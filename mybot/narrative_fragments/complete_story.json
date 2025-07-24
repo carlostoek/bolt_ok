@@ -2,274 +2,172 @@
   "fragments": [
     {
       "fragment_id": "start",
-      "content": "🎩 **Lucien:** Bienvenido, estimado viajero. Soy Lucien, mayordomo de esta mansión. Diana te esperaba... aunque debo confesar que no esperaba que llegaras tan pronto. ¿Estás preparado para descubrir lo que esta casa guarda?",
+      "content": "🎩 **Lucien:** Bienvenido. Esta casa no se abre para cualquiera. Si estás aquí, es porque ella te ha visto. Diana no elige al azar.",
       "character": "Lucien",
       "level": 1,
       "required_besitos": 0,
       "reward_besitos": 5,
       "decisions": [
         {
-          "text": "Estoy listo para comenzar",
-          "next_fragment": "intro_1"
-        },
-        {
-          "text": "Necesito saber más primero",
-          "next_fragment": "info_1"
-        },
-        {
           "text": "¿Dónde está Diana?",
-          "next_fragment": "diana_question"
+          "next_fragment": "diana_echo"
+        },
+        {
+          "text": "¿Por qué fui elegido?",
+          "next_fragment": "lucien_selection"
+        },
+        {
+          "text": "Estoy listo para entrar",
+          "next_fragment": "threshold_entry"
         }
       ]
     },
     {
-      "fragment_id": "intro_1",
-      "content": "🎩 **Lucien:** Excelente. La primera regla de esta casa es simple: cada acción tiene consecuencias, cada decisión abre o cierra puertas. Tus 'besitos' son la moneda de este lugar. Gánalos, y los secretos se revelarán.",
+      "fragment_id": "diana_echo",
+      "content": "🎩 **Lucien:** Ella no está en un lugar... está en una tensión. Aparece cuando alguien se vuelve una pregunta. Cuando no puede evitar mirar.",
       "character": "Lucien",
       "level": 1,
       "required_besitos": 0,
-      "reward_besitos": 10,
+      "reward_besitos": 4,
       "decisions": [
         {
-          "text": "¿Cómo gano besitos?",
-          "next_fragment": "besitos_guide"
+          "text": "¿Y qué se supone que vea en mí?",
+          "next_fragment": "lucien_selection"
         },
         {
-          "text": "Entiendo. ¿Qué sigue?",
-          "next_fragment": "mansion_entrance"
+          "text": "Quiero que me vea",
+          "next_fragment": "threshold_entry"
         }
       ]
     },
     {
-      "fragment_id": "info_1",
-      "content": "🎩 **Lucien:** Prudente. Me gusta eso. Esta mansión no es como otras... aquí cada habitación cuenta una historia, cada objeto guarda un secreto. Y Diana... *sonríe misteriosamente* ...ella es el corazón de todo esto.",
+      "fragment_id": "lucien_selection",
+      "content": "🎩 **Lucien:** Hay quienes buscan ser elegidos. Otros, simplemente, no pueden evitar ser encontrados. Diana mira a quien no teme ser visto.",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 6,
+      "decisions": [
+        {
+          "text": "Entonces que me vea",
+          "next_fragment": "threshold_entry"
+        },
+        {
+          "text": "No sé si estoy listo",
+          "next_fragment": "hesitation_1"
+        }
+      ]
+    },
+    {
+      "fragment_id": "threshold_entry",
+      "content": "🎩 **Lucien:** Entra. Pero recuerda: cada fragmento que veas de ella será también un reflejo de ti. Aquí, los espejos no devuelven apariencias... devuelven intenciones.",
+      "character": "Lucien",
+      "level": 2,
+      "required_besitos": 5,
+      "reward_besitos": 10,
+      "decisions": [
+        {
+          "text": "Acepto ese reflejo",
+          "next_fragment": "hall_of_mirrors"
+        },
+        {
+          "text": "¿Qué intenciones verá en mí?",
+          "next_fragment": "lucien_reflection"
+        }
+      ]
+    },
+    {
+      "fragment_id": "hesitation_1",
+      "content": "🎩 **Lucien:** La duda no te aleja de ella. La atrae. Diana tiene debilidad por los que se contradicen.",
       "character": "Lucien",
       "level": 1,
       "required_besitos": 0,
       "reward_besitos": 3,
       "decisions": [
         {
-          "text": "Ahora estoy listo",
-          "next_fragment": "intro_1"
+          "text": "Entonces dudo contigo",
+          "next_fragment": "threshold_entry"
         },
         {
-          "text": "¿Qué tipo de secretos?",
-          "next_fragment": "secrets_1"
+          "text": "No. Avanzo",
+          "next_fragment": "threshold_entry"
         }
       ]
     },
     {
-      "fragment_id": "diana_question",
-      "content": "🎩 **Lucien:** *Ríe suavemente* Directo al grano, ¿eh? Diana está... presente. Siempre lo está. Pero ella prefiere observar antes de revelarse. Demuestra que eres digno de su atención, y ella aparecerá.",
-      "character": "Lucien",
-      "level": 1,
-      "required_besitos": 0,
-      "reward_besitos": 5,
-      "decisions": [
-        {
-          "text": "¿Cómo puedo demostrar que soy digno?",
-          "next_fragment": "worthy_1"
-        },
-        {
-          "text": "Entiendo. Comencemos.",
-          "next_fragment": "intro_1"
-        }
-      ]
-    },
-    {
-      "fragment_id": "besitos_guide",
-      "content": "🎩 **Lucien:** Los besitos se ganan de muchas formas: completando misiones, reaccionando a los mensajes de Diana, participando en el juego... Cada gesto de atención es recompensado. La generosidad de Diana no conoce límites para quienes la merecen.",
-      "character": "Lucien",
-      "level": 1,
-      "required_besitos": 0,
-      "reward_besitos": 5,
-      "decisions": [
-        {
-          "text": "Perfecto. Continuemos.",
-          "next_fragment": "mansion_entrance"
-        }
-      ]
-    },
-    {
-      "fragment_id": "mansion_entrance",
-      "content": "🎩 **Lucien:** Ahora, permíteme mostrarte la mansión. *Abre una puerta ornamentada* Aquí tienes tres caminos: el salón principal, donde Diana recibe a sus invitados especiales; la biblioteca, llena de secretos escritos; o el jardín, donde ella medita al atardecer.",
+      "fragment_id": "lucien_reflection",
+      "content": "🎩 **Lucien:** Verá deseo, miedo, hambre, memoria. Verá lo que niegas. Por eso muchos no cruzan. Diana no es imagen, es retorno.",
       "character": "Lucien",
       "level": 2,
-      "required_besitos": 10,
+      "required_besitos": 5,
       "reward_besitos": 8,
       "decisions": [
         {
-          "text": "Ir al salón principal",
-          "next_fragment": "main_salon"
+          "text": "Entonces que me devuelva lo que soy",
+          "next_fragment": "hall_of_mirrors"
         },
         {
-          "text": "Explorar la biblioteca",
-          "next_fragment": "library_1"
-        },
-        {
-          "text": "Caminar por el jardín",
-          "next_fragment": "garden_1"
+          "text": "No quiero que me vea del todo",
+          "next_fragment": "slow_path"
         }
       ]
     },
     {
-      "fragment_id": "main_salon",
-      "content": "🎩 **Lucien:** *Te guía a un elegante salón* Este es el corazón social de la mansión. Aquí Diana ha compartido conversaciones íntimas con sus invitados más... especiales. *Señala un diván de terciopelo* Ese es su lugar favorito.",
-      "character": "Lucien",
-      "level": 2,
-      "required_besitos": 10,
-      "reward_besitos": 12,
-      "decisions": [
-        {
-          "text": "Sentarme en el diván",
-          "next_fragment": "divan_experience"
-        },
-        {
-          "text": "Preguntar sobre los otros invitados",
-          "next_fragment": "other_guests"
-        },
-        {
-          "text": "Explorar otra habitación",
-          "next_fragment": "mansion_entrance"
-        }
-      ]
-    },
-    {
-      "fragment_id": "divan_experience",
-      "content": "🌸 **Diana:** *Una voz suave resuena mientras te sientas* Así que has elegido mi lugar favorito... Interesante. Puedo sentir tu presencia, tu curiosidad. Dime, ¿qué es lo que realmente buscas en mi mundo?",
+      "fragment_id": "hall_of_mirrors",
+      "content": "🌸 **Diana:** *Susurra desde dentro* Ya estás aquí... Entonces dime, ¿me estás buscando a mí o estás huyendo de ti?",
       "character": "Diana",
       "level": 3,
-      "required_besitos": 25,
-      "reward_besitos": 20,
+      "required_besitos": 15,
+      "reward_besitos": 15,
       "decisions": [
         {
           "text": "Te busco a ti",
-          "next_fragment": "diana_response_seek"
+          "next_fragment": "diana_seek"
         },
         {
-          "text": "Busco experiencias nuevas",
-          "next_fragment": "diana_response_experience"
+          "text": "Huyo de mí",
+          "next_fragment": "diana_mirror_1"
         },
         {
-          "text": "Busco entender este lugar",
-          "next_fragment": "diana_response_understand"
+          "text": "No sé aún",
+          "next_fragment": "diana_uncertain"
         }
       ]
     },
     {
-      "fragment_id": "diana_response_seek",
-      "content": "🌸 **Diana:** *Su risa es como música* Me buscas... Muchos lo hacen, pero pocos entienden lo que eso significa. Buscarme no es solo encontrarme, es estar dispuesto a perderte en el proceso. ¿Estás preparado para eso?",
+      "fragment_id": "diana_seek",
+      "content": "🌸 **Diana:** ¿Sabes lo que implica buscarme? Muchos creen quererme. Pocos soportan lo que soy cuando dejo de ser imagen.",
       "character": "Diana",
       "level": 3,
-      "required_besitos": 25,
+      "required_besitos": 20,
       "reward_besitos": 25,
       "decisions": [
         {
-          "text": "Estoy preparado para todo",
-          "next_fragment": "vip_deep_1"
+          "text": "Muéstrate tal como eres",
+          "next_fragment": "vip_chamber"
         },
         {
-          "text": "Necesito pensarlo más",
-          "next_fragment": "diana_patience"
+          "text": "Prefiero imaginarte",
+          "next_fragment": "imagined_diana"
         }
       ]
     },
     {
-      "fragment_id": "diana_response_experience",
-      "content": "🌸 **Diana:** *Su voz se suaviza* Experiencias nuevas... Qué hermosa forma de describir la búsqueda del alma. Aquí, en mi mundo, cada experiencia es única, cada momento es irrepetible. ¿Estás dispuesto a dejarte llevar?",
-      "character": "Diana",
-      "level": 3,
-      "required_besitos": 25,
-      "reward_besitos": 20,
-      "decisions": [
-        {
-          "text": "Sí, quiero experimentar",
-          "next_fragment": "experience_path_1"
-        },
-        {
-          "text": "Prefiero ir despacio",
-          "next_fragment": "slow_path_1"
-        }
-      ]
-    },
-    {
-      "fragment_id": "diana_response_understand",
-      "content": "🌸 **Diana:** *Sonríe con aprobación* Entender... Esa es la búsqueda más noble de todas. Este lugar no es solo una mansión, es un reflejo del alma humana. Cada habitación, cada secreto, cada susurro... todo tiene un significado más profundo.",
-      "character": "Diana",
-      "level": 3,
-      "required_besitos": 25,
-      "reward_besitos": 25,
-      "decisions": [
-        {
-          "text": "Quiero entender todo",
-          "next_fragment": "understanding_path_1"
-        },
-        {
-          "text": "Enséñame paso a paso",
-          "next_fragment": "guided_path_1"
-        }
-      ]
-    },
-    {
-      "fragment_id": "vip_deep_1",
-      "content": "🌸 **Diana:** *Su voz se vuelve más íntima* Entonces sígueme más allá del velo... *El ambiente cambia, se vuelve más cálido, más personal* Aquí, en mi espacio más privado, puedo mostrarte quién soy realmente. Pero esto es solo para quienes han demostrado su devoción.",
+      "fragment_id": "vip_chamber",
+      "content": "🌸 **Diana:** *Te abre la puerta privada* Aquí no hay narrativa, solo piel. Pero para quedarte, debes haber dejado algo atrás.",
       "character": "Diana",
       "level": 4,
       "required_besitos": 50,
       "required_role": "vip",
-      "reward_besitos": 30,
+      "reward_besitos": 35,
       "decisions": [
         {
-          "text": "Quiero conocerte completamente",
-          "next_fragment": "vip_intimate_1"
+          "text": "Estoy listo",
+          "next_fragment": "vip_ritual"
         },
         {
-          "text": "Cuéntame tus secretos",
-          "next_fragment": "vip_secrets_1"
-        }
-      ]
-    },
-    {
-      "fragment_id": "library_1",
-      "content": "🎩 **Lucien:** *Te conduce a una biblioteca llena de libros antiguos* Aquí Diana guarda sus pensamientos más profundos. Cada libro cuenta una parte de su historia. *Señala un diario abierto* Ese diario... contiene sus confesiones más íntimas.",
-      "character": "Lucien",
-      "level": 2,
-      "required_besitos": 10,
-      "reward_besitos": 10,
-      "decisions": [
-        {
-          "text": "Leer el diario",
-          "next_fragment": "diary_reading"
-        },
-        {
-          "text": "Explorar otros libros",
-          "next_fragment": "books_exploration"
-        },
-        {
-          "text": "Volver al salón",
-          "next_fragment": "mansion_entrance"
-        }
-      ]
-    },
-    {
-      "fragment_id": "garden_1",
-      "content": "🎩 **Lucien:** *Te lleva a un jardín encantador* Este es el refugio de Diana. Aquí viene a reflexionar, a conectar con su esencia más pura. *El aroma de las flores es embriagador* Si tienes suerte, podrías encontrarla aquí al atardecer.",
-      "character": "Lucien",
-      "level": 2,
-      "required_besitos": 10,
-      "reward_besitos": 8,
-      "decisions": [
-        {
-          "text": "Esperar al atardecer",
-          "next_fragment": "garden_sunset"
-        },
-        {
-          "text": "Explorar las flores",
-          "next_fragment": "garden_flowers"
-        },
-        {
-          "text": "Volver adentro",
-          "next_fragment": "mansion_entrance"
+          "text": "Aún no",
+          "next_fragment": "diana_closure"
         }
       ]
     }
