@@ -65,7 +65,7 @@ async def init_db():
         db_url = Config.DATABASE_URL
         if db_url.startswith("postgres"):
             logger.warning("PostgreSQL detectado pero no disponible, cambiando a SQLite")
-            db_url = "sqlite+aiosqlite:///gamification.db"
+            db_url = "sqlite+aiosqlite:///gamification2.db"
             
         if _engine is None:
             _engine = create_async_engine(
