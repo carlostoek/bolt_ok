@@ -718,4 +718,3 @@ async def handle_admin_kinky_game_button(callback: CallbackQuery, session: Async
         "admin_gamification_main" # Usamos este estado, ya que es el menú de gamificación general
     )
     await callback.answer()
-        

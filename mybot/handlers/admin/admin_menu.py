@@ -392,12 +392,11 @@ async def cmd_give_hint(message: Message):
                 )
         except ValueError:
             await message.answer(
-                "❌ Uso incorrecto. Formato: <code>/give_hint &lt;user_id&gt; &lt;hint_code&gt;</code>",
+                "❌ Uso incorrecto. Formato: <code>/give_hint <user_id> <hint_code></code>",
                 parse_mode="HTML",
             )
     else:
         await message.answer(
-            "❌ Uso incorrecto. Formato: <code>/give_hint &lt;user_id&gt; &lt;hint_code&gt;</code>",
+            "❌ Uso incorrecto. Formato: <code>/give_hint <user_id> <hint_code></code>",
             parse_mode="HTML",
         )
-

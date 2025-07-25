@@ -312,4 +312,3 @@ async def set_vip_interval(message: Message, state: FSMContext, session: AsyncSe
     await ConfigService(session).set_value("vip_scheduler_interval", str(seconds))
     await message.answer("Intervalo actualizado.", reply_markup=get_admin_config_kb())
     await state.clear()
-    
