@@ -3,7 +3,7 @@ Tests para el CoordinadorCentral.
 """
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from mybot.services.coordinador_central import CoordinadorCentral, AccionUsuario
+from services.coordinador_central import CoordinadorCentral, AccionUsuario
 
 @pytest.mark.asyncio
 async def test_flujo_reaccion_publicacion_exitoso():
