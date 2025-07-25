@@ -603,4 +603,3 @@ async def set_vip_expired(message: Message, state: FSMContext, session: AsyncSes
         reply_markup=get_vip_messages_kb()
     )
     await state.clear()
-    

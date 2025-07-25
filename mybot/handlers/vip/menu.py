@@ -258,4 +258,3 @@ async def gain_points(callback: CallbackQuery, session: AsyncSession):
         reply_markup=get_back_keyboard("vip_game")
     )
     await callback.answer()
-

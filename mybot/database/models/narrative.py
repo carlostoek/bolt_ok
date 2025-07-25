@@ -29,4 +29,3 @@ class UserStoryState(Base):
     # Relaciones
     current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id])
     user = relationship("User", back_populates="story_state")
-  

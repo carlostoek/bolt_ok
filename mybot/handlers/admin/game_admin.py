@@ -1871,4 +1871,3 @@ async def save_file_content(message: Message, state: FSMContext, session: AsyncS
         reply_markup=get_back_keyboard("admin_content_lore_pieces"),
     )
     await state.clear()
-
