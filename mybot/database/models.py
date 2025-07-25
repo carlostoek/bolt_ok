@@ -439,7 +439,7 @@ class MiniGamePlay(Base):
     cost_points = Column(Float, default=0)
 
 
-class PendingChannelRequest(Base):
+//*class PendingChannelRequest(Base):
     """Stores pending channel join requests for automatic approval."""
     
     __tablename__ = "pending_channel_requests"
@@ -455,7 +455,7 @@ class PendingChannelRequest(Base):
     
     __table_args__ = (
         UniqueConstraint("user_id", "chat_id", name="uix_user_chat_request"),
-    )
+    )*//
 
 
 class BotConfig(Base):
