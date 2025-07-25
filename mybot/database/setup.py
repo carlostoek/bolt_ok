@@ -16,9 +16,6 @@ TABLES_ORDER = [
     'story_fragments',
     'narrative_choices', 
     'user_narrative_states',
-    'story_fragments',
-    'narrative_choices',
-    'user_narrative_states',
     'rewards',
     'lore_pieces',
     'missions',
@@ -59,28 +56,29 @@ TABLES_ORDER = [
 async def init_db():
     global _engine
     try:
-        logger.info("Creando motor de base de datos...")
-        
-        # Verificar y corregir DATABASE_URL si es necesario
-        db_url = Config.DATABASE_URL
-        if db_url.startswith("postgres"):
-            logger.warning("PostgreSQL detectado pero no disponible, cambiando a SQLite")
-            db_url = "sqlite+aiosqlite:///gamification2.db"
-            
+        logger.info("Inicializando motor de base de datos PostgreSQL...")
+
+        db_url = Config.DATABASE_URL.strip()
+
+        if not db_url.startswith("postgresql+asyncpg://"):
+            raise ValueError("DATABASE_URL debe comenzar con 'postgresql+asyncpg://' para usar PostgreSQL async.")
+
         if _engine is None:
             _engine = create_async_engine(
-                db_url, 
-                echo=False, 
+                db_url,
+                echo=False,
                 poolclass=NullPool
             )
+
         async with _engine.begin() as conn:
-            logger.info("Creando tablas...")
-            tables = [Base.metadata.tables[name] for name in TABLES_ORDER]
+            logger.info("Creando tablas en orden definido...")
+            tables = [Base.metadata.tables[name] for name in TABLES_ORDER if name in Base.metadata.tables]
             await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=tables))
-            logger.info("Tablas creadas exitosamente")
+            logger.info("Tablas creadas exitosamente.")
         return _engine
+
     except Exception as e:
-        logger.critical(f"Error crítico en init_db: {str(e)}")
+        logger.critical(f"Error crítico al inicializar la base de datos: {e}")
         raise
 
 def get_session_factory():
@@ -89,7 +87,7 @@ def get_session_factory():
         raise RuntimeError("Database engine not initialized. Call init_db first.")
     if _sessionmaker is None:
         _sessionmaker = async_sessionmaker(
-            bind=_engine, 
+            bind=_engine,
             expire_on_commit=False,
             class_=AsyncSession
         )
