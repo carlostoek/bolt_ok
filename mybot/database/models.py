@@ -438,16 +438,6 @@ class MiniGamePlay(Base):
     is_free = Column(Boolean, default=False)
     cost_points = Column(Float, default=0)
 
-class BotConfig(Base):
-    """Global bot configuration settings."""
-    __tablename__ = "bot_config"
-    id = Column(Integer, primary_key=True)
-    free_channel_wait_time_minutes = Column(Integer, default=0)
-    social_media_message = Column(Text, nullable=True)
-    welcome_message_template = Column(Text, nullable=True)
-    auto_approval_enabled = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
 
 class LorePiece(Base):
