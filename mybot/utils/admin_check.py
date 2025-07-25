@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models.user import User
+from database.models import User
 
 async def is_admin(user_id: int, session: AsyncSession) -> bool:
     """Verifica si un usuario es administrador"""
