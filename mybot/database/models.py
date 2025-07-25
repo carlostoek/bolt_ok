@@ -441,8 +441,6 @@ class MiniGamePlay(Base):
 
 class PendingChannelRequest(Base):
 
-
-
 class BotConfig(Base):
     """Global bot configuration settings."""
     
