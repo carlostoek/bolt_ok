@@ -438,14 +438,9 @@ class MiniGamePlay(Base):
     is_free = Column(Boolean, default=False)
     cost_points = Column(Float, default=0)
 
-
-class PendingChannelRequest(Base):
-
 class BotConfig(Base):
     """Global bot configuration settings."""
-    
     __tablename__ = "bot_config"
-    
     id = Column(Integer, primary_key=True)
     free_channel_wait_time_minutes = Column(Integer, default=0)
     social_media_message = Column(Text, nullable=True)
