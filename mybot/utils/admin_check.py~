@@ -1,6 +1,8 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-
+<<<<<<< HEAD
+=======
 from sqlalchemy import select
+>>>>>>> 6c33ae3 (complets)
 from database.models import User
 
 async def is_admin(user_id: int, session: AsyncSession) -> bool:
