@@ -37,7 +37,7 @@ async def handle_chat_member(update: ChatMemberUpdated, bot: Bot, session: Async
     if status in {"member", "administrator", "creator"}:
         # Usuario se unió al canal
         
-        # ASEGURAR QUE EL USUARIO TENGA ROL "FREE"
+        # VERIFICAR Y ASIGNAR ROL CORRECTO (VIP si está en canal VIP, sino FREE)
         await free_service._ensure_user_free_role(user_id)
         
         try:
