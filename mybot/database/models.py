@@ -439,6 +439,39 @@ class MiniGamePlay(Base):
     cost_points = Column(Float, default=0)
 
 
+class PendingChannelRequest(Base):
+    """Stores pending channel join requests for automatic approval."""
+    
+    __tablename__ = "pending_channel_requests"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, nullable=False)
+    chat_id = Column(BigInteger, nullable=False)
+    request_timestamp = Column(DateTime, default=func.now())
+    approved = Column(Boolean, default=False)
+    approval_timestamp = Column(DateTime, nullable=True)
+    welcome_message_sent = Column(Boolean, default=False)
+    social_media_message_sent = Column(Boolean, default=False)
+    
+    __table_args__ = (
+        UniqueConstraint("user_id", "chat_id", name="uix_user_chat_request"),
+    )
+
+
+class BotConfig(Base):
+    """Global bot configuration settings."""
+    
+    __tablename__ = "bot_config"
+    
+    id = Column(Integer, primary_key=True)
+    free_channel_wait_time_minutes = Column(Integer, default=0)
+    social_media_message = Column(Text, nullable=True)
+    welcome_message_template = Column(Text, nullable=True)
+    auto_approval_enabled = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+
 class LorePiece(Base):
     """Discrete lore or clue piece that users can unlock."""
 

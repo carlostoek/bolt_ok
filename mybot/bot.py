@@ -63,6 +63,7 @@ from handlers.publication_test import router as publication_test_router
 from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
+from handlers.admin.free_channel_config import router as free_channel_config_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -203,6 +204,7 @@ async def main() -> None:
             ("channel_access", channel_access_router),
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
+            ("free_channel_config", free_channel_config_router),
         ]
         
         for name, router in routers:

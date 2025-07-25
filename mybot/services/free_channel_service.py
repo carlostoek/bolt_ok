@@ -78,13 +78,14 @@ class FreeChannelService:
     async def handle_join_request(self, join_request: ChatJoinRequest) -> bool:
         """
         Procesar solicitud de unión al canal gratuito.
-        Registra la solicitud para aprobación automática posterior.
+        Registra la solicitud para aprobación automática posterior y envía mensaje de redes sociales.
         """
         free_channel_id = await self.get_free_channel_id()
         if not free_channel_id or join_request.chat.id != free_channel_id:
             return False
         
         user_id = join_request.from_user.id
+        user_name = join_request.from_user.first_name or "Usuario"
         
         try:
             # Verificar si ya existe una solicitud pendiente
@@ -98,6 +99,11 @@ class FreeChannelService:
             
             if existing_request:
                 logger.info(f"User {user_id} already has pending request for channel {join_request.chat.id}")
+                # Si no se ha enviado el mensaje de redes sociales, enviarlo ahora
+                if not existing_request.social_media_message_sent:
+                    await self._send_social_media_message(user_id, user_name)
+                    existing_request.social_media_message_sent = True
+                    await self.session.commit()
                 return True
             
             # Crear nueva solicitud pendiente
@@ -105,13 +111,21 @@ class FreeChannelService:
                 user_id=user_id,
                 chat_id=join_request.chat.id,
                 request_timestamp=datetime.utcnow(),
-                approved=False
+                approved=False,
+                social_media_message_sent=False,
+                welcome_message_sent=False
             )
             
             self.session.add(pending_request)
             await self.session.commit()
             
-            # Notificar al usuario sobre el tiempo de espera
+            # 1. ENVIAR MENSAJE DE REDES SOCIALES INMEDIATAMENTE
+            social_sent = await self._send_social_media_message(user_id, user_name)
+            if social_sent:
+                pending_request.social_media_message_sent = True
+                await self.session.commit()
+            
+            # 2. ENVIAR NOTIFICACIÓN SOBRE EL TIEMPO DE ESPERA
             wait_minutes = await self.get_wait_time_minutes()
             
             if wait_minutes > 0:
@@ -160,6 +174,11 @@ class FreeChannelService:
         Procesar solicitudes pendientes que han cumplido el tiempo de espera.
         Retorna el número de solicitudes procesadas.
         """
+        # Verificar si la aprobación automática está habilitada
+        if not await self.get_auto_approval_enabled():
+            logger.info("Auto-approval is disabled, skipping pending requests processing")
+            return 0
+            
         wait_minutes = await self.get_wait_time_minutes()
         threshold_time = datetime.utcnow() - timedelta(minutes=wait_minutes)
         
@@ -182,25 +201,18 @@ class FreeChannelService:
                     request.user_id
                 )
                 
-                # Marcar como aprobada en la base de datos
+                # Marcar como aprobada en la base de datos con timestamp
                 request.approved = True
+                request.approval_timestamp = datetime.utcnow()
                 
-                # Enviar mensaje de bienvenida
-                welcome_message = (
-                    f"🎉 **¡Bienvenido al Canal Gratuito!**\n\n"
-                    f"Tu solicitud ha sido aprobada exitosamente.\n"
-                    f"Ya puedes acceder a todo el contenido gratuito.\n\n"
-                    f"¡Disfruta de la experiencia!"
-                )
+                # VERIFICAR Y ASIGNAR ROL CORRECTO (NO DEGRADAR VIP)
+                await self._ensure_user_free_role(request.user_id)
                 
-                try:
-                    await self.bot.send_message(
-                        request.user_id,
-                        welcome_message,
-                        parse_mode="Markdown"
-                    )
-                except Exception as e:
-                    logger.warning(f"Could not send welcome message to user {request.user_id}: {e}")
+                # Enviar mensaje de bienvenida si no se ha enviado
+                if not request.welcome_message_sent:
+                    welcome_sent = await self._send_welcome_message(request.user_id)
+                    if welcome_sent:
+                        request.welcome_message_sent = True
                 
                 processed_count += 1
                 logger.info(f"Approved join request for user {request.user_id} in channel {request.chat_id}")
@@ -209,8 +221,19 @@ class FreeChannelService:
                 if "USER_ALREADY_PARTICIPANT" in str(e):
                     # Usuario ya está en el canal, marcar como aprobado
                     request.approved = True
+                    request.approval_timestamp = datetime.utcnow()
+                    # VERIFICAR Y ASIGNAR ROL CORRECTO (NO DEGRADAR VIP)
+                    await self._ensure_user_free_role(request.user_id)
                     processed_count += 1
                     logger.info(f"User {request.user_id} already in channel {request.chat_id}")
+                elif "CHAT_JOIN_REQUEST_NOT_FOUND" in str(e):
+                    # La solicitud ya no existe, marcar como procesada
+                    request.approved = True
+                    request.approval_timestamp = datetime.utcnow()
+                    # VERIFICAR Y ASIGNAR ROL CORRECTO (NO DEGRADAR VIP)
+                    await self._ensure_user_free_role(request.user_id)
+                    processed_count += 1
+                    logger.info(f"Join request not found for user {request.user_id}, marking as processed")
                 else:
                     logger.error(f"Error approving join request for user {request.user_id}: {e}")
             except Exception as e:
@@ -221,6 +244,262 @@ class FreeChannelService:
             logger.info(f"Processed {processed_count} pending join requests")
         
         return processed_count
+    
+    async def _send_welcome_message(self, user_id: int) -> bool:
+        """
+        Enviar mensaje de bienvenida personalizado al usuario aprobado.
+        """
+        try:
+            # Obtener mensaje de bienvenida personalizado o usar por defecto
+            welcome_message = await self._get_welcome_message()
+            
+            await self.bot.send_message(
+                user_id,
+                welcome_message,
+                parse_mode="Markdown"
+            )
+            
+            logger.info(f"Welcome message sent to user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.warning(f"Could not send welcome message to user {user_id}: {e}")
+            return False
+    
+    async def _get_welcome_message(self) -> str:
+        """
+        Obtener mensaje de bienvenida configurado o usar mensaje por defecto.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            if config and config.welcome_message_template:
+                return config.welcome_message_template
+        except Exception as e:
+            logger.warning(f"Error getting welcome message from config: {e}")
+        
+        # Mensaje por defecto
+        return (
+            "🎉 **¡Bienvenido al Canal Gratuito!**\n\n"
+            "✅ Tu solicitud ha sido aprobada exitosamente.\n"
+            "🎯 Ya puedes acceder a todo el contenido gratuito disponible.\n\n"
+            "📱 Explora nuestro contenido y participa en las actividades.\n"
+            "🎮 ¡No olvides usar los comandos del bot para ganar puntos!\n\n"
+            "¡Disfruta de la experiencia! 🚀"
+        )
+    
+    async def set_welcome_message(self, message: str) -> bool:
+        """
+        Configurar mensaje personalizado de bienvenida.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            if not config:
+                config = BotConfig(id=1, welcome_message_template=message)
+                self.session.add(config)
+            else:
+                config.welcome_message_template = message
+            
+            await self.session.commit()
+            logger.info("Welcome message updated successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error setting welcome message: {e}")
+            return False
+    
+    async def _send_social_media_message(self, user_id: int, user_name: str) -> bool:
+        """
+        Enviar mensaje de invitación a seguir en redes sociales inmediatamente después de la solicitud.
+        """
+        try:
+            # Obtener mensaje personalizado de redes sociales de la configuración
+            social_message = await self._get_social_media_message()
+            
+            # Personalizar el mensaje con el nombre del usuario
+            personalized_message = social_message.replace("{user_name}", user_name)
+            
+            await self.bot.send_message(
+                user_id,
+                personalized_message,
+                parse_mode="Markdown",
+                disable_web_page_preview=False
+            )
+            
+            logger.info(f"Social media message sent to user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error sending social media message to user {user_id}: {e}")
+            return False
+    
+    async def _get_social_media_message(self) -> str:
+        """
+        Obtener mensaje de redes sociales configurado o usar mensaje por defecto.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            if config and config.social_media_message:
+                return config.social_media_message
+        except Exception as e:
+            logger.warning(f"Error getting social media message from config: {e}")
+        
+        # Mensaje por defecto si no hay configuración personalizada
+        return (
+            "🌟 **¡Hola {user_name}!**\n\n"
+            "¡Gracias por tu interés en unirte a nuestro canal gratuito!\n\n"
+            "🔗 **Mientras esperas la aprobación, ¡síguenos en nuestras redes sociales!**\n\n"
+            "📱 **Instagram**: @tu_instagram\n"
+            "🐦 **Twitter**: @tu_twitter\n"
+            "📘 **Facebook**: facebook.com/tu_pagina\n"
+            "🎵 **TikTok**: @tu_tiktok\n\n"
+            "📺 **YouTube**: youtube.com/tu_canal\n\n"
+            "¡No te pierdas nuestro contenido exclusivo y mantente al día con todas las novedades!\n\n"
+            "⏰ Tu solicitud de acceso al canal será procesada automáticamente pronto.\n\n"
+            "¡Gracias por acompañarnos en esta aventura! 🚀"
+        )
+    
+    async def set_social_media_message(self, message: str) -> bool:
+        """
+        Configurar mensaje personalizado de redes sociales.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            if not config:
+                config = BotConfig(id=1, social_media_message=message)
+                self.session.add(config)
+            else:
+                config.social_media_message = message
+            
+            await self.session.commit()
+            logger.info("Social media message updated successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error setting social media message: {e}")
+            return False
+    
+    async def get_auto_approval_enabled(self) -> bool:
+        """
+        Verificar si la aprobación automática está habilitada.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            return config.auto_approval_enabled if config else True
+        except Exception:
+            return True
+    
+    async def _ensure_user_free_role(self, user_id: int) -> bool:
+        """
+        Asegurar que el usuario tenga el rol correcto al acceder al canal gratuito.
+        
+        LÓGICA DE PRIORIDAD DE ROLES:
+        1. Admin > VIP > Free (no degradar roles superiores)
+        2. Verificar suscripción VIP activa en BD
+        3. Verificar membresía en canal VIP como respaldo
+        4. Solo asignar 'free' si no tiene rol superior
+        """
+        try:
+            from database.models import User
+            from services.user_service import UserService
+            from sqlalchemy import select
+            from datetime import datetime
+            
+            # Obtener o crear usuario
+            user_service = UserService(self.session)
+            user = await user_service.get_user(user_id)
+            
+            if not user:
+                # Usuario no existe, crear con rol free
+                user = await user_service.create_user(user_id)
+                logger.info(f"Created new user {user_id} with role 'free'")
+                return True
+            
+            # VERIFICACIÓN 1: Si es admin, mantener admin
+            if user.is_admin or user_id in self._get_admin_ids():
+                if not user.is_admin:
+                    user.is_admin = True
+                    await self.session.commit()
+                    logger.info(f"Confirmed admin role for user {user_id}")
+                return True
+            
+            # VERIFICACIÓN 2: Verificar suscripción VIP activa en BD
+            current_role = await self._determine_user_role(user_id, user)
+            
+            # Actualizar rol solo si es necesario
+            role_updated = False
+            if user.role != current_role:
+                old_role = user.role
+                user.role = current_role
+                role_updated = True
+                logger.info(f"Updated user {user_id} role from '{old_role}' to '{current_role}'")
+                await self.session.commit()
+            
+            if not role_updated:
+                logger.debug(f"User {user_id} already has correct role '{current_role}'")
+            
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error ensuring correct role for user {user_id}: {e}")
+            return False
+    
+    async def _determine_user_role(self, user_id: int, user) -> str:
+        """
+        Determinar el rol correcto del usuario basado en múltiples fuentes.
+        
+        ORDEN DE VERIFICACIÓN:
+        1. Suscripción VIP activa en BD
+        2. Membresía en canal VIP (respaldo)
+        3. Por defecto: 'free'
+        """
+        try:
+            # VERIFICACIÓN 1: Suscripción VIP en base de datos
+            if user.vip_expires_at and user.vip_expires_at > datetime.utcnow():
+                logger.debug(f"User {user_id} has active VIP subscription until {user.vip_expires_at}")
+                return "vip"
+            
+            # VERIFICACIÓN 2: Membresía en canal VIP (respaldo)
+            vip_channel_id = await self.config_service.get_vip_channel_id()
+            if vip_channel_id:
+                is_vip_member = await self._check_vip_channel_membership(user_id, vip_channel_id)
+                if is_vip_member:
+                    logger.info(f"User {user_id} is VIP member by channel membership")
+                    # Si está en canal VIP pero no tiene suscripción en BD, crear una temporal
+                    if not user.vip_expires_at or user.vip_expires_at <= datetime.utcnow():
+                        # Crear suscripción temporal para evitar conflictos
+                        from datetime import timedelta
+                        user.vip_expires_at = datetime.utcnow() + timedelta(days=30)
+                        logger.info(f"Created temporary VIP subscription for user {user_id}")
+                    return "vip"
+            
+            # VERIFICACIÓN 3: Por defecto es free
+            logger.debug(f"User {user_id} determined as 'free' user")
+            return "free"
+            
+        except Exception as e:
+            logger.warning(f"Error determining role for user {user_id}: {e}")
+            return "free"  # Fallback seguro
+    
+    async def _check_vip_channel_membership(self, user_id: int, vip_channel_id: int) -> bool:
+        """
+        Verificar si el usuario es miembro del canal VIP.
+        """
+        try:
+            member = await self.bot.get_chat_member(vip_channel_id, user_id)
+            is_member = member.status in {"member", "administrator", "creator"}
+            logger.debug(f"User {user_id} VIP channel membership: {is_member}")
+            return is_member
+        except Exception as e:
+            logger.debug(f"Could not check VIP membership for user {user_id}: {e}")
+            return False
+    
+    def _get_admin_ids(self) -> list:
+        """Obtener lista de IDs de administradores desde configuración."""
+        try:
+            from utils.config import ADMIN_IDS
+            return ADMIN_IDS
+        except Exception:
+            return []
     
     async def create_invite_link(
         self, 
@@ -381,7 +660,8 @@ class FreeChannelService:
             "channel_id": free_channel_id,
             "pending_requests": 0,
             "total_processed": 0,
-            "wait_time_minutes": await self.get_wait_time_minutes()
+            "wait_time_minutes": await self.get_wait_time_minutes(),
+            "free_users_count": 0
         }
         
         if free_channel_id:
@@ -401,6 +681,14 @@ class FreeChannelService:
                 )
                 total_result = await self.session.execute(total_stmt)
                 stats["total_processed"] = total_result.scalar() or 0
+                
+                # Contar usuarios con rol free
+                from database.models import User
+                free_users_stmt = select(func.count()).select_from(User).where(
+                    User.role == "free"
+                )
+                free_users_result = await self.session.execute(free_users_stmt)
+                stats["free_users_count"] = free_users_result.scalar() or 0
                 
                 # Información del canal
                 try:

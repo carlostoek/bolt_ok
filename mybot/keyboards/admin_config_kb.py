@@ -4,11 +4,73 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 def get_admin_config_kb():
     builder = InlineKeyboardBuilder()
     builder.button(text="📺 Agregar Canales", callback_data="config_add_channels")
+    builder.button(text="🆓 Canal Gratuito", callback_data="admin_free_channel_config")
     builder.button(text="⏱️ Schedulers", callback_data="config_scheduler")
     builder.button(text="🔄 Actualizar", callback_data="admin_config")
     builder.button(text="↩️ Volver", callback_data="admin_back")
-    builder.adjust(2, 2)
+    builder.adjust(2, 2, 1)
     return builder.as_markup()
+
+
+def create_free_channel_config_keyboard(stats):
+    """Crear teclado para configuración del canal gratuito."""
+    from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+    
+    buttons = []
+    
+    # Primera fila - Configuraciones básicas
+    buttons.append([
+        InlineKeyboardButton(
+            text="⏰ Tiempo de Espera", 
+            callback_data="config_wait_time"
+        ),
+        InlineKeyboardButton(
+            text="📱 Mensaje Social", 
+            callback_data="config_social_message"
+        )
+    ])
+    
+    # Segunda fila - Mensaje de bienvenida
+    buttons.append([
+        InlineKeyboardButton(
+            text="🎉 Mensaje de Bienvenida", 
+            callback_data="config_welcome_message"
+        )
+    ])
+    
+    # Tercera fila - Información y estadísticas
+    if stats.get('pending_requests', 0) > 0:
+        buttons.append([
+            InlineKeyboardButton(
+                text=f"📋 Ver Pendientes ({stats['pending_requests']})", 
+                callback_data="view_pending_requests"
+            ),
+            InlineKeyboardButton(
+                text="🔄 Procesar Ahora", 
+                callback_data="test_approval_flow"
+            )
+        ])
+    else:
+        buttons.append([
+            InlineKeyboardButton(
+                text="📋 Ver Pendientes", 
+                callback_data="view_pending_requests"
+            ),
+            InlineKeyboardButton(
+                text="🔄 Procesar Ahora", 
+                callback_data="test_approval_flow"
+            )
+        ])
+    
+    # Volver
+    buttons.append([
+        InlineKeyboardButton(
+            text="🔙 Volver", 
+            callback_data="admin_config"
+        )
+    ])
+    
+    return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
 def get_channel_type_kb():
