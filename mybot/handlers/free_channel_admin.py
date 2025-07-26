@@ -116,7 +116,7 @@ async def process_free_channel_id(message: Message, state: FSMContext, session: 
         await menu_manager.show_menu(
             message,
             f"✅ **Canal Gratuito Configurado**\n\n"
-            f"**ID del Canal**: `{channel_id}`{title_text}\n\n"
+            f"🆓 **{channel_title or 'Sin nombre'} (ID: {channel_id})**\n\n"
             f"El canal ha sido configurado exitosamente. Los usuarios podrán "
             f"solicitar unirse y serán aprobados automáticamente según el tiempo de espera configurado.",
             get_free_channel_admin_kb(True),

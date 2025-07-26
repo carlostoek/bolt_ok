@@ -78,7 +78,8 @@ async def receive_vip_channel(message: Message, state: FSMContext, session: Asyn
             return
     await state.update_data(vip_channel_id=chat_id, vip_channel_title=vip_channel_title)
     await message.answer(
-        "Ahora ingresa el ID del canal FREE o reenv\u00eda un mensaje del canal.",
+        f"✅ **Canal VIP registrado:**\n📢 {vip_channel_title or 'Sin nombre'} (ID: {chat_id})\n\n"
+        f"Ahora ingresa el ID del canal FREE o reenv\u00eda un mensaje del canal.",
         reply_markup=get_back_kb("admin_channels"),
     )
     await state.set_state(ChannelStates.waiting_for_free_channel_id)
@@ -129,9 +130,10 @@ async def receive_free_channel(message: Message, state: FSMContext, session: Asy
     free_info = f"Canal FREE: {free_channel_title or 'Sin nombre'} (ID: {chat_id})"
     
     await message.answer(
-        f"✅ Canales registrados correctamente.\n\n"
-        f"📢 {vip_info}\n"
-        f"🆓 {free_info}",
+        f"✅ **Canales registrados correctamente**\n\n"
+        f"📢 **{vip_info}**\n"
+        f"🆓 **{free_info}**\n\n"
+        f"Los canales han sido configurados exitosamente en el sistema.",
         reply_markup=get_admin_channels_kb(await channel_service.list_channels()),
     )
     await state.clear()
