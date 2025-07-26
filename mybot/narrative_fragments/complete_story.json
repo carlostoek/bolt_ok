@@ -1,175 +1,183 @@
 {
   "fragments": [
     {
-      "fragment_id": "start",
-      "content": "🎩 **Lucien:** Bienvenido. Esta casa no se abre para cualquiera. Si estás aquí, es porque ella te ha visto. Diana no elige al azar.",
-      "character": "Lucien",
+      "fragment_id": "kinkys_1_diana_intro",
       "level": 1,
+      "character": "Diana",
+      "content": "🌸 **Diana:** Bienvenido a Los Kinkys. Has cruzado una frontera que no existe en el mundo físico.\nAquí, cada curiosidad es un espejo. Cada gesto, una confesión.\nYo no soy un personaje. Soy una posibilidad. Una versión de mí que tú estás construyendo ahora mismo.\n¿Te das cuenta? No todos pueden sostener esa responsabilidad. Pero tú… podrías ser distinto.",
       "required_besitos": 0,
       "reward_besitos": 5,
       "decisions": [
         {
-          "text": "¿Dónde está Diana?",
-          "next_fragment": "diana_echo"
-        },
-        {
-          "text": "¿Por qué fui elegido?",
-          "next_fragment": "lucien_selection"
-        },
-        {
-          "text": "Estoy listo para entrar",
-          "next_fragment": "threshold_entry"
+          "text": "🚪 Descubrir más",
+          "next_fragment": "kinkys_1_lucien_intro"
         }
       ]
     },
     {
-      "fragment_id": "diana_echo",
-      "content": "🎩 **Lucien:** Ella no está en un lugar... está en una tensión. Aparece cuando alguien se vuelve una pregunta. Cuando no puede evitar mirar.",
-      "character": "Lucien",
+      "fragment_id": "kinkys_1_lucien_intro",
       "level": 1,
+      "character": "Lucien",
+      "content": "🎩 **Lucien:** Ah… otro que se atreve a mirar.\nSoy Lucien. No esperes de mí consejos, solo reflejos.\nElla ya vio algo en ti. Tal vez hambre. Tal vez ternura.\nPero ten cuidado… la curiosidad sin deseo auténtico es solo una mirada muerta.",
       "required_besitos": 0,
-      "reward_besitos": 4,
-      "decisions": [
-        {
-          "text": "¿Y qué se supone que vea en mí?",
-          "next_fragment": "lucien_selection"
-        },
-        {
-          "text": "Quiero que me vea",
-          "next_fragment": "threshold_entry"
-        }
-      ]
+      "reward_besitos": 5,
+      "mission": "🧭 Reacciona al último mensaje, pero hazlo por intención real, no por cumplir.",
+      "decisions": []
     },
     {
-      "fragment_id": "lucien_selection",
-      "content": "🎩 **Lucien:** Hay quienes buscan ser elegidos. Otros, simplemente, no pueden evitar ser encontrados. Diana mira a quien no teme ser visto.",
-      "character": "Lucien",
+      "fragment_id": "kinkys_1_reaccion_rapida",
       "level": 1,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** Saltaste sin pensar. Algunos lo llamarían imprudencia… yo lo llamo belleza primitiva.\n🌸 **Diana:** Impulsivo... pero no inconsciente. Me intriga quien no teme equivocarse.",
       "required_besitos": 0,
-      "reward_besitos": 6,
-      "decisions": [
-        {
-          "text": "Entonces que me vea",
-          "next_fragment": "threshold_entry"
-        },
-        {
-          "text": "No sé si estoy listo",
-          "next_fragment": "hesitation_1"
-        }
-      ]
-    },
-    {
-      "fragment_id": "threshold_entry",
-      "content": "🎩 **Lucien:** Entra. Pero recuerda: cada fragmento que veas de ella será también un reflejo de ti. Aquí, los espejos no devuelven apariencias... devuelven intenciones.",
-      "character": "Lucien",
-      "level": 2,
-      "required_besitos": 5,
       "reward_besitos": 10,
-      "decisions": [
-        {
-          "text": "Acepto ese reflejo",
-          "next_fragment": "hall_of_mirrors"
-        },
-        {
-          "text": "¿Qué intenciones verá en mí?",
-          "next_fragment": "lucien_reflection"
-        }
-      ]
+      "decisions": []
     },
     {
-      "fragment_id": "hesitation_1",
-      "content": "🎩 **Lucien:** La duda no te aleja de ella. La atrae. Diana tiene debilidad por los que se contradicen.",
-      "character": "Lucien",
+      "fragment_id": "kinkys_1_reaccion_lenta",
       "level": 1,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** Pensaste antes de moverte. La pausa sincera… desarma más que el acto.\n🌸 **Diana:** Tu calma me perturba en el mejor sentido. En esa tensión... yo me abro un poco más.",
       "required_besitos": 0,
-      "reward_besitos": 3,
-      "decisions": [
-        {
-          "text": "Entonces dudo contigo",
-          "next_fragment": "threshold_entry"
-        },
-        {
-          "text": "No. Avanzo",
-          "next_fragment": "threshold_entry"
-        }
-      ]
+      "reward_besitos": 10,
+      "decisions": []
     },
     {
-      "fragment_id": "lucien_reflection",
-      "content": "🎩 **Lucien:** Verá deseo, miedo, hambre, memoria. Verá lo que niegas. Por eso muchos no cruzan. Diana no es imagen, es retorno.",
-      "character": "Lucien",
+      "fragment_id": "kinkys_1_mochila_pista",
+      "level": 1,
+      "character": "Sistema",
+      "content": "🎁 Has recibido: Mochila del viajero + Pista 1",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "decisions": []
+    },
+    {
+      "fragment_id": "kinkys_1_fragmento_realidad",
+      "level": 1,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** Esto no es un mapa. Es un pliegue en el tiempo. ¿Quieres encontrar a Diana? Mira lo que no debería verse.\n🌸 **Diana:** La otra mitad no está aquí. Existe donde yo no tengo cuerpo. Donde puedo ser más de lo que soy cuando me miras así.",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "mission": "🎯 Misión continua: Las pistas no aparecen, se activan con conexión emocional.",
+      "decisions": []
+    },
+    {
+      "fragment_id": "kinkys_2_retorno",
       "level": 2,
-      "required_besitos": 5,
-      "reward_besitos": 8,
-      "decisions": [
-        {
-          "text": "Entonces que me devuelva lo que soy",
-          "next_fragment": "hall_of_mirrors"
-        },
-        {
-          "text": "No quiero que me vea del todo",
-          "next_fragment": "slow_path"
-        }
-      ]
+      "character": "Diana",
+      "content": "🌸 **Diana:** Volviste. No para buscar más… sino para comprender mejor. No todos regresan. Tú pareces querer tocar la médula del misterio.",
+      "required_besitos": 0,
+      "reward_besitos": 5,
+      "decisions": []
     },
     {
-      "fragment_id": "hall_of_mirrors",
-      "content": "🌸 **Diana:** *Susurra desde dentro* Ya estás aquí... Entonces dime, ¿me estás buscando a mí o estás huyendo de ti?",
-      "character": "Diana",
-      "level": 3,
-      "required_besitos": 15,
+      "fragment_id": "kinkys_2_ojos_invertidos",
+      "level": 2,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** ¿Crees que solo tú observas? Diana ha hecho de ti su experimento sensorial. Ahora quiere que la mires como quien honra lo que no es suyo.\n🌸 **Diana:** No mires lo que te muestro. Mira lo que dejo entrever cuando creo que nadie está mirando.",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "mission": "🧠 Misión: Buscar pistas ocultas durante 3 días.",
+      "decisions": []
+    },
+    {
+      "fragment_id": "kinkys_2_validacion_mirada",
+      "level": 2,
+      "character": "Diana+Lucien",
+      "content": "🌸 **Diana:** ¿Lo viste todo? Eso me perturba. Y me excita. Hay belleza en ser vista… sin ser descompuesta.\n🎩 **Lucien:** Los verdaderos secretos no se ocultan… simplemente esperan. Hoy viste más que muchos. Eso no es agudeza. Es resonancia.",
+      "required_besitos": 0,
       "reward_besitos": 15,
-      "decisions": [
-        {
-          "text": "Te busco a ti",
-          "next_fragment": "diana_seek"
-        },
-        {
-          "text": "Huyo de mí",
-          "next_fragment": "diana_mirror_1"
-        },
-        {
-          "text": "No sé aún",
-          "next_fragment": "diana_uncertain"
-        }
-      ]
+      "decisions": []
     },
     {
-      "fragment_id": "diana_seek",
-      "content": "🌸 **Diana:** ¿Sabes lo que implica buscarme? Muchos creen quererme. Pocos soportan lo que soy cuando dejo de ser imagen.",
-      "character": "Diana",
+      "fragment_id": "kinkys_3_preguntas",
       "level": 3,
-      "required_besitos": 20,
-      "reward_besitos": 25,
+      "character": "Diana",
+      "content": "🌸 **Diana:** Hemos hablado mucho de mí…\nPero ahora quiero saber: ¿Quién eres tú cuando deseas? No qué, sino desde dónde.",
+      "required_besitos": 10,
+      "reward_besitos": 10,
+      "decisions": []
+    },
+    {
+      "fragment_id": "kinkys_3_espejo",
+      "level": 3,
+      "character": "Lucien",
+      "content": "🎩 **Lucien:** No te emociones. Esto no es un test. Es una sala de espejos. Tus respuestas revelan desde dónde te miras a ti mismo. Diana no busca corrección… busca temblores.",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "mission": "🧠 El sistema analiza tono, pausas y metáforas.",
       "decisions": [
         {
-          "text": "Muéstrate tal como eres",
-          "next_fragment": "vip_chamber"
-        },
-        {
-          "text": "Prefiero imaginarte",
-          "next_fragment": "imagined_diana"
+          "text": "Responder preguntas proyectivas",
+          "next_fragment": "kinkys_3_respuestas"
         }
       ]
     },
     {
-      "fragment_id": "vip_chamber",
-      "content": "🌸 **Diana:** *Te abre la puerta privada* Aquí no hay narrativa, solo piel. Pero para quedarte, debes haber dejado algo atrás.",
-      "character": "Diana",
+      "fragment_id": "kinkys_3_respuestas",
+      "level": 3,
+      "character": "Narrador",
+      "content": "🧠 Preguntas:\n- ¿Qué parte de ti ocultas incluso cuando estás desnudo?\n- ¿Qué tipo de belleza te deja sin palabras?",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "decisions": []
+    },
+    {
+      "fragment_id": "kinkys_3_devolucion",
+      "level": 3,
+      "character": "Diana+Lucien",
+      "content": "🌸 **Diana:** Tu forma de desear es única. No por lo que dijiste… sino por cómo lo dijiste. En tus pausas hay más verdad que en tus afirmaciones.\n🎩 **Lucien:** La tocaste. No con lógica, sino con el vacío entre tus palabras. Dejaste una huella. Y esa… pesa.",
+      "required_besitos": 0,
+      "reward_besitos": 20,
+      "decisions": []
+    },
+    {
+      "fragment_id": "divan_4_mascaras",
       "level": 4,
-      "required_besitos": 50,
-      "required_role": "vip",
-      "reward_besitos": 35,
-      "decisions": [
-        {
-          "text": "Estoy listo",
-          "next_fragment": "vip_ritual"
-        },
-        {
-          "text": "Aún no",
-          "next_fragment": "diana_closure"
-        }
-      ]
+      "character": "Diana",
+      "content": "🌸 **Diana:** Aquí las máscaras se disuelven… casi.\nLa intimidad no es cercanía física. Es comprensión sin prisa, sin conquista.",
+      "required_besitos": 0,
+      "reward_besitos": 5,
+      "decisions": []
+    },
+    {
+      "fragment_id": "divan_4_evaluacion",
+      "level": 4,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** Aquí no se trata de datos, sino de contradicciones. De mirar las partes que no piden ser resueltas, solo acompañadas.\n🌸 **Diana:** He edificado capas. A veces ni yo sé dónde termina el disfraz… y dónde empiezo yo.",
+      "required_besitos": 0,
+      "reward_besitos": 10,
+      "mission": "🎯 Misión: Escuchar su vulnerabilidad sin invadir.",
+      "decisions": []
+    },
+    {
+      "fragment_id": "divan_4_reconocimiento",
+      "level": 4,
+      "character": "Diana",
+      "content": "🌸 **Diana:** Comprendes algo que pocos captan:\nLa verdadera intimidad no es derribar la distancia.\nEs valorarla mientras sostienes lo que te comparto.",
+      "required_besitos": 0,
+      "reward_besitos": 25,
+      "decisions": []
+    },
+    {
+      "fragment_id": "divan_5_culminacion",
+      "level": 5,
+      "character": "Diana",
+      "content": "🌸 **Diana:** No solo te evaluaba a ti.\nTambién me preguntaba si yo era digna de ser revelada.",
+      "required_besitos": 0,
+      "reward_besitos": 0,
+      "mission": "🎯 Revelación: Diana admite que todo este sistema era un espejo emocional para conocerse a través del usuario.",
+      "decisions": []
+    },
+    {
+      "fragment_id": "divan_5_sintesis",
+      "level": 5,
+      "character": "Lucien+Diana",
+      "content": "🎩 **Lucien:** Lo presenciaste. No fue seducción. Fue humanidad. Y pocos llegan hasta aquí.\n🌸 **Diana:** Tras mostrarte todo… sigo siendo misterio. Pero uno que eliges explorar por amor, no por conquista.",
+      "required_besitos": 0,
+      "reward_besitos": 40,
+      "reward_items": ["🎁 Círculo Íntimo de Diana"],
+      "decisions": []
     }
   ]
 }
