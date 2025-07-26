@@ -4,11 +4,10 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 def get_admin_config_kb():
     builder = InlineKeyboardBuilder()
     builder.button(text="📺 Agregar Canales", callback_data="config_add_channels")
-    builder.button(text="🆓 Canal Gratuito", callback_data="admin_free_channel_config")
     builder.button(text="⏱️ Schedulers", callback_data="config_scheduler")
     builder.button(text="🔄 Actualizar", callback_data="admin_config")
     builder.button(text="↩️ Volver", callback_data="admin_back")
-    builder.adjust(2, 2, 1)
+    builder.adjust(2, 2)
     return builder.as_markup()
 
 
