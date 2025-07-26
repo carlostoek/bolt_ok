@@ -257,7 +257,7 @@ async def receive_vip_channel(message: Message, state: FSMContext, session: Asyn
     await state.update_data(vip_channel_id=chat_id, vip_channel_title=vip_channel_title)
     # Mostrar información del canal VIP capturado
     vip_display = f"{vip_channel_title} (ID: {chat_id})" if vip_channel_title else f"ID: {chat_id}"
-    await message.answer(f"\u2705 **Canal VIP detectado:**\n\ud83d\udce2 {vip_display}")
+    await message.answer(f"✅ **Canal VIP detectado:**\n📢 {vip_display}")
     data = await state.get_data()
     mode = data.get("mode")
     if mode == "vip_only":
@@ -266,7 +266,7 @@ async def receive_vip_channel(message: Message, state: FSMContext, session: Asyn
         if vip_channel_title:
             await config.set_vip_channel_name(vip_channel_title)
         await ChannelService(session).add_channel(chat_id, vip_channel_title)
-        await message.answer("\u2705 Configuraci\u00f3n guardada correctamente.", reply_markup=get_config_done_kb())
+        await message.answer("✅ Configuración guardada correctamente.", reply_markup=get_config_done_kb())
         await state.clear()
     else:
         await message.answer(
@@ -324,14 +324,14 @@ async def receive_free_channel(message: Message, state: FSMContext, session: Asy
     # Mensaje mejorado con información de los canales configurados
     if mode == "free_only":
         free_display = f"{free_channel_title} (ID: {chat_id})" if free_channel_title else f"ID: {chat_id}"
-        message_text = f"\u2705 **Configuraci\u00f3n guardada correctamente**\n\n\ud83c\udd93 **Canal FREE:** {free_display}"
+        message_text = f"✅ **Configuración guardada correctamente**\n\n🆓 **Canal FREE:** {free_display}"
     else:  # modo both
         vip_channel_title = data.get("vip_channel_title")
         vip_display = f"{vip_channel_title} (ID: {vip_id})" if vip_channel_title else f"ID: {vip_id}"
         free_display = f"{free_channel_title} (ID: {chat_id})" if free_channel_title else f"ID: {chat_id}"
-        message_text = (f"\u2705 **Canales configurados correctamente**\n\n"
-                       f"\ud83d\udce2 **Canal VIP:** {vip_display}\n"
-                       f"\ud83c\udd93 **Canal FREE:** {free_display}")
+        message_text = (f"✅ **Canales configurados correctamente**\n\n"
+                       f"📢 **Canal VIP:** {vip_display}\n"
+                       f"🆓 **Canal FREE:** {free_display}")
     
     await message.answer(message_text, reply_markup=get_config_done_kb())
     await state.clear()

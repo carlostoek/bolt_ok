@@ -8,24 +8,32 @@ async def safe_answer(message: Message, text: str, **kwargs):
     text = text.strip() if isinstance(text, str) else ""
     if not text:
         text = DEFAULT_SAFE_MESSAGE
+    # Limpiar caracteres surrogates
+    text = text.encode('utf-8', 'replace').decode('utf-8')
     return await message.answer(text, **kwargs)
 
 async def safe_edit(message: Message, text: str, **kwargs):
     text = text.strip() if isinstance(text, str) else ""
     if not text:
         text = DEFAULT_SAFE_MESSAGE
+    # Limpiar caracteres surrogates
+    text = text.encode('utf-8', 'replace').decode('utf-8')
     return await message.edit_text(text, **kwargs)
 
 async def safe_send_message(bot, chat_id: int, text: str, **kwargs):
     text = text.strip() if isinstance(text, str) else ""
     if not text:
         text = DEFAULT_SAFE_MESSAGE
+    # Limpiar caracteres surrogates
+    text = text.encode('utf-8', 'replace').decode('utf-8')
     return await bot.send_message(chat_id, text, **kwargs)
 
 async def safe_edit_message_text(bot, chat_id: int, message_id: int, text: str, **kwargs):
     text = text.strip() if isinstance(text, str) else ""
     if not text:
         text = DEFAULT_SAFE_MESSAGE
+    # Limpiar caracteres surrogates
+    text = text.encode('utf-8', 'replace').decode('utf-8')
     return await bot.edit_message_text(text=text, chat_id=chat_id, message_id=message_id, **kwargs)
 
 
@@ -39,12 +47,16 @@ def patch_message_methods():
         text = text.strip() if isinstance(text, str) else ""
         if not text:
             text = DEFAULT_SAFE_MESSAGE
+        # Limpiar caracteres surrogates
+        text = text.encode('utf-8', 'replace').decode('utf-8')
         return await original_answer(self, text, **kwargs)
 
     async def _patched_edit_text(self: Message, text: str, **kwargs):
         text = text.strip() if isinstance(text, str) else ""
         if not text:
             text = DEFAULT_SAFE_MESSAGE
+        # Limpiar caracteres surrogates
+        text = text.encode('utf-8', 'replace').decode('utf-8')
         return await original_edit_text(self, text, **kwargs)
 
     Message.answer = _patched_answer
