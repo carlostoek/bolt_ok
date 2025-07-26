@@ -155,6 +155,9 @@ async def back_to_admin_main(callback: CallbackQuery, session: AsyncSession):
     
     try:
         text, keyboard = await menu_factory.create_menu("admin_main", callback.from_user.id, session, callback.bot)
+        # Si el keyboard es None, generamos uno personalizado con los nombres de los canales
+        if keyboard is None:
+            keyboard = await get_admin_main_kb(session)
         await menu_manager.update_menu(callback, text, keyboard, session, "admin_main")
     except Exception as e:
         logger.error(f"Error returning to admin main: {e}")

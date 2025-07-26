@@ -1,13 +1,29 @@
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from services.config_service import ConfigService
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-def get_admin_main_kb():
+async def get_admin_main_kb(session: AsyncSession = None):
     """Return the main admin inline keyboard with elegant layout."""
     builder = InlineKeyboardBuilder()
     
-    # Fila 1: Gestión de canales principales
-    builder.button(text="💎 Canal VIP", callback_data="admin_vip")
-    builder.button(text="💬 Canal Free", callback_data="admin_free")
+    # Fila 1: Gestión de canales principales con nombres personalizados
+    vip_text = "💎 Canal VIP"
+    free_text = "💬 Canal Free"
+    
+    # Si tenemos una sesión, intentamos obtener los nombres personalizados
+    if session:
+        config = ConfigService(session)
+        vip_name = await config.get_vip_channel_name()
+        free_name = await config.get_free_channel_name()
+        
+        if vip_name:
+            vip_text = f"💎 {vip_name}"
+        if free_name:
+            free_text = f"💬 {free_name}"
+    
+    builder.button(text=vip_text, callback_data="admin_vip")
+    builder.button(text=free_text, callback_data="admin_free")
     
     # Fila 2: Entretenimiento y juegos
     builder.button(text="🎮 Juego Kinky", callback_data="admin_kinky_game")

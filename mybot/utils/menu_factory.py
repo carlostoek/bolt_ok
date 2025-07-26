@@ -62,23 +62,23 @@ class MenuFactory:
             
             # Handle role-based main menus
             if menu_state in ["main", "admin_main", "vip_main", "free_main"]:
-                return self._create_main_menu(role)
+                return await self._create_main_menu(role, session)
             
             # Handle specific menu states
             return await self._create_specific_menu(menu_state, user_id, session, role)
             
         except Exception as e:
             logger.error(f"Error creating menu for state {menu_state}, user {user_id}: {e}")
-            return self._create_fallback_menu(role) 
+            return await self._create_fallback_menu(role, session) 
     
-    def _create_main_menu(self, role: str) -> Tuple[str, InlineKeyboardMarkup]:
+    async def _create_main_menu(self, role: str, session: AsyncSession = None) -> Tuple[str, InlineKeyboardMarkup]:
         """Create the main menu based on user role."""
         if role == "admin":
             return (
                 "🛠️ **Panel de Administración**\n\n"
                 "Bienvenido al centro de control del bot. Desde aquí puedes gestionar "
                 "todos los aspectos del sistema.",
-                get_admin_main_kb()
+                await get_admin_main_kb(session)
             )
         elif role == "vip":
             return (
@@ -282,7 +282,7 @@ class MenuFactory:
         
         return text, get_narrative_stats_keyboard()
     
-    def _create_fallback_menu(self, role: str = "free") -> Tuple[str, InlineKeyboardMarkup]:
+    async def _create_fallback_menu(self, role: str = "free", session: AsyncSession = None) -> Tuple[str, InlineKeyboardMarkup]:
         """
         Create a fallback menu when something goes wrong.
         Tries to provide a role-appropriate fallback.
@@ -291,7 +291,7 @@ class MenuFactory:
                "Hubo un problema al cargar el menú. Por favor, intenta nuevamente."
         
         if role == "admin":
-            return (text, get_admin_main_kb())
+            return (text, await get_admin_main_kb(session))
         elif role == "vip":
             return (text, get_vip_main_kb())
         else: # Default for 'free' or unknown
