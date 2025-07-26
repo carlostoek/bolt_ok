@@ -42,7 +42,7 @@ async def channels_menu(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_add_channel")
-async def prompt_add_channel(callback: CallbackQuery, state: FSMContext):
+async def prompt_add_channel(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
