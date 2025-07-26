@@ -19,6 +19,7 @@ from utils.message_utils import get_profile_message
 from services.subscription_service import SubscriptionService
 from services.mission_service import MissionService
 from services.achievement_service import AchievementService
+from services.config_service import ConfigService
 from database.models import User, UserBadge, set_user_menu_state
 from utils.text_utils import sanitize_text
 
@@ -36,9 +37,18 @@ async def vip_menu(message: Message, session: AsyncSession):
             ),
         )
         return
+    
+    # Obtener nombre del canal VIP para la cabecera
+    config = ConfigService(session)
+    vip_channel_name = await config.get_vip_channel_name()
+    
+    # Crear mensaje con nombre del canal en la cabecera
+    header = f"🔥 **Canal VIP: {vip_channel_name}**\n\n" if vip_channel_name else "🔥 **Canal VIP**\n\n"
+    welcome_message = header + BOT_MESSAGES["start_welcome_returning_user"]
+    
     await send_menu(
         message,
-        BOT_MESSAGES["start_welcome_returning_user"],
+        welcome_message,
         get_vip_main_kb(),
         session,
         "vip_main",
@@ -57,9 +67,18 @@ async def vip_menu_cb(callback: CallbackQuery, session: AsyncSession):
             show_alert=True,
         )
         return
+    
+    # Obtener nombre del canal VIP para la cabecera
+    config = ConfigService(session)
+    vip_channel_name = await config.get_vip_channel_name()
+    
+    # Crear mensaje con nombre del canal en la cabecera
+    header = f"🔥 **Canal VIP: {vip_channel_name}**\n\n" if vip_channel_name else "🔥 **Canal VIP**\n\n"
+    welcome_message = header + BOT_MESSAGES["start_welcome_returning_user"]
+    
     await update_menu(
         callback,
-        BOT_MESSAGES["start_welcome_returning_user"],
+        welcome_message,
         get_vip_main_kb(),
         session,
         "vip_main",

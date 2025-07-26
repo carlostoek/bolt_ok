@@ -60,15 +60,23 @@ async def receive_vip_channel(message: Message, state: FSMContext, session: Asyn
     if not await is_admin(message.from_user.id, session):
         return
     chat_id = None
+    vip_channel_title = None
     if message.forward_from_chat:
         chat_id = message.forward_from_chat.id
+        vip_channel_title = message.forward_from_chat.title
     else:
         try:
             chat_id = int(message.text.strip())
+            # Obtener información del canal usando la API de Telegram
+            try:
+                chat_info = await message.bot.get_chat(chat_id)
+                vip_channel_title = chat_info.title
+            except Exception:
+                vip_channel_title = None
         except (TypeError, ValueError):
             await send_temporary_reply(message, "ID inválido. Intenta de nuevo.")
             return
-    await state.update_data(vip_channel_id=chat_id)
+    await state.update_data(vip_channel_id=chat_id, vip_channel_title=vip_channel_title)
     await message.answer(
         "Ahora ingresa el ID del canal FREE o reenv\u00eda un mensaje del canal.",
         reply_markup=get_back_kb("admin_channels"),
@@ -81,26 +89,49 @@ async def receive_free_channel(message: Message, state: FSMContext, session: Asy
     if not await is_admin(message.from_user.id, session):
         return
     chat_id = None
+    free_channel_title = None
     if message.forward_from_chat:
         chat_id = message.forward_from_chat.id
+        free_channel_title = message.forward_from_chat.title
     else:
         try:
             chat_id = int(message.text.strip())
+            # Obtener información del canal usando la API de Telegram
+            try:
+                chat_info = await message.bot.get_chat(chat_id)
+                free_channel_title = chat_info.title
+            except Exception:
+                free_channel_title = None
         except (TypeError, ValueError):
             await send_temporary_reply(message, "ID inválido. Intenta de nuevo.")
             return
+    
     data = await state.get_data()
     vip_id = int(data.get("vip_channel_id"))
+    vip_channel_title = data.get("vip_channel_title")
+    
     config = ConfigService(session)
     await config.set_vip_channel_id(vip_id)
     await config.set_free_channel_id(chat_id)
+    
+    # Guardar nombres de canales si están disponibles
+    if vip_channel_title:
+        await config.set_vip_channel_name(vip_channel_title)
+    if free_channel_title:
+        await config.set_free_channel_name(free_channel_title)
 
     channel_service = ChannelService(session)
-    await channel_service.add_channel(vip_id)
-    await channel_service.add_channel(chat_id)
+    await channel_service.add_channel(vip_id, vip_channel_title)
+    await channel_service.add_channel(chat_id, free_channel_title)
 
+    # Mensaje de confirmación con nombres de los canales
+    vip_info = f"Canal VIP: {vip_channel_title or 'Sin nombre'} (ID: {vip_id})"
+    free_info = f"Canal FREE: {free_channel_title or 'Sin nombre'} (ID: {chat_id})"
+    
     await message.answer(
-        f"Canales registrados correctamente. Canal VIP: {vip_id}, Canal FREE: {chat_id}",
+        f"✅ Canales registrados correctamente.\n\n"
+        f"📢 {vip_info}\n"
+        f"🆓 {free_info}",
         reply_markup=get_admin_channels_kb(await channel_service.list_channels()),
     )
     await state.clear()

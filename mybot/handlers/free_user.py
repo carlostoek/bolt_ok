@@ -12,6 +12,7 @@ from keyboards.packs_kb import get_packs_list_kb, get_pack_detail_kb
 from utils.messages import BOT_MESSAGES
 from utils.keyboard_utils import get_back_keyboard
 from utils.notify_admins import notify_admins
+from services.config_service import ConfigService
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -23,9 +24,17 @@ async def show_free_main_menu(message: Message, session: AsyncSession):
     if await get_user_role(message.bot, message.from_user.id, session=session) != "free":
         return
 
+    # Obtener nombre del canal gratuito para la cabecera
+    config = ConfigService(session)
+    free_channel_name = await config.get_free_channel_name()
+    
+    # Crear mensaje con nombre del canal en la cabecera
+    header = f"🆓 **Canal Gratuito: {free_channel_name}**\n\n" if free_channel_name else "🆓 **Canal Gratuito**\n\n"
+    menu_text = header + BOT_MESSAGES.get("FREE_MENU_TEXT", "Menú gratuito")
+
     await menu_manager.show_menu(
         message,
-        BOT_MESSAGES.get("FREE_MENU_TEXT", "Menú gratuito"),
+        menu_text,
         get_free_main_menu_kb(),
         session,
         "free_main",
@@ -35,9 +44,17 @@ async def show_free_main_menu(message: Message, session: AsyncSession):
 
 @router.callback_query(F.data == "free_main_menu")
 async def cb_free_main_menu(callback: CallbackQuery, session: AsyncSession):
+    # Obtener nombre del canal gratuito para la cabecera
+    config = ConfigService(session)
+    free_channel_name = await config.get_free_channel_name()
+    
+    # Crear mensaje con nombre del canal en la cabecera
+    header = f"🆓 **Canal Gratuito: {free_channel_name}**\n\n" if free_channel_name else "🆓 **Canal Gratuito**\n\n"
+    menu_text = header + BOT_MESSAGES.get("FREE_MENU_TEXT", "Menú gratuito")
+    
     await menu_manager.update_menu(
         callback,
-        BOT_MESSAGES.get("FREE_MENU_TEXT", "Menú gratuito"),
+        menu_text,
         get_free_main_menu_kb(),
         session,
         "free_main",
