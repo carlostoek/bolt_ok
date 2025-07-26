@@ -1,39 +1,35 @@
 import asyncio
 import logging
 import sys
-from datetime import datetime
-from sqlalchemy import select
 
-from aiogram import Bot, Dispatcher, Router
-from aiogram.filters import Command
-from aiogram.types import Message, ChatJoinRequest
+from aiogram import Bot, Dispatcher, BaseMiddleware
 from aiogram.enums.parse_mode import ParseMode
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import ErrorEvent
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from database.setup import init_db, get_session_factory
-from database.models import PendingChannelRequest
-from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
+# --- CONFIGURACIÓN DE LOGGING MEJORADA ---
+def setup_logging():
+    """Configuración robusta de logging"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s',
+        handlers=[
+            logging.FileHandler('bot.log', encoding='utf-8'),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    
+    # Reducir ruido de librerías externas
+    logging.getLogger('aiogram').setLevel(logging.WARNING)
+    logging.getLogger('aiohttp').setLevel(logging.WARNING)
 
-# Configuración de logging simplificada
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
-)
 
-# Reducir ruido de librerías externas
-logging.getLogger('aiogram').setLevel(logging.WARNING)
-logging.getLogger('aiohttp').setLevel(logging.WARNING)
 
-# Router principal para comandos
-router = Router()
-
-# Middleware para inyectar la sesión de base de datos
-class DBSessionMiddleware:
+# --- MIDDLEWARE DE SESIÓN ---
+class DBSessionMiddleware(BaseMiddleware):
+    """Middleware para inyectar la sesión de base de datos en los handlers"""
     def __init__(self, session_pool: async_sessionmaker[AsyncSession]):
         self.session_pool = session_pool
 
@@ -45,187 +41,223 @@ class DBSessionMiddleware:
             finally:
                 await session.close()
 
-# Comando para mostrar solicitudes pendientes
-@router.message(Command("mostrar"))
-async def mostrar_solicitudes(message: Message, session: AsyncSession):
-    """Mostrar solicitudes pendientes."""
-    try:
-        # Obtener solicitudes pendientes
-        stmt = select(PendingChannelRequest).where(
-            PendingChannelRequest.approved == False
-        )
-        result = await session.execute(stmt)
-        pending_requests = result.scalars().all()
-        
-        if not pending_requests:
-            await message.answer("No hay solicitudes pendientes.")
-            return
-        
-        # Contar solicitudes
-        count = len(pending_requests)
-        
-        # Formatear detalles de las solicitudes
-        texto = f"📋 **{count} Solicitudes pendientes**:\n\n"
-        
-        for i, req in enumerate(pending_requests[:10], 1):  # Limitar a 10 para el mensaje
-            tiempo_espera = datetime.utcnow() - req.request_timestamp
-            horas = int(tiempo_espera.total_seconds() // 3600)
-            minutos = int((tiempo_espera.total_seconds() % 3600) // 60)
-            
-            texto += (
-                f"{i}. ID Usuario: `{req.user_id}`\n"
-                f"   Solicitado hace: {horas}h {minutos}m\n"
-                f"   Chat ID: `{req.chat_id}`\n\n"
-            )
-        
-        if count > 10:
-            texto += f"... y {count - 10} solicitudes más."
-        
-        await message.answer(texto, parse_mode=ParseMode.MARKDOWN)
-    
-    except Exception as e:
-        logging.error(f"Error mostrando solicitudes: {e}")
-        await message.answer(f"❌ Error: {str(e)}")
+# Imports
+from database.setup import init_db, get_session_factory
+from utils.message_safety import patch_message_methods
+from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 
-# Comando para aceptar solicitudes pendientes
-@router.message(Command("aceptar"))
-async def aceptar_solicitudes(message: Message, session: AsyncSession, bot: Bot):
-    """Aceptar solicitudes pendientes."""
-    try:
-        # Obtener solicitudes pendientes
-        stmt = select(PendingChannelRequest).where(
-            PendingChannelRequest.approved == False
-        )
-        result = await session.execute(stmt)
-        pending_requests = result.scalars().all()
-        
-        if not pending_requests:
-            await message.answer("No hay solicitudes pendientes para aceptar.")
-            return
-        
-        count = len(pending_requests)
-        processed = 0
-        
-        # Procesar cada solicitud
-        for req in pending_requests:
+# Handlers imports
+from handlers import start, free_user, daily_gift, minigames, setup as setup_handlers
+from handlers.channel_access import router as channel_access_router
+from handlers.user import start_token
+from handlers.vip import menu as vip, gamification
+from handlers.vip.auction_user import router as auction_user_router
+from handlers.reaction_callback import router as reaction_callback_router
+from handlers.admin import admin_router
+from handlers.admin.auction_admin import router as auction_admin_router
+from handlers.lore_handlers import router as lore_router
+from handlers.missions_handler import router as missions_router
+from handlers.info_handler import router as info_router
+from handlers.free_channel_admin import router as free_channel_admin_router
+from handlers.publication_test import router as publication_test_router
+from handlers.main_menu import router as main_menu_router
+from handlers.narrative_handler import router as narrative_router
+from handlers.admin_narrative_handlers import router as admin_narrative_handlers
+from handlers.admin.free_channel_config import router as free_channel_config_router
+
+import combinar_pistas
+from backpack import router as backpack_router
+
+# Services imports
+from services import (
+    channel_request_scheduler,
+    vip_subscription_scheduler,
+    vip_membership_scheduler,
+)
+from services.scheduler import auction_monitor_scheduler, free_channel_cleanup_scheduler
+
+# Middlewares
+from middlewares import PointsMiddleware, UserRegistrationMiddleware
+
+# --- MANEJO DE ERRORES GLOBAL ---
+async def global_error_handler(event: ErrorEvent) -> None:
+    """Manejo centralizado de errores"""
+    logger = logging.getLogger(__name__)
+    
+    # Log del error
+    logger.error(
+        f"Error en {event.update.update_id if event.update else 'Unknown'}: "
+        f"{type(event.exception).__name__}: {event.exception}",
+        exc_info=True
+    )
+    
+    # Notificar errores críticos a admins (opcional)
+    if isinstance(event.exception, (ConnectionError, TimeoutError)):
+        logger.critical("Error de conexión crítico detectado")
+        # Aquí podrías notificar a admins
+    
+    return True  # Marca el error como manejado
+
+# --- GESTOR DE TAREAS EN SEGUNDO PLANO ---
+class BackgroundTaskManager:
+    """Gestor para tareas en segundo plano con manejo de errores"""
+    
+    def __init__(self):
+        self.tasks: list[asyncio.Task] = []
+    
+    def add_task(self, coro, name: str):
+        """Añade una tarea con manejo de errores"""
+        async def safe_task():
             try:
-                # Aprobar la solicitud en Telegram
-                await bot.approve_chat_join_request(
-                    chat_id=req.chat_id,
-                    user_id=req.user_id
-                )
-                
-                # Marcar como aprobada en la base de datos
-                req.approved = True
-                req.approval_timestamp = datetime.utcnow()
-                processed += 1
-                
-                # Notificar al usuario (opcional)
-                try:
-                    await bot.send_message(
-                        req.user_id, 
-                        "✅ Tu solicitud para unirte al canal ha sido aprobada."
-                    )
-                except Exception as e:
-                    logging.warning(f"No se pudo notificar al usuario {req.user_id}: {e}")
-                
-                logging.info(f"Aprobada solicitud de usuario {req.user_id} para canal {req.chat_id}")
-                
+                await coro
+            except asyncio.CancelledError:
+                logging.info(f"Tarea {name} cancelada")
+                raise
             except Exception as e:
-                logging.error(f"Error aprobando solicitud {req.id}: {e}")
+                logging.error(f"Error en tarea {name}: {e}", exc_info=True)
         
-        # Guardar cambios en la base de datos
-        if processed > 0:
-            await session.commit()
-            await message.answer(f"✅ Se aprobaron {processed} de {count} solicitudes pendientes.")
-        else:
-            await message.answer("❌ No se pudo aprobar ninguna solicitud.")
+        task = asyncio.create_task(safe_task(), name=name)
+        self.tasks.append(task)
+        return task
     
-    except Exception as e:
-        logging.error(f"Error procesando solicitudes: {e}")
-        await message.answer(f"❌ Error: {str(e)}")
+    async def shutdown(self):
+        """Cierre ordenado de todas las tareas"""
+        logging.info("Cerrando tareas en segundo plano...")
+        
+        for task in self.tasks:
+            if not task.done():
+                task.cancel()
+        
+        if self.tasks:
+            await asyncio.gather(*self.tasks, return_exceptions=True)
+        
+        logging.info("Todas las tareas cerradas")
 
-# Manejador para detectar nuevas solicitudes de ingreso
-@router.chat_join_request()
-async def handle_join_request(event: ChatJoinRequest, session: AsyncSession):
-    """Detectar y registrar solicitudes de unión al canal."""
-    try:
-        user_id = event.from_user.id
-        chat_id = event.chat.id
-        
-        # Verificar si ya existe una solicitud pendiente
-        stmt = select(PendingChannelRequest).where(
-            PendingChannelRequest.user_id == user_id,
-            PendingChannelRequest.chat_id == chat_id,
-            PendingChannelRequest.approved == False
-        )
-        result = await session.execute(stmt)
-        existing = result.scalar_one_or_none()
-        
-        if existing:
-            logging.info(f"Solicitud ya existente para usuario {user_id} en canal {chat_id}")
-            return
-        
-        # Crear nueva solicitud
-        pending = PendingChannelRequest(
-            user_id=user_id,
-            chat_id=chat_id,
-            request_timestamp=datetime.utcnow(),
-            approved=False
-        )
-        
-        session.add(pending)
-        await session.commit()
-        
-        logging.info(f"Nueva solicitud registrada: Usuario {user_id} para canal {chat_id}")
-        
-        # Enviar mensaje al usuario (opcional)
-        try:
-            await event.bot.send_message(
-                user_id,
-                f"📋 Tu solicitud para unirte al canal ha sido registrada. Te notificaremos cuando sea aprobada."
-            )
-        except Exception as e:
-            logging.warning(f"No se pudo enviar mensaje al usuario {user_id}: {e}")
+# --- FUNCIÓN PRINCIPAL MEJORADA ---
+async def main() -> None:
+    """Función principal con manejo robusto de errores"""
+    setup_logging()
+    logger = logging.getLogger(__name__)
     
-    except Exception as e:
-        logging.error(f"Error procesando solicitud de unión: {e}")
-
-async def main():
-    """Función principal."""
     try:
-        # Inicializar base de datos
-        logging.info("Inicializando base de datos...")
+        # Inicialización
+        logger.info("Inicializando base de datos...")
         await init_db()
         
-        # Configurar bot
+        logger.info("Aplicando parches de seguridad...")
+        patch_message_methods()
+        
         session_factory = get_session_factory()
-        bot = Bot(BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-        dp = Dispatcher(storage=MemoryStorage())
         
-        # Configurar middleware
-        session_middleware = DBSessionMiddleware(session_factory)
-        dp.update.middleware(session_middleware)
-        
-        # Registrar router
-        dp.include_router(router)
-        
-        # Iniciar el bot
-        logging.info("Bot iniciado. Presiona Ctrl+C para detener.")
-        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
-    
-    except Exception as e:
-        logging.critical(f"Error crítico: {e}", exc_info=True)
-    finally:
-        logging.info("Bot detenido.")
-        if 'bot' in locals():
-            await bot.session.close()
+        logger.info(f"VIP channel ID: {VIP_CHANNEL_ID}")
+        logger.info("Configurando bot...")
 
+        # Configuración del bot
+        bot = Bot(
+            BOT_TOKEN, 
+            default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+        )
+        dp = Dispatcher(storage=MemoryStorage(), session_factory=session_factory)
+
+        # Registrar manejo de errores PRIMERO
+        dp.error.register(global_error_handler)
+
+        # --- MIDDLEWARE DE SESIÓN ---
+        session_middleware = DBSessionMiddleware(session_factory)
+        dp.update.outer_middleware(session_middleware)  # Registrar PRIMERO
+
+        # Configurar middlewares en orden correcto
+        user_reg_middleware = UserRegistrationMiddleware()
+        points_middleware = PointsMiddleware()
+
+        # Middlewares outer (se ejecutan después de session_middleware)
+        dp.update.outer_middleware(user_reg_middleware)
+
+        # Middleware de puntos (inner)
+        dp.message.middleware(points_middleware)
+        dp.poll_answer.middleware(points_middleware)
+        dp.message_reaction.middleware(points_middleware)
+
+        # Registrar routers en orden de prioridad
+        logger.info("Registrando handlers...")
+        routers = [
+            ("setup", setup_handlers.router),
+            ("admin", admin_router),
+            ("auction_admin", auction_admin_router),
+            ("start_token", start_token),
+            ("start", start.router),
+            ("main_menu", main_menu_router),
+            ("backpack", backpack_router),
+            ("missions", missions_router),
+            ("info", info_router),
+            ("free_channel_admin", free_channel_admin_router),
+            ("publication_test", publication_test_router),
+            ("vip_menu", vip.router),
+            ("auction_user", auction_user_router),
+            ("reaction_callback", reaction_callback_router),
+            ("daily_gift", daily_gift.router),
+            ("minigames", minigames.router),
+            ("gamification", gamification.router),
+            ("free_user", free_user.router),
+            ("lore", lore_router),
+            ("combinar_pistas", combinar_pistas.router),
+            ("channel_access", channel_access_router),
+            ("narrative", narrative_router),
+            ("admin_narrative", admin_narrative_handlers),
+            ("free_channel_config", free_channel_config_router),
+        ]
+        
+        for name, router in routers:
+            dp.include_router(router)
+            logger.info(f"Router {name} registrado")
+
+        # Configurar tareas en segundo plano
+        task_manager = BackgroundTaskManager()
+        
+        logger.info("Iniciando tareas en segundo plano...")
+        task_manager.add_task(
+            channel_request_scheduler(bot, session_factory), 
+            "channel_requests"
+        )
+        task_manager.add_task(
+            vip_subscription_scheduler(bot, session_factory), 
+            "vip_subscriptions"
+        )
+        task_manager.add_task(
+            vip_membership_scheduler(bot, session_factory), 
+            "vip_memberships"
+        )
+        task_manager.add_task(
+            auction_monitor_scheduler(bot, session_factory), 
+            "auction_monitor"
+        )
+        task_manager.add_task(
+            free_channel_cleanup_scheduler(bot, session_factory), 
+            "channel_cleanup"
+        )
+
+        # Iniciar polling
+        logger.info("Bot iniciado correctamente. Comenzando polling...")
+        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        
+    except Exception as e:
+        logger.critical(f"Error crítico en main(): {e}", exc_info=True)
+        raise
+    finally:
+        logger.info("Cerrando bot...")
+        try:
+            await task_manager.shutdown()
+            if 'bot' in locals():
+                await bot.session.close()
+        except Exception as e:
+            logger.error(f"Error durante el cierre: {e}", exc_info=True)
+
+# --- PUNTO DE ENTRADA ---
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logging.info("Bot detenido manualmente.")
+        logging.info("Bot detenido por el usuario")
     except Exception as e:
         logging.critical(f"Error fatal: {e}", exc_info=True)
         sys.exit(1)
