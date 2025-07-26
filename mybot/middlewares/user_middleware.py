@@ -34,15 +34,26 @@ class UserRegistrationMiddleware(BaseMiddleware):
 
         if user_info:
             service = UserService(session)
-            user = await service.get_user(user_info.id)
-            if not user:
-                user = await service.create_user(
-                    user_info.id,
-                    first_name=getattr(user_info, "first_name", None),
-                    last_name=getattr(user_info, "last_name", None),
-                    username=getattr(user_info, "username", None),
-                )
-                logger.info("Created new user via middleware: %s", user_info.id)
-            data.setdefault("user", user)
+            try:
+                # Try to get the user first
+                user = await service.get_user(user_info.id)
+                
+                # If user doesn't exist, create a new one
+                if not user:
+                    user = await service.create_user(
+                        user_info.id,
+                        first_name=getattr(user_info, "first_name", None),
+                        last_name=getattr(user_info, "last_name", None),
+                        username=getattr(user_info, "username", None),
+                    )
+                    logger.info("Created new user via middleware: %s", user_info.id)
+                
+                # Update user data in the handler
+                data.setdefault("user", user)
+            except Exception as e:
+                # Log error but don't crash the middleware
+                logger.error(f"Error processing user in middleware: {e}")
+                # Continue with handler even if user registration fails
+                # The service layer will handle and log the specific error
 
         return await handler(event, data)
