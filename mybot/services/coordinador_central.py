@@ -12,6 +12,7 @@ from .integration.narrative_access_service import NarrativeAccessService
 from .narrative_service import NarrativeService
 from .point_service import PointService
 from .diana_emotional_service import DianaEmotionalService
+from database.diana_models import EmotionalInteractionType, EmotionCategory
 
 logger = logging.getLogger(__name__)
 
@@ -170,58 +171,65 @@ class CoordinadorCentral:
     
     async def enhance_with_diana(self, user_id: int, resultado_base: Dict[str, Any], **kwargs) -> Dict[str, Any]:
         """
-        Mejora el mensaje de respuesta utilizando el servicio emocional de Diana si está activo.
+        Mejora el mensaje de respuesta utilizando el servicio emocional de Diana.
         
-        Esta función permite que Diana personalice los mensajes según su memoria emocional
-        y adaptación de personalidad para cada usuario, mientras mantiene la funcionalidad
-        exacta actual si Diana no está activa.
+        Esta función permite que Diana personalice los mensajes basándose en la memoria emocional,
+        nivel de intimidad, contexto de interacción, y adaptación de personalidad específica para cada usuario.
+        Mantiene la funcionalidad exacta actual si el servicio de Diana no está activo.
         
         Args:
             user_id: ID del usuario
             resultado_base: Resultado base que contiene el mensaje y datos del flujo
-            **kwargs: Parámetros adicionales específicos de la acción
+            **kwargs: Parámetros adicionales específicos de la acción (reaction_type, etc.)
             
         Returns:
-            Dict con los resultados mejorados por Diana o los originales si Diana no está activa
+            Dict con los resultados personalizados según el contexto de la relación o los originales si Diana no está activa
         """
         try:
-            # Verificar si Diana está activa usando el método en diana_service
+            # 1. Verificar si el servicio de Diana está activo 
             if not hasattr(self.diana_service, 'is_active') or not self.diana_service.is_active():
-                # Si Diana no está activa, devolver resultado base sin modificaciones
                 return resultado_base
             
-            # Si Diana está activa, intentar mejorar el mensaje
-            if hasattr(self.diana_service, '_enhance_reaction_message'):
-                # Obtener estado de relación actual
+            # 2. Obtener información contextual necesaria para personalización
+            # Primero, verificar si el usuario tiene historial emocional registrado
+            relationship_result = await self.diana_service.get_relationship_state(user_id)
+            if not relationship_result.get("success", False):
+                # Crear un registro de relación inicial si no existe
+                await self._ensure_diana_profile_exists(user_id)
                 relationship_result = await self.diana_service.get_relationship_state(user_id)
                 if not relationship_result.get("success", False):
                     return resultado_base
-                    
-                relationship = relationship_result.get("relationship", {})
-                
-                # Obtener adaptación de personalidad actual
+            
+            relationship = relationship_result.get("relationship", {})
+            
+            # 3. Obtener adaptación de personalidad
+            adaptation_result = await self.diana_service.get_personality_adaptation(user_id)
+            if not adaptation_result.get("success", False):
+                await self._ensure_diana_profile_exists(user_id)
                 adaptation_result = await self.diana_service.get_personality_adaptation(user_id)
                 if not adaptation_result.get("success", False):
                     return resultado_base
-                    
-                adaptation = adaptation_result.get("adaptation", {})
-                
-                # Aplicar mejora específica para mensajes de reacción
-                resultado_mejorado = await self.diana_service._enhance_reaction_message(
-                    user_id, resultado_base, relationship, adaptation, **kwargs
-                )
-                
-                return resultado_mejorado
-            else:
-                # Si el método específico no existe, usar el método genérico
-                if hasattr(self.diana_service, 'enhance_interaction'):
-                    resultado_mejorado = await self.diana_service.enhance_interaction(
-                        user_id, 
-                        AccionUsuario.REACCIONAR_PUBLICACION, 
-                        resultado_base, 
-                        **kwargs
+            
+            adaptation = adaptation_result.get("adaptation", {})
+            
+            # 4. Identificar el tipo de acción y seleccionar el método de mejora apropiado
+            action_type = kwargs.get('action_type', AccionUsuario.REACCIONAR_PUBLICACION)
+            
+            # 5. Personalizar según tipo de acción
+            if action_type == AccionUsuario.REACCIONAR_PUBLICACION or 'reaction_type' in kwargs:
+                # Usar método especializado para reacciones si existe
+                if hasattr(self.diana_service, '_enhance_reaction_message'):
+                    resultado_mejorado = await self.diana_service._enhance_reaction_message(
+                        user_id, resultado_base, relationship, adaptation, **kwargs
                     )
                     return resultado_mejorado
+            
+            # 6. Para otros tipos de acciones o si no hay método especializado
+            if hasattr(self.diana_service, 'enhance_interaction'):
+                resultado_mejorado = await self.diana_service.enhance_interaction(
+                    user_id, action_type, resultado_base, **kwargs
+                )
+                return resultado_mejorado
                     
             # Si no se pudo mejorar, devolver resultado base
             return resultado_base
@@ -230,6 +238,39 @@ class CoordinadorCentral:
             # En caso de error, registrar y devolver el resultado base
             logger.error(f"Error al mejorar con Diana: {e}")
             return resultado_base
+    
+    async def _ensure_diana_profile_exists(self, user_id: int) -> None:
+        """
+        Asegura que exista un perfil de Diana para el usuario.
+        
+        Esta función es útil para nuevos usuarios o cuando se requiere
+        inicializar el estado emocional y de relación para la personalización.
+        
+        Args:
+            user_id: ID del usuario
+        """
+        try:
+            # Inicializar relación si no existe
+            await self.diana_service._get_or_create_relationship_state(user_id)
+            
+            # Inicializar adaptación de personalidad si no existe
+            await self.diana_service._get_or_create_personality_adaptation(user_id)
+            
+            # Crear una memoria emocional inicial para tener contexto
+            # Solo si no hay memorias existentes
+            memories_result = await self.diana_service.get_recent_memories(user_id, limit=1)
+            if not memories_result.get("success", False) or not memories_result.get("memories"):
+                # Crear una memoria inicial neutra
+                await self.diana_service.store_emotional_memory(
+                    user_id=user_id,
+                    interaction_type=EmotionalInteractionType.GREETING,
+                    summary="Primera interacción",
+                    content="El usuario comienza a interactuar con Diana",
+                    primary_emotion=EmotionCategory.NEUTRAL,
+                    importance_score=1.0
+                )
+        except Exception as e:
+            logger.error(f"Error al asegurar perfil de Diana: {e}")
     
     async def _flujo_acceso_narrativa_vip(self, user_id: int, fragment_key: str, bot=None) -> Dict[str, Any]:
         """

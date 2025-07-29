@@ -671,19 +671,22 @@ class DianaEmotionalService:
         **kwargs
     ) -> Dict[str, Any]:
         """
-        Enhance a user interaction based on Diana's emotional understanding.
+        Enhance a user interaction based on Diana's emotional understanding and personal context.
+        
+        This method records the interaction, stores emotional memory if appropriate, and personalizes
+        the response based on the user's relationship state, interaction history, and personality preferences.
         
         Args:
             user_id: ID of the user
-            accion: Type of action performed
-            resultado_original: Original result from the action
-            **kwargs: Additional parameters specific to the action
+            accion: Type of action performed (from AccionUsuario enum)
+            resultado_original: Original result from the action 
+            **kwargs: Additional parameters specific to the action (reaction_type, etc.)
             
         Returns:
-            Dict with enhanced results, or original results if enhancement not possible
+            Dict with enhanced results incorporating relationship context, or original results if enhancement not possible
         """
         try:
-            # Get the current relationship state and personality adaptation
+            # 1. Get the current relationship state and personality adaptation
             relationship_result = await self.get_relationship_state(user_id)
             if not relationship_result["success"]:
                 return resultado_original
@@ -696,14 +699,18 @@ class DianaEmotionalService:
                 
             adaptation = adaptation_result["adaptation"]
             
-            # Record the interaction to update relationship metrics
+            # 2. Record the interaction to update relationship metrics
             await self.record_interaction(user_id)
             
-            # Check if Diana service is active for enhancement
+            # 3. Store emotional memory for significant interactions
+            if resultado_original.get("success", False):
+                await self._store_interaction_memory(user_id, accion, resultado_original, **kwargs)
+            
+            # 4. Check if Diana service is active for enhancement
             if not self.is_active():
                 return resultado_original
                 
-            # If active, try to enhance the interaction
+            # 5. If active, try to enhance the interaction based on action type
             enhanced_result = await self._enhance_by_action_type(
                 user_id, accion, resultado_original, relationship, adaptation, **kwargs
             )
@@ -714,6 +721,102 @@ class DianaEmotionalService:
             logger.error(f"Error enhancing interaction: {e}")
             # Return original result in case of any error
             return resultado_original
+    
+    async def _store_interaction_memory(self, user_id: int, accion, resultado: Dict[str, Any], **kwargs) -> None:
+        """
+        Store an emotional memory for this interaction if it's significant.
+        
+        This creates a persistent record of meaningful interactions that can be referenced
+        in future personalizations, building a sense of shared history.
+        
+        Args:
+            user_id: ID of the user
+            accion: Type of action performed
+            resultado: Result data from the action
+            **kwargs: Additional parameters specific to the action
+        """
+        try:
+            # Map action types to appropriate emotional interaction types
+            action_name = getattr(accion, "value", str(accion))
+            
+            # Default values
+            summary = "Interacción con Diana"
+            content = ""
+            primary_emotion = EmotionCategory.NEUTRAL
+            secondary_emotion = None
+            interaction_type = EmotionalInteractionType.GREETING
+            importance_score = 1.0
+            context_data = {}
+            
+            # Populate based on action type
+            if action_name == "reaccionar_publicacion":
+                reaction_type = kwargs.get("reaction_type", "")
+                reaction_category = self._categorize_reaction(reaction_type)
+                
+                # Set interaction type
+                interaction_type = EmotionalInteractionType.FEEDBACK
+                
+                # Set emotion based on reaction category
+                emotion_map = {
+                    "positive": EmotionCategory.JOY,
+                    "romantic": EmotionCategory.TRUST,
+                    "humorous": EmotionCategory.JOY,
+                    "surprised": EmotionCategory.SURPRISE,
+                    "neutral": EmotionCategory.NEUTRAL
+                }
+                primary_emotion = emotion_map.get(reaction_category, EmotionCategory.NEUTRAL)
+                
+                # Create descriptive summary and content
+                summary = f"Reacción {reaction_type} a publicación"
+                content = f"El usuario reaccionó con {reaction_type} a una publicación de Diana"
+                
+                # Add context data
+                context_data = {
+                    "reaction_type": reaction_type,
+                    "reaction_category": reaction_category,
+                    "points_awarded": resultado.get("points_awarded", 0),
+                    "message_id": kwargs.get("message_id", 0)
+                }
+                
+                # Higher importance for romantic reactions
+                if reaction_category == "romantic":
+                    importance_score = 1.5
+                    secondary_emotion = EmotionCategory.ANTICIPATION
+                
+            # Add more action types as needed
+            elif action_name == "tomar_decision":
+                decision_id = kwargs.get("decision_id", 0)
+                
+                interaction_type = EmotionalInteractionType.PERSONAL_SHARE
+                primary_emotion = EmotionCategory.ANTICIPATION
+                
+                summary = f"Decisión narrativa {decision_id}"
+                content = f"El usuario eligió la decisión {decision_id} en la narrativa"
+                
+                context_data = {
+                    "decision_id": decision_id,
+                    "fragment": resultado.get("fragment", {})
+                }
+                
+                importance_score = 1.8  # Narrative decisions are significant
+            
+            # Only store memories for significant interactions
+            if importance_score >= 1.0:
+                await self.store_emotional_memory(
+                    user_id=user_id,
+                    interaction_type=interaction_type,
+                    summary=summary,
+                    content=content,
+                    primary_emotion=primary_emotion,
+                    secondary_emotion=secondary_emotion,
+                    context_data=context_data,
+                    importance_score=importance_score
+                )
+                
+        except Exception as e:
+            # Log but don't fail the whole flow
+            logger.error(f"Error storing interaction memory: {e}")
+            pass
     
     def is_active(self) -> bool:
         """
@@ -777,89 +880,494 @@ class DianaEmotionalService:
         **kwargs
     ) -> Dict[str, Any]:
         """
-        Enhance reaction messages based on relationship and adaptation.
+        Enhance reaction messages based on relationship state, emotional memories,
+        and personality adaptation for truly personalized interactions.
         
         Args:
             user_id: ID of the user
             resultado: Original result to enhance
             relationship: Current relationship state
             adaptation: Current personality adaptation
-            **kwargs: Additional parameters
+            **kwargs: Additional parameters including reaction_type
             
         Returns:
-            Dict with enhanced message
+            Dict with enhanced message incorporating intimacy level, memories, and context
         """
         if not resultado.get("success", False):
             return resultado
             
-        # Get base message
+        # Get base message and check for hint unlocked scenario
         original_message = resultado.get("message", "")
+        hint_unlocked = resultado.get("hint_unlocked")
         
-        # Apply personalization based on relationship status
+        # If hint is unlocked, we'll preserve the hint part but personalize the greeting
+        if hint_unlocked and "Nueva pista desbloqueada" in original_message:
+            base_part, hint_part = original_message.split("\n\n", 1)
+            # We'll only personalize the base part and keep the hint intact
+            is_hint_message = True
+        else:
+            base_part = original_message
+            hint_part = ""
+            is_hint_message = False
+        
+        # Extract core parameters from relationship and adaptation
         status = relationship.get("status", "initial")
+        intimacy_level = self._calculate_intimacy_level(relationship)
+        
+        # Get adaptation parameters with defaults
         warmth = adaptation.get("warmth", 0.5)
         formality = adaptation.get("formality", 0.5)
         humor = adaptation.get("humor", 0.5)
         emoji_usage = adaptation.get("emoji_usage", 0.5)
+        directness = adaptation.get("directness", 0.5)
+        emotional_expressiveness = adaptation.get("emotional_expressiveness", 0.5)
         
-        # Enhance message based on relationship status
-        if status == "intimate" or status == "close":
-            if warmth > 0.7:
-                greeting = "mi amor más preciado"
-            elif warmth > 0.5:
-                greeting = "mi dulce amor"
-            else:
-                greeting = "mi amor"
-        elif status == "friendly":
-            if warmth > 0.7:
-                greeting = "mi querido admirador"
-            elif warmth > 0.5:
-                greeting = "mi dulce admirador"
-            else:
-                greeting = "mi admirador"
-        elif status == "acquaintance":
-            if warmth > 0.7:
-                greeting = "mi nuevo admirador"
-            elif warmth > 0.5:
-                greeting = "mi admirador"
-            else:
-                greeting = "admirador"
-        else:  # initial or other
-            greeting = ""
+        # Get user's current emotional state based on recent memories
+        emotion_result = await self._get_user_emotional_context(user_id)
+        primary_emotion = emotion_result.get("primary_emotion", "neutral")
+        emotional_context = emotion_result.get("context", {})
         
-        # Get reaction type if available
+        # Get reaction type if available and determine what kind of reaction it was
         reaction_type = kwargs.get("reaction_type", "")
+        reaction_category = self._categorize_reaction(reaction_type)
         
-        # Customize response based on relationship and adaptation
-        hint_unlocked = resultado.get("hint_unlocked")
+        # Select appropriate endearment term based on relationship status and warmth
+        endearment = self._get_relationship_endearment(status, warmth, intimacy_level)
         
-        if hint_unlocked:
-            # Original message already has the hint, keep it
-            enhanced_message = original_message
-        else:
-            # Start with base message component
-            base_message = "Diana sonríe al notar tu reacción..."
-            
-            # Add personalization based on relationship
-            if greeting:
-                if humor > 0.7 and reaction_type == "👍":
-                    action = f"guiña un ojo a {greeting}"
-                elif humor > 0.7 and reaction_type == "❤️":
-                    action = f"envía un beso volado a {greeting}"
-                elif warmth > 0.7:
-                    action = f"mira con dulzura a {greeting}"
-                else:
-                    action = f"sonríe a {greeting}"
+        # Get personalized action verb and description based on all factors
+        action_verb, action_description = self._get_personalized_action(
+            reaction_category, 
+            primary_emotion,
+            intimacy_level,
+            status,
+            warmth,
+            humor,
+            emotional_expressiveness
+        )
+        
+        # Build the response based on all contextual factors
+        if endearment:
+            if directness > 0.7:
+                # More direct style addresses the user explicitly
+                greeting_phrase = f"{endearment}, "
             else:
-                action = "sonríe al notar tu reacción"
+                greeting_phrase = ""
+        else:
+            greeting_phrase = ""
             
-            # Create enhanced message
-            enhanced_message = f"Diana {action}... *+10 besitos* 💋 han sido añadidos a tu cuenta."
+        # Get reference to past interactions if appropriate
+        memory_reference = await self._get_contextual_memory_reference(
+            user_id, 
+            reaction_category,
+            intimacy_level
+        )
         
-        # Update the result with enhanced message
+        # Calculate response with proper level of emotional expression
+        emotional_intensity = "" if emotional_expressiveness < 0.3 else \
+                            "con una chispa en sus ojos" if emotional_expressiveness < 0.6 else \
+                            action_description
+                            
+        # Format the emoji usage based on user preference
+        emoji = self._select_appropriate_emoji(reaction_category, emoji_usage)
+        
+        # Construct the personalized core message
+        if intimacy_level > 0.7:
+            # High intimacy - more personal, emotional, specific
+            core_message = f"Diana {action_verb} {emotional_intensity}{emoji} {memory_reference}"
+        elif intimacy_level > 0.4:
+            # Medium intimacy - warm but more reserved
+            core_message = f"Diana {action_verb}{emoji} {memory_reference}"
+        else:
+            # Low intimacy - more formal, less emotional
+            core_message = f"Diana {action_verb}{emoji}"
+            
+        # Add the points award part
+        points_message = f"*+10 besitos* 💋 han sido añadidos a tu cuenta."
+        
+        # Combine everything into the enhanced message
+        if greeting_phrase:
+            enhanced_message = f"{greeting_phrase}{core_message}... {points_message}"
+        else:
+            enhanced_message = f"{core_message}... {points_message}"
+            
+        # If there was a hint, add it back
+        if is_hint_message:
+            enhanced_message = f"{enhanced_message}\n\n{hint_part}"
+        
+        # Update the result with the enhanced message
         resultado["message"] = enhanced_message
         
         return resultado
+        
+    def _calculate_intimacy_level(self, relationship: Dict[str, Any]) -> float:
+        """
+        Calculate an intimacy level score (0.0-1.0) based on relationship metrics.
+        
+        Args:
+            relationship: Relationship state dictionary
+            
+        Returns:
+            Float intimacy score from 0.0 (distant) to 1.0 (very intimate)
+        """
+        # Base intimacy on status
+        status_weights = {
+            "initial": 0.1,
+            "acquaintance": 0.3,
+            "friendly": 0.5,
+            "close": 0.8,
+            "intimate": 1.0,
+            "strained": 0.4,
+            "repaired": 0.6,
+            "distant": 0.2,
+            "complex": 0.5
+        }
+        
+        status = relationship.get("status", "initial")
+        base_intimacy = status_weights.get(status, 0.1)
+        
+        # Factor in trust and rapport
+        trust_level = relationship.get("trust_level", 0.1)
+        rapport = relationship.get("rapport", 0.1)
+        
+        # Consider interaction history
+        interaction_count = relationship.get("interaction_count", 0)
+        interaction_factor = min(1.0, interaction_count / 100.0) * 0.2
+        
+        # Calculate final intimacy score with weighted components
+        intimacy_score = (base_intimacy * 0.4) + (trust_level * 0.3) + (rapport * 0.2) + interaction_factor
+        
+        # Ensure it's in valid range
+        return max(0.0, min(1.0, intimacy_score))
+    
+    def _categorize_reaction(self, reaction_type: str) -> str:
+        """
+        Categorize the reaction type into a general emotional category.
+        
+        Args:
+            reaction_type: Specific reaction emoji or code
+            
+        Returns:
+            Category string: 'positive', 'romantic', 'humorous', 'surprised', or 'neutral'
+        """
+        positive_reactions = ["👍", "👌", "🔥", "✨", "⭐", "🙌", "like"]
+        romantic_reactions = ["❤️", "😍", "😘", "💕", "💖", "love", "heart"]
+        humorous_reactions = ["😂", "🤣", "😆", "😜", "🤪", "haha", "funny"]
+        surprised_reactions = ["😮", "😲", "🤯", "😱", "wow", "omg"]
+        
+        if any(r in reaction_type for r in positive_reactions):
+            return "positive"
+        elif any(r in reaction_type for r in romantic_reactions):
+            return "romantic"
+        elif any(r in reaction_type for r in humorous_reactions):
+            return "humorous"
+        elif any(r in reaction_type for r in surprised_reactions):
+            return "surprised"
+        else:
+            return "neutral"
+    
+    def _get_relationship_endearment(self, status: str, warmth: float, intimacy_level: float) -> str:
+        """
+        Get an appropriate endearment term based on relationship factors.
+        
+        Args:
+            status: Relationship status string
+            warmth: Warmth adaptation value (0.0-1.0)
+            intimacy_level: Calculated intimacy level (0.0-1.0)
+            
+        Returns:
+            String with appropriate endearment term or empty string
+        """
+        # High intimacy endearments
+        if status in ["intimate", "close"]:
+            if warmth > 0.8 and intimacy_level > 0.8:
+                options = ["mi amor más preciado", "mi tesoro", "mi vida", "mi adoración"]
+            elif warmth > 0.6:
+                options = ["mi dulce amor", "mi cielo", "mi corazón", "cariño mío"]
+            else:
+                options = ["mi amor", "cielo", "cariño"]
+                
+        # Medium intimacy endearments
+        elif status == "friendly":
+            if warmth > 0.7:
+                options = ["mi querido admirador", "mi dulce compañero", "querido"]
+            elif warmth > 0.5:
+                options = ["mi dulce admirador", "encanto", "querido"]
+            else:
+                options = ["mi admirador", "querido"]
+                
+        # Lower intimacy or beginning relationship
+        elif status == "acquaintance":
+            if warmth > 0.7:
+                options = ["mi nuevo admirador", "dulzura"]
+            elif warmth > 0.5:
+                options = ["mi admirador"]
+            else:
+                options = ["admirador"]
+                
+        # Initial or strained relationships
+        else:
+            if intimacy_level > 0.3:
+                options = ["querido"]
+            else:
+                return ""
+                
+        # Select randomly but deterministically based on user_id to maintain consistency
+        import hashlib
+        index = int(hashlib.md5(f"{status}_{warmth:.1f}".encode()).hexdigest(), 16) % len(options)
+        return options[index]
+        
+    def _get_personalized_action(self, 
+                               reaction_category: str,
+                               primary_emotion: str,
+                               intimacy_level: float,
+                               status: str,
+                               warmth: float,
+                               humor: float,
+                               emotional_expressiveness: float) -> Tuple[str, str]:
+        """
+        Get a personalized action verb and description based on all contextual factors.
+        
+        Args:
+            reaction_category: Category of the reaction
+            primary_emotion: User's primary emotional state
+            intimacy_level: Calculated intimacy level
+            status: Relationship status
+            warmth: Warmth adaptation value
+            humor: Humor adaptation value
+            emotional_expressiveness: Emotional expressiveness value
+            
+        Returns:
+            Tuple of (action_verb, description)
+        """
+        # Base actions by reaction category
+        actions_by_reaction = {
+            "positive": [
+                ("sonríe", "con aprobación"),
+                ("asiente", "complacida"),
+                ("responde", "con una sonrisa sincera"),
+                ("nota tu reacción", "y sus ojos brillan"),
+            ],
+            "romantic": [
+                ("se sonroja", "ligeramente al ver tu reacción"),
+                ("muerde su labio", "mientras te mira fijamente"),
+                ("sonríe", "con un brillo especial en sus ojos"),
+                ("reacciona", "con una mirada intensa y cómplice"),
+            ],
+            "humorous": [
+                ("ríe", "divertida por tu reacción"),
+                ("sonríe ampliamente", "compartiendo tu sentido del humor"),
+                ("guiña un ojo", "con complicidad"),
+                ("juguetea con su pelo", "mientras ríe contigo"),
+            ],
+            "surprised": [
+                ("arquea una ceja", "sorprendida por tu reacción"),
+                ("abre los ojos", "gratamente sorprendida"),
+                ("reacciona", "con una expresión de asombro divertido"),
+                ("se detiene", "observando tu reacción con curiosidad"),
+            ],
+            "neutral": [
+                ("sonríe", "al notar tu reacción"),
+                ("te observa", "con atención"),
+                ("nota tu gesto", "con interés"),
+                ("registra tu reacción", "con una sonrisa sutil"),
+            ]
+        }
+        
+        # Get base options from reaction category
+        action_options = actions_by_reaction.get(reaction_category, actions_by_reaction["neutral"])
+        
+        # Filter or enhance based on intimacy and status
+        if intimacy_level > 0.7 and status in ["intimate", "close"]:
+            if reaction_category == "romantic":
+                # Add more intimate options for romantic reactions in close relationships
+                action_options.extend([
+                    ("se acerca", "rozando ligeramente tu mano"),
+                    ("suspira", "con anhelo mientras te mira"),
+                    ("te dedica", "una mirada llena de complicidad y deseo"),
+                ])
+        
+        # Adjust based on user's current emotional state
+        if primary_emotion == "joy" and reaction_category in ["positive", "romantic", "humorous"]:
+            # Amplify positive responses to positive emotions
+            emotional_modifier = 0.2
+        elif primary_emotion in ["sadness", "fear"] and emotional_expressiveness > 0.6:
+            # More empathetic responses to negative emotions
+            action_options = [
+                ("responde", "con calidez para animarte"),
+                ("sonríe", "con ternura comprensiva"),
+                ("te observa", "con ojos compasivos"),
+            ]
+            emotional_modifier = -0.1
+        else:
+            emotional_modifier = 0.0
+            
+        # Apply humor if appropriate
+        effective_humor = humor + emotional_modifier
+        if effective_humor > 0.7 and reaction_category in ["humorous", "positive"]:
+            action_options.extend([
+                ("hace un guiño", "con picardía"),
+                ("responde", "con una expresión traviesa"),
+            ])
+            
+        # Select an appropriate action based on all factors
+        effective_warmth = warmth + emotional_modifier
+        
+        # Choose more expressive actions for higher emotional expressiveness
+        if emotional_expressiveness > 0.7:
+            weight_descriptive = 0.8  # Prefer actions with descriptions
+        elif emotional_expressiveness > 0.4:
+            weight_descriptive = 0.5  # Balance between simple and descriptive
+        else:
+            weight_descriptive = 0.2  # Prefer simpler actions
+            
+        # Final selection logic
+        import random
+        # Seed with consistent factors to maintain personality consistency
+        random.seed(f"{reaction_category}_{effective_warmth:.1f}_{effective_humor:.1f}")
+        
+        if random.random() < weight_descriptive:
+            # Select action with description
+            action, description = random.choice(action_options)
+            return action, description
+        else:
+            # Select just the action verb
+            action, _ = random.choice(action_options)
+            return action, ""
+    
+    def _select_appropriate_emoji(self, reaction_category: str, emoji_usage: float) -> str:
+        """
+        Select appropriate emojis based on reaction category and emoji usage preference.
+        
+        Args:
+            reaction_category: Category of the reaction
+            emoji_usage: User's emoji usage preference (0.0-1.0)
+            
+        Returns:
+            String with appropriate emoji(s) or empty string
+        """
+        if emoji_usage < 0.3:
+            return ""  # No emojis for low preference
+            
+        # Emoji sets by category and intensity
+        emoji_sets = {
+            "positive": ["✨", "✨✨", "✨🌟✨"],
+            "romantic": ["💕", "💕💖", "💕💖💋"],
+            "humorous": ["😊", "😊😉", "😊😉😆"],
+            "surprised": ["👀", "👀✨", "👀✨🔥"],
+            "neutral": ["✨", "💫", "💫✨"]
+        }
+        
+        # Select intensity based on preference
+        if emoji_usage > 0.7:
+            intensity_index = 2  # High emoji usage
+        elif emoji_usage > 0.5:
+            intensity_index = 1  # Medium emoji usage
+        else:
+            intensity_index = 0  # Low but non-zero emoji usage
+            
+        # Get emoji set for this category
+        emoji_options = emoji_sets.get(reaction_category, emoji_sets["neutral"])
+        
+        # Return appropriate emoji based on intensity
+        return emoji_options[intensity_index]
+        
+    async def _get_user_emotional_context(self, user_id: int) -> Dict[str, Any]:
+        """
+        Get the user's current emotional context based on recent memories.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            Dict with primary_emotion and context data
+        """
+        try:
+            # Get recent emotional memories
+            memories_result = await self.get_recent_memories(user_id, limit=5)
+            
+            if not memories_result.get("success", False) or not memories_result.get("memories"):
+                return {
+                    "primary_emotion": "neutral",
+                    "context": {}
+                }
+                
+            # Count emotions to determine primary
+            emotion_counts = {}
+            context_data = {}
+            for memory in memories_result["memories"]:
+                # Track emotion counts
+                primary = memory.get("primary_emotion")
+                if primary:
+                    emotion_counts[primary] = emotion_counts.get(primary, 0) + 1
+                    
+                # Collect context data
+                if memory.get("context_data"):
+                    context_data.update(memory["context_data"])
+            
+            # Determine primary emotion
+            if emotion_counts:
+                primary_emotion = max(emotion_counts.items(), key=lambda x: x[1])[0]
+            else:
+                primary_emotion = "neutral"
+                
+            return {
+                "primary_emotion": primary_emotion,
+                "context": context_data
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting user emotional context: {e}")
+            return {
+                "primary_emotion": "neutral",
+                "context": {}
+            }
+    
+    async def _get_contextual_memory_reference(self, user_id: int, reaction_category: str, intimacy_level: float) -> str:
+        """
+        Get a personalized reference to past interactions if appropriate for intimacy level.
+        
+        Args:
+            user_id: User ID
+            reaction_category: Category of the reaction
+            intimacy_level: Calculated intimacy level
+            
+        Returns:
+            String with memory reference or empty string
+        """
+        # Only include memory references for higher intimacy levels
+        if intimacy_level < 0.4:
+            return ""
+            
+        try:
+            # Get appropriate emotional memory
+            relevant_emotions = {"positive": "joy", "romantic": "trust", "humorous": "joy", "surprised": "surprise"}
+            emotion = relevant_emotions.get(reaction_category, None)
+            
+            if emotion:
+                # Try to get memories associated with this emotion
+                memories_result = await self.get_memories_by_emotion(user_id, EmotionCategory(emotion), limit=3)
+                
+                if memories_result.get("success", False) and memories_result.get("memories"):
+                    # Choose a memory that's important enough to reference
+                    significant_memories = [m for m in memories_result["memories"] 
+                                         if m.get("importance_score", 0) > 1.2]  
+                    
+                    if significant_memories and len(significant_memories) > 0 and intimacy_level > 0.5:
+                        memory = significant_memories[0]
+                        # Create a subtle reference to the memory
+                        reference = f"recordando {memory.get('summary', 'tu gesto anterior')}"
+                        return reference
+            
+            # If we've gotten here, no specific memory to reference
+            if intimacy_level > 0.7 and reaction_category in ["positive", "romantic"]:
+                # Generic positive memory reference for high intimacy
+                return "como tantas otras veces que hemos compartido"
+                
+            return ""
+            
+        except Exception as e:
+            logger.error(f"Error getting contextual memory reference: {e}")
+            return ""
 
     async def update_personality_adaptation(
         self,
