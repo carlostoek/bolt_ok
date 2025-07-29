@@ -11,10 +11,16 @@ from services.scheduler import run_channel_request_check, run_vip_subscription_c
 # Importar routers de sub-módulos
 from .admin.auction_admin import router as auction_router
 from .admin.vip_manage import router as vip_manage_router
+from .admin.trivia_handlers import router as trivia_router
+from .admin.channel_handlers import router as channel_router
+from .admin.vip_token_handlers import router as vip_token_router
 
 router = Router()
 router.include_router(auction_router)
 router.include_router(vip_manage_router)
+router.include_router(trivia_router)
+router.include_router(channel_router)
+router.include_router(vip_token_router)
 
 
 @router.message(Command("admin_menu"))
