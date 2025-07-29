@@ -183,3 +183,22 @@ async def confirm_auction_action(callback: CallbackQuery):
     """Confirmar acción de subasta"""
     action, _, auction_id = callback.data.split("_")[1:]
     await callback.answer(f"Confirmando {action} para subasta {auction_id}")
+
+@router.callback_query(F.data.startswith("*_auction_*"))
+async def handle_dynamic_auction(callback: CallbackQuery):
+    """Manejador dinámico para acciones de subasta"""
+    action = callback.data.split("_")[0]
+    auction_id = callback.data.split("_")[-1]
+    await callback.answer(f"Procesando {action} para subasta {auction_id}")
+
+@router.callback_query(F.data == "edit_auction_data")
+async def edit_auction_data(callback: CallbackQuery):
+    """Editar datos de subasta"""
+    await callback.answer()
+    await callback.message.answer("✏️ Modo edición de subasta activado")
+
+@router.callback_query(F.data == "auction_advanced_settings")
+async def auction_advanced_settings(callback: CallbackQuery):
+    """Mostrar configuración avanzada de subastas"""
+    await callback.answer()
+    await callback.message.answer("⚙ Mostrando configuración avanzada de subastas")
