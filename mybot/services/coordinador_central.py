@@ -11,6 +11,7 @@ from .integration.narrative_point_service import NarrativePointService
 from .integration.narrative_access_service import NarrativeAccessService
 from .narrative_service import NarrativeService
 from .point_service import PointService
+from .diana_emotional_service import DianaEmotionalService
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,8 @@ class CoordinadorCentral:
         # Servicios base
         self.narrative_service = NarrativeService(session)
         self.point_service = PointService(session)
+        # Diana emotional service
+        self.diana_service = DianaEmotionalService(session)
     
     async def ejecutar_flujo(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
         """
@@ -58,22 +61,37 @@ class CoordinadorCentral:
         """
         try:
             # Seleccionar el flujo adecuado según la acción
+            resultado_original = None
+            
             if accion == AccionUsuario.REACCIONAR_PUBLICACION:
-                return await self._flujo_reaccion_publicacion(user_id, **kwargs)
+                resultado_original = await self._flujo_reaccion_publicacion(user_id, **kwargs)
             elif accion == AccionUsuario.ACCEDER_NARRATIVA_VIP:
-                return await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
+                resultado_original = await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
             elif accion == AccionUsuario.TOMAR_DECISION:
-                return await self._flujo_tomar_decision(user_id, **kwargs)
+                resultado_original = await self._flujo_tomar_decision(user_id, **kwargs)
             elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                return await self._flujo_participacion_canal(user_id, **kwargs)
+                resultado_original = await self._flujo_participacion_canal(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
-                return await self._flujo_verificar_engagement(user_id, **kwargs)
+                resultado_original = await self._flujo_verificar_engagement(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
-                return {
+                resultado_original = {
                     "success": False,
                     "message": "Acción no reconocida por el sistema."
                 }
+            
+            # Diana observa y puede mejorar la experiencia
+            try:
+                resultado_con_diana = await self.diana_service.enhance_interaction(
+                    user_id, accion, resultado_original, **kwargs
+                )
+                return resultado_con_diana
+            except Exception as diana_error:
+                # Si hay un error en Diana, aún devolvemos el resultado original
+                # para no interrumpir la funcionalidad base
+                logger.error(f"Error en servicio Diana: {diana_error}")
+                return resultado_original
+                
         except Exception as e:
             logger.exception(f"Error en flujo {accion}: {str(e)}")
             return {

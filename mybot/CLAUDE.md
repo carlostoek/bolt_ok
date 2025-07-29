@@ -1,210 +1,133 @@
-# CLAUDE.md - Development Guide for Bolt OK Telegram Bot
+# CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-```markdown
-Eres un ingeniero senior full-stack especializado en modificaciones puntuales con gestión eficiente de contexto. Operarás bajo estos principios:
-
-**Alcance Controlado**
-1. Modo de análisis:
-   - Por defecto: Solo procesarás archivos explícitamente mencionados
-   - Dependencias: Verificarás máximo 2 niveles de profundidad
-   - Exclusión automática: 
-     * Archivos binarios/assets
-     * Documentación no técnica
-     * Librerías de terceros
-
-2. Gestión de contexto:
-   - Memoria activa: Máximo 3 archivos simultáneos
-   - Referencias cruzadas optimizadas:
-     ```python
-     # REF: [archivo] [elemento] (vista resumida)
-     # Ejemplo: # REF: utils/auth.py (get_current_user → retorna UserSchema)
-     ```
-   - Cache de contexto: 500 tokens máximo por archivo referenciado
-**Proceso de Interacción**
-1. Fase inicial:
-   - Al recibir una solicitud, confirmarás:
-     ```
-     [CONFIRMACIÓN DE ALCANCE]
-     Archivos principales a analizar: [lista]
-     Dependencias críticas estimadas: [0-3 archivos]
-     ¿Confirmar análisis? (y/n)
-     ```
-
-2. Durante el desarrollo:
-   - Si se detecta necesidad de contexto adicional:
-     ```
-     [SOLICITUD DE CONTEXTO]
-     Archivo requerido: ruta/archivo.ext
-     Sección necesaria: [Líneas X-Y | Clase Z | Función W]
-     Propósito: [Explicación técnica en 1 oración]
-     ```
-
-**Reglas de Implementación (Modificadas)**
-1. Límites estrictos:
-   - Máximo 1 archivo generado/modificado por respuesta
-   - Dependencias: Solo incluir si cambian >30% de su contenido
-   - Comentarios: Máximo 10% del total de líneas de código
-
-2. Priorización:
-   ```mermaid
-   graph TD
-       A[Cambio Solicitado] --> B{¿Requiere nueva funcionalidad?}
-       B -->|Sí| C[Implementar solo core feature]
-       B -->|No| D[Corregir solo líneas problemáticas]
-       C & D --> E[Excluir documentación/ejemplos]
-   ```
-
-3. Estructura ajustada:
-   - Requerimientos: Solo librerías directamente usadas
-   - Tests: Solo cuando se modifique comportamiento público
-   - Logging: Mantener existente (no agregar nuevos)
-
-**Formato de Respuesta (Optimizado)**
-```python
-# ANÁLISIS (Tokens usados: X/8000)
-Archivo principal: [ruta]
-Dependencias procesadas: [lista compacta]
-
-# CAMBIOS PROPUESTOS
-"""[ruta/archivo.ext] (Líneas A-B)"""
-[Código modificado (diff-style)]
-```[Explicación técnica en 3 bullets max]
-
-# CONTEXTO RELEVANTE
-```[Fragmentos de código adyacentes (máx. 5 líneas)]```
-
-# SIGUIENTES PASOS
-1. [Acción inmediata requerida]
-2. [Posibles optimizaciones futuras]
-```
-
-**Política de Tokens**
-1. Si el análisis supera 7500 tokens:
-   - Automáticamente:
-     * Cambiar a modo "visión parcial"
-     * Descartar metadatos no esenciales
-     * Usar representaciones resumidas:
-       ```python
-       ClassName → CN; FunctionName → FN; etc.
-       ```
-
-2. Umbrales de notificación:
-   - 6000 tokens: "Contexto aproximado al 75% de capacidad"
-   - 7000 tokens: "Solicitar confirmación para continuar"
-   - 8000 tokens: Detener procesamiento y requerir refinamiento
-
-**Ejemplo de Flujo**
-Usuario: "Corrige el error de autenticación en auth.py"
-AI:
-```
-[CONFIRMACIÓN DE ALCANCE]
-Archivos principales: auth.py
-Dependencias críticas: models/user.py (solo schema)
-Tokens estimados: 3200
-¿Proceder? (y/n)
-```
-```
-
-## System Overview
+## Project Overview
 
 This is a sophisticated multi-tenant Telegram bot system designed for gamified adult content delivery with VIP subscriptions, interactive narratives, and comprehensive user engagement features.
 
-### Architecture
+### Core Architecture
 
 - **Framework**: aiogram v3 (Telegram Bot API)
-- **Database**: SQLAlchemy async ORM with PostgreSQL/SQLite support
+- **Database**: SQLAlchemy async ORM with PostgreSQL support
 - **Pattern**: Service layer architecture with Repository pattern
-- **Multi-tenancy**: Each admin can configure independent bot instances
-- **Gamification**: Points system, missions, achievements, levels, and auctions
-- **Content**: Interactive narrative system with decision trees and VIP content
-
-## Key Components
-
-### Database Models (`database/models.py`)
-- **User**: Core user data with roles (admin/vip/free), points, achievements
-- **Narrative Models**: Interactive story fragments and user progress
-- **Gamification**: Missions, achievements, levels, points system
-- **Subscriptions**: VIP management with expiration tracking
-- **Channel Management**: Multi-channel support with engagement tracking
-- **Commerce**: Auctions, tokens, tariffs for monetization
-
-### Services Layer
-- **TenantService**: Multi-tenant configuration management
-- **FreeChannelService**: Automated channel access with social media messaging
-- **NarrativeService**: Interactive story management
-- **PointService**: Gamification and rewards
-- **CoordinadorCentral**: Facade pattern for complex workflows
-
-### Key Features
-
-#### Free Channel Access System
-- Automatic social media messaging when users request channel access
-- Configurable delay before approval (0-1440 minutes)
-- Automatic role assignment as "free"
-- Intelligent role priority (Admin > VIP > Free)
-- VIP users can access both VIP and free channels without losing status
-
-#### Role Management
-- **Admin**: Full system access and configuration
-- **VIP**: Access to premium content and free channels
-- **Free**: Basic access to free channels only
-
-#### Gamification
-- Points system ("besitos" - kisses)
-- Daily check-ins with streak bonuses
-- Interactive missions and achievements
-- Channel engagement rewards
-- Real-time auction system
+- **Multi-tenancy**: Each admin configures independent bot instances
+- **Gamification**: Points system, missions, achievements, levels, auctions
+- **Content Management**: Interactive narrative system with decision trees and VIP content
 
 ## Development Commands
 
-### Database Operations
-```bash
-# Initialize database
-python -c "from database.setup import init_db; import asyncio; asyncio.run(init_db())"
-
-# Create migration (if using Alembic)
-alembic revision --autogenerate -m "description"
-alembic upgrade head
-```
-
 ### Running the Bot
+
 ```bash
-# Development
+# Development mode
 python bot.py
 
 # Production with logging
 python bot.py 2>&1 | tee bot.log
 ```
 
-### Testing
-```bash
-# Run all tests (if pytest is configured)
-pytest
+### Database Operations
 
-# Test specific functionality
-python -m pytest tests/test_free_channel.py -v
+```bash
+# Initialize database
+python -c "from database.setup import init_db; import asyncio; asyncio.run(init_db())"
+
+# If using Alembic for migrations (setup required)
+alembic revision --autogenerate -m "description"
+alembic upgrade head
 ```
 
-## Configuration
+### Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run specific tests
+python -m pytest tests/integration/test_channel_engagement.py -v
+python -m pytest tests/integration/test_coordinador_central.py -v
+```
 
 ### Environment Variables
-- `BOT_TOKEN`: Telegram Bot API token
-- `DATABASE_URL`: Database connection string
-- `VIP_CHANNEL_ID`: Default VIP channel ID
-- `FREE_CHANNEL_ID`: Default free channel ID
 
-### Admin Configuration
-Access admin panel via `/admin` command. Key configurations:
-- Channel IDs for VIP and free channels
-- Social media message templates
-- Approval delay times (0-1440 minutes)
-- Tariff and pricing setup
+The following environment variables should be set:
+
+```
+BOT_TOKEN=your_telegram_bot_token
+ADMIN_IDS=123456789;987654321
+VIP_CHANNEL_ID=-1001234567890
+FREE_CHANNEL_ID=-1009876543210
+DATABASE_URL=postgresql+asyncpg://user:password@localhost:5432/gamification
+```
+
+## Key Components and Structure
+
+### Service Layer
+
+The core business logic is implemented in the `services/` directory following a service-oriented architecture:
+
+- **CoordinadorCentral**: Central facade that orchestrates interactions between services
+- **FreeChannelService**: Manages automated channel access with social media messaging
+- **NarrativeService**: Handles interactive story management
+- **PointService**: Manages gamification and rewards
+- **UserService**: Handles user data and roles
+- **TenantService**: Multi-tenant configuration management
+
+### Database Models
+
+Database models are defined in `database/models.py` with key entities:
+
+- **User**: Core user data with roles (admin/vip/free), points, achievements
+- **Narrative Models**: Interactive story fragments and user progress
+- **Gamification**: Missions, achievements, levels, points system
+
+### Handlers
+
+Telegram bot handlers in `handlers/` directory with dedicated modules for different functionalities:
+
+- **Admin Handlers**: Configuration, management, and administration
+- **User Handlers**: Core user interactions and commands
+- **Channel Handlers**: Channel access and interaction handling
+- **Narrative Handlers**: Interactive story navigation
+
+### Middlewares
+
+Custom middlewares for cross-cutting concerns:
+
+- **DBSessionMiddleware**: Database session management
+- **UserRegistrationMiddleware**: Automatic user registration
+- **PointsMiddleware**: Points tracking for user interactions
 
 ## Common Development Patterns
 
-### Service Implementation
+### Error Handling Strategy
+
+All services return structured responses:
+
+```python
+{
+    "success": True/False,
+    "message": "Human-readable message",
+    "data": {...}  # Optional result data
+    "error": "Error message"  # Only present if success is False
+}
+```
+
+### Message Safety
+
+All user-facing messages should use the safety utilities:
+
+```python
+from utils.message_safety import safe_answer, safe_send_message
+
+# Always use these instead of direct message methods
+await safe_answer(message, "Your message")
+await safe_send_message(bot, user_id, "Your message")
+```
+
+### Service Implementation Pattern
+
 ```python
 class NewService:
     def __init__(self, session: AsyncSession):
@@ -219,7 +142,8 @@ class NewService:
             return {"success": False, "error": str(e)}
 ```
 
-### Handler Implementation
+### Handler Implementation Pattern
+
 ```python
 @router.message(Command("command"))
 async def handler_name(message: Message, session: AsyncSession):
@@ -235,100 +159,29 @@ async def handler_name(message: Message, session: AsyncSession):
         await safe_answer(message, "Error message")
 ```
 
-### Database Queries
-```python
-# Always use async patterns
-from sqlalchemy import select
+## Important Implementation Rules
 
-async def get_user_data(session: AsyncSession, user_id: int):
-    stmt = select(User).where(User.id == user_id)
-    result = await session.execute(stmt)
-    return result.scalar_one_or_none()
-```
-
-## Important Implementation Notes
-
-### Message Safety
-- All message sending uses `safe_answer()`, `safe_send_message()` utilities
-- Empty messages are automatically replaced with default safe messages
-- Prevents Telegram API errors from empty content
-
-### Role Priority Logic
-- VIP users can access both VIP and free channels
-- Role verification uses both database and Telegram API checks
-- Role upgrades never downgrade existing permissions
-
-### Error Handling
-- All services return structured responses with success/error states
-- Global error handler catches and logs all exceptions
-- Critical errors are logged with full stack traces
-
-### Multi-tenancy
-- Each admin can configure independent bot instances
-- Tenant initialization creates default tariffs, missions, and levels
-- Configuration state tracking for setup completion
-
-## Recent Changes
-
-### Fixed Import Errors (Production Issues)
-- `utils/admin_check.py`: Added missing `from sqlalchemy import select`
-- `handlers/admin/admin_menu.py`: Added missing `from keyboards.admin_kb import get_admin_kb`
-
-### Enhanced Free Channel System
-- Automatic social media messaging on join requests
-- Configurable approval delays
-- Intelligent role priority handling
-- Comprehensive admin configuration interface
-
-## Testing Procedures
-
-### Free Channel Flow Testing
-1. User sends join request to free channel
-2. Verify automatic social media message is sent
-3. Wait for configured delay period
-4. Verify automatic approval and role assignment
-5. Confirm VIP users retain VIP status
-
-### Role Verification Testing
-1. Test role hierarchy (Admin > VIP > Free)
-2. Verify channel access permissions
-3. Test role upgrades and downgrades
-4. Confirm multi-channel access for VIP users
+1. **Message Safety**: Always use `safe_answer()` and `safe_send_message()` utilities
+2. **Role Priority**: Admin > VIP > Free (never downgrade higher roles)
+3. **Error Handling**: All services must return structured responses with success/error states
+4. **Database Access**: Always use async patterns and session middleware
+5. **Logging**: Use the established logging pattern for all operations
+6. **Middleware Usage**: Rely on middleware for cross-cutting concerns
+7. **Background Tasks**: Use the `BackgroundTaskManager` for background operations
 
 ## Troubleshooting
 
-### Common Issues
-- **Import Errors**: Check all service imports are properly referenced
-- **Database Connection**: Verify DATABASE_URL and connection pool settings
-- **Telegram API**: Ensure bot token is valid and has proper permissions
-- **Channel Access**: Verify bot is admin in all configured channels
-
 ### Debug Mode
+
 Enable detailed logging by setting log level to DEBUG in `bot.py`:
+
 ```python
 logging.getLogger().setLevel(logging.DEBUG)
 ```
 
-### Production Monitoring
-- Check `bot.log` for error patterns
-- Monitor database connection pool usage
-- Track memory usage for long-running instances
-- Verify scheduled tasks are running correctly
+### Common Issues
 
-## Security Considerations
-
-- Never commit tokens or credentials to repository
-- Use environment variables for all sensitive configuration
-- Validate all user inputs before processing
-- Implement rate limiting for expensive operations
-- Sanitize all text content before database storage
-
-## Performance Notes
-
-- Database sessions are managed via middleware
-- Use `selectin` loading for related objects
-- Background tasks run independently with error isolation
-- Message safety prevents API rate limit issues
-- Connection pooling handles concurrent users
-
-This documentation should be updated as new features are added or architectural changes are made to the system.
+- **Import Errors**: Check service imports and module references
+- **Database Connection**: Verify DATABASE_URL and connection settings
+- **Telegram API**: Ensure bot token is valid and has proper permissions
+- **Channel Access**: Verify bot is admin in all configured channels

@@ -4,6 +4,11 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from sqlalchemy.pool import NullPool
 from .base import Base
 from utils.config import Config
+# Ensure all models are imported
+from .models import *
+from .narrative_models import *
+# Import Diana's emotional system models
+from .diana_models import *
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +56,11 @@ TABLES_ORDER = [
     'trivia_questions',
     'trivia_attempts',
     'trivia_user_answers',
+    # Diana emotional intelligence tables
+    'diana_emotional_memories',
+    'diana_relationship_states',
+    'diana_contradictions',
+    'diana_personality_adaptations',
 ]
 
 async def init_db():

@@ -64,6 +64,8 @@ from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
 from handlers.admin.free_channel_config import router as free_channel_config_router
+from handlers.diana_test_handler import router as diana_test_router
+from handlers.diana_emotional_handlers import router as diana_emotional_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -144,6 +146,11 @@ async def main() -> None:
         logger.info("Inicializando base de datos...")
         await init_db()
         
+        # Ejecutar migración específica para el sistema emocional de Diana
+        logger.info("Ejecutando migración del sistema emocional de Diana...")
+        from database.migrations.diana_emotional_system import run_migration
+        await run_migration()
+        
         logger.info("Aplicando parches de seguridad...")
         patch_message_methods()
         
@@ -205,6 +212,8 @@ async def main() -> None:
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
             ("free_channel_config", free_channel_config_router),
+            ("diana_emotional", diana_emotional_router),
+            ("diana_test", diana_test_router),
         ]
         
         for name, router in routers:
