@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generated_at": "2025-07-28T20:20:03.791325",
+    "generated_at": "2025-07-29T03:01:51.436117",
     "script_version": "1.0.0",
     "analysis_type": "admin_menu_validation"
   },
@@ -14,228 +14,11 @@
     "orphaned_handler_files": 2
   },
   "keyboard_files": {
-    "admin_auction_kb.py": {
-      "total_callbacks": 26,
-      "connected_callbacks": 7,
-      "disconnected_callbacks": 19,
+    "admin_vip_config_kb.py": {
+      "total_callbacks": 8,
+      "connected_callbacks": 6,
+      "disconnected_callbacks": 2,
       "callbacks": [
-        {
-          "callback_data": "auction_duration_3",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_duration_1",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_duration_6",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_basic_settings",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "cancel_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "view_auction_details_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_auction_main",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "edit_auction_data",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "start_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_duration_48",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "confirm_*_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_duration_24",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_advanced_settings",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_list_active_auctions",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_manage_content",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "*_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_create_auction",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_end_auction",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_cancel_auction",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_list_pending_auctions",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "confirm_create_auction",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_auction_stats",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "auction_duration_12",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "end_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "view_auction_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "auction_duration_72",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        }
-      ]
-    },
-    "admin_main_kb.py": {
-      "total_callbacks": 7,
-      "connected_callbacks": 7,
-      "disconnected_callbacks": 0,
-      "callbacks": [
-        {
-          "callback_data": "admin_main_menu",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_back",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_free",
-          "handler_file": "admin/free_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_stats",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
         {
           "callback_data": "admin_vip",
           "handler_file": "admin/vip_menu.py",
@@ -244,26 +27,40 @@
           "priority": "high"
         },
         {
-          "callback_data": "admin_config",
-          "handler_file": "admin/config_menu.py",
+          "callback_data": "vip_config_messages",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "generate_token_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_vip_config",
+          "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "high"
         },
         {
-          "callback_data": "admin_kinky_game",
-          "handler_file": "admin/admin_menu.py",
+          "callback_data": "edit_vip_reminder",
+          "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "high"
-        }
-      ]
-    },
-    "admin_vip_kb.py": {
-      "total_callbacks": 8,
-      "connected_callbacks": 7,
-      "disconnected_callbacks": 1,
-      "callbacks": [
+          "priority": "medium"
+        },
+        {
+          "callback_data": "edit_vip_farewell",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
         {
           "callback_data": "vip_config",
           "handler_file": "admin/vip_menu.py",
@@ -272,128 +69,30 @@
           "priority": "medium"
         },
         {
-          "callback_data": "admin_back",
-          "handler_file": "admin/admin_menu.py",
+          "callback_data": "config_tarifas",
+          "handler_file": "admin/subscription_plans.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "high"
-        },
+          "priority": "medium"
+        }
+      ]
+    },
+    "admin_free_channel_kb.py": {
+      "total_callbacks": 17,
+      "connected_callbacks": 7,
+      "disconnected_callbacks": 10,
+      "callbacks": [
         {
-          "callback_data": "admin_send_channel_post",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "vip_manage",
+          "callback_data": "create_invite_link",
           "handler_file": null,
           "is_connected": false,
           "is_dynamic": false,
           "priority": "medium"
         },
         {
-          "callback_data": "vip_generate_token",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_vip",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "vip_manual_badge",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "vip_stats",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        }
-      ]
-    },
-    "admin_channel_config_kb.py": {
-      "total_callbacks": 2,
-      "connected_callbacks": 2,
-      "disconnected_callbacks": 0,
-      "callbacks": [
-        {
-          "callback_data": "cancel_config",
-          "handler_file": "admin/admin_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "save_reactions",
-          "handler_file": "admin/config_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        }
-      ]
-    },
-    "admin_config_kb.py": {
-      "total_callbacks": 16,
-      "connected_callbacks": 16,
-      "disconnected_callbacks": 0,
-      "callbacks": [
-        {
-          "callback_data": "view_pending_requests",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "set_channel_interval",
-          "handler_file": "admin/config_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "config_wait_time",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_back",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "config_welcome_message",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "set_vip_interval",
-          "handler_file": "admin/config_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "config_add_channels",
-          "handler_file": "admin/config_menu.py",
-          "is_connected": true,
+          "callback_data": "set_free_channel",
+          "handler_file": null,
+          "is_connected": false,
           "is_dynamic": false,
           "priority": "medium"
         },
@@ -412,14 +111,105 @@
           "priority": "medium"
         },
         {
-          "callback_data": "run_schedulers_now",
-          "handler_file": "admin/config_menu.py",
+          "callback_data": "channel_detailed_stats",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_menu",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "advanced_channel_config",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "config_wait_time",
+          "handler_file": "admin/free_channel_config.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "medium"
         },
         {
-          "callback_data": "config_scheduler",
+          "callback_data": "cleanup_old_requests",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "weekly_channel_metrics",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_free_channel_config",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "clear_all_requests",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "view_pending_requests",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "export_channel_data",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "toggle_auto_approval",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "confirm_*",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "config_welcome_message",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        }
+      ]
+    },
+    "admin_config_kb.py": {
+      "total_callbacks": 16,
+      "connected_callbacks": 16,
+      "disconnected_callbacks": 0,
+      "callbacks": [
+        {
+          "callback_data": "save_reactions",
           "handler_file": "admin/config_menu.py",
           "is_connected": true,
           "is_dynamic": false,
@@ -433,15 +223,36 @@
           "priority": "medium"
         },
         {
-          "callback_data": "channel_mode_vip",
+          "callback_data": "config_social_message",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "set_vip_interval",
           "handler_file": "admin/config_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "medium"
         },
         {
-          "callback_data": "save_reactions",
+          "callback_data": "config_scheduler",
           "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "test_approval_flow",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "config_wait_time",
+          "handler_file": "admin/free_channel_config.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "medium"
@@ -454,11 +265,452 @@
           "priority": "medium"
         },
         {
+          "callback_data": "channel_mode_vip",
+          "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "view_pending_requests",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_back",
+          "handler_file": "admin/admin_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
           "callback_data": "admin_config",
           "handler_file": "admin/config_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "high"
+        },
+        {
+          "callback_data": "set_channel_interval",
+          "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "config_add_channels",
+          "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "run_schedulers_now",
+          "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "config_welcome_message",
+          "handler_file": "admin/free_channel_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        }
+      ]
+    },
+    "admin_channels_kb.py": {
+      "total_callbacks": 6,
+      "connected_callbacks": 4,
+      "disconnected_callbacks": 2,
+      "callbacks": [
+        {
+          "callback_data": "admin_add_channel",
+          "handler_file": "admin/channel_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "remove_channel_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "wait_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_wait_time",
+          "handler_file": "admin/channel_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_channels",
+          "handler_file": "admin/channel_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_back",
+          "handler_file": "admin/admin_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        }
+      ]
+    },
+    "admin_trivia_kb.py": {
+      "total_callbacks": 8,
+      "connected_callbacks": 6,
+      "disconnected_callbacks": 2,
+      "callbacks": [
+        {
+          "callback_data": "yes",
+          "handler_file": "admin/game_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "list_trivias",
+          "handler_file": "admin/trivia_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "confirm",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "create_trivia",
+          "handler_file": "admin/trivia_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "multiple",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "open",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "no",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "cancel",
+          "handler_file": "admin/admin_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        }
+      ]
+    },
+    "admin_vip_channel_kb.py": {
+      "total_callbacks": 9,
+      "connected_callbacks": 8,
+      "disconnected_callbacks": 1,
+      "callbacks": [
+        {
+          "callback_data": "vip_generate_token",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "vip_stats",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "vip_config_reactions",
+          "handler_file": "admin/admin_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "vip_manage",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_send_channel_post",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "vip_manual_badge",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "vip_config",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_main",
+          "handler_file": "admin/admin_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_vip_channel",
+          "handler_file": "admin/vip_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        }
+      ]
+    },
+    "admin_channel_config_kb.py": {
+      "total_callbacks": 2,
+      "connected_callbacks": 2,
+      "disconnected_callbacks": 0,
+      "callbacks": [
+        {
+          "callback_data": "save_reactions",
+          "handler_file": "admin/config_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "cancel_config",
+          "handler_file": "admin/admin_config.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        }
+      ]
+    },
+    "admin_auction_kb.py": {
+      "total_callbacks": 26,
+      "connected_callbacks": 7,
+      "disconnected_callbacks": 19,
+      "callbacks": [
+        {
+          "callback_data": "auction_duration_6",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "confirm_*_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_basic_settings",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "*_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "view_auction_details_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "start_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "view_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "cancel_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_list_pending_auctions",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "auction_duration_3",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_list_active_auctions",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_auction_main",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "auction_duration_72",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "end_auction_*",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": true,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_duration_12",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_duration_24",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_duration_1",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_advanced_settings",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_auction_stats",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_create_auction",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_cancel_auction",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "confirm_create_auction",
+          "handler_file": "admin/auction_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "auction_duration_48",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
+          "callback_data": "admin_manage_content",
+          "handler_file": "admin/admin_menu.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "admin_end_auction",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "high"
+        },
+        {
+          "callback_data": "edit_auction_data",
+          "handler_file": null,
+          "is_connected": false,
+          "is_dynamic": false,
+          "priority": "medium"
         }
       ]
     },
@@ -482,6 +734,13 @@
           "priority": "medium"
         },
         {
+          "callback_data": "list_events",
+          "handler_file": "admin/event_admin.py",
+          "is_connected": true,
+          "is_dynamic": false,
+          "priority": "medium"
+        },
+        {
           "callback_data": "create_event",
           "handler_file": "admin/event_admin.py",
           "is_connected": true,
@@ -489,14 +748,7 @@
           "priority": "medium"
         },
         {
-          "callback_data": "admin_main_menu",
-          "handler_file": "admin/admin_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "list_events",
+          "callback_data": "end_raffle",
           "handler_file": "admin/event_admin.py",
           "is_connected": true,
           "is_dynamic": false,
@@ -524,11 +776,11 @@
           "priority": "high"
         },
         {
-          "callback_data": "end_raffle",
-          "handler_file": "admin/event_admin.py",
+          "callback_data": "admin_main_menu",
+          "handler_file": "admin/admin_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "medium"
+          "priority": "high"
         },
         {
           "callback_data": "create_raffle",
@@ -553,77 +805,35 @@
         }
       ]
     },
-    "admin_trivia_kb.py": {
-      "total_callbacks": 8,
-      "connected_callbacks": 6,
-      "disconnected_callbacks": 2,
+    "admin_main_kb.py": {
+      "total_callbacks": 7,
+      "connected_callbacks": 7,
+      "disconnected_callbacks": 0,
       "callbacks": [
         {
-          "callback_data": "multiple",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "open",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "confirm",
-          "handler_file": "admin/auction_admin.py",
+          "callback_data": "admin_main_menu",
+          "handler_file": "admin/admin_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "medium"
+          "priority": "high"
         },
         {
-          "callback_data": "create_trivia",
-          "handler_file": "admin/trivia_admin.py",
+          "callback_data": "admin_kinky_game",
+          "handler_file": "admin/admin_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "medium"
+          "priority": "high"
         },
         {
-          "callback_data": "list_trivias",
-          "handler_file": "admin/trivia_admin.py",
+          "callback_data": "admin_free",
+          "handler_file": "admin/free_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "medium"
+          "priority": "high"
         },
         {
-          "callback_data": "no",
-          "handler_file": "admin/config_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "cancel",
-          "handler_file": "admin/admin_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "yes",
-          "handler_file": "admin/game_admin.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        }
-      ]
-    },
-    "admin_channels_kb.py": {
-      "total_callbacks": 6,
-      "connected_callbacks": 4,
-      "disconnected_callbacks": 2,
-      "callbacks": [
-        {
-          "callback_data": "admin_add_channel",
-          "handler_file": "admin/channel_admin.py",
+          "callback_data": "admin_vip",
+          "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "high"
@@ -636,245 +846,42 @@
           "priority": "high"
         },
         {
-          "callback_data": "wait_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_channels",
-          "handler_file": "admin/channel_admin.py",
+          "callback_data": "admin_config",
+          "handler_file": "admin/config_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "high"
         },
         {
-          "callback_data": "admin_wait_time",
-          "handler_file": "admin/channel_admin.py",
+          "callback_data": "admin_stats",
+          "handler_file": "admin/admin_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "high"
-        },
-        {
-          "callback_data": "remove_channel_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
         }
       ]
     },
-    "admin_vip_config_kb.py": {
+    "admin_vip_kb.py": {
       "total_callbacks": 8,
-      "connected_callbacks": 6,
-      "disconnected_callbacks": 2,
+      "connected_callbacks": 7,
+      "disconnected_callbacks": 1,
       "callbacks": [
         {
-          "callback_data": "generate_token_*",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "vip_config",
+          "callback_data": "vip_generate_token",
           "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
           "priority": "medium"
         },
         {
-          "callback_data": "vip_config_messages",
+          "callback_data": "vip_stats",
           "handler_file": "admin/vip_menu.py",
           "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_vip_config",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "config_tarifas",
-          "handler_file": "admin/subscription_plans.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "edit_vip_reminder",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "edit_vip_farewell",
-          "handler_file": null,
-          "is_connected": false,
           "is_dynamic": false,
           "priority": "medium"
         },
         {
           "callback_data": "admin_vip",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        }
-      ]
-    },
-    "admin_free_channel_kb.py": {
-      "total_callbacks": 17,
-      "connected_callbacks": 7,
-      "disconnected_callbacks": 10,
-      "callbacks": [
-        {
-          "callback_data": "advanced_channel_config",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "export_channel_data",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "toggle_auto_approval",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "config_wait_time",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "config_welcome_message",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "confirm_*",
-          "handler_file": "admin/auction_admin.py",
-          "is_connected": true,
-          "is_dynamic": true,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "clear_all_requests",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "create_invite_link",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "config_social_message",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "test_approval_flow",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_free_channel_config",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "cleanup_old_requests",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "weekly_channel_metrics",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "channel_detailed_stats",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "view_pending_requests",
-          "handler_file": "admin/free_channel_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_menu",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "set_free_channel",
-          "handler_file": null,
-          "is_connected": false,
-          "is_dynamic": false,
-          "priority": "medium"
-        }
-      ]
-    },
-    "admin_vip_channel_kb.py": {
-      "total_callbacks": 9,
-      "connected_callbacks": 8,
-      "disconnected_callbacks": 1,
-      "callbacks": [
-        {
-          "callback_data": "vip_config",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "admin_vip_channel",
-          "handler_file": "admin/vip_menu.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "high"
-        },
-        {
-          "callback_data": "admin_send_channel_post",
           "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
@@ -888,21 +895,14 @@
           "priority": "medium"
         },
         {
-          "callback_data": "vip_config_reactions",
-          "handler_file": "admin/admin_config.py",
-          "is_connected": true,
-          "is_dynamic": false,
-          "priority": "medium"
-        },
-        {
-          "callback_data": "vip_generate_token",
+          "callback_data": "admin_send_channel_post",
           "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
-          "priority": "medium"
+          "priority": "high"
         },
         {
-          "callback_data": "admin_main",
+          "callback_data": "admin_back",
           "handler_file": "admin/admin_menu.py",
           "is_connected": true,
           "is_dynamic": false,
@@ -916,7 +916,7 @@
           "priority": "medium"
         },
         {
-          "callback_data": "vip_stats",
+          "callback_data": "vip_config",
           "handler_file": "admin/vip_menu.py",
           "is_connected": true,
           "is_dynamic": false,
@@ -951,20 +951,43 @@
       "handlers_list": [],
       "used_handlers_list": []
     },
-    "admin/admin_config.py": {
-      "total_handlers": 4,
-      "used_handlers": 3,
-      "unused_handlers": 1,
+    "admin/free_channel_config.py": {
+      "total_handlers": 6,
+      "used_handlers": 11,
+      "unused_handlers": -5,
       "handlers_list": [
-        "vip_config_reactions",
-        "free_config_reactions",
-        "cancel_config",
-        "save_reactions"
+        "config_social_message",
+        "test_approval_flow",
+        "config_wait_time",
+        "admin_free_channel_config",
+        "view_pending_requests",
+        "config_welcome_message"
       ],
       "used_handlers_list": [
-        "cancel_config",
-        "cancel",
-        "vip_config_reactions"
+        "config_social_message",
+        "test_approval_flow",
+        "config_wait_time",
+        "admin_free_channel_config",
+        "view_pending_requests",
+        "config_welcome_message",
+        "config_social_message",
+        "test_approval_flow",
+        "config_wait_time",
+        "view_pending_requests",
+        "config_welcome_message"
+      ]
+    },
+    "admin/trivia_admin.py": {
+      "total_handlers": 2,
+      "used_handlers": 2,
+      "unused_handlers": 0,
+      "handlers_list": [
+        "list_trivias",
+        "create_trivia"
+      ],
+      "used_handlers_list": [
+        "list_trivias",
+        "create_trivia"
       ]
     },
     "admin/admin_menu.py": {
@@ -972,123 +995,25 @@
       "used_handlers": 10,
       "unused_handlers": -3,
       "handlers_list": [
+        "admin_free_channel",
         "admin_main_menu",
-        "admin_back",
+        "admin_kinky_game",
         "admin_bot_config",
         "admin_manage_content",
-        "admin_stats",
-        "admin_free_channel",
-        "admin_kinky_game"
+        "admin_back",
+        "admin_stats"
       ],
       "used_handlers_list": [
+        "admin_back",
+        "admin_back",
+        "admin_main",
         "admin_manage_content",
         "admin_main_menu",
-        "admin_back",
-        "admin_stats",
+        "admin_main_menu",
         "admin_kinky_game",
         "admin_back",
-        "admin_back",
-        "admin_main_menu",
-        "admin_back",
-        "admin_main"
-      ]
-    },
-    "admin/auction_admin.py": {
-      "total_handlers": 6,
-      "used_handlers": 8,
-      "unused_handlers": -2,
-      "handlers_list": [
-        "admin_list_active_auctions",
-        "admin_list_pending_auctions",
-        "confirm_create_auction",
-        "admin_auction_stats",
-        "admin_auction_main",
-        "admin_create_auction"
-      ],
-      "used_handlers_list": [
-        "admin_auction_main",
-        "admin_list_active_auctions",
-        "admin_create_auction",
-        "admin_list_pending_auctions",
-        "confirm_create_auction",
-        "admin_auction_stats",
-        "confirm",
-        "confirm_*"
-      ]
-    },
-    "admin/channel_admin.py": {
-      "total_handlers": 3,
-      "used_handlers": 3,
-      "unused_handlers": 0,
-      "handlers_list": [
-        "admin_add_channel",
-        "admin_channels",
-        "admin_wait_time"
-      ],
-      "used_handlers_list": [
-        "admin_add_channel",
-        "admin_channels",
-        "admin_wait_time"
-      ]
-    },
-    "admin/config_menu.py": {
-      "total_handlers": 11,
-      "used_handlers": 13,
-      "unused_handlers": -2,
-      "handlers_list": [
-        "config_reaction_buttons",
-        "set_channel_interval",
-        "set_vip_interval",
-        "config_add_channels",
-        "run_schedulers_now",
-        "config_scheduler",
-        "save_reactions",
-        "channel_mode_vip",
-        "channel_mode_both",
-        "channel_mode_free",
-        "admin_config"
-      ],
-      "used_handlers_list": [
-        "admin_config",
-        "save_reactions",
-        "set_channel_interval",
-        "set_vip_interval",
-        "config_add_channels",
-        "run_schedulers_now",
-        "config_scheduler",
-        "channel_mode_both",
-        "channel_mode_vip",
-        "save_reactions",
-        "channel_mode_free",
-        "admin_config",
-        "no"
-      ]
-    },
-    "admin/event_admin.py": {
-      "total_handlers": 9,
-      "used_handlers": 9,
-      "unused_handlers": 0,
-      "handlers_list": [
-        "event_menu",
-        "raffle_menu",
-        "create_event",
-        "list_raffles",
-        "list_events",
-        "end_event",
-        "admin_manage_events_sorteos",
-        "end_raffle",
-        "create_raffle"
-      ],
-      "used_handlers_list": [
-        "event_menu",
-        "raffle_menu",
-        "create_event",
-        "list_events",
-        "end_event",
-        "list_raffles",
-        "admin_manage_events_sorteos",
-        "end_raffle",
-        "create_raffle"
+        "admin_stats",
+        "admin_back"
       ]
     },
     "admin/free_menu.py": {
@@ -1102,53 +1027,27 @@
         "admin_free"
       ]
     },
-    "admin/game_admin.py": {
-      "total_handlers": 39,
-      "used_handlers": 1,
-      "unused_handlers": 38,
+    "admin/auction_admin.py": {
+      "total_handlers": 6,
+      "used_handlers": 8,
+      "unused_handlers": -2,
       "handlers_list": [
-        "admin_content_minigames",
-        "admin_create_badge",
-        "admin_reward_delete",
-        "toggle_minigames",
-        "admin_view_badges",
-        "admin_level_edit",
-        "lore_piece_create",
-        "admin_reward_add",
-        "lore_edit_category",
-        "admin_search_user",
-        "admin_toggle_mission",
-        "admin_levels_view",
-        "lore_main_edit_yes",
-        "confirm_create_level",
-        "admin_content_lore_pieces",
-        "lore_edit_description",
-        "lore_edit_type",
-        "admin_view_missions",
-        "admin_content_auctions",
-        "lore_edit_main",
-        "admin_delete_badge",
-        "lore_edit_title",
-        "confirm_delete_badge",
-        "admin_level_delete",
-        "toggle_daily_gift",
-        "admin_content_badges",
-        "admin_reward_edit",
-        "admin_manage_hints",
-        "admin_create_mission",
-        "admin_content_levels",
-        "admin_reward_view",
-        "admin_content_daily_gifts",
-        "admin_configure_daily_gift",
-        "admin_manage_users",
-        "admin_content_missions",
-        "admin_level_add",
-        "lore_main_yes",
-        "admin_delete_mission",
-        "admin_content_rewards"
+        "admin_auction_stats",
+        "admin_create_auction",
+        "confirm_create_auction",
+        "admin_list_pending_auctions",
+        "admin_list_active_auctions",
+        "admin_auction_main"
       ],
       "used_handlers_list": [
-        "yes"
+        "confirm_*",
+        "confirm",
+        "admin_list_pending_auctions",
+        "admin_list_active_auctions",
+        "admin_auction_main",
+        "admin_auction_stats",
+        "admin_create_auction",
+        "confirm_create_auction"
       ]
     },
     "admin/subscription_plans.py": {
@@ -1156,297 +1055,278 @@
       "used_handlers": 1,
       "unused_handlers": 5,
       "handlers_list": [
-        "edit_tariff_",
+        "delete_tariff_",
         "delete_tariff_*",
         "tarifa_new",
         "config_tarifas",
         "edit_tariff_*",
-        "delete_tariff_"
+        "edit_tariff_"
       ],
       "used_handlers_list": [
         "config_tarifas"
       ]
     },
-    "admin/trivia_admin.py": {
-      "total_handlers": 2,
-      "used_handlers": 2,
-      "unused_handlers": 0,
-      "handlers_list": [
-        "create_trivia",
-        "list_trivias"
-      ],
-      "used_handlers_list": [
-        "create_trivia",
-        "list_trivias"
-      ]
-    },
     "admin/vip_menu.py": {
       "total_handlers": 12,
-      "used_handlers": 18,
-      "unused_handlers": -6,
+      "used_handlers": 19,
+      "unused_handlers": -7,
       "handlers_list": [
-        "vip_config",
-        "vip_config_messages",
-        "admin_send_channel_post",
-        "edit_vip_reminder",
         "vip_generate_token",
-        "admin_vip",
-        "edit_vip_welcome",
         "confirm_channel_post",
-        "vip_manual_badge",
         "vip_none",
         "vip_stats",
-        "edit_vip_expired"
+        "edit_vip_expired",
+        "edit_vip_welcome",
+        "admin_vip",
+        "vip_config_messages",
+        "admin_send_channel_post",
+        "vip_manual_badge",
+        "vip_config",
+        "edit_vip_reminder"
       ],
       "used_handlers_list": [
         "admin_vip",
-        "vip_config",
-        "admin_send_channel_post",
-        "vip_generate_token",
-        "admin_vip",
-        "vip_manual_badge",
-        "vip_stats",
-        "vip_config",
         "vip_config_messages",
         "admin_vip_config",
         "edit_vip_reminder",
-        "admin_vip",
+        "vip_config",
+        "no",
+        "vip_generate_token",
+        "vip_stats",
+        "admin_send_channel_post",
+        "vip_manual_badge",
         "vip_config",
         "admin_vip_channel",
-        "admin_send_channel_post",
+        "admin_vip",
         "vip_generate_token",
+        "vip_stats",
+        "admin_vip",
+        "admin_send_channel_post",
         "vip_manual_badge",
-        "vip_stats"
+        "vip_config"
       ]
     },
-    "admin/free_channel_config.py": {
-      "total_handlers": 6,
-      "used_handlers": 11,
-      "unused_handlers": -5,
+    "admin/channel_admin.py": {
+      "total_handlers": 3,
+      "used_handlers": 3,
+      "unused_handlers": 0,
       "handlers_list": [
-        "config_wait_time",
-        "config_welcome_message",
-        "config_social_message",
-        "admin_free_channel_config",
-        "test_approval_flow",
-        "view_pending_requests"
+        "admin_add_channel",
+        "admin_wait_time",
+        "admin_channels"
       ],
       "used_handlers_list": [
-        "view_pending_requests",
-        "config_wait_time",
-        "config_welcome_message",
-        "config_social_message",
-        "test_approval_flow",
-        "config_wait_time",
-        "config_welcome_message",
-        "config_social_message",
-        "test_approval_flow",
-        "admin_free_channel_config",
-        "view_pending_requests"
+        "admin_add_channel",
+        "admin_wait_time",
+        "admin_channels"
+      ]
+    },
+    "admin/event_admin.py": {
+      "total_handlers": 9,
+      "used_handlers": 9,
+      "unused_handlers": 0,
+      "handlers_list": [
+        "event_menu",
+        "raffle_menu",
+        "list_events",
+        "create_event",
+        "end_raffle",
+        "end_event",
+        "list_raffles",
+        "admin_manage_events_sorteos",
+        "create_raffle"
+      ],
+      "used_handlers_list": [
+        "event_menu",
+        "raffle_menu",
+        "list_events",
+        "create_event",
+        "end_raffle",
+        "end_event",
+        "list_raffles",
+        "admin_manage_events_sorteos",
+        "create_raffle"
+      ]
+    },
+    "admin/admin_config.py": {
+      "total_handlers": 4,
+      "used_handlers": 3,
+      "unused_handlers": 1,
+      "handlers_list": [
+        "save_reactions",
+        "vip_config_reactions",
+        "cancel_config",
+        "free_config_reactions"
+      ],
+      "used_handlers_list": [
+        "cancel",
+        "vip_config_reactions",
+        "cancel_config"
+      ]
+    },
+    "admin/config_menu.py": {
+      "total_handlers": 11,
+      "used_handlers": 12,
+      "unused_handlers": -1,
+      "handlers_list": [
+        "save_reactions",
+        "channel_mode_both",
+        "set_vip_interval",
+        "config_scheduler",
+        "channel_mode_free",
+        "channel_mode_vip",
+        "config_reaction_buttons",
+        "set_channel_interval",
+        "admin_config",
+        "config_add_channels",
+        "run_schedulers_now"
+      ],
+      "used_handlers_list": [
+        "save_reactions",
+        "channel_mode_both",
+        "set_vip_interval",
+        "config_scheduler",
+        "channel_mode_free",
+        "channel_mode_vip",
+        "admin_config",
+        "set_channel_interval",
+        "config_add_channels",
+        "run_schedulers_now",
+        "save_reactions",
+        "admin_config"
+      ]
+    },
+    "admin/game_admin.py": {
+      "total_handlers": 39,
+      "used_handlers": 1,
+      "unused_handlers": 38,
+      "handlers_list": [
+        "confirm_create_level",
+        "lore_edit_type",
+        "admin_reward_edit",
+        "lore_edit_main",
+        "admin_manage_hints",
+        "admin_content_minigames",
+        "admin_content_rewards",
+        "admin_view_missions",
+        "admin_content_auctions",
+        "admin_delete_mission",
+        "admin_view_badges",
+        "lore_edit_category",
+        "admin_manage_users",
+        "admin_create_mission",
+        "admin_content_daily_gifts",
+        "admin_reward_view",
+        "admin_levels_view",
+        "admin_level_add",
+        "admin_reward_add",
+        "admin_level_delete",
+        "lore_edit_title",
+        "toggle_minigames",
+        "admin_content_missions",
+        "admin_create_badge",
+        "admin_toggle_mission",
+        "lore_main_yes",
+        "toggle_daily_gift",
+        "admin_delete_badge",
+        "admin_content_badges",
+        "admin_content_levels",
+        "confirm_delete_badge",
+        "lore_edit_description",
+        "lore_main_edit_yes",
+        "admin_reward_delete",
+        "admin_configure_daily_gift",
+        "admin_level_edit",
+        "admin_content_lore_pieces",
+        "lore_piece_create",
+        "admin_search_user"
+      ],
+      "used_handlers_list": [
+        "yes"
       ]
     }
   },
   "connected_callbacks": [
     {
-      "callback_data": "admin_auction_main",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_list_active_auctions",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_manage_content",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_create_auction",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_list_pending_auctions",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "confirm_create_auction",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_auction_stats",
-      "keyboard_file": "admin_auction_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_main_menu",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_back",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_free",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/free_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_stats",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
       "callback_data": "admin_vip",
-      "keyboard_file": "admin_main_kb.py",
+      "keyboard_file": "admin_vip_config_kb.py",
       "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_config",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/config_menu.py",
+      "callback_data": "vip_config_messages",
+      "keyboard_file": "admin_vip_config_kb.py",
+      "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_kinky_game",
-      "keyboard_file": "admin_main_kb.py",
-      "handler_file": "admin/admin_menu.py",
+      "callback_data": "admin_vip_config",
+      "keyboard_file": "admin_vip_config_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "edit_vip_reminder",
+      "keyboard_file": "admin_vip_config_kb.py",
+      "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
       "callback_data": "vip_config",
-      "keyboard_file": "admin_vip_kb.py",
+      "keyboard_file": "admin_vip_config_kb.py",
       "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_back",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_send_channel_post",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_generate_token",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_vip",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_manual_badge",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_stats",
-      "keyboard_file": "admin_vip_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "cancel_config",
-      "keyboard_file": "admin_channel_config_kb.py",
-      "handler_file": "admin/admin_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "save_reactions",
-      "keyboard_file": "admin_channel_config_kb.py",
-      "handler_file": "admin/config_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "view_pending_requests",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "set_channel_interval",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/config_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "config_wait_time",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_back",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "config_welcome_message",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "set_vip_interval",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/config_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "config_add_channels",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/config_menu.py",
+      "callback_data": "config_tarifas",
+      "keyboard_file": "admin_vip_config_kb.py",
+      "handler_file": "admin/subscription_plans.py",
       "is_dynamic": false
     },
     {
       "callback_data": "config_social_message",
-      "keyboard_file": "admin_config_kb.py",
+      "keyboard_file": "admin_free_channel_kb.py",
       "handler_file": "admin/free_channel_config.py",
       "is_dynamic": false
     },
     {
       "callback_data": "test_approval_flow",
-      "keyboard_file": "admin_config_kb.py",
+      "keyboard_file": "admin_free_channel_kb.py",
       "handler_file": "admin/free_channel_config.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "run_schedulers_now",
-      "keyboard_file": "admin_config_kb.py",
-      "handler_file": "admin/config_menu.py",
+      "callback_data": "config_wait_time",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "handler_file": "admin/free_channel_config.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "config_scheduler",
+      "callback_data": "admin_free_channel_config",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "view_pending_requests",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "confirm_*",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": true
+    },
+    {
+      "callback_data": "config_welcome_message",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "save_reactions",
       "keyboard_file": "admin_config_kb.py",
       "handler_file": "admin/config_menu.py",
       "is_dynamic": false
@@ -1458,15 +1338,33 @@
       "is_dynamic": false
     },
     {
-      "callback_data": "channel_mode_vip",
+      "callback_data": "config_social_message",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "set_vip_interval",
       "keyboard_file": "admin_config_kb.py",
       "handler_file": "admin/config_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "save_reactions",
+      "callback_data": "config_scheduler",
       "keyboard_file": "admin_config_kb.py",
       "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "test_approval_flow",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "config_wait_time",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/free_channel_config.py",
       "is_dynamic": false
     },
     {
@@ -1476,9 +1374,213 @@
       "is_dynamic": false
     },
     {
+      "callback_data": "channel_mode_vip",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "view_pending_requests",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_back",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/admin_menu.py",
+      "is_dynamic": false
+    },
+    {
       "callback_data": "admin_config",
       "keyboard_file": "admin_config_kb.py",
       "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "set_channel_interval",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "config_add_channels",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "run_schedulers_now",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "config_welcome_message",
+      "keyboard_file": "admin_config_kb.py",
+      "handler_file": "admin/free_channel_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_add_channel",
+      "keyboard_file": "admin_channels_kb.py",
+      "handler_file": "admin/channel_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_wait_time",
+      "keyboard_file": "admin_channels_kb.py",
+      "handler_file": "admin/channel_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_channels",
+      "keyboard_file": "admin_channels_kb.py",
+      "handler_file": "admin/channel_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_back",
+      "keyboard_file": "admin_channels_kb.py",
+      "handler_file": "admin/admin_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "yes",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/game_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "list_trivias",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/trivia_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "confirm",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "create_trivia",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/trivia_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "no",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "cancel",
+      "keyboard_file": "admin_trivia_kb.py",
+      "handler_file": "admin/admin_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_generate_token",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_stats",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_config_reactions",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/admin_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_send_channel_post",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_manual_badge",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_config",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_main",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/admin_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_vip_channel",
+      "keyboard_file": "admin_vip_channel_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "save_reactions",
+      "keyboard_file": "admin_channel_config_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "cancel_config",
+      "keyboard_file": "admin_channel_config_kb.py",
+      "handler_file": "admin/admin_config.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_list_pending_auctions",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_list_active_auctions",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_auction_main",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_auction_stats",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_create_auction",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "confirm_create_auction",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/auction_admin.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_manage_content",
+      "keyboard_file": "admin_auction_kb.py",
+      "handler_file": "admin/admin_menu.py",
       "is_dynamic": false
     },
     {
@@ -1494,19 +1596,19 @@
       "is_dynamic": false
     },
     {
+      "callback_data": "list_events",
+      "keyboard_file": "admin_event_kb.py",
+      "handler_file": "admin/event_admin.py",
+      "is_dynamic": false
+    },
+    {
       "callback_data": "create_event",
       "keyboard_file": "admin_event_kb.py",
       "handler_file": "admin/event_admin.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_main_menu",
-      "keyboard_file": "admin_event_kb.py",
-      "handler_file": "admin/admin_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "list_events",
+      "callback_data": "end_raffle",
       "keyboard_file": "admin_event_kb.py",
       "handler_file": "admin/event_admin.py",
       "is_dynamic": false
@@ -1530,9 +1632,9 @@
       "is_dynamic": false
     },
     {
-      "callback_data": "end_raffle",
+      "callback_data": "admin_main_menu",
       "keyboard_file": "admin_event_kb.py",
-      "handler_file": "admin/event_admin.py",
+      "handler_file": "admin/admin_menu.py",
       "is_dynamic": false
     },
     {
@@ -1548,337 +1650,91 @@
       "is_dynamic": false
     },
     {
-      "callback_data": "confirm",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "create_trivia",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/trivia_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "list_trivias",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/trivia_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "no",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/config_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "cancel",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/admin_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "yes",
-      "keyboard_file": "admin_trivia_kb.py",
-      "handler_file": "admin/game_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_add_channel",
-      "keyboard_file": "admin_channels_kb.py",
-      "handler_file": "admin/channel_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_back",
-      "keyboard_file": "admin_channels_kb.py",
+      "callback_data": "admin_main_menu",
+      "keyboard_file": "admin_main_kb.py",
       "handler_file": "admin/admin_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_channels",
-      "keyboard_file": "admin_channels_kb.py",
-      "handler_file": "admin/channel_admin.py",
+      "callback_data": "admin_kinky_game",
+      "keyboard_file": "admin_main_kb.py",
+      "handler_file": "admin/admin_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "admin_wait_time",
-      "keyboard_file": "admin_channels_kb.py",
-      "handler_file": "admin/channel_admin.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_config",
-      "keyboard_file": "admin_vip_config_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_config_messages",
-      "keyboard_file": "admin_vip_config_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_vip_config",
-      "keyboard_file": "admin_vip_config_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "config_tarifas",
-      "keyboard_file": "admin_vip_config_kb.py",
-      "handler_file": "admin/subscription_plans.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "edit_vip_reminder",
-      "keyboard_file": "admin_vip_config_kb.py",
-      "handler_file": "admin/vip_menu.py",
+      "callback_data": "admin_free",
+      "keyboard_file": "admin_main_kb.py",
+      "handler_file": "admin/free_menu.py",
       "is_dynamic": false
     },
     {
       "callback_data": "admin_vip",
-      "keyboard_file": "admin_vip_config_kb.py",
+      "keyboard_file": "admin_main_kb.py",
       "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "config_wait_time",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "config_welcome_message",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "confirm_*",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/auction_admin.py",
-      "is_dynamic": true
-    },
-    {
-      "callback_data": "config_social_message",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "test_approval_flow",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_free_channel_config",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "view_pending_requests",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "handler_file": "admin/free_channel_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_config",
-      "keyboard_file": "admin_vip_channel_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_vip_channel",
-      "keyboard_file": "admin_vip_channel_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_send_channel_post",
-      "keyboard_file": "admin_vip_channel_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_config_reactions",
-      "keyboard_file": "admin_vip_channel_kb.py",
-      "handler_file": "admin/admin_config.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "vip_generate_token",
-      "keyboard_file": "admin_vip_channel_kb.py",
-      "handler_file": "admin/vip_menu.py",
-      "is_dynamic": false
-    },
-    {
-      "callback_data": "admin_main",
-      "keyboard_file": "admin_vip_channel_kb.py",
+      "callback_data": "admin_back",
+      "keyboard_file": "admin_main_kb.py",
       "handler_file": "admin/admin_menu.py",
       "is_dynamic": false
     },
     {
-      "callback_data": "vip_manual_badge",
-      "keyboard_file": "admin_vip_channel_kb.py",
+      "callback_data": "admin_config",
+      "keyboard_file": "admin_main_kb.py",
+      "handler_file": "admin/config_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_stats",
+      "keyboard_file": "admin_main_kb.py",
+      "handler_file": "admin/admin_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_generate_token",
+      "keyboard_file": "admin_vip_kb.py",
       "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     },
     {
       "callback_data": "vip_stats",
-      "keyboard_file": "admin_vip_channel_kb.py",
+      "keyboard_file": "admin_vip_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_vip",
+      "keyboard_file": "admin_vip_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_send_channel_post",
+      "keyboard_file": "admin_vip_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "admin_back",
+      "keyboard_file": "admin_vip_kb.py",
+      "handler_file": "admin/admin_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_manual_badge",
+      "keyboard_file": "admin_vip_kb.py",
+      "handler_file": "admin/vip_menu.py",
+      "is_dynamic": false
+    },
+    {
+      "callback_data": "vip_config",
+      "keyboard_file": "admin_vip_kb.py",
       "handler_file": "admin/vip_menu.py",
       "is_dynamic": false
     }
   ],
   "disconnected_callbacks": [
-    {
-      "callback_data": "auction_duration_3",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_duration_1",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_duration_6",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_basic_settings",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "cancel_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "view_auction_details_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "edit_auction_data",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "start_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_duration_48",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "confirm_*_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_duration_24",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_advanced_settings",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "*_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "admin_end_auction",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "high"
-    },
-    {
-      "callback_data": "admin_cancel_auction",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "high"
-    },
-    {
-      "callback_data": "auction_duration_12",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "end_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "view_auction_*",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "auction_duration_72",
-      "keyboard_file": "admin_auction_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "vip_manage",
-      "keyboard_file": "admin_vip_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "multiple",
-      "keyboard_file": "admin_trivia_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "open",
-      "keyboard_file": "admin_trivia_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "wait_*",
-      "keyboard_file": "admin_channels_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "remove_channel_*",
-      "keyboard_file": "admin_channels_kb.py",
-      "is_dynamic": true,
-      "priority": "medium"
-    },
     {
       "callback_data": "generate_token_*",
       "keyboard_file": "admin_vip_config_kb.py",
@@ -1892,43 +1748,13 @@
       "priority": "medium"
     },
     {
-      "callback_data": "advanced_channel_config",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "export_channel_data",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "toggle_auto_approval",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "clear_all_requests",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
       "callback_data": "create_invite_link",
       "keyboard_file": "admin_free_channel_kb.py",
       "is_dynamic": false,
       "priority": "medium"
     },
     {
-      "callback_data": "cleanup_old_requests",
-      "keyboard_file": "admin_free_channel_kb.py",
-      "is_dynamic": false,
-      "priority": "medium"
-    },
-    {
-      "callback_data": "weekly_channel_metrics",
+      "callback_data": "set_free_channel",
       "keyboard_file": "admin_free_channel_kb.py",
       "is_dynamic": false,
       "priority": "medium"
@@ -1946,8 +1772,62 @@
       "priority": "high"
     },
     {
-      "callback_data": "set_free_channel",
+      "callback_data": "advanced_channel_config",
       "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "cleanup_old_requests",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "weekly_channel_metrics",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "clear_all_requests",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "export_channel_data",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "toggle_auto_approval",
+      "keyboard_file": "admin_free_channel_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "remove_channel_*",
+      "keyboard_file": "admin_channels_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "wait_*",
+      "keyboard_file": "admin_channels_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "multiple",
+      "keyboard_file": "admin_trivia_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "open",
+      "keyboard_file": "admin_trivia_kb.py",
       "is_dynamic": false,
       "priority": "medium"
     },
@@ -1956,11 +1836,131 @@
       "keyboard_file": "admin_vip_channel_kb.py",
       "is_dynamic": false,
       "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_6",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "confirm_*_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_basic_settings",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "*_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "view_auction_details_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "start_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "view_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "cancel_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_3",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_72",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "end_auction_*",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": true,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_12",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_24",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_duration_1",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "auction_advanced_settings",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "admin_cancel_auction",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "high"
+    },
+    {
+      "callback_data": "auction_duration_48",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "admin_end_auction",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "high"
+    },
+    {
+      "callback_data": "edit_auction_data",
+      "keyboard_file": "admin_auction_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
+    },
+    {
+      "callback_data": "vip_manage",
+      "keyboard_file": "admin_vip_kb.py",
+      "is_dynamic": false,
+      "priority": "medium"
     }
   ],
   "orphaned_files": [
-    "admin_narrative_handlers.py",
-    "admin/__init__.py"
+    "admin/__init__.py",
+    "admin_narrative_handlers.py"
   ],
   "recommendations": {
     "critical_actions": [
@@ -1970,9 +1970,9 @@
       "Test all admin menu functionality"
     ],
     "high_priority_callbacks": [
-      "admin_end_auction",
+      "admin_menu",
       "admin_cancel_auction",
-      "admin_menu"
+      "admin_end_auction"
     ],
     "improvement_suggestions": [
       "Connection rate is 68.6% - Needs attention",
