@@ -1,0 +1,1508 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Validación de Menús - Bolt OK Bot</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); 
+            color: white; 
+            padding: 30px; 
+            text-align: center; 
+        }
+        .header h1 { margin: 0; font-size: 2.5em; }
+        .header p { margin: 10px 0 0 0; opacity: 0.9; }
+        .stats { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 20px; 
+            padding: 30px; 
+            background: #f8f9fa;
+        }
+        .stat-card { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            text-align: center; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stat-card:hover { transform: translateY(-5px); }
+        .stat-number { font-size: 2em; font-weight: bold; margin-bottom: 5px; }
+        .stat-label { color: #666; font-size: 0.9em; }
+        .connected { color: #27ae60; }
+        .disconnected { color: #e74c3c; }
+        .warning { color: #f39c12; }
+        .content { padding: 30px; }
+        .section { margin-bottom: 40px; }
+        .section h2 { 
+            color: #2c3e50; 
+            border-bottom: 3px solid #3498db; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px;
+        }
+        .keyboard-group { 
+            background: #f8f9fa; 
+            border-radius: 10px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            border-left: 5px solid #3498db;
+        }
+        .keyboard-title { 
+            font-weight: bold; 
+            color: #2c3e50; 
+            margin-bottom: 15px; 
+            font-size: 1.2em;
+        }
+        .callback-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px; 
+            margin: 5px 0; 
+            border-radius: 5px; 
+            background: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .callback-name { font-family: 'Courier New', monospace; font-weight: bold; }
+        .callback-status { 
+            padding: 5px 15px; 
+            border-radius: 20px; 
+            font-size: 0.8em; 
+            font-weight: bold;
+        }
+        .status-connected { background: #d4edda; color: #155724; }
+        .status-disconnected { background: #f8d7da; color: #721c24; }
+        .status-dynamic { background: #fff3cd; color: #856404; }
+        .handler-info { font-size: 0.9em; color: #666; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #3498db; color: white; }
+        tr:hover { background: #f5f5f5; }
+        .timestamp { 
+            text-align: center; 
+            color: #666; 
+            font-size: 0.9em; 
+            padding: 20px; 
+            border-top: 1px solid #eee; 
+        }
+        .alert { 
+            padding: 15px; 
+            border-radius: 5px; 
+            margin: 20px 0; 
+        }
+        .alert-warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Reporte de Validación de Menús</h1>
+            <p>Sistema de Administración - Bolt OK Telegram Bot</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number connected">81</div>
+                <div class="stat-label">Callbacks Conectados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number disconnected">37</div>
+                <div class="stat-label">Callbacks Desconectados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">68.6%</div>
+                <div class="stat-label">Tasa de Conexión</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">12</div>
+                <div class="stat-label">Archivos de Teclado</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">15</div>
+                <div class="stat-label">Archivos de Handlers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number warning">2</div>
+                <div class="stat-label">Handlers Huérfanos</div>
+            </div>
+        </div>
+        
+        <div class="content">
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Atención:</strong> Se encontraron 37 callbacks sin handlers correspondientes. 
+                Esto puede causar errores cuando los usuarios interactúen con esos botones.
+            </div>
+
+            <div class="alert alert-danger">
+                <strong>🚨 Crítico:</strong> Muchos callbacks están desconectados. Se requiere atención inmediata.
+            </div>
+
+            <div class="section">
+                <h2>📋 Estado por Archivo de Teclado</h2>
+
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_auction_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (7/26 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_auction_main</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_auction_stats</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_create_auction</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_list_active_auctions</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_list_pending_auctions</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_manage_content</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">confirm_create_auction</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">*_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_cancel_auction</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_end_auction</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_advanced_settings</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_basic_settings</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_1</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_12</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_24</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_3</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_48</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_6</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">auction_duration_72</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">cancel_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">confirm_*_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">edit_auction_data</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">end_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">start_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">view_auction_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">view_auction_details_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_channel_config_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (2/2 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">cancel_config</div>
+                            <div class='handler-info'>📂 admin/admin_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">save_reactions</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_channels_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (4/6 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_add_channel</div>
+                            <div class='handler-info'>📂 admin/channel_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_back</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_channels</div>
+                            <div class='handler-info'>📂 admin/channel_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_wait_time</div>
+                            <div class='handler-info'>📂 admin/channel_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">remove_channel_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">wait_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_config_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (16/16 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_back</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_config</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">channel_mode_both</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">channel_mode_free</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">channel_mode_vip</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_add_channels</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_scheduler</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_social_message</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_wait_time</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_welcome_message</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">run_schedulers_now</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">save_reactions</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">set_channel_interval</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">set_vip_interval</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">test_approval_flow</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">view_pending_requests</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_event_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (10/10 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_main_menu</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_manage_events_sorteos</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">create_event</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">create_raffle</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">end_event</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">end_raffle</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">event_menu</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">list_events</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">list_raffles</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">raffle_menu</div>
+                            <div class='handler-info'>📂 admin/event_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_free_channel_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (7/17 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_free_channel_config</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_social_message</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_wait_time</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_welcome_message</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">confirm_*</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">test_approval_flow</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">view_pending_requests</div>
+                            <div class='handler-info'>📂 admin/free_channel_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_menu</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">advanced_channel_config</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">channel_detailed_stats</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">cleanup_old_requests</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">clear_all_requests</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">create_invite_link</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">export_channel_data</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">set_free_channel</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">toggle_auto_approval</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">weekly_channel_metrics</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (1/1 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_button</div>
+                            <div class='handler-info'>📂 admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_main_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (7/7 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_back</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_config</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_free</div>
+                            <div class='handler-info'>📂 admin/free_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_kinky_game</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_main_menu</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_stats</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_vip</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_trivia_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (6/8 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">cancel</div>
+                            <div class='handler-info'>📂 admin/admin_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">confirm</div>
+                            <div class='handler-info'>📂 admin/auction_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">create_trivia</div>
+                            <div class='handler-info'>📂 admin/trivia_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">list_trivias</div>
+                            <div class='handler-info'>📂 admin/trivia_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">no</div>
+                            <div class='handler-info'>📂 admin/config_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">yes</div>
+                            <div class='handler-info'>📂 admin/game_admin.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">multiple</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">open</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_vip_channel_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (8/9 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_main</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_send_channel_post</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_vip_channel</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_config</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_config_reactions</div>
+                            <div class='handler-info'>📂 admin/admin_config.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_generate_token</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_manual_badge</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_stats</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_manage</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_vip_config_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (6/8 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_vip</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_vip_config</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">config_tarifas</div>
+                            <div class='handler-info'>📂 admin/subscription_plans.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">edit_vip_reminder</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_config</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_config_messages</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">edit_vip_farewell</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">generate_token_*</div>
+                            
+                        </div>
+                        <div class="callback-status status-dynamic">🔄 Dinámico</div>
+                    </div>
+</div>
+                <div class="keyboard-group">
+                    <div class="keyboard-title">
+                        📄 admin_vip_kb.py 
+                        <span style="color: #666; font-size: 0.9em;">
+                            (7/8 conectados)
+                        </span>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_back</div>
+                            <div class='handler-info'>📂 admin/admin_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_send_channel_post</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">admin_vip</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_config</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_generate_token</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_manual_badge</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_stats</div>
+                            <div class='handler-info'>📂 admin/vip_menu.py</div>
+                        </div>
+                        <div class="callback-status status-connected">✅ Conectado</div>
+                    </div>
+
+                    <div class="callback-item">
+                        <div>
+                            <div class="callback-name">vip_manage</div>
+                            
+                        </div>
+                        <div class="callback-status status-disconnected">❌ Desconectado</div>
+                    </div>
+</div>
+            <div class="section">
+                <h2>❌ Callbacks Desconectados (Requieren Atención)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Callback Data</th>
+                            <th>Archivo de Teclado</th>
+                            <th>Tipo</th>
+                            <th>Prioridad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        <tr>
+                            <td><code>*_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>admin_cancel_auction</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🔴 Alta</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>admin_end_auction</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🔴 Alta</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>admin_menu</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🔴 Alta</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>advanced_channel_config</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_advanced_settings</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_basic_settings</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_1</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_12</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_24</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_3</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_48</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_6</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>auction_duration_72</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>cancel_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>channel_detailed_stats</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>cleanup_old_requests</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>clear_all_requests</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>confirm_*_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>create_invite_link</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>edit_auction_data</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>edit_vip_farewell</code></td>
+                            <td>admin_vip_config_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>end_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>export_channel_data</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>generate_token_*</code></td>
+                            <td>admin_vip_config_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>multiple</code></td>
+                            <td>admin_trivia_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>open</code></td>
+                            <td>admin_trivia_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>remove_channel_*</code></td>
+                            <td>admin_channels_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>set_free_channel</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>start_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>toggle_auto_approval</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>view_auction_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>view_auction_details_*</code></td>
+                            <td>admin_auction_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>vip_manage</code></td>
+                            <td>admin_vip_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>vip_manage</code></td>
+                            <td>admin_vip_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>wait_*</code></td>
+                            <td>admin_channels_kb.py</td>
+                            <td>🔄 Dinámico</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                        <tr>
+                            <td><code>weekly_channel_metrics</code></td>
+                            <td>admin_free_channel_kb.py</td>
+                            <td>📍 Estático</td>
+                            <td>🟡 Media</td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section">
+                <h2>📊 Resumen y Recomendaciones</h2>
+
+                <h3>🔧 Acciones Recomendadas:</h3>
+                <ul>
+                    <li><strong>Implementar handlers faltantes:</strong> Los callbacks desconectados necesitan handlers correspondientes.</li>
+                    <li><strong>Verificar nombres de callbacks:</strong> Algunos pueden tener errores tipográficos.</li>
+                    <li><strong>Revisar lógica de routing:</strong> Algunos handlers pueden existir pero usar patrones diferentes.</li>
+                    <li><strong>Testear funcionalidad:</strong> Probar todos los botones del menú de administración.</li>
+                </ul>
+
+                <h3>🗂️ Archivos de Handlers sin Usar:</h3>
+                <ul>
+                    <li><code>admin/__init__.py</code></li>                    <li><code>admin_narrative_handlers.py</code></li>
+                </ul>
+                <p><em>Estos archivos pueden contener handlers obsoletos o usar patrones de naming diferentes.</em></p>
+
+                <h3>📈 Estado General:</h3>
+                <p>El sistema de menús tiene una tasa de conexión del <strong>68.6%</strong>. 
+                ⚠️ Necesita atención para evitar errores de usuario.</p>
+            </div>
+        </div>
+        
+        <div class="timestamp">
+            📅 Reporte generado el 28/07/2025 a las 20:12:36
+        </div>
+    </div>
+</body>
+</html>
