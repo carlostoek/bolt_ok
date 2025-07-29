@@ -92,6 +92,7 @@ class MissionService:
         target_message_id: int = None,
         *,
         bot=None,
+        _skip_notification=False,  # New parameter to control notifications
     ) -> tuple[bool, Mission | None]:
         """
         Marks a mission as completed for a user, adds points, and handles reset logic.
@@ -157,7 +158,7 @@ class MissionService:
         await self.session.commit()
         await self.session.refresh(user)
 
-        if bot:
+        if bot and not _skip_notification:
             from utils.message_utils import get_mission_completed_message
             from utils.keyboard_utils import get_mission_completed_keyboard
 

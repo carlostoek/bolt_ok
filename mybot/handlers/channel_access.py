@@ -21,6 +21,9 @@ async def handle_join_request(event: ChatJoinRequest, bot: Bot, session: AsyncSe
 
 @router.chat_member()
 async def handle_chat_member(update: ChatMemberUpdated, bot: Bot, session: AsyncSession):
+    # Skip if not a reaction-related update
+    if not getattr(update, 'reaction', None):
+        return
     """
     Manejar cambios de membresía en el canal.
     Limpia solicitudes pendientes cuando el usuario se une o sale.

@@ -47,6 +47,16 @@ class PointService:
     async def award_reaction(
         self, user: User, message_id: int, bot: Bot
     ) -> UserStats | None:
+        # First check if we already processed this reaction
+        progress = await self._get_or_create_progress(user.id)
+        now = datetime.datetime.utcnow()
+        if progress.last_reaction_at and (now - progress.last_reaction_at).total_seconds() < 5:
+            return None  # Skip if same reaction within 5 seconds
+            
+        progress.last_reaction_at = now
+        await self.session.commit()
+        
+        # Only then award points
         progress = await self.add_points(user.id, 0.5, bot=bot)
         ach_service = AchievementService(self.session)
         new_badges = await ach_service.check_user_badges(user.id)
