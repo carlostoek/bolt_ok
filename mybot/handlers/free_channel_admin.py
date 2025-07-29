@@ -326,29 +326,46 @@ async def continue_without_media(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
 
 
-@router.callback_query(FreeChannelStates.confirming_post, F.data.startswith("protect_"))
+@router.callback_query(FreeChannelStates.confirming_post, F.data == "toggle_protection")
+async def toggle_protection(callback: CallbackQuery, state: FSMContext):
+    """Alternar protección de contenido."""
+    data = await state.get_data()
+    current_protection = data.get("protect_content", True)
+    await state.update_data(protect_content=not current_protection)
+    
+    await callback.message.edit_reply_markup(
+        reply_markup=get_content_protection_kb(not current_protection)
+    )
+    await callback.answer()
+
+@router.callback_query(FreeChannelStates.confirming_post, F.data == "confirm_post")
 async def confirm_and_send_post(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     """Confirmar y enviar el post al canal."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
     
-    protect_content = callback.data == "protect_yes"
     data = await state.get_data()
+    protect_content = data.get("protect_content", True)
     
     free_service = FreeChannelService(session, callback.bot)
-    
     config = ConfigService(session)
-    buttons = await config.get_reaction_buttons()
-    channel_id = await config.get_free_channel_id()
-    sent_message = await free_service.send_message_to_channel(
-        text=data.get("post_text", ""),
-        protect_content=protect_content,
-        reply_markup=get_reaction_kb(
+    
+    # Prepare message with optional reactions
+    reply_markup = None
+    if data.get("enable_reactions", True):
+        buttons = await config.get_reaction_buttons()
+        channel_id = await config.get_free_channel_id()
+        reply_markup = get_reaction_kb(
             reactions=buttons,
             current_counts={},
             message_id=0,
             channel_id=channel_id or 0,
-        ),
+        )
+    
+    sent_message = await free_service.send_message_to_channel(
+        text=data.get("post_text", ""),
+        protect_content=protect_content,
+        reply_markup=reply_markup,
         media_files=data.get("media_files", [])
     )
 

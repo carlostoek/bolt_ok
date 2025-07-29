@@ -538,7 +538,8 @@ class FreeChannelService:
         text: str,
         protect_content: bool = True,
         reply_markup: Optional[InlineKeyboardMarkup] = None,
-        media_files: Optional[List[Dict[str, Any]]] = None
+        media_files: Optional[List[Dict[str, Any]]] = None,
+        **kwargs
     ) -> Optional[Message]:
         """
         Enviar mensaje al canal gratuito con protección opcional.

@@ -62,15 +62,22 @@ def get_channel_post_options_kb() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def get_content_protection_kb() -> InlineKeyboardMarkup:
-    """Teclado para configurar protección de contenido."""
+def get_content_protection_kb(protect_enabled: bool = True) -> InlineKeyboardMarkup:
+    """Teclado para configurar protección de contenido con toggle."""
     builder = InlineKeyboardBuilder()
     
-    builder.button(text="🔒 Proteger", callback_data="protect_yes")
-    builder.button(text="🔓 Libre", callback_data="protect_no")
+    # Toggle button shows current state
+    toggle_text = "✅ Protección: ON" if protect_enabled else "❌ Protección: OFF"
+    builder.button(text=toggle_text, callback_data="toggle_protection")
+    
+    # Confirm and cancel buttons
+    builder.button(text="📤 Publicar", callback_data="confirm_post")
     builder.button(text="❌ Cancelar", callback_data="admin_free_channel")
     
-    builder.adjust(2, 1)
+    # Add reactions toggle if needed
+    builder.button(text="🎭 Reacciones", callback_data="toggle_reactions")
+    
+    builder.adjust(1, 2, 1)
     return builder.as_markup()
 
 
