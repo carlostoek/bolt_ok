@@ -217,6 +217,106 @@ class MenuValidator:
             'orphaned_files_list': list(orphaned_files)
         }
     
+    def generate_json_report(self) -> Dict:
+        """Generate comprehensive JSON report"""
+        stats = self.generate_statistics()
+        
+        # Separate connected and disconnected
+        connected_mappings = [m for m in self.callback_mappings if m.is_connected]
+        disconnected_mappings = [m for m in self.callback_mappings if not m.is_connected]
+        
+        # Group by keyboard file
+        keyboard_groups = {}
+        for mapping in self.callback_mappings:
+            if mapping.keyboard_file not in keyboard_groups:
+                keyboard_groups[mapping.keyboard_file] = {
+                    "total_callbacks": 0,
+                    "connected_callbacks": 0,
+                    "disconnected_callbacks": 0,
+                    "callbacks": []
+                }
+            
+            keyboard_groups[mapping.keyboard_file]["total_callbacks"] += 1
+            if mapping.is_connected:
+                keyboard_groups[mapping.keyboard_file]["connected_callbacks"] += 1
+            else:
+                keyboard_groups[mapping.keyboard_file]["disconnected_callbacks"] += 1
+            
+            keyboard_groups[mapping.keyboard_file]["callbacks"].append({
+                "callback_data": mapping.callback_data,
+                "handler_file": mapping.handler_file,
+                "is_connected": mapping.is_connected,
+                "is_dynamic": mapping.is_dynamic,
+                "priority": "high" if "admin_" in mapping.callback_data else "medium"
+            })
+        
+        # Handler files analysis
+        handler_files_analysis = {}
+        for file_name, handlers in self.admin_handlers.items():
+            used_handlers = [m.callback_data for m in self.callback_mappings 
+                           if m.handler_file == file_name and m.is_connected]
+            
+            handler_files_analysis[file_name] = {
+                "total_handlers": len(handlers),
+                "used_handlers": len(used_handlers),
+                "unused_handlers": len(handlers) - len(used_handlers),
+                "handlers_list": list(handlers),
+                "used_handlers_list": used_handlers
+            }
+        
+        return {
+            "metadata": {
+                "generated_at": datetime.now().isoformat(),
+                "script_version": "1.0.0",
+                "analysis_type": "admin_menu_validation"
+            },
+            "summary": {
+                "total_callbacks": stats['total_callbacks'],
+                "connected_callbacks": stats['connected_callbacks'],
+                "disconnected_callbacks": stats['disconnected_callbacks'],
+                "connection_rate_percentage": round(stats['connection_rate'], 2),
+                "total_keyboard_files": stats['total_keyboard_files'],
+                "total_handler_files": stats['total_handler_files'],
+                "orphaned_handler_files": stats['orphaned_handler_files']
+            },
+            "keyboard_files": keyboard_groups,
+            "handler_files": handler_files_analysis,
+            "connected_callbacks": [
+                {
+                    "callback_data": m.callback_data,
+                    "keyboard_file": m.keyboard_file,
+                    "handler_file": m.handler_file,
+                    "is_dynamic": m.is_dynamic
+                } for m in connected_mappings
+            ],
+            "disconnected_callbacks": [
+                {
+                    "callback_data": m.callback_data,
+                    "keyboard_file": m.keyboard_file,
+                    "is_dynamic": m.is_dynamic,
+                    "priority": "high" if "admin_" in m.callback_data else "medium"
+                } for m in disconnected_mappings
+            ],
+            "orphaned_files": stats['orphaned_files_list'],
+            "recommendations": {
+                "critical_actions": [
+                    "Implement missing handlers for disconnected callbacks",
+                    "Verify callback naming consistency",
+                    "Review routing logic for pattern mismatches",
+                    "Test all admin menu functionality"
+                ],
+                "high_priority_callbacks": [
+                    m.callback_data for m in disconnected_mappings 
+                    if "admin_" in m.callback_data
+                ],
+                "improvement_suggestions": [
+                    f"Connection rate is {stats['connection_rate']:.1f}% - {'Excellent!' if stats['connection_rate'] >= 90 else 'Good but can be improved' if stats['connection_rate'] >= 70 else 'Needs attention'}",
+                    f"Focus on {stats['disconnected_callbacks']} disconnected callbacks",
+                    f"Review {stats['orphaned_handler_files']} orphaned handler files"
+                ]
+            }
+        }
+
     def generate_html_report(self) -> str:
         """Generate comprehensive HTML report"""
         stats = self.generate_statistics()
@@ -558,14 +658,22 @@ class MenuValidator:
         print(f"❌ Callbacks desconectados: {stats['disconnected_callbacks']}")
         print(f"📈 Tasa de conexión: {stats['connection_rate']:.1f}%")
         
-        # Generate HTML report
+        # Generate reports
         html_content = self.generate_html_report()
-        report_path = self.base_path / "menu_validation_report.html"
+        json_content = self.generate_json_report()
         
-        with open(report_path, 'w', encoding='utf-8') as f:
+        # Save HTML report
+        html_report_path = self.base_path / "menu_validation_report.html"
+        with open(html_report_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
         
-        print(f"\n📄 Reporte HTML generado: {report_path}")
+        # Save JSON report
+        json_report_path = self.base_path / "menu_validation_report.json"
+        with open(json_report_path, 'w', encoding='utf-8') as f:
+            json.dump(json_content, f, indent=2, ensure_ascii=False)
+        
+        print(f"\n📄 Reporte HTML generado: {html_report_path}")
+        print(f"📄 Reporte JSON generado: {json_report_path}")
         
         # Show disconnected callbacks
         disconnected = [m for m in self.callback_mappings if not m.is_connected]
