@@ -663,6 +663,204 @@ class DianaEmotionalService:
                 "error": str(e)
             }
     
+    async def enhance_interaction(
+        self,
+        user_id: int, 
+        accion, 
+        resultado_original: Dict[str, Any],
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Enhance a user interaction based on Diana's emotional understanding.
+        
+        Args:
+            user_id: ID of the user
+            accion: Type of action performed
+            resultado_original: Original result from the action
+            **kwargs: Additional parameters specific to the action
+            
+        Returns:
+            Dict with enhanced results, or original results if enhancement not possible
+        """
+        try:
+            # Get the current relationship state and personality adaptation
+            relationship_result = await self.get_relationship_state(user_id)
+            if not relationship_result["success"]:
+                return resultado_original
+                
+            relationship = relationship_result["relationship"]
+            
+            adaptation_result = await self.get_personality_adaptation(user_id)
+            if not adaptation_result["success"]:
+                return resultado_original
+                
+            adaptation = adaptation_result["adaptation"]
+            
+            # Record the interaction to update relationship metrics
+            await self.record_interaction(user_id)
+            
+            # Check if Diana service is active for enhancement
+            if not self.is_active():
+                return resultado_original
+                
+            # If active, try to enhance the interaction
+            enhanced_result = await self._enhance_by_action_type(
+                user_id, accion, resultado_original, relationship, adaptation, **kwargs
+            )
+            
+            return enhanced_result
+            
+        except Exception as e:
+            logger.error(f"Error enhancing interaction: {e}")
+            # Return original result in case of any error
+            return resultado_original
+    
+    def is_active(self) -> bool:
+        """
+        Check if Diana's emotional service is active.
+        
+        This is a placeholder for any activation logic. This could check a setting in
+        a configuration table, a feature flag, or any other mechanism to determine
+        if Diana should enhance interactions.
+        
+        Returns:
+            bool: True if Diana is active, False otherwise
+        """
+        # This should be replaced with actual logic to check if Diana is active
+        # For now, we'll return True for testing purposes
+        return True
+    
+    async def _enhance_by_action_type(
+        self,
+        user_id: int,
+        accion,
+        resultado_original: Dict[str, Any],
+        relationship: Dict[str, Any],
+        adaptation: Dict[str, Any],
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Apply enhancements based on the specific action type.
+        
+        Args:
+            user_id: ID of the user
+            accion: Type of action performed
+            resultado_original: Original result from the action
+            relationship: Current relationship state
+            adaptation: Current personality adaptation
+            **kwargs: Additional parameters specific to the action
+            
+        Returns:
+            Dict with enhanced results
+        """
+        # Clone the original result to avoid modifying it directly
+        resultado = dict(resultado_original)
+        
+        # Check the action type and apply appropriate enhancements
+        action_name = getattr(accion, "value", str(accion))
+        
+        if action_name == "reaccionar_publicacion":
+            resultado = await self._enhance_reaction_message(
+                user_id, resultado, relationship, adaptation, **kwargs
+            )
+        
+        # Add more action types as needed
+        
+        return resultado
+    
+    async def _enhance_reaction_message(
+        self,
+        user_id: int,
+        resultado: Dict[str, Any],
+        relationship: Dict[str, Any],
+        adaptation: Dict[str, Any],
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Enhance reaction messages based on relationship and adaptation.
+        
+        Args:
+            user_id: ID of the user
+            resultado: Original result to enhance
+            relationship: Current relationship state
+            adaptation: Current personality adaptation
+            **kwargs: Additional parameters
+            
+        Returns:
+            Dict with enhanced message
+        """
+        if not resultado.get("success", False):
+            return resultado
+            
+        # Get base message
+        original_message = resultado.get("message", "")
+        
+        # Apply personalization based on relationship status
+        status = relationship.get("status", "initial")
+        warmth = adaptation.get("warmth", 0.5)
+        formality = adaptation.get("formality", 0.5)
+        humor = adaptation.get("humor", 0.5)
+        emoji_usage = adaptation.get("emoji_usage", 0.5)
+        
+        # Enhance message based on relationship status
+        if status == "intimate" or status == "close":
+            if warmth > 0.7:
+                greeting = "mi amor más preciado"
+            elif warmth > 0.5:
+                greeting = "mi dulce amor"
+            else:
+                greeting = "mi amor"
+        elif status == "friendly":
+            if warmth > 0.7:
+                greeting = "mi querido admirador"
+            elif warmth > 0.5:
+                greeting = "mi dulce admirador"
+            else:
+                greeting = "mi admirador"
+        elif status == "acquaintance":
+            if warmth > 0.7:
+                greeting = "mi nuevo admirador"
+            elif warmth > 0.5:
+                greeting = "mi admirador"
+            else:
+                greeting = "admirador"
+        else:  # initial or other
+            greeting = ""
+        
+        # Get reaction type if available
+        reaction_type = kwargs.get("reaction_type", "")
+        
+        # Customize response based on relationship and adaptation
+        hint_unlocked = resultado.get("hint_unlocked")
+        
+        if hint_unlocked:
+            # Original message already has the hint, keep it
+            enhanced_message = original_message
+        else:
+            # Start with base message component
+            base_message = "Diana sonríe al notar tu reacción..."
+            
+            # Add personalization based on relationship
+            if greeting:
+                if humor > 0.7 and reaction_type == "👍":
+                    action = f"guiña un ojo a {greeting}"
+                elif humor > 0.7 and reaction_type == "❤️":
+                    action = f"envía un beso volado a {greeting}"
+                elif warmth > 0.7:
+                    action = f"mira con dulzura a {greeting}"
+                else:
+                    action = f"sonríe a {greeting}"
+            else:
+                action = "sonríe al notar tu reacción"
+            
+            # Create enhanced message
+            enhanced_message = f"Diana {action}... *+10 besitos* 💋 han sido añadidos a tu cuenta."
+        
+        # Update the result with enhanced message
+        resultado["message"] = enhanced_message
+        
+        return resultado
+
     async def update_personality_adaptation(
         self,
         user_id: int,

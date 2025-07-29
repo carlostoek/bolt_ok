@@ -61,36 +61,28 @@ class CoordinadorCentral:
         """
         try:
             # Seleccionar el flujo adecuado según la acción
-            resultado_original = None
+            resultado = None
             
             if accion == AccionUsuario.REACCIONAR_PUBLICACION:
-                resultado_original = await self._flujo_reaccion_publicacion(user_id, **kwargs)
+                resultado = await self._flujo_reaccion_publicacion(user_id, **kwargs)
             elif accion == AccionUsuario.ACCEDER_NARRATIVA_VIP:
-                resultado_original = await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
+                resultado = await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
             elif accion == AccionUsuario.TOMAR_DECISION:
-                resultado_original = await self._flujo_tomar_decision(user_id, **kwargs)
+                resultado = await self._flujo_tomar_decision(user_id, **kwargs)
             elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                resultado_original = await self._flujo_participacion_canal(user_id, **kwargs)
+                resultado = await self._flujo_participacion_canal(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
-                resultado_original = await self._flujo_verificar_engagement(user_id, **kwargs)
+                resultado = await self._flujo_verificar_engagement(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
-                resultado_original = {
+                resultado = {
                     "success": False,
                     "message": "Acción no reconocida por el sistema."
                 }
             
-            # Diana observa y puede mejorar la experiencia
-            try:
-                resultado_con_diana = await self.diana_service.enhance_interaction(
-                    user_id, accion, resultado_original, **kwargs
-                )
-                return resultado_con_diana
-            except Exception as diana_error:
-                # Si hay un error en Diana, aún devolvemos el resultado original
-                # para no interrumpir la funcionalidad base
-                logger.error(f"Error en servicio Diana: {diana_error}")
-                return resultado_original
+            # Nota: Ya no aplicamos Diana aquí, cada flujo maneja su propia mejora
+            # mediante enhance_with_diana() cuando corresponde
+            return resultado
                 
         except Exception as e:
             logger.exception(f"Error en flujo {accion}: {str(e)}")
@@ -150,14 +142,15 @@ class CoordinadorCentral:
                         pista_desbloqueada = pista
                         break
         
-        # 4. Generar mensaje de respuesta
+        # 4. Generar mensaje de respuesta base
         mensaje_base = "Diana sonríe al notar tu reacción... *+10 besitos* 💋 han sido añadidos a tu cuenta."
         if pista_desbloqueada:
             mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
         else:
             mensaje = mensaje_base
         
-        return {
+        # Crear el resultado base
+        resultado_base = {
             "success": True,
             "message": mensaje,
             "points_awarded": 10,
@@ -165,6 +158,78 @@ class CoordinadorCentral:
             "hint_unlocked": pista_desbloqueada,
             "action": "reaction_success"
         }
+        
+        # 5. Aplicar mejora de Diana si está disponible
+        resultado_final = await self.enhance_with_diana(
+            user_id, 
+            resultado_base, 
+            reaction_type=reaction_type
+        )
+        
+        return resultado_final
+    
+    async def enhance_with_diana(self, user_id: int, resultado_base: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+        """
+        Mejora el mensaje de respuesta utilizando el servicio emocional de Diana si está activo.
+        
+        Esta función permite que Diana personalice los mensajes según su memoria emocional
+        y adaptación de personalidad para cada usuario, mientras mantiene la funcionalidad
+        exacta actual si Diana no está activa.
+        
+        Args:
+            user_id: ID del usuario
+            resultado_base: Resultado base que contiene el mensaje y datos del flujo
+            **kwargs: Parámetros adicionales específicos de la acción
+            
+        Returns:
+            Dict con los resultados mejorados por Diana o los originales si Diana no está activa
+        """
+        try:
+            # Verificar si Diana está activa usando el método en diana_service
+            if not hasattr(self.diana_service, 'is_active') or not self.diana_service.is_active():
+                # Si Diana no está activa, devolver resultado base sin modificaciones
+                return resultado_base
+            
+            # Si Diana está activa, intentar mejorar el mensaje
+            if hasattr(self.diana_service, '_enhance_reaction_message'):
+                # Obtener estado de relación actual
+                relationship_result = await self.diana_service.get_relationship_state(user_id)
+                if not relationship_result.get("success", False):
+                    return resultado_base
+                    
+                relationship = relationship_result.get("relationship", {})
+                
+                # Obtener adaptación de personalidad actual
+                adaptation_result = await self.diana_service.get_personality_adaptation(user_id)
+                if not adaptation_result.get("success", False):
+                    return resultado_base
+                    
+                adaptation = adaptation_result.get("adaptation", {})
+                
+                # Aplicar mejora específica para mensajes de reacción
+                resultado_mejorado = await self.diana_service._enhance_reaction_message(
+                    user_id, resultado_base, relationship, adaptation, **kwargs
+                )
+                
+                return resultado_mejorado
+            else:
+                # Si el método específico no existe, usar el método genérico
+                if hasattr(self.diana_service, 'enhance_interaction'):
+                    resultado_mejorado = await self.diana_service.enhance_interaction(
+                        user_id, 
+                        AccionUsuario.REACCIONAR_PUBLICACION, 
+                        resultado_base, 
+                        **kwargs
+                    )
+                    return resultado_mejorado
+                    
+            # Si no se pudo mejorar, devolver resultado base
+            return resultado_base
+            
+        except Exception as e:
+            # En caso de error, registrar y devolver el resultado base
+            logger.error(f"Error al mejorar con Diana: {e}")
+            return resultado_base
     
     async def _flujo_acceso_narrativa_vip(self, user_id: int, fragment_key: str, bot=None) -> Dict[str, Any]:
         """
