@@ -125,7 +125,7 @@ async def vip_create_token(callback: CallbackQuery, session: AsyncSession, bot: 
     
     builder = InlineKeyboardBuilder()
     builder.button(text="❌ Invalidar Token", callback_data=f"vip_invalidate_{token.token_string}"),
-    builder.button(text="🔄 Generar Otro"),
+    builder.button(text="🔄 Generar Otro", callback_data=f"vip_token_{tariff_id}"),
     builder.button(text="🔙 Volver", callback_data="admin_vip"),
     builder.adjust(1)
     
