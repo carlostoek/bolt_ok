@@ -1,7 +1,6 @@
 # database/__init__.py
-from .models import User
-from .narrative_models import UserNarrativeState
-from .diana_models import DianaEmotionalMemory, DianaRelationshipState, DianaContradiction
+# Importamos solo Base para evitar importaciones circulares
+from .base import Base
 
 __all__ = [
     'User', 

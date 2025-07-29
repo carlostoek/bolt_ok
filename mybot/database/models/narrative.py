@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from database import Base
+from ..base import Base
 
 class NarrativeFragment(Base):
     __tablename__ = 'narrative_fragments'

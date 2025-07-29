@@ -63,27 +63,29 @@ class User(Base):
             cascade="all, delete-orphan"
         )
         
-    @declared_attr
-    def emotional_states(cls):
-        from .models.emotional import CharacterEmotionalState
-        return relationship(
-            CharacterEmotionalState,
-            back_populates="user",
-            uselist=True,
-            lazy="selectin",
-            cascade="all, delete-orphan"
-        )
+    # Comentando temporalmente para solucionar problema de importación
+    # @declared_attr
+    # def emotional_states(cls):
+    #     from database.models.emotional import CharacterEmotionalState
+    #     return relationship(
+    #         CharacterEmotionalState,
+    #         back_populates="user",
+    #         uselist=True,
+    #         lazy="selectin",
+    #         cascade="all, delete-orphan"
+    #     )
         
-    @declared_attr
-    def emotional_history(cls):
-        from .models.emotional import EmotionalHistoryEntry
-        return relationship(
-            EmotionalHistoryEntry,
-            back_populates="user",
-            uselist=True,
-            lazy="selectin",
-            cascade="all, delete-orphan"
-        )
+    # Comentando temporalmente para solucionar problema de importación
+    # @declared_attr
+    # def emotional_history(cls):
+    #     from database.models.emotional import EmotionalHistoryEntry
+    #     return relationship(
+    #         EmotionalHistoryEntry,
+    #         back_populates="user",
+    #         uselist=True,
+    #         lazy="selectin",
+    #         cascade="all, delete-orphan"
+    #     )
 
 
 class Reward(Base):
