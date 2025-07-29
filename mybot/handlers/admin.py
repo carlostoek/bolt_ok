@@ -2,13 +2,19 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram import Bot
 from aiogram.filters import Command
-from sqlalchemy.ext.asyncio import AsyncSession  # Importar AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards.admin_kb import get_admin_kb
 from utils.user_roles import is_admin
 from services.scheduler import run_channel_request_check, run_vip_subscription_check
 
+# Importar routers de sub-módulos
+from .admin.auction_admin import router as auction_router
+from .admin.vip_manage import router as vip_manage_router
+
 router = Router()
+router.include_router(auction_router)
+router.include_router(vip_manage_router)
 
 
 @router.message(Command("admin_menu"))
