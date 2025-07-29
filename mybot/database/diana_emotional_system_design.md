@@ -1,310 +1,225 @@
-# Diana Emotional System - Design Documentation
+# DianaEmotionalService - Arquitectura y Diseño
 
-## System Overview
+## Visión General
 
-The Diana Emotional System is a sophisticated database and service architecture designed to enable Diana to maintain complex emotional relationships with users. The system provides the foundation for emotional memory, relationship state tracking, contradiction detection, and personality adaptation.
+DianaEmotionalService es un sistema de gestión de emociones para personajes en el bot Telegram, diseñado para añadir profundidad a las interacciones narrativas. El sistema permite que los personajes (Diana, Lucien, etc.) mantengan estados emocionales persistentes hacia cada usuario, los cuales evolucionan basados en las decisiones e interacciones del usuario.
 
-### Core Components
+## Arquitectura
 
-1. **Emotional Memory (diana_emotional_memories)** - Stores individual interactions with emotional context
-2. **Relationship State (diana_relationship_states)** - Maintains the current state of each user-Diana relationship
-3. **Contradictions (diana_contradictions)** - Tracks contradictory information to maintain consistency
-4. **Personality Adaptations (diana_personality_adaptations)** - Stores personalization data for Diana's interactions
-
-## Database Schema Design
-
-### Design Principles
-
-1. **Query Performance** - All queries are optimized to execute in <100ms for real-time emotional context
-2. **Natural Memory Decay** - Memories have importance and decay rates to mimic human memory
-3. **Contextual Access** - Fast retrieval patterns based on emotion, time, and importance
-4. **Privacy by Design** - Support for marking sensitive content and GDPR compliance
-5. **Relationship Evolution** - Relationship status changes based on interaction patterns
-
-### Emotional Memory Table (diana_emotional_memories)
-
-This table stores individual emotional interactions between Diana and users:
+La arquitectura del sistema emocional se integra con el sistema narrativo existente y sigue un patrón de capas similar:
 
 ```
-id: Integer (PK)
-user_id: BigInteger (FK to users.id)
-interaction_type: Enum (GREETING, HELP_REQUEST, etc.)
-timestamp: DateTime (when the interaction occurred)
-summary: String (brief description)
-content: Text (detailed content, potentially encrypted)
-primary_emotion: Enum (JOY, SADNESS, etc.)
-secondary_emotion: Enum (optional additional emotion)
-intensity: Enum (VERY_LOW to VERY_HIGH)
-context_data: JSON (additional structured context)
-related_achievements: JSON (IDs of related achievements)
-related_narrative_keys: JSON (keys of related narrative fragments)
-importance_score: Float (higher = more important)
-decay_rate: Float (how quickly memory fades)
-last_recalled_at: DateTime (when memory was last accessed)
-recall_count: Integer (how often memory has been recalled)
-tags: JSON (array of string tags for filtering)
-is_sensitive: Boolean (flag for sensitive content)
-is_forgotten: Boolean (for GDPR compliance)
-parent_memory_id: Integer (optional, for linked memories)
+┌─────────────────────────────────────┐
+│           Handlers Layer            │
+│  emotional_handler.py               │
+│  emotional_narrative_handler.py     │
+└───────────────────┬─────────────────┘
+                    │
+┌───────────────────▼─────────────────┐
+│         Integration Layer           │
+│  narrative_emotional_service.py     │
+└───────────────────┬─────────────────┘
+                    │
+┌───────────────────▼─────────────────┐
+│          Service Layer              │
+│  emotional_service.py               │
+└───────────────────┬─────────────────┘
+                    │
+┌───────────────────▼─────────────────┐
+│          Data Layer                 │
+│  models/emotional.py                │
+└─────────────────────────────────────┘
 ```
 
-Key indices:
-- user_id + timestamp (primary access pattern)
-- user_id + primary_emotion (emotional search)
-- user_id + importance_score (important memories)
-- user_id + last_recalled_at (recently recalled)
+### Componentes Principales
 
-### Relationship State Table (diana_relationship_states)
+1. **EmotionalService**: Servicio base que gestiona los estados emocionales de los personajes
+2. **NarrativeEmotionalService**: Integración entre el sistema narrativo y el sistema emocional
+3. **Handlers Emocionales**: Manejadores para comandos y callbacks relacionados con emociones
+4. **Modelos de Datos**: Estructuras para almacenar estados emocionales y plantillas de respuesta
 
-This table represents the current state of relationship between Diana and a user:
+## Modelo Emocional
 
-```
-user_id: BigInteger (PK, FK to users.id)
-status: Enum (INITIAL, ACQUAINTANCE, FRIENDLY, CLOSE, etc.)
-trust_level: Float (0.0-1.0 scale)
-familiarity: Float (how well Diana knows the user)
-rapport: Float (quality of communication)
-dominant_emotion: Enum (predominant emotion in relationship)
-emotional_volatility: Float (how much emotions fluctuate)
-positive_interactions: Integer (count of positive interactions)
-negative_interactions: Integer (count of negative interactions)
-relationship_started_at: DateTime (when relationship began)
-last_interaction_at: DateTime (when last interaction occurred)
-longest_absence_days: Integer (longest period without interaction)
-typical_response_time_seconds: Integer (average response time)
-typical_interaction_length: Integer (average message length)
-communication_frequency: Float (interactions per day)
-interaction_count: Integer (total number of interactions)
-milestone_count: Integer (number of relationship milestones)
-milestone_data: JSON (record of relationship milestones)
-boundary_settings: JSON (user's boundaries)
-communication_preferences: JSON (preferred communication styles)
-topic_interests: JSON (topics with interest scores)
-personality_adaptations: JSON (personality adaptation data)
-linguistic_adaptations: JSON (linguistic adaptation data)
-```
+El sistema utiliza un modelo emocional basado en las 8 emociones básicas de Plutchik:
 
-### Contradictions Table (diana_contradictions)
+- **Alegría** (Joy)
+- **Confianza** (Trust)
+- **Miedo** (Fear)
+- **Tristeza** (Sadness)
+- **Enfado** (Anger)
+- **Sorpresa** (Surprise)
+- **Anticipación** (Anticipation)
+- **Disgusto** (Disgust)
 
-This table records contradictions in user information:
+Cada emoción tiene:
+- Un rango de intensidad (0-100)
+- Una tasa de decaimiento natural
+- Un valor predeterminado para cada personaje
+- Iconos y descripciones asociadas
 
-```
-id: Integer (PK)
-user_id: BigInteger (FK to users.id)
-contradiction_type: String (type of contradiction)
-original_statement: Text (original statement)
-contradicting_statement: Text (contradicting statement)
-resolution: Text (how contradiction was resolved)
-detected_at: DateTime (when contradiction was detected)
-context_data: JSON (additional context)
-is_resolved: Boolean (whether contradiction is resolved)
-resolved_at: DateTime (when contradiction was resolved)
-related_memory_ids: JSON (IDs of related memories)
-```
+## Flujo de Datos
 
-### Personality Adaptation Table (diana_personality_adaptations)
+1. **Captura de Interacciones**: Las decisiones narrativas del usuario influyen en el estado emocional de los personajes
+2. **Procesamiento Emocional**: El sistema calcula los cambios emocionales basados en el contenido y contexto
+3. **Almacenamiento**: Los estados emocionales se guardan en la base de datos
+4. **Retroalimentación Visual**: Los usuarios pueden ver el estado emocional de los personajes
+5. **Modificación Narrativa**: Las respuestas narrativas se adaptan según el estado emocional
 
-This table tracks how Diana adapts her personality to match user preferences:
+```mermaid
+sequenceDiagram
+    participant User
+    participant Handler
+    participant NarrativeEmotionalService
+    participant EmotionalService
+    participant Database
 
-```
-id: Integer (PK)
-user_id: BigInteger (FK to users.id)
-warmth: Float (0.0-1.0 scale)
-formality: Float (0.0-1.0 scale)
-humor: Float (0.0-1.0 scale)
-directness: Float (0.0-1.0 scale)
-assertiveness: Float (0.0-1.0 scale)
-curiosity: Float (0.0-1.0 scale)
-emotional_expressiveness: Float (0.0-1.0 scale)
-message_length_preference: Integer (optimal message length)
-complexity_level: Float (0.0 simple to 1.0 complex)
-emoji_usage: Float (0.0 none to 1.0 frequent)
-response_delay: Integer (artificial delay in seconds)
-topic_preferences: JSON (preferred topics)
-taboo_topics: JSON (topics to avoid)
-memory_reference_frequency: Float (how often to reference past)
-adaptation_reason: Text (reason for adaptation)
-last_significant_change: DateTime (when adaptation changed significantly)
-confidence_score: Float (confidence in adaptation)
+    User->>Handler: /historia_emocional
+    Handler->>NarrativeEmotionalService: get_emotionally_enhanced_fragment()
+    NarrativeEmotionalService->>EmotionalService: get_character_emotional_state()
+    EmotionalService->>Database: Query emotional state
+    Database-->>EmotionalService: Return state data
+    EmotionalService-->>NarrativeEmotionalService: Emotional state
+    NarrativeEmotionalService-->>Handler: Enhanced fragment with emotions
+    Handler-->>User: Display emotional narrative
+    
+    User->>Handler: Select narrative choice
+    Handler->>NarrativeEmotionalService: process_narrative_choice_with_emotions()
+    NarrativeEmotionalService->>EmotionalService: update_emotional_state()
+    EmotionalService->>Database: Store updated emotional state
+    Database-->>EmotionalService: Confirmation
+    NarrativeEmotionalService-->>Handler: Next fragment + emotional changes
+    Handler-->>User: Display next fragment with emotion indicators
 ```
 
-## Relationship Status Transitions
+## Modelos de Datos
 
-The system defines clear thresholds for relationship status transitions based on quantifiable metrics:
-
-1. **INITIAL → ACQUAINTANCE**
-   - Requirements: 5+ interactions
-
-2. **ACQUAINTANCE → FRIENDLY**
-   - Requirements: familiarity ≥ 0.3, trust_level ≥ 0.2
-
-3. **FRIENDLY → CLOSE**
-   - Requirements: trust_level ≥ 0.6, rapport ≥ 0.5, interaction_count ≥ 20
-
-4. **CLOSE → INTIMATE**
-   - Requirements: trust_level ≥ 0.8, rapport ≥ 0.7, interaction_count ≥ 50
-
-5. **Any → STRAINED**
-   - Triggered when: negative_interactions > positive_interactions AND interaction_count > 10
-
-6. **STRAINED → REPAIRED**
-   - Can be manually set when relationship issues are resolved
-
-## Emotional Memory Evolution
-
-Memories evolve over time through several mechanisms:
-
-1. **Recall Reinforcement** - Each time a memory is recalled, its recall_count increases and last_recalled_at is updated
-2. **Importance Scoring** - Memories with higher emotional intensity or significance get higher importance_score
-3. **Memory Decay** - The decay_rate parameter determines how quickly a memory becomes less prominent
-4. **Memory Linking** - Memories can be linked through parent_memory_id to create connected memory chains
-
-## Service Layer Implementation
-
-The DianaEmotionalService provides a comprehensive API for interacting with the emotional system:
-
-### Memory Management
-
-- `store_emotional_memory()` - Store a new emotional memory
-- `get_recent_memories()` - Retrieve recent memories
-- `get_memories_by_emotion()` - Get memories with specific emotions
-- `get_important_memories()` - Get high-importance memories
-- `get_contextual_memories()` - Get memories based on tags
-- `forget_memory()` - Mark a memory as forgotten (GDPR)
-- `forget_all_user_memories()` - Forget all memories for a user
-
-### Relationship Management
-
-- `get_relationship_state()` - Get current relationship state
-- `update_relationship_status()` - Update relationship status
-- `record_interaction()` - Record a general interaction
-
-### Contradiction Management
-
-- `record_contradiction()` - Record a contradiction
-- `resolve_contradiction()` - Resolve a contradiction
-- `get_unresolved_contradictions()` - Get unresolved contradictions
-
-### Personality Adaptation
-
-- `get_personality_adaptation()` - Get personality adaptation
-- `update_personality_adaptation()` - Update personality adaptation
-
-## Usage Patterns
-
-### Recording Emotional Interactions
+### CharacterEmotionalState
+Almacena el estado emocional actual de un personaje hacia un usuario específico.
 
 ```python
-await diana_service.store_emotional_memory(
-    user_id=user_id,
-    interaction_type=EmotionalInteractionType.PERSONAL_SHARE,
-    summary="User shared personal feelings about work",
-    content="The detailed content of the interaction...",
-    primary_emotion=EmotionCategory.JOY,
-    intensity=EmotionalIntensity.HIGH,
-    tags=["work", "happiness", "achievement"]
-)
+class CharacterEmotionalState(Base):
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('users.id'))
+    character_name = Column(String(50))
+    
+    # Valores emocionales (0-100)
+    joy = Column(Float, default=50.0)
+    trust = Column(Float, default=30.0)
+    fear = Column(Float, default=20.0)
+    sadness = Column(Float, default=15.0)
+    anger = Column(Float, default=10.0)
+    surprise = Column(Float, default=25.0)
+    anticipation = Column(Float, default=40.0)
+    disgust = Column(Float, default=5.0)
+    
+    # Metadatos adicionales
+    dominant_emotion = Column(String(20))
+    relationship_level = Column(Integer)
+    relationship_status = Column(String(20))
+    
+    # Datos históricos
+    history_entries = Column(JSON)
+    last_updated = Column(DateTime)
 ```
 
-### Retrieving Emotional Context
+### EmotionalHistoryEntry
+Registra cambios históricos en los estados emocionales para análisis y visualización.
 
 ```python
-# Get recent memories to provide context for the current conversation
-result = await diana_service.get_recent_memories(user_id, limit=5)
-
-# Get emotionally similar memories
-result = await diana_service.get_memories_by_emotion(
-    user_id, 
-    EmotionCategory.SADNESS
-)
-
-# Get memories with relevant tags
-result = await diana_service.get_contextual_memories(
-    user_id, 
-    tags=["family", "birthday"]
-)
+class EmotionalHistoryEntry(Base):
+    id = Column(Integer, primary_key=True)
+    user_id = Column(BigInteger, ForeignKey('users.id'))
+    character_name = Column(String(50))
+    timestamp = Column(DateTime)
+    
+    emotional_state = Column(JSON)
+    context_type = Column(String(50))
+    context_description = Column(Text)
+    context_reference_id = Column(String(50))
 ```
 
-### Tracking Relationship Evolution
+### EmotionalResponseTemplate
+Plantillas para generar respuestas adaptadas al estado emocional.
 
 ```python
-# Get current relationship state
-result = await diana_service.get_relationship_state(user_id)
-
-# Record a general interaction (updates metrics)
-await diana_service.record_interaction(
-    user_id=user_id,
-    interaction_length=len(message_text)
-)
-
-# Update relationship status manually if needed
-await diana_service.update_relationship_status(
-    user_id=user_id,
-    status=RelationshipStatus.CLOSE,
-    reason="Significant trust established through personal sharing"
-)
+class EmotionalResponseTemplate(Base):
+    id = Column(Integer, primary_key=True)
+    character_name = Column(String(50))
+    emotion = Column(String(20))
+    intensity_level = Column(String(10))
+    
+    text_prefixes = Column(JSON)
+    text_suffixes = Column(JSON)
+    style_suggestions = Column(JSON)
+    emoji_suggestions = Column(JSON)
+    sample_phrases = Column(JSON)
 ```
 
-### Adapting Personality
+## Características Principales
 
-```python
-# Get current personality adaptation
-result = await diana_service.get_personality_adaptation(user_id)
+### 1. Estados Emocionales Persistentes
+Los personajes mantienen estados emocionales que evolucionan con cada interacción.
 
-# Update personality based on observed preferences
-await diana_service.update_personality_adaptation(
-    user_id=user_id,
-    adaptation_data={
-        "warmth": 0.8,  # More warm and friendly
-        "formality": 0.3,  # Less formal
-        "humor": 0.7,  # More humorous
-        "emoji_usage": 0.6  # Moderate emoji usage
-    },
-    reason="User responds better to warm, informal communication"
-)
-```
+### 2. Análisis de Decisiones Narrativas
+El sistema analiza decisiones narrativas para determinar su impacto emocional.
 
-## Performance Considerations
+### 3. Modificadores de Respuesta
+Sugerencias de estilo y formato basadas en el estado emocional:
+- Prefijos y sufijos de texto
+- Sugerencias de estilo
+- Sugerencias de emojis
 
-1. **Indexing Strategy** - Multiple indices for different query patterns
-2. **Memory Retrieval Limits** - Default limits on memory retrieval to ensure fast responses
-3. **Lazy Loading** - Relationships use lazy loading patterns appropriate to access frequency
-4. **JSON Optimization** - JSON fields for flexible schema without excessive normalization
-5. **Session Management** - Proper session handling to prevent connection leaks
+### 4. Visualización de Estados Emocionales
+Interfaces visuales para que los usuarios puedan ver cómo se sienten los personajes hacia ellos.
 
-## Security and Privacy
+### 5. Relaciones Dinámicas
+Sistema de niveles de relación que cambian con el tiempo:
+- Distante (Nivel 1)
+- Cautelosa (Nivel 2)
+- Neutral (Nivel 3)
+- Amistosa (Nivel 4)
+- Íntima (Nivel 5)
 
-1. **Sensitive Flag** - is_sensitive flag for content that requires special handling
-2. **GDPR Compliance** - is_forgotten flag for "right to be forgotten" without deleting data
-3. **Memory Access Patterns** - Memory access is always through the user_id to prevent data leakage
+### 6. Historial Emocional
+Registro histórico de cambios emocionales para análisis y visualización.
 
-## Integration with Existing Systems
+## Integración con Sistemas Existentes
 
-The emotional system integrates with the existing system through:
+### Integración con Sistema Narrativo
+- Los fragmentos narrativos se enriquecen con estados emocionales
+- Las decisiones narrativas afectan y son afectadas por estados emocionales
+- Nuevos tipos de decisiones basadas en emociones
 
-1. **User Table Relationship** - All tables reference the existing users table
-2. **Narrative Integration** - related_narrative_keys links memories to narrative fragments
-3. **Achievement Integration** - related_achievements links memories to achievements
-4. **Mission Integration** - Potential for missions based on relationship milestones
+### Integración con Sistema de Puntos
+- Recompensas basadas en mejoras de relaciones
+- Desbloqueo de contenido basado en niveles de relación
 
-## Future Extensions
+## Comandos del Bot
 
-1. **Emotional Analysis** - Integration with NLP for better emotion detection
-2. **Memory Consolidation** - Algorithms to consolidate related memories
-3. **Emotional Intelligence Metrics** - Track Diana's emotional intelligence development
-4. **Multi-user Relationship Awareness** - Understanding relationships between users
-5. **Emotional Timeline Visualization** - Visual representation of relationship evolution
+- `/emociones [personaje]` - Muestra el estado emocional actual de un personaje
+- `/historia_emocional` - Versión mejorada de la narrativa con contexto emocional
+- Callbacks para mostrar relaciones y estados emocionales desde la narrativa
 
-## Example Handlers
+## Futuras Expansiones
 
-The system includes example handlers that demonstrate how to use the emotional system:
+1. **Memoria Emocional**: Recordar eventos específicos y sus impactos emocionales
+2. **Respuestas Generadas**: Integración con LLM para generar respuestas personalizadas
+3. **Análisis de Sentimientos**: Procesamiento de lenguaje natural para determinar impactos emocionales
+4. **Visualizaciones Avanzadas**: Gráficos de evolución emocional a lo largo del tiempo
+5. **Misiones Emocionales**: Desafíos específicos para mejorar relaciones con personajes
 
-1. `/relationship_status` - View current relationship status with Diana
-2. `/recent_memories` - View recent emotional memories with Diana
-3. `/personality_preferences` - View Diana's personality adaptation to the user
+## Consideraciones Técnicas
 
-Additionally, a message handler processes general messages and updates emotional memory based on detected emotions.
+- **Rendimiento**: Estados emocionales se calculan bajo demanda y se almacenan en caché
+- **Escalabilidad**: Diseño modular que permite añadir más personajes y emociones
+- **Persistencia**: Almacenamiento eficiente de historiales emocionales
+- **Mantenibilidad**: Separación clara de responsabilidades entre componentes
 
-## Conclusion
+## Ejemplo de Flujo de Usuario
 
-The Diana Emotional System provides a robust foundation for building emotionally intelligent interactions between Diana and users. The system's careful design balances performance, flexibility, and emotional depth to create meaningful and evolving relationships.
+1. Usuario envía `/historia_emocional`
+2. Bot muestra fragmento narrativo con modificadores emocionales
+3. Usuario toma decisión que afecta negativamente a Diana
+4. Bot procesa la decisión, actualizando el estado emocional
+5. Bot muestra siguiente fragmento con indicadores de cambio emocional
+6. Usuario puede ver `/emociones Diana` para comprobar el impacto de su decisión
