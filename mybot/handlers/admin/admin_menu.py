@@ -46,13 +46,17 @@ router.include_router(admin_config_router)
 
 @router.message(Command("admin"))
 async def admin_start(message: Message, session: AsyncSession):
-    """Handler de inicio de administración"""
+    """Handler de inicio de administración - Complete admin menu"""
     if not await is_admin(message.from_user.id, session):
         return await message.answer("Acceso denegado")
     
+    # Use the comprehensive admin main menu instead of the simple one
     await message.answer(
-        "Panel de Administración",
-        reply_markup=get_admin_kb()
+        "⚙️ **PANEL DE ADMINISTRACIÓN COMPLETO**\n\n"
+        "Bienvenido al centro de control del bot. Desde aquí puedes gestionar "
+        "todos los aspectos del sistema: usuarios, canales, gamificación, "
+        "subastas, eventos y configuraciones avanzadas.",
+        reply_markup=await get_admin_main_kb(session)
     )
 
 @router.message(Command("admin_menu"))

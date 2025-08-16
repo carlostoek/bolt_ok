@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_admin_main_kb(session: AsyncSession = None):
-    """Return the main admin inline keyboard with elegant layout."""
+    """Return the main admin inline keyboard with comprehensive layout."""
     builder = InlineKeyboardBuilder()
     
     # Fila 1: Gestión de canales principales con nombres personalizados
@@ -25,17 +25,22 @@ async def get_admin_main_kb(session: AsyncSession = None):
     builder.button(text=vip_text, callback_data="admin_vip")
     builder.button(text=free_text, callback_data="admin_free")
     
-    # Fila 2: Entretenimiento y juegos
-    builder.button(text="🎮 Juego Kinky", callback_data="admin_kinky_game")
+    # Fila 2: Sistema de gamificación completo
+    builder.button(text="🎮 Gamificación", callback_data="admin_manage_content")
+    builder.button(text="👥 Usuarios", callback_data="admin_manage_users")
+    
+    # Fila 3: Comercio y eventos
+    builder.button(text="🏛️ Subastas", callback_data="admin_auction_main")
+    builder.button(text="🎉 Eventos", callback_data="admin_manage_events_sorteos")
+    
+    # Fila 4: Sistema y estadísticas
     builder.button(text="📊 Estadísticas", callback_data="admin_stats")
-    
-    # Fila 3: Configuración y navegación
     builder.button(text="⚙️ Configuración", callback_data="admin_config")
-    builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
     
-    # Fila 4: Navegación
+    # Fila 5: Navegación
+    builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
     builder.button(text="↩️ Volver", callback_data="admin_back")
     
-    # Distribución: 2x2, luego 2x1, luego 1
-    builder.adjust(2, 2, 2, 1)
+    # Distribución: 2x2x2x2x2 = 10 botones total
+    builder.adjust(2, 2, 2, 2, 2)
     return builder.as_markup()
