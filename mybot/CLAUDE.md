@@ -1,22 +1,4 @@
 
-Navigation Menu
-V2
-
-Code
-Issues
-V2
-/CLAUDE.md
-carlostoek
-carlostoek
-last week
-78 lines (54 loc) · 3.71 KB
-
-Preview
-
-Code
-
-Blame
-Antes de empezar a desarrollar cualquier petición que se te haga vas a revisar el directorio docs que es en donde está toda la documentación del proyecto para que tengas una visión Clara de lo que hay que hacer y en dónde hacerlo. el 90% de las funcionalidades que se necesitan ya están implementadas si tienes que obtener algún dato o una función lo más seguro es que ya está implementada primero revisa la documentación para que sepas se la desarrollas tú o no de primera instancia es usar lo que ya está en último de los casos es desarrollar algo nuevo porque si no vamos a duplicar código. procede conforme a las guías y al término de tu tarea documentas lo hecho según la guía de documentación que se encuentra en ese mismo directorio
 
 Using Gemini CLI for Large Codebase Analysis
 When analyzing large codebases or multiple files that might exceed context limits, use the Gemini CLI with its massive context window. Use gemini -p to leverage Google Gemini's large context capacity.
