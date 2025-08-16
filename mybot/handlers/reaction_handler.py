@@ -11,11 +11,16 @@ from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from services.message_service import MessageService
 from services.message_registry import validate_message
 from utils.messages import BOT_MESSAGES
+from utils.handler_decorators import safe_handler, track_usage, transaction
+from utils.message_safety import safe_send_message
 
 router = Router()
 logger = logging.getLogger(__name__)
 
 @router.callback_query(F.data.startswith("ip_"))
+@safe_handler("Error al procesar tu reacción. Inténtalo de nuevo.")
+@track_usage("reaction_to_publication")
+@transaction()
 async def handle_reaction_callback(
     callback: CallbackQuery, session: AsyncSession, bot: Bot
 ) -> None:
@@ -44,15 +49,13 @@ async def handle_reaction_callback(
 
     chat_id = callback.message.chat.id
     valid = validate_message(chat_id, message_id)
-    logger.info(
-        "Edit attempt chat_id=%s message_id=%s valid=%s", chat_id, message_id, valid
-    )
-
+    
     if not valid:
         logger.warning(
-            "[ERROR] El mensaje que se intenta editar no fue enviado por este bot o el chat_id es incorrecto."
+            "Invalid message edit attempt - chat_id=%s message_id=%s", 
+            chat_id, message_id
         )
-        return await callback.answer()
+        return await callback.answer("Mensaje no válido.")
 
     # Usar el coordinador central para manejar el flujo completo
     coordinador = CoordinadorCentral(session)
@@ -72,7 +75,8 @@ async def handle_reaction_callback(
     # Enviar respuesta al usuario
     if result["success"]:
         await callback.answer(BOT_MESSAGES.get("reaction_registered", "Reacción registrada"))
-        await bot.send_message(
+        await safe_send_message(
+            bot,
             callback.from_user.id,
             result["message"]
         )
