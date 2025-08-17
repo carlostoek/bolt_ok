@@ -95,6 +95,7 @@ class TestDianaMenuSystemIntegration:
 class TestMainMenuNavigation(TestDianaMenuSystemIntegration):
     """Test main menu navigation and role-based access."""
     
+    @pytest.mark.asyncio
     async def test_free_user_main_menu_display(self, diana_system, mock_callback_query_with_bot, 
                                              test_user, enhanced_user_data):
         """Test main menu display for free users shows correct content and limitations."""
@@ -117,6 +118,7 @@ class TestMainMenuNavigation(TestDianaMenuSystemIntegration):
                 assert "Menú Principal Diana" in text
                 assert "personalizada" in text.lower()
     
+    @pytest.mark.asyncio
     async def test_vip_user_main_menu_display(self, diana_system, mock_callback_query_with_bot,
                                             vip_user, enhanced_user_data):
         """Test main menu display for VIP users shows enhanced content."""
@@ -131,6 +133,7 @@ class TestMainMenuNavigation(TestDianaMenuSystemIntegration):
             # Assert
             assert callback.message.bot.send_message.called or callback.message.answer.called
     
+    @pytest.mark.asyncio
     async def test_admin_user_main_menu_display(self, diana_system, mock_callback_query_with_bot,
                                               admin_user):
         """Test main menu display for admin users shows administrative controls."""
@@ -152,6 +155,7 @@ class TestMainMenuNavigation(TestDianaMenuSystemIntegration):
                 assert "🎭" in text  # Admin Diana icon
                 assert "Administración" in text
     
+    @pytest.mark.asyncio
     async def test_menu_navigation_preserves_character_personality(self, diana_system, 
                                                                  mock_callback_query_with_bot,
                                                                  test_user, enhanced_user_data):
@@ -187,6 +191,7 @@ class TestMainMenuNavigation(TestDianaMenuSystemIntegration):
 class TestCrossModuleFlows(TestDianaMenuSystemIntegration):
     """Test critical cross-module integration flows."""
     
+    @pytest.mark.asyncio
     async def test_narrative_to_gamification_flow(self, diana_system, cross_module_rewards,
                                                 session, test_user, enhanced_user_data):
         """Test narrative progress triggers gamification rewards correctly."""
@@ -209,6 +214,7 @@ class TestCrossModuleFlows(TestDianaMenuSystemIntegration):
         await session.refresh(test_user)
         assert test_user.points > initial_points
     
+    @pytest.mark.asyncio
     async def test_gamification_to_narrative_unlock_flow(self, diana_system, cross_module_rewards,
                                                        session, test_user, enhanced_user_data):
         """Test achievement unlocks grant narrative content access."""
@@ -226,6 +232,7 @@ class TestCrossModuleFlows(TestDianaMenuSystemIntegration):
         # Narrative unlocks should be available for VIP/achievement-based content
         # This protects the cross-module reward mechanism
     
+    @pytest.mark.asyncio
     async def test_channel_engagement_dual_rewards_flow(self, diana_system, cross_module_rewards,
                                                       session, test_user, test_channel, enhanced_user_data):
         """Test channel engagement provides both points and narrative access."""
@@ -252,6 +259,7 @@ class TestCrossModuleFlows(TestDianaMenuSystemIntegration):
 class TestDataConsistencyAcrossModules(TestDianaMenuSystemIntegration):
     """Test data consistency between different modules."""
     
+    @pytest.mark.asyncio
     async def test_user_profile_shows_integrated_data(self, diana_system, session,
                                                     test_user, enhanced_user_data):
         """Test user profile displays consistent data from all modules."""
@@ -278,6 +286,7 @@ class TestDataConsistencyAcrossModules(TestDianaMenuSystemIntegration):
         # Verify gamification data is integrated
         assert 'streak_days' in user_data
     
+    @pytest.mark.asyncio
     async def test_point_updates_reflect_across_modules(self, diana_system, session,
                                                       test_user, point_service):
         """Test point updates are reflected consistently across all modules."""
@@ -297,6 +306,7 @@ class TestDataConsistencyAcrossModules(TestDianaMenuSystemIntegration):
         assert user_data['points'] == test_user.points
         assert user_data['current_points'] == test_user.points
     
+    @pytest.mark.asyncio
     async def test_narrative_progress_consistency(self, diana_system, session,
                                                 test_user, enhanced_user_data):
         """Test narrative progress is consistently calculated across modules."""
@@ -320,6 +330,7 @@ class TestDataConsistencyAcrossModules(TestDianaMenuSystemIntegration):
 class TestMenuCallbackHandling(TestDianaMenuSystemIntegration):
     """Test comprehensive callback handling and menu navigation."""
     
+    @pytest.mark.asyncio
     async def test_narrative_menu_navigation(self, diana_system, mock_callback_query_with_bot,
                                            test_user, enhanced_user_data):
         """Test narrative menu callbacks work correctly."""
@@ -334,6 +345,7 @@ class TestMenuCallbackHandling(TestDianaMenuSystemIntegration):
         assert callback.answer.called
         # Verify narrative menu was triggered
     
+    @pytest.mark.asyncio
     async def test_gamification_menu_navigation(self, diana_system, mock_callback_query_with_bot,
                                               test_user, enhanced_user_data):
         """Test gamification menu callbacks work correctly."""
@@ -348,6 +360,7 @@ class TestMenuCallbackHandling(TestDianaMenuSystemIntegration):
         assert callback.answer.called
         # Verify gamification menu was triggered
     
+    @pytest.mark.asyncio
     async def test_profile_integration_navigation(self, diana_system, mock_callback_query_with_bot,
                                                 test_user, enhanced_user_data):
         """Test profile integration displays comprehensive user data."""
@@ -362,6 +375,7 @@ class TestMenuCallbackHandling(TestDianaMenuSystemIntegration):
         assert callback.answer.called
         # Verify profile menu was triggered
     
+    @pytest.mark.asyncio
     async def test_invalid_callback_handling(self, diana_system, mock_callback_query_with_bot,
                                            test_user):
         """Test invalid callbacks are handled gracefully."""
@@ -380,6 +394,7 @@ class TestMenuCallbackHandling(TestDianaMenuSystemIntegration):
 class TestMenuRefreshAndUpdates(TestDianaMenuSystemIntegration):
     """Test real-time menu updates and refresh functionality."""
     
+    @pytest.mark.asyncio
     async def test_menu_refresh_updates_data(self, diana_system, mock_callback_query_with_bot,
                                            test_user, enhanced_user_data, point_service):
         """Test menu refresh shows updated user data."""
@@ -400,6 +415,7 @@ class TestMenuRefreshAndUpdates(TestDianaMenuSystemIntegration):
             message = call_args[0][0] if call_args[0] else ""
             assert "actualizado" in message.lower()
     
+    @pytest.mark.asyncio
     async def test_cross_module_notifications_update_menus(self, diana_system, cross_module_rewards,
                                                          session, test_user, enhanced_user_data):
         """Test cross-module events trigger menu notifications."""
@@ -420,6 +436,7 @@ class TestMenuRefreshAndUpdates(TestDianaMenuSystemIntegration):
 class TestErrorHandlingAndRecovery(TestDianaMenuSystemIntegration):
     """Test error handling and graceful degradation."""
     
+    @pytest.mark.asyncio
     async def test_service_unavailable_graceful_degradation(self, diana_system, 
                                                           mock_callback_query_with_bot, test_user):
         """Test graceful degradation when services are unavailable."""
@@ -435,6 +452,7 @@ class TestErrorHandlingAndRecovery(TestDianaMenuSystemIntegration):
             # Should not crash and show error message
             assert True  # If we get here, no unhandled exception occurred
     
+    @pytest.mark.asyncio
     async def test_database_error_handling(self, diana_system, mock_callback_query_with_bot, test_user):
         """Test database errors are handled gracefully."""
         # Arrange
@@ -449,6 +467,7 @@ class TestErrorHandlingAndRecovery(TestDianaMenuSystemIntegration):
             assert callback.answer.called
             # Should show error message to user
     
+    @pytest.mark.asyncio
     async def test_telegram_api_error_recovery(self, diana_system, mock_callback_query_with_bot, test_user):
         """Test recovery from Telegram API errors."""
         # Arrange
@@ -466,6 +485,7 @@ class TestErrorHandlingAndRecovery(TestDianaMenuSystemIntegration):
 class TestRoleBasedAccessControl(TestDianaMenuSystemIntegration):
     """Test role-based access controls are properly enforced."""
     
+    @pytest.mark.asyncio
     async def test_free_user_vip_content_restriction(self, diana_system, mock_callback_query_with_bot,
                                                    test_user):
         """Test free users cannot access VIP-only content."""
@@ -481,6 +501,7 @@ class TestRoleBasedAccessControl(TestDianaMenuSystemIntegration):
             assert user_data is not None
             # VIP content should not be accessible
     
+    @pytest.mark.asyncio
     async def test_vip_user_enhanced_access(self, diana_system, mock_callback_query_with_bot,
                                           vip_user, enhanced_user_data):
         """Test VIP users have enhanced access to content."""
@@ -496,6 +517,7 @@ class TestRoleBasedAccessControl(TestDianaMenuSystemIntegration):
             assert user_data is not None
             # VIP users should have enhanced access
     
+    @pytest.mark.asyncio
     async def test_admin_unrestricted_access(self, diana_system, mock_callback_query_with_bot,
                                            admin_user):
         """Test admin users have unrestricted access."""
@@ -515,6 +537,7 @@ class TestRoleBasedAccessControl(TestDianaMenuSystemIntegration):
 class TestCharacterConsistency(TestDianaMenuSystemIntegration):
     """Test Diana/Lucien character consistency across modules."""
     
+    @pytest.mark.asyncio
     async def test_diana_character_messaging(self, diana_system, test_user, enhanced_user_data):
         """Test Diana character messaging is consistent."""
         # Arrange & Act
@@ -525,6 +548,7 @@ class TestCharacterConsistency(TestDianaMenuSystemIntegration):
         # Default should be Diana for most users
         assert character == "diana"
     
+    @pytest.mark.asyncio
     async def test_character_specific_icons_and_themes(self, diana_system, test_user):
         """Test character-specific visual elements are applied correctly."""
         # Arrange & Act
@@ -540,6 +564,7 @@ class TestCharacterConsistency(TestDianaMenuSystemIntegration):
         assert icons["user"] == "💋"  # Diana's signature
         assert icons["admin"] == "🎭"  # Admin Diana
     
+    @pytest.mark.asyncio
     async def test_engagement_score_calculation(self, diana_system, test_user, enhanced_user_data):
         """Test engagement score reflects cross-module activity."""
         # Act
@@ -558,6 +583,7 @@ class TestCharacterConsistency(TestDianaMenuSystemIntegration):
 class TestCompleteUserJourneys(TestDianaMenuSystemIntegration):
     """Test complete user journeys across all modules."""
     
+    @pytest.mark.asyncio
     async def test_new_user_complete_onboarding_journey(self, diana_system, cross_module_rewards,
                                                       session, mock_callback_query_with_bot):
         """Test complete journey for new user through all systems."""
@@ -605,6 +631,7 @@ class TestCompleteUserJourneys(TestDianaMenuSystemIntegration):
             await session.refresh(new_user)
             assert new_user.points > 0
     
+    @pytest.mark.asyncio
     async def test_vip_user_complete_experience_journey(self, diana_system, cross_module_rewards,
                                                       session, vip_user, enhanced_user_data):
         """Test complete VIP user experience across all modules."""
