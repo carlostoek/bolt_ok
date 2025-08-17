@@ -5,9 +5,9 @@ import logging
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..point_service import PointService
-from ..user_service import UserService
-from ..config_service import ConfigService
+from services.point_service import PointService
+from services.user_service import UserService
+from services.config_service import ConfigService
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..database.models import User
-from ..database.narrative_models import NarrativeFragment, NarrativeDecision, UserNarrativeState, UserDecisionLog
+from database.models import User
+from database.narrative_models import NarrativeFragment, NarrativeDecision, UserNarrativeState, UserDecisionLog
 
 class NarrativeService:
     def __init__(self, session: AsyncSession, user_service=None, point_service=None, backpack_service=None):

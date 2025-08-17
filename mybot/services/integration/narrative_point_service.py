@@ -4,9 +4,9 @@ Integration service to connect narrative system with gamification (points) syste
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..narrative_service import NarrativeService
-from ..point_service import PointService
-from ..database.narrative_models import NarrativeDecision
+from services.narrative_service import NarrativeService
+from services.point_service import PointService
+from database.narrative_models import NarrativeDecision
 
 logger = logging.getLogger(__name__)
 

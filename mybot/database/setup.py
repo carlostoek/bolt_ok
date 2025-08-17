@@ -56,12 +56,14 @@ TABLES_ORDER = [
 async def init_db():
     global _engine
     try:
-        logger.info("Inicializando motor de base de datos PostgreSQL...")
-
         db_url = Config.DATABASE_URL.strip()
-
-        if not db_url.startswith("postgresql+asyncpg://"):
-            raise ValueError("DATABASE_URL debe comenzar con 'postgresql+asyncpg://' para usar PostgreSQL async.")
+        
+        if db_url.startswith("postgresql+asyncpg://"):
+            logger.info("Inicializando motor de base de datos PostgreSQL...")
+        elif db_url.startswith("sqlite+aiosqlite://"):
+            logger.info("Inicializando motor de base de datos SQLite...")
+        else:
+            raise ValueError("DATABASE_URL debe comenzar con 'postgresql+asyncpg://' o 'sqlite+aiosqlite://'")
 
         if _engine is None:
             _engine = create_async_engine(
