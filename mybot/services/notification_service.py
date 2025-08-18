@@ -34,7 +34,7 @@ class NotificationService:
         self.bot = bot
         self.pending_notifications: Dict[int, List[NotificationData]] = {}
         self.scheduled_tasks: Dict[int, asyncio.Task] = {}
-        self.aggregation_delay = 1.0  # Segundos para esperar y agrupar notificaciones
+        self.aggregation_delay = 0.8  # Segundos para esperar y agrupar notificaciones
         
     async def add_notification(self, user_id: int, notification_type: str, data: Dict[str, Any]) -> None:
         """
@@ -266,6 +266,28 @@ class NotificationService:
             Número de notificaciones pendientes
         """
         return len(self.pending_notifications.get(user_id, []))
+    
+    def set_aggregation_delay(self, delay_seconds: float) -> None:
+        """
+        Configura el delay de agregación de notificaciones.
+        
+        Args:
+            delay_seconds: Delay en segundos (mínimo 0.1, máximo 5.0)
+        """
+        if 0.1 <= delay_seconds <= 5.0:
+            self.aggregation_delay = delay_seconds
+            logger.info(f"Aggregation delay actualizado a {delay_seconds} segundos")
+        else:
+            logger.warning(f"Delay inválido {delay_seconds}, manteniendo {self.aggregation_delay}")
+    
+    def get_aggregation_delay(self) -> float:
+        """
+        Obtiene el delay actual de agregación.
+        
+        Returns:
+            Delay en segundos
+        """
+        return self.aggregation_delay
     
     async def cleanup_expired_notifications(self, max_age_minutes: int = 5) -> None:
         """

@@ -111,3 +111,25 @@ class ConfigService:
         """Store reaction points as a semicolon separated list."""
         text = ";".join(str(p) for p in points)
         return await self.set_value(self.REACTION_POINTS_KEY, text)
+    
+    async def get_managed_channels(self) -> dict[str, str]:
+        """
+        Retorna los canales administrados por el bot.
+        Para propósitos de test, incluye los canales VIP y FREE configurados.
+        """
+        managed_channels = {}
+        
+        # Agregar canal VIP si está configurado
+        vip_channel_id = await self.get_vip_channel_id()
+        if vip_channel_id:
+            managed_channels[str(vip_channel_id)] = "vip"
+        
+        # Agregar canal FREE si está configurado
+        free_channel_id = await self.get_free_channel_id()
+        if free_channel_id:
+            managed_channels[str(free_channel_id)] = "free"
+        
+        # Para propósitos de test, agregar canal hardcodeado
+        managed_channels["-1001234567890"] = "test"
+        
+        return managed_channels

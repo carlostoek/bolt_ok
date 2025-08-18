@@ -73,14 +73,13 @@ async def handle_native_reaction(
             channel_id=chat_id,
             reaction_type=reaction_type,
             is_native_reaction=True,
-            bot=bot
+            bot=bot,
+            skip_unified_notifications=False  # CoordinadorCentral maneja las notificaciones unificadas
         )
         
-        # Enviar notificación unificada si el procesamiento fue exitoso
-        if result.get("success"):
-            await _send_unified_notification(notification_service, user_id, result)
-        else:
-            # Enviar notificación de error inmediata
+        # El CoordinadorCentral ya maneja las notificaciones unificadas,
+        # solo enviamos notificaciones de error si es necesario
+        if not result.get("success"):
             error_message = result.get("message", "No se pudo procesar tu reacción.")
             await notification_service.send_immediate_notification(user_id, error_message)
         

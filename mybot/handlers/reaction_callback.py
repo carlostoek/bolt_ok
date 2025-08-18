@@ -7,76 +7,101 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from services.message_service import MessageService
 from services.channel_service import ChannelService
 from services.message_registry import validate_message
+from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from utils.messages import BOT_MESSAGES
+from utils.handler_decorators import safe_handler, track_usage, transaction
 
 router = Router()
 logger = logging.getLogger(__name__)
 
 
 @router.callback_query(F.data.startswith("ip_"))
+@safe_handler("Error al procesar tu reacción. Inténtalo de nuevo.")
+@track_usage("inline_reaction")
+@transaction()
 async def handle_reaction_callback(
     callback: CallbackQuery, session: AsyncSession, bot: Bot
 ) -> None:
-    parts = callback.data.split("_")
-    if len(parts) < 4:
-        return await callback.answer()
-
+    """
+    Maneja reacciones a través de botones inline usando el CoordinadorCentral.
+    Procesa la reacción y envía notificaciones unificadas.
+    """
     try:
-        channel_id = int(parts[1])
-    except ValueError:
-        channel_id = parts[1]
+        # Parsear datos del callback
+        parts = callback.data.split("_")
+        if len(parts) < 4:
+            return await callback.answer()
 
-    try:
-        message_id = int(parts[2])
-    except ValueError:
-        return await callback.answer()
+        try:
+            channel_id = int(parts[1])
+        except ValueError:
+            channel_id = parts[1]
 
-    reaction_type = parts[3]
+        try:
+            message_id = int(parts[2])
+        except ValueError:
+            return await callback.answer()
 
-    if not callback.message:
-        return await callback.answer()
+        reaction_type = parts[3]
+        user_id = callback.from_user.id
 
-    chat_id = callback.message.chat.id
-    valid = validate_message(chat_id, message_id)
-    logger.info(
-        "Edit attempt chat_id=%s message_id=%s valid=%s", chat_id, message_id, valid
-    )
+        if not callback.message:
+            return await callback.answer()
 
-    if not valid:
-        logger.warning(
-            "[ERROR] El mensaje que se intenta editar no fue enviado por este bot o el chat_id es incorrecto."
+        chat_id = callback.message.chat.id
+        
+        # Validar que el mensaje sea válido
+        valid = validate_message(chat_id, message_id)
+        logger.info(
+            "Inline reaction attempt: user=%s, chat_id=%s, message_id=%s, reaction=%s, valid=%s", 
+            user_id, chat_id, message_id, reaction_type, valid
         )
-        return await callback.answer()
 
-    service = MessageService(session, bot)
-    channel_service = ChannelService(session)
+        if not valid:
+            logger.warning(
+                "[ERROR] El mensaje que se intenta editar no fue enviado por este bot o el chat_id es incorrecto."
+            )
+            return await callback.answer("Mensaje no válido.", show_alert=True)
 
-    reaction_result = await service.register_reaction(
-        callback.from_user.id,
-        message_id,
-        reaction_type,
-    )
+        # Verificar si la reacción ya existe
+        service = MessageService(session, bot)
+        reaction_result = await service.register_reaction(user_id, message_id, reaction_type)
 
-    if reaction_result is None:
-        await callback.answer(
-            BOT_MESSAGES.get("reaction_already", "Ya has reaccionado a este post."),
-            show_alert=True,
+        if reaction_result is None:
+            await callback.answer(
+                BOT_MESSAGES.get("reaction_already", "Ya has reaccionado a este post."),
+                show_alert=True,
+            )
+            return
+
+        # Usar CoordinadorCentral para procesar la reacción unificadamente
+        coordinador = CoordinadorCentral(session)
+        result = await coordinador.ejecutar_flujo(
+            user_id,
+            AccionUsuario.REACCIONAR_PUBLICACION,
+            message_id=message_id,
+            channel_id=channel_id,
+            reaction_type=reaction_type,
+            is_native_reaction=False,
+            bot=bot,
+            skip_unified_notifications=False  # CoordinadorCentral manejará las notificaciones unificadas
         )
-        return
 
-    from services.point_service import PointService
+        # Actualizar el markup del mensaje con los conteos actualizados
+        await service.update_reaction_markup(chat_id, message_id)
+        
+        # Responder al callback con mensaje simple
+        if result.get("success"):
+            await callback.answer("✅ Reacción registrada")
+            logger.info(f"Inline reaction processed successfully: user {user_id}, message {message_id}")
+        else:
+            error_message = result.get("message", "No se pudo procesar tu reacción.")
+            await callback.answer(error_message, show_alert=True)
+            logger.warning(f"Inline reaction failed: user {user_id}, message {message_id}, error: {error_message}")
 
-    points_dict = await channel_service.get_reaction_points(channel_id)
-    points = float(points_dict.get(reaction_type, 0.0))
-
-    await PointService(session).add_points(callback.from_user.id, points, bot=bot)
-    from services.mission_service import MissionService
-    mission_service = MissionService(session)
-    await mission_service.update_progress(callback.from_user.id, "reaction", bot=bot)
-
-    await service.update_reaction_markup(chat_id, message_id)
-    await callback.answer(BOT_MESSAGES["reaction_registered_points"].format(points=points))
-    await bot.send_message(
-        callback.from_user.id,
-        BOT_MESSAGES["reaction_registered_points"].format(points=points),
-    )
+    except Exception as e:
+        logger.exception(f"Error processing inline reaction: {e}")
+        try:
+            await callback.answer("Diana parece confundida por tu reacción... Inténtalo de nuevo.", show_alert=True)
+        except:
+            pass  # Evitar loops de error

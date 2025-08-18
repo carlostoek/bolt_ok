@@ -125,7 +125,7 @@ class MissionService:
              from services.point_service import PointService
              point_service = PointService(self.session)
 
-        await point_service.add_points(user_id, mission.reward_points, bot=bot)
+        await point_service.add_points(user_id, mission.reward_points, bot=bot, skip_direct_notification=_skip_notification)
 
         # Update last reset timestamps for daily/weekly missions
         if mission.type == "daily":
@@ -220,6 +220,7 @@ class MissionService:
         increment: int = 1,
         current_value: int | None = None,
         bot=None,
+        skip_direct_notification: bool = False,
     ) -> None:
         missions = await self.get_active_missions(mission_type=mission_type)
         for mission in missions:
@@ -245,8 +246,8 @@ class MissionService:
             if progress >= mission.target_value:
                 record.completed = True
                 record.completed_at = datetime.datetime.utcnow()
-                await self.point_service.add_points(user_id, mission.reward_points, bot=bot)
-                if bot:
+                await self.point_service.add_points(user_id, mission.reward_points, bot=bot, skip_direct_notification=True)
+                if bot and not skip_direct_notification:
                     from utils.message_utils import get_mission_completed_message
                     from utils.keyboard_utils import get_mission_completed_keyboard
 

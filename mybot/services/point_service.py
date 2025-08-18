@@ -106,7 +106,7 @@ class PointService:
                 )
         return True, progress
 
-    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None) -> UserStats:
+    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None, skip_direct_notification: bool = False) -> UserStats:
         user = await self.session.get(User, user_id)
         if not user:
             logger.warning(
@@ -145,7 +145,7 @@ class PointService:
         logger.info(
             f"User {user_id} gained {total} points (base {points}, x{multiplier}). Total: {user.points}"
         )
-        if bot and user.points - progress.last_notified_points >= 5:
+        if bot and not skip_direct_notification and user.points - progress.last_notified_points >= 5:
             await bot.send_message(
                 user_id,
                 f"Has acumulado {user.points:.1f} puntos en total",

@@ -14,9 +14,11 @@ from .integration.narrative_access_service import NarrativeAccessService
 from .integration.event_coordinator import EventCoordinator
 from .narrative_service import NarrativeService
 from .point_service import PointService
+from .mission_service import MissionService
 from .reconciliation_service import ReconciliationService
 from .event_bus import get_event_bus, EventType, Event
 from .notification_service import NotificationService
+from .user_service import UserService
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +52,9 @@ class CoordinadorCentral:
         # Servicios base
         self.narrative_service = NarrativeService(session)
         self.point_service = PointService(session)
+        self.mission_service = MissionService(session)
         self.reconciliation_service = ReconciliationService(session)
+        self.user_service = UserService(session)
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
     
@@ -126,7 +130,7 @@ class CoordinadorCentral:
         """
         # 1. Otorgar puntos por la reacción
         puntos_otorgados = await self.channel_engagement.award_channel_reaction(
-            user_id, message_id, channel_id, bot=bot
+            user_id, message_id, channel_id, bot=bot, skip_direct_notifications=True
         )
         
         if not puntos_otorgados:
@@ -136,10 +140,30 @@ class CoordinadorCentral:
                 "action": "reaction_failed"
             }
         
-        # 2. Obtener puntos actuales del usuario
+        # 2. Verificar y completar misiones de reacción
+        misiones_completadas = []
+        try:
+            # Buscar misiones de reacción activas
+            misiones_reaccion = await self.mission_service.get_active_missions(user_id=user_id, mission_type="reaction")
+            for mision in misiones_reaccion:
+                # Intentar completar la misión
+                completada, mision_obj = await self.mission_service.complete_mission(
+                    user_id, mision.id, reaction_type=reaction_type, 
+                    target_message_id=message_id, bot=bot, _skip_notification=True
+                )
+                if completada:
+                    misiones_completadas.append({
+                        "name": mision_obj.name,
+                        "points": mision_obj.reward_points
+                    })
+                    logger.info(f"Mission {mision.id} completed for user {user_id} via reaction")
+        except Exception as e:
+            logger.exception(f"Error checking reaction missions for user {user_id}: {e}")
+
+        # 3. Obtener puntos actuales del usuario (después de misiones)
         puntos_actuales = await self.point_service.get_user_points(user_id)
         
-        # 3. Verificar si se desbloquea una pista narrativa
+        # 4. Verificar si se desbloquea una pista narrativa
         pista_desbloqueada = None
         if puntos_actuales % 50 <= 15 and puntos_actuales > 15:  # Desbloquear pista cada ~50 puntos
             # Obtener fragmento actual del usuario
@@ -160,7 +184,7 @@ class CoordinadorCentral:
                         pista_desbloqueada = pista
                         break
         
-        # 4. Generar mensaje de respuesta
+        # 5. Generar mensaje de respuesta
         mensaje_base = "Diana sonríe al notar tu reacción... *+10 besitos* 💋 han sido añadidos a tu cuenta."
         if pista_desbloqueada:
             mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
@@ -173,6 +197,7 @@ class CoordinadorCentral:
             "points_awarded": 10,
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
+            "missions_completed": misiones_completadas,
             "action": "reaction_success"
         }
     
@@ -860,16 +885,17 @@ class CoordinadorCentral:
                     }
                 )
             
-            # Agregar notificación de misión completada si aplica
-            if result.get("mission_completed"):
-                await notification_service.add_notification(
-                    user_id,
-                    "mission",
-                    {
-                        "name": result["mission_completed"],
-                        "points": result.get("mission_points", 0)
-                    }
-                )
+            # Agregar notificaciones de misiones completadas si aplica
+            if result.get("missions_completed"):
+                for mission in result["missions_completed"]:
+                    await notification_service.add_notification(
+                        user_id,
+                        "mission",
+                        {
+                            "name": mission["name"],
+                            "points": mission["points"]
+                        }
+                    )
             
             # Agregar notificación de logro si aplica
             if result.get("achievement_unlocked"):

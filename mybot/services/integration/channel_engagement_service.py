@@ -23,7 +23,7 @@ class ChannelEngagementService:
         self.user_service = UserService(session)
         self.config_service = ConfigService(session)
     
-    async def award_channel_reaction(self, user_id: int, message_id: int, channel_id: int, bot=None):
+    async def award_channel_reaction(self, user_id: int, message_id: int, channel_id: int, bot=None, skip_direct_notifications: bool = False):
         """
         Awards points to a user for reacting to a message in a channel.
         
@@ -50,7 +50,12 @@ class ChannelEngagementService:
         
         # Award points for the reaction
         try:
-            await self.point_service.award_reaction(user, message_id, bot)
+            # Use custom point awarding to avoid duplicate notifications when used from CoordinadorCentral
+            if skip_direct_notifications:
+                # Award points directly without the extra notifications from award_reaction
+                await self.point_service.add_points(user_id, 10, bot=bot, skip_direct_notification=True)
+            else:
+                await self.point_service.award_reaction(user, message_id, bot)
             logger.info(f"Awarded reaction points to user {user_id} for message {message_id} in channel {channel_id}")
             return True
         except Exception as e:
