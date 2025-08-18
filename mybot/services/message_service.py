@@ -128,7 +128,7 @@ class MessageService:
     async def register_reaction(
         self, user_id: int, message_id: int, reaction_type: str
     ) -> ButtonReaction | None:
-        # Verificar si ya existe esta reacción
+        # Verificar si ya existe esta reacción exacta
         stmt = select(ButtonReaction).where(
             ButtonReaction.message_id == message_id,
             ButtonReaction.user_id == user_id,
@@ -142,15 +142,20 @@ class MessageService:
             logger.info(f"User {user_id} already reacted with {reaction_type} to message {message_id}")
             return None
 
-        # Verificar si el usuario ya reaccionó con otro emoji (opcional - solo si queremos permitir una reacción por usuario)
-        # stmt = select(ButtonReaction).where(
-        #     ButtonReaction.message_id == message_id,
-        #     ButtonReaction.user_id == user_id,
-        # )
-        # result = await self.session.execute(stmt)
-        # if result.scalar():
-        #     logger.info(f"User {user_id} already has a different reaction to message {message_id}")
-        #     return None
+        # Verificar y eliminar si el usuario ya reaccionó con otro emoji
+        # para permitir solo una reacción por usuario por mensaje
+        stmt = select(ButtonReaction).where(
+            ButtonReaction.message_id == message_id,
+            ButtonReaction.user_id == user_id,
+        )
+        result = await self.session.execute(stmt)
+        existing_different_reaction = result.scalar()
+        
+        if existing_different_reaction:
+            logger.info(f"User {user_id} changing reaction from {existing_different_reaction.reaction_type} to {reaction_type} on message {message_id}")
+            # Eliminar la reacción anterior
+            await self.session.delete(existing_different_reaction)
+            await self.session.flush()
 
         # Crear nueva reacción
         reaction = ButtonReaction(
