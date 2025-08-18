@@ -592,7 +592,7 @@ class CoordinadorCentral:
             )
             log.gamification(f"Awarded {points_to_award} points to user {user_id} for native reaction to message {message_id}", user_id=user_id, points=points_to_award)
         except Exception as e:
-            logger.exception(f"Error awarding points for native reaction to user {user_id}: {e}")
+            logging.exception(f"Error awarding points for native reaction to user {user_id}: {e}")
             return {
                 "success": False,
                 "message": "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde.",
@@ -824,7 +824,7 @@ class CoordinadorCentral:
             return result
             
         except Exception as e:
-            logger.exception(f"Error in async workflow {accion}: {str(e)}")
+            logging.exception(f"Error in async workflow {accion}: {str(e)}")
             
             # Emit error event
             await self.event_bus.publish(
@@ -872,7 +872,7 @@ class CoordinadorCentral:
                 yield result
             except Exception as e:
                 # Transaction will be rolled back automatically
-                logger.exception(f"Transaction failed in workflow: {e}")
+                logging.exception(f"Transaction failed in workflow: {e}")
                 raise
     
     async def execute_parallel_workflows(self, workflows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -901,7 +901,7 @@ class CoordinadorCentral:
                     **workflow_spec.get('kwargs', {})
                 )
             except Exception as e:
-                logger.exception(f"Error in parallel workflow execution: {e}")
+                logging.exception(f"Error in parallel workflow execution: {e}")
                 return {
                     "success": False,
                     "error": str(e),
@@ -1040,7 +1040,7 @@ class CoordinadorCentral:
                 
         except Exception as e:
             # Don't let event emission failures break the main workflow
-            logger.exception(f"Error emitting workflow events: {e}")
+            logging.exception(f"Error emitting workflow events: {e}")
     
     # ==================== CONSISTENCY AND MONITORING ====================
     
@@ -1111,7 +1111,7 @@ class CoordinadorCentral:
             return consistency_report
             
         except Exception as e:
-            logger.exception(f"Error in consistency check for user {user_id}: {e}")
+            logging.exception(f"Error in consistency check for user {user_id}: {e}")
             return {
                 "user_id": user_id,
                 "success": False,
@@ -1156,7 +1156,7 @@ class CoordinadorCentral:
             }
             
         except Exception as e:
-            logger.exception(f"Error initializing coordination systems: {e}")
+            logging.exception(f"Error initializing coordination systems: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -1257,7 +1257,7 @@ class CoordinadorCentral:
             return health_report
             
         except Exception as e:
-            logger.exception(f"Error during system health check: {e}")
+            logging.exception(f"Error during system health check: {e}")
             return {
                 "timestamp": asyncio.get_event_loop().time(),
                 "overall_status": "error",
@@ -1292,7 +1292,7 @@ class CoordinadorCentral:
             return status
             
         except Exception as e:
-            logger.exception(f"Error getting coordination status: {e}")
+            logging.exception(f"Error getting coordination status: {e}")
             return {
                 "error": str(e),
                 "coordinador_central": {"active": False}
@@ -1409,10 +1409,10 @@ class CoordinadorCentral:
                     }
                 )
             
-            logger.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
+            logging.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
             
         except Exception as e:
-            logger.exception(f"Error sending unified notifications: {e}")
+            logging.exception(f"Error sending unified notifications: {e}")
             # Fallback: enviar mensaje básico
             try:
                 basic_message = result.get("message", "Diana sonríe al ver tu progreso... 💋")
