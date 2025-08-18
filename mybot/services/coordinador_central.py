@@ -16,6 +16,7 @@ from .narrative_service import NarrativeService
 from .point_service import PointService
 from .reconciliation_service import ReconciliationService
 from .event_bus import get_event_bus, EventType, Event
+from .notification_service import NotificationService
 
 logger = logging.getLogger(__name__)
 
@@ -66,17 +67,35 @@ class CoordinadorCentral:
             Dict con los resultados del flujo y mensajes para el usuario
         """
         try:
+            # Obtener bot si está disponible para crear servicio de notificaciones
+            bot = kwargs.get('bot')
+            notification_service = None
+            if bot:
+                notification_service = NotificationService(self.session, bot)
+            
             # Seleccionar el flujo adecuado según la acción
             if accion == AccionUsuario.REACCIONAR_PUBLICACION:
-                return await self._flujo_reaccion_publicacion(user_id, **kwargs)
+                result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
             elif accion == AccionUsuario.ACCEDER_NARRATIVA_VIP:
                 return await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
             elif accion == AccionUsuario.TOMAR_DECISION:
                 return await self._flujo_tomar_decision(user_id, **kwargs)
             elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                return await self._flujo_participacion_canal(user_id, **kwargs)
+                result = await self._flujo_participacion_canal(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
-                return await self._flujo_verificar_engagement(user_id, **kwargs)
+                result = await self._flujo_verificar_engagement(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -814,3 +833,124 @@ class CoordinadorCentral:
                 "error": str(e),
                 "coordinador_central": {"active": False}
             }
+    
+    # ==================== SISTEMA DE NOTIFICACIONES UNIFICADAS ====================
+    
+    async def _send_unified_notifications(self, notification_service: NotificationService, user_id: int, result: Dict[str, Any], accion: AccionUsuario) -> None:
+        """
+        Envía notificaciones unificadas basadas en el resultado del flujo ejecutado.
+        Consolida múltiples tipos de notificaciones en un solo mensaje.
+        
+        Args:
+            notification_service: Servicio de notificaciones
+            user_id: ID del usuario
+            result: Resultado del flujo ejecutado
+            accion: Acción que se ejecutó
+        """
+        try:
+            # Agregar notificación de puntos si se otorgaron
+            if result.get("points_awarded"):
+                await notification_service.add_notification(
+                    user_id,
+                    "points",
+                    {
+                        "points": result["points_awarded"],
+                        "total": result.get("total_points", 0),
+                        "source": accion.value
+                    }
+                )
+            
+            # Agregar notificación de misión completada si aplica
+            if result.get("mission_completed"):
+                await notification_service.add_notification(
+                    user_id,
+                    "mission",
+                    {
+                        "name": result["mission_completed"],
+                        "points": result.get("mission_points", 0)
+                    }
+                )
+            
+            # Agregar notificación de logro si aplica
+            if result.get("achievement_unlocked"):
+                await notification_service.add_notification(
+                    user_id,
+                    "achievement",
+                    {
+                        "name": result["achievement_unlocked"],
+                        "description": result.get("achievement_description", "")
+                    }
+                )
+            
+            # Agregar notificación de insignia si aplica
+            if result.get("badge_awarded"):
+                await notification_service.add_notification(
+                    user_id,
+                    "badge",
+                    {
+                        "name": result["badge_awarded"],
+                        "icon": result.get("badge_icon", "🏅")
+                    }
+                )
+            
+            # Agregar notificación de subida de nivel si aplica
+            if result.get("level_up"):
+                await notification_service.add_notification(
+                    user_id,
+                    "level",
+                    {
+                        "level": result["level_up"],
+                        "reward": result.get("level_reward", "")
+                    }
+                )
+            
+            # Agregar notificación de pista desbloqueada si aplica
+            if result.get("hint_unlocked"):
+                await notification_service.add_notification(
+                    user_id,
+                    "hint",
+                    {
+                        "text": result["hint_unlocked"]
+                    }
+                )
+            
+            # Agregar notificación de la acción específica
+            if accion == AccionUsuario.REACCIONAR_PUBLICACION:
+                await notification_service.add_notification(
+                    user_id,
+                    "reaction",
+                    {
+                        "type": "publication",
+                        "reaction_type": result.get("reaction_type", "unknown"),
+                        "is_native": result.get("is_native_reaction", False)
+                    }
+                )
+            elif accion == AccionUsuario.PARTICIPAR_CANAL:
+                await notification_service.add_notification(
+                    user_id,
+                    "participation",
+                    {
+                        "action_type": result.get("action_type", "unknown"),
+                        "points": result.get("points_awarded", 0)
+                    }
+                )
+            elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
+                await notification_service.add_notification(
+                    user_id,
+                    "daily_check",
+                    {
+                        "streak": result.get("streak", 1),
+                        "points": result.get("points_awarded", 0)
+                    }
+                )
+            
+            logger.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
+            
+        except Exception as e:
+            logger.exception(f"Error sending unified notifications: {e}")
+            # Fallback: enviar mensaje básico
+            try:
+                basic_message = result.get("message", "Diana sonríe al ver tu progreso... 💋")
+                await notification_service.send_immediate_notification(user_id, basic_message)
+            except:
+                pass  # Evitar loops de error

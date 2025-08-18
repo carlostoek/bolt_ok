@@ -53,6 +53,7 @@ from handlers.user import start_token
 from handlers.vip import menu as vip, gamification
 from handlers.vip.auction_user import router as auction_user_router
 from handlers.reaction_callback import router as reaction_callback_router
+from handlers.native_reaction_handler import router as native_reaction_router
 from handlers.admin import admin_router
 from handlers.admin.auction_admin import router as auction_admin_router
 from handlers.lore_handlers import router as lore_router
@@ -195,6 +196,7 @@ async def main() -> None:
             ("vip_menu", vip.router),
             ("auction_user", auction_user_router),
             ("reaction_callback", reaction_callback_router),
+            ("native_reaction", native_reaction_router),
             ("daily_gift", daily_gift.router),
             ("minigames", minigames.router),
             ("gamification", gamification.router),

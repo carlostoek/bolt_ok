@@ -75,10 +75,12 @@ async def handle_reaction_callback(
     # Enviar respuesta al usuario
     if result["success"]:
         await callback.answer(BOT_MESSAGES.get("reaction_registered", "Reacción registrada"))
-        await safe_send_message(
-            bot,
-            callback.from_user.id,
-            result["message"]
-        )
+        
+        # El sistema de notificaciones unificadas ya se encarga del envío de mensajes
+        # a través del CoordinadorCentral, no necesitamos enviar mensajes duplicados aquí
+        
+        # Solo para depuración: mostrar que se procesó correctamente
+        logger.info(f"Reaction processed successfully for user {callback.from_user.id}, "
+                   f"unified notifications handled by CoordinadorCentral")
     else:
         await callback.answer(result["message"], show_alert=True)
