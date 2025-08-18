@@ -58,10 +58,11 @@ async def handle_reaction_callback(
         return await callback.answer("Mensaje no válido.")
 
     # Usar el coordinador central para manejar el flujo completo
+    # Utilizar la nueva acción específica para reacciones inline
     coordinador = CoordinadorCentral(session)
     result = await coordinador.ejecutar_flujo(
         callback.from_user.id,
-        AccionUsuario.REACCIONAR_PUBLICACION,
+        AccionUsuario.REACCIONAR_PUBLICACION_INLINE,  # Nuevo tipo específico para reacciones inline
         message_id=message_id,
         channel_id=channel_id,
         reaction_type=reaction_type,

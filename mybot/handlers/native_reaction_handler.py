@@ -65,14 +65,14 @@ async def handle_native_reaction(
         notification_service = NotificationService(session, bot)
         
         # Procesar la reacción usando el CoordinadorCentral
+        # Utilizar la nueva acción específica para reacciones nativas
         coordinador = CoordinadorCentral(session)
         result = await coordinador.ejecutar_flujo(
             user_id,
-            AccionUsuario.REACCIONAR_PUBLICACION,
+            AccionUsuario.REACCIONAR_PUBLICACION_NATIVA,  # Nuevo tipo específico para reacciones nativas
             message_id=message_id,
             channel_id=chat_id,
             reaction_type=reaction_type,
-            is_native_reaction=True,
             bot=bot,
             skip_unified_notifications=False  # CoordinadorCentral maneja las notificaciones unificadas
         )

@@ -128,14 +128,31 @@ class MessageService:
     async def register_reaction(
         self, user_id: int, message_id: int, reaction_type: str
     ) -> ButtonReaction | None:
+        # Verificar si ya existe esta reacción
         stmt = select(ButtonReaction).where(
             ButtonReaction.message_id == message_id,
             ButtonReaction.user_id == user_id,
+            ButtonReaction.reaction_type == reaction_type,
         )
         result = await self.session.execute(stmt)
-        if result.scalar():
+        existing_reaction = result.scalar()
+        
+        # Si ya existe esta reacción exacta, no hacer nada
+        if existing_reaction:
+            logger.info(f"User {user_id} already reacted with {reaction_type} to message {message_id}")
             return None
 
+        # Verificar si el usuario ya reaccionó con otro emoji (opcional - solo si queremos permitir una reacción por usuario)
+        # stmt = select(ButtonReaction).where(
+        #     ButtonReaction.message_id == message_id,
+        #     ButtonReaction.user_id == user_id,
+        # )
+        # result = await self.session.execute(stmt)
+        # if result.scalar():
+        #     logger.info(f"User {user_id} already has a different reaction to message {message_id}")
+        #     return None
+
+        # Crear nueva reacción
         reaction = ButtonReaction(
             message_id=message_id,
             user_id=user_id,
@@ -144,6 +161,11 @@ class MessageService:
         self.session.add(reaction)
         await self.session.commit()
         await self.session.refresh(reaction)
+
+        # Limpiar cualquier caché de conteos previos para forzar actualización
+        previous_counts_key = f"prev_counts_{message_id}"
+        if hasattr(self, "_previous_counts_cache") and previous_counts_key in self._previous_counts_cache:
+            del self._previous_counts_cache[previous_counts_key]
 
         from services.mission_service import MissionService
         mission_service = MissionService(self.session)
@@ -174,11 +196,43 @@ class MessageService:
         """Update inline keyboard of an interactive post with current counts."""
         chat_id_str = str(chat_id)
 
+        # Obtener conteos actuales siempre frescos
         counts = await self.get_reaction_counts(message_id)
+        
+        # Mostrar los conteos que estamos usando para depuración
+        logger.info(f"Current reaction counts for message {message_id}: {counts}")
 
+        # Key de caché para este mensaje específico
+        previous_counts_key = f"prev_counts_{message_id}"
+        if not hasattr(self, "_previous_counts_cache"):
+            self._previous_counts_cache = {}
+        
+        # Obtener conteos anteriores del caché
+        previous_counts = self._previous_counts_cache.get(previous_counts_key, {})
+        
+        # Comparar si hay cambios en los conteos
+        has_changes = previous_counts != counts
+        
+        # Log detallado para debugging
+        if previous_counts:
+            logger.info(f"Previous counts: {previous_counts}, Current counts: {counts}, Has changes: {has_changes}")
+        
+        # Actualizar el caché con los nuevos conteos
+        self._previous_counts_cache[previous_counts_key] = counts.copy()
+        
+        # Si no hay cambios reales y no es la primera vez, no actualizar el markup
+        if not has_changes and previous_counts:
+            logger.info(f"No changes in reaction counts for message {message_id}, skipping update")
+            return
+
+        # Siempre forzar obtener las reacciones disponibles del canal
         raw_reactions, _ = await self.channel_service.get_reactions_and_points(chat_id)
+        if not raw_reactions:
+            from utils.config import DEFAULT_REACTION_BUTTONS
+            raw_reactions = DEFAULT_REACTION_BUTTONS
 
         try:
+            # Crear markup con los conteos actualizados
             markup_to_edit = get_reaction_kb(
                 reactions=raw_reactions,
                 current_counts=counts,
@@ -187,16 +241,25 @@ class MessageService:
             )
             logger.info(f"DEBUG: Markup being sent for update: {markup_to_edit}")
 
+            # Intentar actualizar el markup
             await self.bot.edit_message_reply_markup(
                 chat_id=chat_id_str,
                 message_id=message_id,
                 reply_markup=markup_to_edit,
             )
+            logger.info(f"Successfully updated reaction markup for message {message_id} with counts: {counts}")
+            
         except TelegramBadRequest as e:
-            logger.error(
-                f"Failed to update reaction markup for chat {chat_id}, message {message_id}: {e}",
-                exc_info=True,
-            )
+            # Solo registrar como error si no es un "message is not modified"
+            if "message is not modified" in str(e):
+                logger.info(
+                    f"No changes needed for markup in chat {chat_id}, message {message_id}"
+                )
+            else:
+                logger.error(
+                    f"Failed to update reaction markup for chat {chat_id}, message {message_id}: {e}",
+                    exc_info=True,
+                )
         except TelegramAPIError as e:
             logger.error(
                 f"Unexpected API error updating reaction markup for chat {chat_id}, message {message_id}: {e}",

@@ -24,7 +24,9 @@ logger = logging.getLogger(__name__)
 
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
-    REACCIONAR_PUBLICACION = "reaccionar_publicacion"
+    REACCIONAR_PUBLICACION = "reaccionar_publicacion"  # Tipo genérico (legacy)
+    REACCIONAR_PUBLICACION_INLINE = "reaccionar_publicacion_inline"  # Reacción de botones inline (solo misión)
+    REACCIONAR_PUBLICACION_NATIVA = "reaccionar_publicacion_nativa"  # Reacción nativa de Telegram (solo puntos)
     ACCEDER_NARRATIVA_VIP = "acceder_narrativa_vip"
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
@@ -79,7 +81,22 @@ class CoordinadorCentral:
             
             # Seleccionar el flujo adecuado según la acción
             if accion == AccionUsuario.REACCIONAR_PUBLICACION:
+                # Flujo legacy para mantener compatibilidad
                 result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
+            elif accion == AccionUsuario.REACCIONAR_PUBLICACION_INLINE:
+                # Nuevo flujo para reacciones inline (botones) - solo puntos por misión
+                result = await self._flujo_reaccion_publicacion_inline(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
+            elif accion == AccionUsuario.REACCIONAR_PUBLICACION_NATIVA:
+                # Nuevo flujo para reacciones nativas - solo puntos directos, sin misión
+                result = await self._flujo_reaccion_publicacion_nativa(user_id, **kwargs)
                 # Enviar notificaciones unificadas si está habilitado
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
@@ -128,6 +145,16 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
+        # 0. Registrar la reacción en la base de datos
+        from services.message_service import MessageService
+        from sqlalchemy.ext.asyncio import AsyncSession
+        
+        # Crear una instancia temporal de MessageService para registrar la reacción
+        message_service = MessageService(self.session, bot)
+        reaction_registered = await message_service.register_reaction(
+            user_id, message_id, reaction_type
+        )
+        
         # 1. Otorgar puntos por la reacción
         puntos_otorgados = await self.channel_engagement.award_channel_reaction(
             user_id, message_id, channel_id, bot=bot, skip_direct_notifications=True
@@ -140,25 +167,27 @@ class CoordinadorCentral:
                 "action": "reaction_failed"
             }
         
-        # 2. Verificar y completar misiones de reacción
+        # 2. Verificar y completar misiones de reacción, pero solo la misión específica para este mensaje
         misiones_completadas = []
         try:
-            # Buscar misiones de reacción activas
-            misiones_reaccion = await self.mission_service.get_active_missions(user_id=user_id, mission_type="reaction")
-            for mision in misiones_reaccion:
-                # Intentar completar la misión
-                completada, mision_obj = await self.mission_service.complete_mission(
-                    user_id, mision.id, reaction_type=reaction_type, 
-                    target_message_id=message_id, bot=bot, _skip_notification=True
-                )
-                if completada:
-                    misiones_completadas.append({
-                        "name": mision_obj.name,
-                        "points": mision_obj.reward_points
-                    })
-                    logger.info(f"Mission {mision.id} completed for user {user_id} via reaction")
+            # Filtrar solo las misiones relacionadas con este mensaje específico
+            mission_id = f"reaction_reaccionar_{message_id}"
+            
+            # Intentar completar la misión específica para este mensaje
+            completada, mision_obj = await self.mission_service.complete_mission(
+                user_id, mission_id, reaction_type=reaction_type, 
+                target_message_id=message_id, bot=bot, _skip_notification=True
+            )
+            
+            if completada:
+                misiones_completadas.append({
+                    "name": mision_obj.name,
+                    "points": mision_obj.reward_points
+                })
+                logger.info(f"Mission {mission_id} completed for user {user_id} via reaction")
+                
         except Exception as e:
-            logger.exception(f"Error checking reaction missions for user {user_id}: {e}")
+            logger.exception(f"Error checking reaction mission for user {user_id}: {e}")
 
         # 3. Obtener puntos actuales del usuario (después de misiones)
         puntos_actuales = await self.point_service.get_user_points(user_id)
@@ -199,6 +228,192 @@ class CoordinadorCentral:
             "hint_unlocked": pista_desbloqueada,
             "missions_completed": misiones_completadas,
             "action": "reaction_success"
+        }
+        
+    async def _flujo_reaccion_publicacion_inline(self, user_id: int, message_id: int, channel_id: int, reaction_type: str, bot=None, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para manejar reacciones inline (botones) a publicaciones en canales.
+        Solo otorga puntos a través de la misión, no por la reacción directa.
+        
+        Args:
+            user_id: ID del usuario
+            message_id: ID del mensaje al que se reaccionó
+            channel_id: ID del canal donde está el mensaje
+            reaction_type: Tipo de reacción (emoji)
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con resultados y mensajes
+        """
+        # 0. Registrar la reacción en la base de datos
+        from services.message_service import MessageService
+        
+        # Crear una instancia temporal de MessageService para registrar la reacción
+        message_service = MessageService(self.session, bot)
+        reaction_registered = await message_service.register_reaction(
+            user_id, message_id, reaction_type
+        )
+        
+        # Si no se pudo registrar la reacción (ya existía), solo actualizamos el markup
+        if not reaction_registered:
+            # Actualizar el markup para mostrar el conteo correcto
+            await message_service.update_reaction_markup(channel_id, message_id)
+            
+            return {
+                "success": True,
+                "message": "Diana asiente al reconocer tu reacción...",
+                "action": "reaction_already_registered",
+                "total_points": await self.point_service.get_user_points(user_id)
+            }
+        
+        # 1. Verificar y completar SOLO la misión específica para este mensaje
+        # NOTA: No otorgamos puntos directos por la reacción
+        misiones_completadas = []
+        try:
+            # Misión específica para este mensaje
+            mission_id = f"reaction_reaccionar_{message_id}"
+            
+            # Intentar completar esta misión específica
+            completada, mision_obj = await self.mission_service.complete_mission(
+                user_id, mission_id, reaction_type=reaction_type, 
+                target_message_id=message_id, bot=bot, _skip_notification=True
+            )
+            
+            if completada:
+                misiones_completadas.append({
+                    "name": mision_obj.name,
+                    "points": mision_obj.reward_points
+                })
+                logger.info(f"Mission {mission_id} completed for user {user_id} via inline reaction")
+                
+        except Exception as e:
+            logger.exception(f"Error checking reaction mission for user {user_id}: {e}")
+
+        # 2. Obtener puntos actuales del usuario (después de misiones)
+        puntos_actuales = await self.point_service.get_user_points(user_id)
+        
+        # 3. Verificar si se desbloquea una pista narrativa
+        pista_desbloqueada = None
+        if puntos_actuales % 50 <= 15 and puntos_actuales > 15:  # Desbloquear pista cada ~50 puntos
+            # Obtener fragmento actual del usuario
+            fragmento_actual = await self.narrative_service.get_user_current_fragment(user_id)
+            if fragmento_actual:
+                # Simular desbloqueo de pista basada en el fragmento actual
+                pistas = {
+                    "level1_": "El jardín de los secretos esconde más de lo que revela a simple vista...",
+                    "level2_": "Las sombras del pasillo susurran verdades que nadie se atreve a pronunciar...",
+                    "level3_": "Bajo la luz de la luna, los amantes intercambian más que simples caricias...",
+                    "level4_": "El sabor prohibido de sus labios esconde un secreto ancestral...",
+                    "level5_": "En la habitación del placer, las reglas convencionales se desvanecen...",
+                    "level6_": "El último velo cae, revelando la verdad que siempre estuvo ante tus ojos..."
+                }
+                
+                for prefix, pista in pistas.items():
+                    if fragmento_actual.key.startswith(prefix):
+                        pista_desbloqueada = pista
+                        break
+        
+        # 4. Generar mensaje de respuesta - indicando que los puntos vienen de la misión
+        if misiones_completadas:
+            total_mission_points = sum(m.get("points", 0) for m in misiones_completadas)
+            mensaje_base = f"Diana sonríe al notar tu reacción... *+{total_mission_points} besitos* 💋 han sido añadidos a tu cuenta por completar la misión."
+        else:
+            mensaje_base = "Diana sonríe al notar tu reacción..."
+            
+        if pista_desbloqueada:
+            mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+        else:
+            mensaje = mensaje_base
+        
+        return {
+            "success": True,
+            "message": mensaje,
+            "points_awarded": 0,  # No otorgamos puntos directos, solo por misión
+            "mission_points_awarded": sum(m.get("points", 0) for m in misiones_completadas),
+            "total_points": puntos_actuales,
+            "hint_unlocked": pista_desbloqueada,
+            "missions_completed": misiones_completadas,
+            "action": "reaction_inline_success"
+        }
+        
+    async def _flujo_reaccion_publicacion_nativa(self, user_id: int, message_id: int, channel_id: int, reaction_type: str, bot=None, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para manejar reacciones nativas de Telegram.
+        Solo otorga puntos directos (10), sin completar misiones.
+        
+        Args:
+            user_id: ID del usuario
+            message_id: ID del mensaje al que se reaccionó
+            channel_id: ID del canal donde está el mensaje
+            reaction_type: Tipo de reacción (emoji)
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con resultados y mensajes
+        """
+        # 0. Verificar si la reacción ya fue procesada anteriormente
+        user = await self.session.get(User, user_id)
+        if not user:
+            return {
+                "success": False,
+                "message": "Usuario no encontrado",
+                "action": "reaction_failed"
+            }
+        
+        # 1. Otorgar puntos por la reacción nativa - directo sin misión
+        try:
+            # Otorgar 10 puntos directamente sin pasar por misiones
+            await self.point_service.add_points(
+                user_id, 10, bot=bot, skip_direct_notification=True
+            )
+            logger.info(f"Awarded 10 points to user {user_id} for native reaction to message {message_id}")
+        except Exception as e:
+            logger.exception(f"Error awarding points for native reaction to user {user_id}: {e}")
+            return {
+                "success": False,
+                "message": "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde.",
+                "action": "reaction_failed"
+            }
+
+        # 2. Obtener puntos actuales del usuario
+        puntos_actuales = await self.point_service.get_user_points(user_id)
+        
+        # 3. Verificar si se desbloquea una pista narrativa
+        pista_desbloqueada = None
+        if puntos_actuales % 50 <= 15 and puntos_actuales > 15:  # Desbloquear pista cada ~50 puntos
+            # Obtener fragmento actual del usuario
+            fragmento_actual = await self.narrative_service.get_user_current_fragment(user_id)
+            if fragmento_actual:
+                # Simular desbloqueo de pista basada en el fragmento actual
+                pistas = {
+                    "level1_": "El jardín de los secretos esconde más de lo que revela a simple vista...",
+                    "level2_": "Las sombras del pasillo susurran verdades que nadie se atreve a pronunciar...",
+                    "level3_": "Bajo la luz de la luna, los amantes intercambian más que simples caricias...",
+                    "level4_": "El sabor prohibido de sus labios esconde un secreto ancestral...",
+                    "level5_": "En la habitación del placer, las reglas convencionales se desvanecen...",
+                    "level6_": "El último velo cae, revelando la verdad que siempre estuvo ante tus ojos..."
+                }
+                
+                for prefix, pista in pistas.items():
+                    if fragmento_actual.key.startswith(prefix):
+                        pista_desbloqueada = pista
+                        break
+        
+        # 4. Generar mensaje de respuesta para reacción nativa
+        mensaje_base = "Diana sonríe al notar tu reacción nativa... *+10 besitos* 💋 han sido añadidos a tu cuenta."
+        if pista_desbloqueada:
+            mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+        else:
+            mensaje = mensaje_base
+        
+        return {
+            "success": True,
+            "message": mensaje,
+            "points_awarded": 10,
+            "total_points": puntos_actuales,
+            "hint_unlocked": pista_desbloqueada,
+            "missions_completed": [],  # No hay misiones completadas en reacciones nativas
+            "action": "reaction_native_success"
         }
     
     async def _flujo_acceso_narrativa_vip(self, user_id: int, fragment_key: str, bot=None) -> Dict[str, Any]:
