@@ -192,10 +192,28 @@ class NotificationService:
             # Procesar reacciones
             if "reaction" in grouped_notifications:
                 reactions = grouped_notifications["reaction"]
-                if len(reactions) == 1:
-                    message_parts.append("Diana sonríe al notar tu reacción...")
-                else:
-                    message_parts.append(f"Diana observa con cariño tus {len(reactions)} reacciones...")
+                # Separar reacciones nativas e inline
+                native_reactions = [r for r in reactions if r.get('is_native', False)]
+                inline_reactions = [r for r in reactions if not r.get('is_native', False)]
+                
+                # Construir mensaje según tipos de reacciones
+                if native_reactions and inline_reactions:
+                    message_parts.append(f"Diana sonríe al notar tus {len(reactions)} reacciones diferentes...")
+                elif native_reactions:
+                    if len(native_reactions) == 1:
+                        message_parts.append("💫 Diana se sonroja por tu reacción nativa...")
+                    else:
+                        message_parts.append(f"💫 Diana se emociona por tus {len(native_reactions)} reacciones nativas...")
+                elif inline_reactions:
+                    if len(inline_reactions) == 1:
+                        message_parts.append("👆 Diana sonríe al notar tu reacción...")
+                    else:
+                        message_parts.append(f"👆 Diana observa con cariño tus {len(inline_reactions)} reacciones...")
+                        
+                # Añadir conteo de puntos para reacciones nativas si hay
+                total_native_points = sum(r.get('points', 0) for r in native_reactions if r.get('points'))
+                if total_native_points > 0:
+                    message_parts.append(f"✨ +{total_native_points} besitos por reacciones nativas")
             
             # Construir mensaje final
             if message_parts:
@@ -288,6 +306,79 @@ class NotificationService:
             Delay en segundos
         """
         return self.aggregation_delay
+        
+    async def send_unified_notification(self, user_id: int, data: Dict[str, Any], bot: Bot) -> None:
+        """
+        Envía notificación unificada de reacción con formato personalizado según el tipo.
+        
+        Args:
+            user_id: ID del usuario de Telegram
+            data: Diccionario con datos de la notificación
+            bot: Instancia del bot para enviar mensajes
+        """
+        try:
+            message_parts = []
+            
+            # Determinar el tipo de reacción y personalizar el mensaje inicial
+            reaction_type = data.get('reaction_type', '')
+            is_native = data.get('is_native', False)
+            
+            # Mensaje introductorio según el tipo de reacción
+            if is_native:
+                intro = "💫 *Reacción nativa registrada*"
+            else:
+                intro = "👆 *Reacción registrada*"
+                
+            message_parts.append(intro)
+            
+            # Reacción registrada con puntos (solo para nativas)
+            reaction_points = data.get('points_awarded', 0)
+            if reaction_points > 0:
+                message_parts.append(f"✨ +{reaction_points} besitos")
+                
+                # Total de puntos si está disponible
+                total_points = data.get('total_points')
+                if total_points is not None:
+                    message_parts.append(f"Total actual: {total_points} besitos")
+            
+            # Misiones completadas
+            missions_completed = data.get('missions_completed', [])
+            if missions_completed:
+                if len(missions_completed) == 1:
+                    mission = missions_completed[0]
+                    message_parts.append(f"🎉 ¡Misión '{mission.get('name', 'Desconocida')}' completada!")
+                    if mission.get("points"):
+                        message_parts.append(f"Recompensa: {mission.get('points')} besitos")
+                else:
+                    total_mission_points = data.get('mission_points_awarded', 0)
+                    message_parts.append(f"🎉 ¡{len(missions_completed)} misiones completadas!")
+                    if total_mission_points > 0:
+                        message_parts.append(f"Recompensa total: {total_mission_points} besitos")
+            
+            # Pistas narrativas
+            narrative_hint = data.get('narrative_hint')
+            if narrative_hint:
+                message_parts.append("✨ *Nueva pista desbloqueada:*")
+                message_parts.append(f"_{narrative_hint}_")
+            
+            # Construir mensaje final
+            if message_parts:
+                # Añadir saludo personalizado de Diana
+                greeting = "Diana te mira con una sonrisa cálida...\n\n"
+                body = "\n".join(message_parts)
+                
+                # Añadir mensaje de cierre para reacciones
+                if is_native:
+                    closing = "\n\n*\"Qué bonito es sentir tu reacción espontánea, mi amor...\"*"
+                else:
+                    closing = "\n\n*\"Me encanta cuando interactúas conmigo, cariño...\"*"
+                
+                message = greeting + body + closing
+                await safe_send_message(bot, user_id, message)
+                logger.info(f"Sent unified reaction notification to user {user_id}")
+                
+        except Exception as e:
+            logger.exception(f"Error sending unified notification to user {user_id}: {e}")
     
     async def cleanup_expired_notifications(self, max_age_minutes: int = 5) -> None:
         """
