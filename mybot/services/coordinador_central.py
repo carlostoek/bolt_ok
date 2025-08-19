@@ -22,7 +22,8 @@ logger = logging.getLogger(__name__)
 
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
-    REACCIONAR_PUBLICACION = "reaccionar_publicacion"
+    REACCIONAR_PUBLICACION_NATIVA = "reaccionar_publicacion_nativa"
+    REACCIONAR_PUBLICACION_INLINE = "reaccionar_publicacion_inline"
     ACCEDER_NARRATIVA_VIP = "acceder_narrativa_vip"
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
@@ -74,7 +75,7 @@ class CoordinadorCentral:
                 notification_service = NotificationService(self.session, bot)
             
             # Seleccionar el flujo adecuado según la acción
-            if accion == AccionUsuario.REACCIONAR_PUBLICACION:
+            if accion in [AccionUsuario.REACCIONAR_PUBLICACION_NATIVA, AccionUsuario.REACCIONAR_PUBLICACION_INLINE]:
                 result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
                 # Enviar notificaciones unificadas si está habilitado
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
@@ -836,121 +837,171 @@ class CoordinadorCentral:
     
     # ==================== SISTEMA DE NOTIFICACIONES UNIFICADAS ====================
     
-    async def _send_unified_notifications(self, notification_service: NotificationService, user_id: int, result: Dict[str, Any], accion: AccionUsuario) -> None:
+    async def _send_unified_notifications(self, notification_service: NotificationService, 
+                                     user_id: int, result: Dict[str, Any], 
+                                     accion: AccionUsuario) -> None:
         """
-        Envía notificaciones unificadas basadas en el resultado del flujo ejecutado.
-        Consolida múltiples tipos de notificaciones en un solo mensaje.
-        
-        Args:
-            notification_service: Servicio de notificaciones
-            user_id: ID del usuario
-            result: Resultado del flujo ejecutado
-            accion: Acción que se ejecutó
+        Envía notificaciones unificadas con prioridades inteligentes.
         """
         try:
-            # Agregar notificación de puntos si se otorgaron
-            if result.get("points_awarded"):
-                await notification_service.add_notification(
-                    user_id,
-                    "points",
-                    {
-                        "points": result["points_awarded"],
-                        "total": result.get("total_points", 0),
-                        "source": accion.value
-                    }
-                )
+            from services.notification_service import NotificationPriority
             
-            # Agregar notificación de misión completada si aplica
-            if result.get("mission_completed"):
-                await notification_service.add_notification(
-                    user_id,
-                    "mission",
-                    {
-                        "name": result["mission_completed"],
-                        "points": result.get("mission_points", 0)
-                    }
-                )
+            # Determinar si hay logros o niveles (alta prioridad)
+            has_high_priority = (
+                result.get("achievement_unlocked") or 
+                result.get("level_up") or
+                result.get("vip_unlocked")
+            )
             
-            # Agregar notificación de logro si aplica
+            # === NOTIFICACIONES DE PUNTOS ===
+            if result.get("points_awarded") or result.get("mission_points_awarded"):
+                total_points = (result.get("points_awarded", 0) + 
+                              result.get("mission_points_awarded", 0))
+                
+                if total_points > 0:
+                    priority = NotificationPriority.HIGH if total_points >= 50 else NotificationPriority.MEDIUM
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "points",
+                        {
+                            "points": total_points,
+                            "total": result.get("total_points", 0),
+                            "source": accion.value,
+                            "breakdown": {
+                                "direct": result.get("points_awarded", 0),
+                                "mission": result.get("mission_points_awarded", 0)
+                            }
+                        },
+                        priority=priority
+                    )
+            
+            # === NOTIFICACIONES DE MISIONES ===
+            if result.get("missions_completed"):
+                for mission in result["missions_completed"]:
+                    # Las misiones importantes tienen alta prioridad
+                    priority = (NotificationPriority.HIGH 
+                              if mission.get("important") or mission.get("points", 0) >= 30 
+                              else NotificationPriority.MEDIUM)
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "mission",
+                        {
+                            "name": mission.get("name", "Misión Completada"),
+                            "points": mission.get("points", 0),
+                            "description": mission.get("description"),
+                            "reward_type": mission.get("reward_type", "points")
+                        },
+                        priority=priority
+                    )
+            
+            # === NOTIFICACIONES DE LOGROS ===
             if result.get("achievement_unlocked"):
                 await notification_service.add_notification(
                     user_id,
                     "achievement",
                     {
                         "name": result["achievement_unlocked"],
-                        "description": result.get("achievement_description", "")
-                    }
+                        "description": result.get("achievement_description"),
+                        "icon": result.get("achievement_icon", "🏆"),
+                        "rarity": result.get("achievement_rarity", "common")
+                    },
+                    priority=NotificationPriority.HIGH
                 )
             
-            # Agregar notificación de insignia si aplica
-            if result.get("badge_awarded"):
-                await notification_service.add_notification(
-                    user_id,
-                    "badge",
-                    {
-                        "name": result["badge_awarded"],
-                        "icon": result.get("badge_icon", "🏅")
-                    }
-                )
-            
-            # Agregar notificación de subida de nivel si aplica
+            # === NOTIFICACIONES DE NIVEL ===
             if result.get("level_up"):
                 await notification_service.add_notification(
                     user_id,
                     "level",
                     {
-                        "level": result["level_up"],
-                        "reward": result.get("level_reward", "")
-                    }
+                        "level": result["new_level"],
+                        "previous_level": result.get("previous_level"),
+                        "title": result.get("level_title"),
+                        "rewards": result.get("level_rewards", [])
+                    },
+                    priority=NotificationPriority.HIGH
                 )
             
-            # Agregar notificación de pista desbloqueada si aplica
+            # === NOTIFICACIONES DE INSIGNIAS ===
+            if result.get("badges_earned"):
+                for badge in result["badges_earned"]:
+                    await notification_service.add_notification(
+                        user_id,
+                        "badge",
+                        {
+                            "name": badge.get("name"),
+                            "icon": badge.get("icon", "🎖"),
+                            "description": badge.get("description")
+                        },
+                        priority=NotificationPriority.MEDIUM
+                    )
+            
+            # === NOTIFICACIONES NARRATIVAS ===
             if result.get("hint_unlocked"):
                 await notification_service.add_notification(
                     user_id,
                     "hint",
                     {
-                        "text": result["hint_unlocked"]
-                    }
+                        "text": result["hint_unlocked"],
+                        "chapter": result.get("narrative_chapter"),
+                        "fragment": result.get("narrative_fragment")
+                    },
+                    priority=NotificationPriority.MEDIUM
                 )
             
-            # Agregar notificación de la acción específica
-            if accion == AccionUsuario.REACCIONAR_PUBLICACION:
+            # === NOTIFICACIONES DE ACCESO VIP ===
+            if result.get("vip_unlocked"):
+                await notification_service.add_notification(
+                    user_id,
+                    "vip_access",
+                    {
+                        "type": result.get("vip_type", "standard"),
+                        "duration": result.get("vip_duration"),
+                        "benefits": result.get("vip_benefits", [])
+                    },
+                    priority=NotificationPriority.HIGH
+                )
+            
+            # === NOTIFICACIÓN DE REACCIÓN BASE ===
+            # Solo si no hay otras notificaciones más importantes
+            if not has_high_priority and not result.get("missions_completed"):
+                reaction_messages = {
+                    AccionUsuario.REACCIONAR_PUBLICACION_NATIVA: 
+                        "Diana nota tu reacción espontánea...",
+                    AccionUsuario.REACCIONAR_PUBLICACION_INLINE: 
+                        "Diana aprecia tu interacción...",
+                    AccionUsuario.PARTICIPAR_CANAL: 
+                        "Diana valora tu participación...",
+                    AccionUsuario.VERIFICAR_ENGAGEMENT: 
+                        "Diana reconoce tu constancia..."
+                }
+                
+                base_message = reaction_messages.get(accion, "Diana sonríe...")
+                
                 await notification_service.add_notification(
                     user_id,
                     "reaction",
                     {
-                        "type": "publication",
-                        "reaction_type": result.get("reaction_type", "unknown"),
-                        "is_native": result.get("is_native_reaction", False)
-                    }
-                )
-            elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                await notification_service.add_notification(
-                    user_id,
-                    "participation",
-                    {
-                        "action_type": result.get("action_type", "unknown"),
-                        "points": result.get("points_awarded", 0)
-                    }
-                )
-            elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
-                await notification_service.add_notification(
-                    user_id,
-                    "daily_check",
-                    {
-                        "streak": result.get("streak", 1),
-                        "points": result.get("points_awarded", 0)
-                    }
+                        "type": accion.value,
+                        "message": base_message,
+                        "emoji": result.get("reaction_type", "💋")
+                    },
+                    priority=NotificationPriority.LOW
                 )
             
-            logger.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
+            logger.debug(f"Queued unified notifications for {accion.value} to user {user_id}")
             
         except Exception as e:
-            logger.exception(f"Error sending unified notifications: {e}")
-            # Fallback: enviar mensaje básico
+            logger.exception(f"Error queueing unified notifications: {e}")
+            # Fallback: enviar mensaje básico inmediatamente
             try:
-                basic_message = result.get("message", "Diana sonríe al ver tu progreso... 💋")
-                await notification_service.send_immediate_notification(user_id, basic_message)
+                fallback = result.get("message", "Diana te envía una sonrisa misteriosa... 💋")
+                await notification_service.send_immediate_notification(
+                    user_id, 
+                    fallback,
+                    priority=NotificationPriority.HIGH
+                )
             except:
-                pass  # Evitar loops de error
+                pass
