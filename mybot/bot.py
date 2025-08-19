@@ -60,7 +60,7 @@ from handlers.lore_handlers import router as lore_router
 from handlers.missions_handler import router as missions_router
 from handlers.info_handler import router as info_router
 from handlers.free_channel_admin import router as free_channel_admin_router
-from handlers.publication_test import router as publication_test_router
+# from handlers.publication_test import router as publication_test_router
 from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
@@ -192,7 +192,7 @@ async def main() -> None:
             ("missions", missions_router),
             ("info", info_router),
             ("free_channel_admin", free_channel_admin_router),
-            ("publication_test", publication_test_router),
+            # ("publication_test", publication_test_router),
             ("vip_menu", vip.router),
             ("auction_user", auction_user_router),
             ("reaction_handler", reaction_handler_router),

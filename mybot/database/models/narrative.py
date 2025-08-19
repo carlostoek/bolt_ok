@@ -3,7 +3,7 @@ from sqlalchemy.orm import relationship
 from database import Base
 
 class NarrativeFragment(Base):
-    __tablename__ = 'narrative_fragments'
+    __tablename__ = 'legacy_narrative_fragments'
     
     id = Column(Integer, primary_key=True, index=True)
     fragment_id = Column(String(50), unique=True, index=True)
@@ -21,7 +21,7 @@ class UserStoryState(Base):
     __tablename__ = 'user_story_states'
     
     user_id = Column(Integer, ForeignKey('users.id'), primary_key=True)
-    current_fragment_id = Column(String(50), ForeignKey('narrative_fragments.fragment_id'))
+    current_fragment_id = Column(String(50), ForeignKey('legacy_narrative_fragments.fragment_id'))
     decisions = Column(JSON, default=dict)  # Almacenar decisiones como {fragment_id: choice_index, ...}
     unlocked_fragments = Column(JSON, default=list)  # Lista de fragment_ids desbloqueados
     story_progress = Column(Integer, default=0)  # Porcentaje o nivel de progreso
