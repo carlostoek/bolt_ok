@@ -72,11 +72,13 @@ class MessageService:
 
             real_message_id = sent.message_id
 
-            counts = await self.get_reaction_counts(real_message_id)
-
+            # Inicializar contadores en cero para un nuevo mensaje
+            initial_counts = {emoji: 0 for emoji in raw_reactions} if raw_reactions else {}
+            
+            # Crear el markup con los conteos iniciales
             updated_markup = get_interactive_post_kb(
                 reactions=raw_reactions,
-                current_counts=counts,
+                current_counts=initial_counts,
                 message_id=real_message_id,
                 channel_id=target_channel_id,
             )
