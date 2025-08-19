@@ -22,34 +22,7 @@ def get_interactive_post_kb(
     channel_id: int,
 ) -> InlineKeyboardMarkup:
     """
-    Keyboard with reaction buttons for channel posts.
-    Always returns a valid InlineKeyboardMarkup.
+    Alias para get_reaction_kb para mantener compatibilidad.
     """
-    builder = InlineKeyboardBuilder()
-
-    if not isinstance(current_counts, dict):
-        logger.error(
-            f"Expected current_counts to be a dict, but got {type(current_counts)}"
-        )
-        current_counts = {}
-
-    reactions_to_use = reactions if reactions else DEFAULT_REACTION_BUTTONS
-
-    for emoji in reactions_to_use[:10]:
-        count = current_counts.get(emoji, 0)
-        display = f"{emoji} {count}"
-        callback_data = f"ip_{channel_id}_{message_id}_{emoji}"
-        builder.button(text=display, callback_data=callback_data)
-
-    keyboard_data = builder.export()
-    if keyboard_data:
-        # ``buttons`` is a generator, therefore ``len`` cannot be applied
-        # directly. ``export`` returns a list of rows with the created buttons,
-        # which allows us to count them reliably.
-        num_buttons = sum(len(row) for row in keyboard_data)
-        if num_buttons <= 4:
-            builder.adjust(num_buttons)
-        else:
-            builder.adjust(4)
-
-    return builder.as_markup()
+    from keyboards.inline_post_kb import get_reaction_kb
+    return get_reaction_kb(reactions, current_counts, message_id, channel_id)

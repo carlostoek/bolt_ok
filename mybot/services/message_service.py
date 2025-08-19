@@ -15,7 +15,7 @@ import logging
 from .config_service import ConfigService
 from .channel_service import ChannelService
 from database.models import ButtonReaction
-from keyboards.inline_post_kb import get_reaction_kb
+from keyboards.common import get_interactive_post_kb
 from services.message_registry import store_message
 from utils.config import VIP_CHANNEL_ID, FREE_CHANNEL_ID
 
@@ -74,7 +74,7 @@ class MessageService:
 
             counts = await self.get_reaction_counts(real_message_id)
 
-            updated_markup = get_reaction_kb(
+            updated_markup = get_interactive_post_kb(
                 reactions=raw_reactions,
                 current_counts=counts,
                 message_id=real_message_id,
@@ -128,38 +128,51 @@ class MessageService:
     async def register_reaction(
         self, user_id: int, message_id: int, reaction_type: str
     ) -> ButtonReaction | None:
-        # Asegurarnos de que message_id sea un entero
+        """Register a reaction to a message and return the created reaction."""
+        logger.info(f"Registering reaction from user {user_id} for message {message_id}: {reaction_type}")
+        
+        # Asegurarnos de que message_id y user_id sean enteros
         message_id = int(message_id)
         user_id = int(user_id)
-        
-        # Verificar si ya existe esta reacción exacta
-        stmt = select(ButtonReaction).where(
-            ButtonReaction.message_id == message_id,
-            ButtonReaction.user_id == user_id,
-            ButtonReaction.reaction_type == reaction_type,
-        )
-        result = await self.session.execute(stmt)
-        existing_reaction = result.scalar()
-        
-        # Si ya existe esta reacción exacta, no hacer nada
-        if existing_reaction:
-            logger.info(f"User {user_id} already reacted with {reaction_type} to message {message_id}")
-            return None
 
-        # Verificar y eliminar si el usuario ya reaccionó con otro emoji
-        # para permitir solo una reacción por usuario por mensaje
+        # Verificar si el usuario ya ha reaccionado a este mensaje
         stmt = select(ButtonReaction).where(
             ButtonReaction.message_id == message_id,
             ButtonReaction.user_id == user_id,
         )
         result = await self.session.execute(stmt)
-        existing_different_reaction = result.scalar()
-        
-        if existing_different_reaction:
-            logger.info(f"User {user_id} changing reaction from {existing_different_reaction.reaction_type} to {reaction_type} on message {message_id}")
-            # Eliminar la reacción anterior
-            await self.session.delete(existing_different_reaction)
-            await self.session.flush()
+        existing = result.scalar_one_or_none()
+
+        if existing:
+            # Si ya existe, verificar si es la misma reacción
+            if existing.reaction_type == reaction_type:
+                logger.info(f"User {user_id} already has the same reaction to message {message_id}")
+                return None
+
+            # Si es diferente, actualizar la reacción existente
+            logger.info(f"User {user_id} changing reaction from {existing.reaction_type} to {reaction_type} on message {message_id}")
+            existing.reaction_type = reaction_type
+            await self.session.commit()
+            await self.session.refresh(existing)
+            # Forzar actualización de contadores invalidando caché de la sesión
+            await self.session.expire_all()
+            
+            # Completar misiones y registrar para minijuegos
+            from services.mission_service import MissionService
+            mission_service = MissionService(self.session)
+            mission_id = f"reaction_reaccionar_{message_id}"
+            await mission_service.complete_mission(
+                user_id,
+                mission_id,
+                reaction_type=reaction_type,
+                target_message_id=message_id,
+                bot=self.bot,
+            )
+            from services.minigame_service import MiniGameService
+            await MiniGameService(self.session).record_reaction(user_id, self.bot)
+            
+            logger.info(f"Updated reaction for user {user_id} on message {message_id} to {reaction_type}")
+            return existing
 
         # Crear nueva reacción
         reaction = ButtonReaction(
@@ -174,6 +187,7 @@ class MessageService:
         # Forzar actualización de contadores invalidando caché de la sesión
         await self.session.expire_all()
 
+        # Completar misiones y registrar para minijuegos
         from services.mission_service import MissionService
         mission_service = MissionService(self.session)
         mission_id = f"reaction_reaccionar_{message_id}"
@@ -187,6 +201,7 @@ class MessageService:
         from services.minigame_service import MiniGameService
         await MiniGameService(self.session).record_reaction(user_id, self.bot)
 
+        logger.info(f"Created new reaction for user {user_id} on message {message_id}: {reaction_type}")
         return reaction
 
     async def get_reaction_counts(self, message_id: int) -> dict[str, int]:
@@ -244,8 +259,8 @@ class MessageService:
 
         try:
             # Crear markup con los conteos actualizados
-            # Usar get_reaction_kb de keyboards/inline_post_kb.py para consistencia
-            markup_to_edit = get_reaction_kb(
+            # Usar get_interactive_post_kb para mantener consistencia
+            markup_to_edit = get_interactive_post_kb(
                 reactions=raw_reactions,
                 current_counts=counts,
                 message_id=message_id,
