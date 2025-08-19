@@ -29,19 +29,41 @@ class PointService:
         now = datetime.datetime.utcnow()
         if progress.last_activity_at and (now - progress.last_activity_at).total_seconds() < 30:
             return None
-        progress = await self.add_points(user_id, 1, bot=bot)
+        # Omitir notificación ya que la información se enviará a través del sistema unificado
+        progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
         progress.messages_sent += 1
         await self.session.commit()
+        
         ach_service = AchievementService(self.session)
         await ach_service.check_message_achievements(user_id, progress.messages_sent, bot=bot)
         new_badges = await ach_service.check_user_badges(user_id)
+        
+        # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
-                )
+                try:
+                    from services.notification_service import NotificationService, NotificationPriority
+                    notification_service = NotificationService(self.session, bot)
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "badge",
+                        {
+                            "name": badge.name,
+                            "icon": badge.icon or "🏅",
+                            "description": getattr(badge, 'description', '')
+                        },
+                        priority=NotificationPriority.MEDIUM
+                    )
+                    
+                    logger.debug(f"Sent unified badge notification to user {user_id}")
+                except ImportError:
+                    # Fallback al método anterior
+                    await bot.send_message(
+                        user_id,
+                        f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                    )
         return progress
 
     async def award_reaction(
@@ -56,30 +78,73 @@ class PointService:
         progress.last_reaction_at = now
         await self.session.commit()
         
-        # Only then award points
-        progress = await self.add_points(user.id, 0.5, bot=bot)
+        # Only then award points - Omitir notificación para usar sistema unificado
+        progress = await self.add_points(user.id, 0.5, bot=bot, skip_notification=True)
+        
         ach_service = AchievementService(self.session)
         new_badges = await ach_service.check_user_badges(user.id)
+        
+        # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
             await ach_service.award_badge(user.id, badge.id)
             if bot:
-                await bot.send_message(
-                    user.id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
-                )
+                try:
+                    from services.notification_service import NotificationService, NotificationPriority
+                    notification_service = NotificationService(self.session, bot)
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "badge",
+                        {
+                            "name": badge.name,
+                            "icon": badge.icon or "🏅",
+                            "description": getattr(badge, 'description', '')
+                        },
+                        priority=NotificationPriority.MEDIUM
+                    )
+                    
+                    logger.debug(f"Sent unified badge notification to user {user.id}")
+                except ImportError:
+                    # Fallback al método anterior
+                    await bot.send_message(
+                        user.id,
+                        f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                    )
         return progress
 
     async def award_poll(self, user_id: int, bot: Bot) -> UserStats:
-        progress = await self.add_points(user_id, 2, bot=bot)
+        # Omitir notificación ya que la información se enviará a través del sistema unificado
+        progress = await self.add_points(user_id, 2, bot=bot, skip_notification=True)
+        
         ach_service = AchievementService(self.session)
         new_badges = await ach_service.check_user_badges(user_id)
+        
+        # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
-                )
+                try:
+                    from services.notification_service import NotificationService, NotificationPriority
+                    notification_service = NotificationService(self.session, bot)
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "badge",
+                        {
+                            "name": badge.name,
+                            "icon": badge.icon or "🏅",
+                            "description": getattr(badge, 'description', '')
+                        },
+                        priority=NotificationPriority.MEDIUM
+                    )
+                    
+                    logger.debug(f"Sent unified badge notification to user {user_id}")
+                except ImportError:
+                    # Fallback al método anterior
+                    await bot.send_message(
+                        user_id,
+                        f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                    )
         return progress
 
     async def daily_checkin(self, user_id: int, bot: Bot) -> tuple[bool, UserStats]:
@@ -87,26 +152,70 @@ class PointService:
         now = datetime.datetime.utcnow()
         if progress.last_checkin_at and (now - progress.last_checkin_at).total_seconds() < 86400:
             return False, progress
-        progress = await self.add_points(user_id, 10, bot=bot)
+            
+        # Omitir notificación ya que la información se enviará a través del sistema unificado
+        progress = await self.add_points(user_id, 10, bot=bot, skip_notification=True)
+        
         if progress.last_checkin_at and (now.date() - progress.last_checkin_at.date()).days == 1:
             progress.checkin_streak += 1
         else:
             progress.checkin_streak = 1
         progress.last_checkin_at = now
         await self.session.commit()
+        
+        # Usar el sistema unificado para las notificaciones de daily_checkin
+        try:
+            if bot:
+                from services.notification_service import NotificationService, NotificationPriority
+                notification_service = NotificationService(self.session, bot)
+                
+                await notification_service.add_notification(
+                    user_id,
+                    "checkin",
+                    {
+                        "streak": progress.checkin_streak,
+                        "points": 10
+                    },
+                    priority=NotificationPriority.MEDIUM
+                )
+                
+                logger.debug(f"Sent unified checkin notification to user {user_id}")
+        except ImportError:
+            pass  # Sin fallback, ya que se maneja en el channel_engagement_service
+        
         ach_service = AchievementService(self.session)
         await ach_service.check_checkin_achievements(user_id, progress.checkin_streak, bot=bot)
         new_badges = await ach_service.check_user_badges(user_id)
+        
+        # Usar el sistema unificado de notificaciones para las insignias
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
-                )
+                try:
+                    from services.notification_service import NotificationService, NotificationPriority
+                    notification_service = NotificationService(self.session, bot)
+                    
+                    await notification_service.add_notification(
+                        user_id,
+                        "badge",
+                        {
+                            "name": badge.name,
+                            "icon": badge.icon or "🏅",
+                            "description": getattr(badge, 'description', '')
+                        },
+                        priority=NotificationPriority.MEDIUM
+                    )
+                    
+                    logger.debug(f"Sent unified badge notification to user {user_id}")
+                except ImportError:
+                    # Fallback al método anterior
+                    await bot.send_message(
+                        user_id,
+                        f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                    )
         return True, progress
 
-    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None) -> UserStats:
+    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None, skip_notification: bool = False) -> UserStats:
         user = await self.session.get(User, user_id)
         if not user:
             logger.warning(
@@ -145,11 +254,35 @@ class PointService:
         logger.info(
             f"User {user_id} gained {total} points (base {points}, x{multiplier}). Total: {user.points}"
         )
-        if bot and user.points - progress.last_notified_points >= 5:
-            await bot.send_message(
-                user_id,
-                f"Has acumulado {user.points:.1f} puntos en total",
-            )
+        
+        # Solo enviar notificaciones de puntos cuando:
+        # 1. No se ha solicitado omitir notificaciones
+        # 2. Hay bot disponible
+        # 3. El incremento desde la última notificación es significativo (>=5)
+        if not skip_notification and bot and user.points - progress.last_notified_points >= 5:
+            try:
+                # Intentar usar el sistema de notificaciones unificadas
+                from services.notification_service import NotificationService, NotificationPriority
+                notification_service = NotificationService(self.session, bot)
+                
+                await notification_service.add_notification(
+                    user_id,
+                    "points",
+                    {
+                        "points": total,
+                        "total": user.points
+                    },
+                    priority=NotificationPriority.LOW  # Prioridad baja para notificaciones de puntos
+                )
+                
+                logger.debug(f"Sent unified points notification to user {user_id}")
+            except ImportError:
+                # Fallback al método anterior
+                await bot.send_message(
+                    user_id,
+                    f"Has acumulado {user.points:.1f} puntos en total",
+                )
+            
             progress.last_notified_points = user.points
             await self.session.commit()
         return progress

@@ -125,7 +125,7 @@ class MissionService:
              from services.point_service import PointService
              point_service = PointService(self.session)
 
-        await point_service.add_points(user_id, mission.reward_points, bot=bot)
+        await point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
 
         # Update last reset timestamps for daily/weekly missions
         if mission.type == "daily":
@@ -159,15 +159,34 @@ class MissionService:
         await self.session.refresh(user)
 
         if bot and not _skip_notification:
-            from utils.message_utils import get_mission_completed_message
-            from utils.keyboard_utils import get_mission_completed_keyboard
+            # Usar servicio de notificaciones unificadas si está disponible
+            try:
+                from services.notification_service import NotificationService, NotificationPriority
+                notification_service = NotificationService(self.session, bot)
+                
+                await notification_service.add_notification(
+                    user_id,
+                    "mission",
+                    {
+                        "name": mission.name,
+                        "points": mission.reward_points,
+                        "description": mission.description
+                    },
+                    priority=NotificationPriority.MEDIUM
+                )
+                
+                logger.info(f"Sent unified mission completion notification to user {user_id}")
+            except ImportError:
+                # Fallback al método anterior si no está disponible el servicio unificado
+                from utils.message_utils import get_mission_completed_message
+                from utils.keyboard_utils import get_mission_completed_keyboard
 
-            text = await get_mission_completed_message(mission)
-            await bot.send_message(
-                user_id,
-                text,
-                reply_markup=get_mission_completed_keyboard(),
-            )
+                text = await get_mission_completed_message(mission)
+                await bot.send_message(
+                    user_id,
+                    text,
+                    reply_markup=get_mission_completed_keyboard(),
+                )
 
         logger.info(
             f"User {user_id} successfully completed mission {mission_id} (Type: {mission.type}, Message: {target_message_id})."
@@ -245,17 +264,37 @@ class MissionService:
             if progress >= mission.target_value:
                 record.completed = True
                 record.completed_at = datetime.datetime.utcnow()
-                await self.point_service.add_points(user_id, mission.reward_points, bot=bot)
+                # Añadir puntos sin notificación
+                await self.point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
                 if bot:
-                    from utils.message_utils import get_mission_completed_message
-                    from utils.keyboard_utils import get_mission_completed_keyboard
+                    # Usar servicio de notificaciones unificadas si está disponible
+                    try:
+                        from services.notification_service import NotificationService, NotificationPriority
+                        notification_service = NotificationService(self.session, bot)
+                        
+                        await notification_service.add_notification(
+                            user_id,
+                            "mission",
+                            {
+                                "name": mission.name,
+                                "points": mission.reward_points,
+                                "description": mission.description
+                            },
+                            priority=NotificationPriority.MEDIUM
+                        )
+                        
+                        logger.info(f"Sent unified mission completion notification to user {user_id}")
+                    except ImportError:
+                        # Fallback al método anterior si no está disponible el servicio unificado
+                        from utils.message_utils import get_mission_completed_message
+                        from utils.keyboard_utils import get_mission_completed_keyboard
 
-                    text = await get_mission_completed_message(mission)
-                    await bot.send_message(
-                        user_id,
-                        text,
-                        reply_markup=get_mission_completed_keyboard(),
-                    )
+                        text = await get_mission_completed_message(mission)
+                        await bot.send_message(
+                            user_id,
+                            text,
+                            reply_markup=get_mission_completed_keyboard(),
+                        )
         await self.session.commit()
 
     async def delete_mission(self, mission_id: str) -> bool:

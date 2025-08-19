@@ -3,6 +3,7 @@ Handler para reacciones nativas de Telegram.
 Maneja el evento MessageReactionUpdated para procesar reacciones emoji nativas.
 """
 import logging
+import asyncio
 from aiogram import Router, F, Bot
 from aiogram.types import MessageReactionUpdated
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,7 +69,7 @@ async def handle_native_reaction(
         coordinador = CoordinadorCentral(session)
         result = await coordinador.ejecutar_flujo(
             user_id,
-            AccionUsuario.REACCIONAR_PUBLICACION,
+            AccionUsuario.REACCIONAR_PUBLICACION_NATIVA,
             message_id=message_id,
             channel_id=chat_id,
             reaction_type=reaction_type,
@@ -76,10 +77,12 @@ async def handle_native_reaction(
             bot=bot
         )
         
-        # Enviar notificación unificada si el procesamiento fue exitoso
-        if result.get("success"):
-            await _send_unified_notification(notification_service, user_id, result)
-        else:
+        # Agregar el tipo de reacción al resultado para usarlo en las notificaciones
+        result["reaction_type"] = reaction_type
+        
+        # Para evitar duplicación, solo enviamos notificación de error si falla
+        # Las notificaciones de éxito ya son manejadas por el CoordinadorCentral
+        if not result.get("success"):
             # Enviar notificación de error inmediata
             error_message = result.get("message", "No se pudo procesar tu reacción.")
             await notification_service.send_immediate_notification(user_id, error_message)
@@ -114,7 +117,7 @@ async def _send_unified_notification(
     """
     try:
         # Agregar notificación de puntos si se otorgaron
-        if result.get("points_awarded"):
+        if result.get("points_awarded") is not None:
             await notification_service.add_notification(
                 user_id,
                 "points",
@@ -151,17 +154,30 @@ async def _send_unified_notification(
             "reaction",
             {
                 "type": "native",
-                "processed": True
+                "reaction_type": result.get("reaction_type", "unknown"),
+                "processed": True,
+                "is_native": True
             }
         )
         
+        # Forzar envío para asegurar que todas las notificaciones se procesen
+        # después del tiempo de agregación
+        await asyncio.sleep(notification_service.aggregation_delay + 0.1)
+        await notification_service.flush_pending_notifications(user_id)
+        
         logger.debug(f"Added unified notifications for user {user_id}")
         
+    except asyncio.CancelledError:
+        # Ignorar si la tarea se cancela
+        pass
     except Exception as e:
         logger.exception(f"Error sending unified notification: {e}")
         # Fallback: enviar mensaje básico
-        basic_message = result.get("message", "Diana sonríe al ver tu reacción... 💋")
-        await notification_service.send_immediate_notification(user_id, basic_message)
+        try:
+            basic_message = result.get("message", "Diana sonríe al ver tu reacción... 💋")
+            await notification_service.send_immediate_notification(user_id, basic_message)
+        except Exception as inner_e:
+            logger.exception(f"Error sending fallback notification: {inner_e}")
 
 
 # Función de utilidad para verificar si una reacción es válida

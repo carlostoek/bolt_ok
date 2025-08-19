@@ -48,8 +48,9 @@ class ChannelEngagementService:
             logger.debug(f"Channel {channel_id} is not managed, not awarding points")
             return False
         
-        # Award points for the reaction
+        # Award points for the reaction - Omitir notificación para usar sistema unificado
         try:
+            # Las notificaciones se manejan en el CoordinadorCentral con el servicio unificado
             await self.point_service.award_reaction(user, message_id, bot)
             logger.info(f"Awarded reaction points to user {user_id} for message {message_id} in channel {channel_id}")
             return True
@@ -84,16 +85,19 @@ class ChannelEngagementService:
             elif action_type == "comment":
                 points = 2
             elif action_type == "poll_vote":
+                # Las notificaciones se manejan en el CoordinadorCentral con el servicio unificado
                 await self.point_service.award_poll(user_id, bot)
                 return True
             elif action_type == "message":
+                # Las notificaciones se manejan en el CoordinadorCentral con el servicio unificado
                 await self.point_service.award_message(user_id, bot)
                 return True
             else:
                 points = 1
             
             if points > 0:
-                await self.point_service.add_points(user_id, points, bot=bot)
+                # Omitir notificación ya que se manejará a través del sistema unificado
+                await self.point_service.add_points(user_id, points, bot=bot, skip_notification=True)
                 logger.info(f"Awarded {points} points to user {user_id} for {action_type} in channel {channel_id}")
                 return True
             
@@ -114,20 +118,41 @@ class ChannelEngagementService:
             bool: True if daily bonus was awarded, False otherwise
         """
         try:
+            # Usar sistema unificado para las notificaciones de daily_checkin
             success, progress = await self.point_service.daily_checkin(user_id, bot)
             if success:
                 logger.info(f"Awarded daily checkin bonus to user {user_id}, streak: {progress.checkin_streak}")
                 
                 # Extra bonus for consistent engagement
                 if progress.checkin_streak % 7 == 0:  # Weekly bonus
-                    await self.point_service.add_points(user_id, 25, bot=bot)
+                    # Evitar notificaciones duplicadas usando el sistema unificado
+                    await self.point_service.add_points(user_id, 25, bot=bot, skip_notification=True)
                     logger.info(f"Awarded weekly streak bonus to user {user_id}, streak: {progress.checkin_streak}")
                     
+                    # Usar el sistema de notificaciones unificadas si está disponible
                     if bot:
-                        await bot.send_message(
-                            user_id,
-                            f"🎉 ¡Felicidades! Has completado {progress.checkin_streak} días de participación. Bonus semanal: +25 puntos"
-                        )
+                        try:
+                            from services.notification_service import NotificationService, NotificationPriority
+                            notification_service = NotificationService(self.session, bot)
+                            
+                            await notification_service.add_notification(
+                                user_id,
+                                "streak",
+                                {
+                                    "streak": progress.checkin_streak,
+                                    "points": 25,
+                                    "weekly": True
+                                },
+                                priority=NotificationPriority.MEDIUM
+                            )
+                            
+                            logger.info(f"Sent unified streak notification to user {user_id}")
+                        except ImportError:
+                            # Fallback al método anterior si no está disponible el servicio unificado
+                            await bot.send_message(
+                                user_id,
+                                f"🎉 ¡Felicidades! Has completado {progress.checkin_streak} días de participación. Bonus semanal: +25 puntos"
+                            )
                 
                 return True
             return False
