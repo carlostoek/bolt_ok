@@ -63,7 +63,7 @@ async def handle_reaction_callback(
             )
             return await callback.answer("Mensaje no válido.", show_alert=True)
 
-        # Verificar si la reacción ya existe
+        # Verificar si la reacción ya existe y registrarla
         service = MessageService(session, bot)
         reaction_result = await service.register_reaction(user_id, message_id, reaction_type)
 
@@ -72,6 +72,8 @@ async def handle_reaction_callback(
                 BOT_MESSAGES.get("reaction_already", "Ya has reaccionado a este post."),
                 show_alert=True,
             )
+            # Asegurarse de que los conteos sean actualizados aún cuando no hay cambio
+            await service.update_reaction_markup(chat_id, message_id)
             return
 
         # Usar CoordinadorCentral para procesar la reacción unificadamente
@@ -87,7 +89,9 @@ async def handle_reaction_callback(
             skip_unified_notifications=False  # CoordinadorCentral manejará las notificaciones unificadas
         )
 
-        # Actualizar el markup del mensaje con los conteos actualizados
+        # Forzar actualizar el markup del mensaje con los conteos actualizados
+        # Asegurarnos que los cambios estén visibles en la BD antes de actualizar
+        await session.expire_all()
         await service.update_reaction_markup(chat_id, message_id)
         
         # Responder al callback con mensaje simple

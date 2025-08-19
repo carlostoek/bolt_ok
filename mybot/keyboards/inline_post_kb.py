@@ -29,8 +29,13 @@ def get_reaction_kb(
     reactions_to_use = reactions if reactions else DEFAULT_REACTION_BUTTONS
 
     for emoji in reactions_to_use[:10]:
-        # Obtener conteo, asegurándonos de que sea un entero
-        count = int(current_counts.get(emoji, 0))
+        # Obtener conteo, asegurándonos de que sea un entero y evitar valores None
+        try:
+            count = int(current_counts.get(emoji, 0))
+        except (TypeError, ValueError):
+            count = 0
+            logger.warning(f"Invalid count for emoji {emoji}, using 0 instead")
+            
         display = f"{emoji} {count}"
         callback_data = f"ip_{channel_id}_{message_id}_{emoji}"
         builder.button(text=display, callback_data=callback_data)

@@ -17,7 +17,10 @@ from utils.message_safety import safe_send_message
 router = Router()
 logger = logging.getLogger(__name__)
 
-@router.callback_query(F.data.startswith("ip_"))
+# OBSOLETO: Este handler ha sido reemplazado por el de reaction_callback.py
+# Se mantiene como referencia pero se ha desactivado la ruta del router
+
+#@router.callback_query(F.data.startswith("ip_"))
 @safe_handler("Error al procesar tu reacción. Inténtalo de nuevo.")
 @track_usage("reaction_to_publication")
 @transaction()
