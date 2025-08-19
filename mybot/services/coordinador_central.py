@@ -1,12 +1,13 @@
 """
 Coordinador Central para orquestar la integración entre todos los módulos del sistema.
 """
-import logging
 import enum
 import asyncio
 from typing import Dict, Any, Optional, Callable, Union, List
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from utils.sexy_logger import log, logger as logging
 
 from .integration.channel_engagement_service import ChannelEngagementService
 from .integration.narrative_point_service import NarrativePointService
@@ -20,7 +21,7 @@ from .event_bus import get_event_bus, EventType, Event
 from .notification_service import NotificationService
 from .user_service import UserService
 
-logger = logging.getLogger(__name__)
+# Usar sexy_logger en lugar del logger tradicional
 
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
@@ -78,25 +79,131 @@ class CoordinadorCentral:
             notification_service = None
             if bot:
                 notification_service = NotificationService(self.session, bot)
+                
+            # Inicializar resultado base
+            result = {'success': False}
             
             # Seleccionar el flujo adecuado según la acción
-            if accion == AccionUsuario.REACCIONAR_PUBLICACION:
-                # Flujo legacy para mantener compatibilidad
-                result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
+            if accion == AccionUsuario.REACCIONAR_PUBLICACION_INLINE:
+                # Procesar reacción Inline - Solo puntos de misión, sin puntos directos
+                skip_direct_points = kwargs.get('skip_direct_points', True)
+                
+                # Parámetros para misión
+                mission_params = {
+                    'reaction_type': kwargs.get('reaction_type'),
+                    'target_message_id': kwargs.get('message_id'),
+                    'bot': bot
+                }
+                
+                # Verificar y completar misiones
+                mission_result = await self.mission_service.check_and_complete_missions(
+                    user_id, 'reaction', skip_direct_notification=True, **mission_params
+                )
+                
+                # No otorgar puntos directos por la reacción
+                # Los puntos vienen solo de la misión completada
+                
+                # Obtener puntos totales del usuario
+                total_points = await self.point_service.get_user_points(user_id)
+                
+                # Preparar mensaje de notificación
+                mensaje_base = "Diana sonríe al notar tu reacción..."
+                if mission_result.get("missions_completed"):
+                    total_mission_points = mission_result.get("total_mission_points", 0)
+                    mensaje_base = f"Diana sonríe al notar tu reacción... *+{total_mission_points} besitos* 💋 han sido añadidos a tu cuenta por completar la misión."
+                
+                # Verificar si se desbloquea una pista narrativa
+                pista_desbloqueada = await self._check_hint_unlock(user_id, total_points)
+                
+                if pista_desbloqueada:
+                    mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+                else:
+                    mensaje = mensaje_base
+                
+                # Construir resultado
+                result.update({
+                    'success': True,
+                    'message': mensaje,
+                    'points_awarded': 0,  # No hay puntos directos
+                    'mission_points_awarded': mission_result.get("total_mission_points", 0),
+                    'missions_completed': mission_result.get("missions_completed", []),
+                    'total_points': total_points,
+                    'hint_unlocked': pista_desbloqueada,
+                    'action': "reaction_inline_success",
+                    'notification_data': {
+                        'reaction_registered': True,
+                        'reaction_points': 0,  # No hay puntos directos
+                        'missions_completed': mission_result.get("missions_completed", []),
+                        'total_points': total_points
+                    }
+                })
+                
+                # Actualizar marcador de reacción
+                if "channel_id" in kwargs and "message_id" in kwargs:
+                    from services.message_service import MessageService
+                    message_service = MessageService(self.session, bot)
+                    await message_service.update_reaction_markup(
+                        kwargs.get("channel_id"), kwargs.get("message_id")
+                    )
+                
                 # Enviar notificaciones unificadas si está habilitado
-                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                if notification_service and not kwargs.get("skip_unified_notifications"):
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
+                
                 return result
-            elif accion == AccionUsuario.REACCIONAR_PUBLICACION_INLINE:
-                # Nuevo flujo para reacciones inline (botones) - solo puntos por misión
-                result = await self._flujo_reaccion_publicacion_inline(user_id, **kwargs)
-                # Enviar notificaciones unificadas si está habilitado
-                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
-                    await self._send_unified_notifications(notification_service, user_id, result, accion)
-                return result
+                
             elif accion == AccionUsuario.REACCIONAR_PUBLICACION_NATIVA:
-                # Nuevo flujo para reacciones nativas - solo puntos directos, sin misión
-                result = await self._flujo_reaccion_publicacion_nativa(user_id, **kwargs)
+                # Procesar reacción nativa - puntos fijos, sin misión asociada
+                points_to_award = kwargs.get('points_to_award', 10)
+                
+                # Otorgar puntos directos
+                points_result = await self.point_service.award_points(
+                    user_id, 
+                    points_to_award, 
+                    reason="Reacción nativa",
+                    send_notification=False,
+                    bot=bot
+                )
+                
+                # Obtener puntos totales
+                total_points = points_result.get("total_points", 0)
+                
+                # Verificar si se desbloquea una pista narrativa
+                pista_desbloqueada = await self._check_hint_unlock(user_id, total_points)
+                
+                # Preparar mensaje de notificación
+                mensaje_base = f"Diana sonríe al notar tu reacción nativa... *+{points_to_award} besitos* 💋 han sido añadidos a tu cuenta."
+                if pista_desbloqueada:
+                    mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+                else:
+                    mensaje = mensaje_base
+                
+                # Construir resultado
+                result.update({
+                    'success': True,
+                    'message': mensaje,
+                    'points_awarded': points_to_award,
+                    'total_points': total_points,
+                    'hint_unlocked': pista_desbloqueada,
+                    'missions_completed': [],  # No hay misiones completadas
+                    'action': "reaction_native_success",
+                    'notification_data': {
+                        'reaction_registered': True,
+                        'reaction_points': points_to_award,
+                        'missions_completed': [],  # No hay misiones completadas
+                        'total_points': total_points
+                    }
+                })
+                
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                
+                return result
+                
+            elif accion == AccionUsuario.REACCIONAR_PUBLICACION:
+                # Mantener flujo legacy para compatibilidad
+                result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
                 # Enviar notificaciones unificadas si está habilitado
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
@@ -118,18 +225,132 @@ class CoordinadorCentral:
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
                 return result
             else:
-                logger.warning(f"Acción no implementada: {accion}")
+                log.warning(f"Acción no implementada: {accion}")
                 return {
                     "success": False,
                     "message": "Acción no reconocida por el sistema."
                 }
         except Exception as e:
-            logger.exception(f"Error en flujo {accion}: {str(e)}")
+            log.error(f"Error en flujo {accion}: {str(e)}", error=e)
             return {
                 "success": False,
                 "message": "Un error inesperado ha ocurrido. Inténtalo de nuevo más tarde.",
                 "error": str(e)
             }
+            
+    async def _check_hint_unlock(self, user_id: int, points: float) -> str | None:
+        """
+        Verifica si el usuario desbloquea una pista narrativa basado en sus puntos.
+        
+        Args:
+            user_id: ID del usuario
+            points: Puntos actuales del usuario
+            
+        Returns:
+            Texto de la pista desbloqueada o None si no hay pista
+        """
+        # Desbloquear pista cada ~50 puntos
+        if points % 50 <= 15 and points > 15:  
+            # Obtener fragmento actual del usuario
+            fragmento_actual = await self.narrative_service.get_user_current_fragment(user_id)
+            if fragmento_actual:
+                # Pistas basadas en el fragmento actual
+                pistas = {
+                    "level1_": "El jardín de los secretos esconde más de lo que revela a simple vista...",
+                    "level2_": "Las sombras del pasillo susurran verdades que nadie se atreve a pronunciar...",
+                    "level3_": "Bajo la luz de la luna, los amantes intercambian más que simples caricias...",
+                    "level4_": "El sabor prohibido de sus labios esconde un secreto ancestral...",
+                    "level5_": "En la habitación del placer, las reglas convencionales se desvanecen...",
+                    "level6_": "El último velo cae, revelando la verdad que siempre estuvo ante tus ojos..."
+                }
+                
+                for prefix, pista in pistas.items():
+                    if fragmento_actual.key.startswith(prefix):
+                        return pista
+        
+        return None
+    
+    async def _send_unified_notifications(
+        self, notification_service: NotificationService, user_id: int, result: dict, accion: AccionUsuario
+    ) -> None:
+        """
+        Envía notificaciones unificadas basadas en el resultado del procesamiento.
+        
+        Args:
+            notification_service: Servicio de notificaciones
+            user_id: ID del usuario
+            result: Resultado del procesamiento de la acción
+            accion: Tipo de acción realizada
+        """
+        try:
+            # Si hay datos de notificación específicos, usarlos
+            notification_data = result.get("notification_data", {})
+            
+            # Agregar notificación de puntos si se otorgaron
+            if result.get("points_awarded") or notification_data.get("reaction_points"):
+                points = result.get("points_awarded", notification_data.get("reaction_points", 0))
+                total = result.get("total_points", notification_data.get("total_points", 0))
+                
+                if points > 0:
+                    await notification_service.add_notification(
+                        user_id,
+                        "points",
+                        {
+                            "points": points,
+                            "total": total
+                        }
+                    )
+            
+            # Agregar notificación de misión completada si aplica
+            missions = result.get("missions_completed", notification_data.get("missions_completed", []))
+            for mission in missions:
+                await notification_service.add_notification(
+                    user_id,
+                    "mission",
+                    {
+                        "name": mission.get("name", "Misión completada"),
+                        "points": mission.get("points", 0)
+                    }
+                )
+            
+            # Agregar notificación de pista desbloqueada si aplica
+            if result.get("hint_unlocked"):
+                await notification_service.add_notification(
+                    user_id,
+                    "hint",
+                    {
+                        "text": result["hint_unlocked"]
+                    }
+                )
+            
+            # Agregar notificación básica según el tipo de acción
+            notification_type = "default"
+            if accion == AccionUsuario.REACCIONAR_PUBLICACION_INLINE:
+                notification_type = "reaction_inline"
+            elif accion == AccionUsuario.REACCIONAR_PUBLICACION_NATIVA:
+                notification_type = "reaction_native"
+            elif accion == AccionUsuario.REACCIONAR_PUBLICACION:
+                notification_type = "reaction"
+                
+            await notification_service.add_notification(
+                user_id,
+                notification_type,
+                {
+                    "action": result.get("action", str(accion.value)),
+                    "processed": True
+                }
+            )
+            
+            log.success(f"Unified notifications sent for user {user_id}, action {accion.value}", user_id=user_id)
+            
+        except Exception as e:
+            logging.exception(f"Error sending unified notifications: {e}")
+            # Fallback: intentar enviar mensaje básico
+            try:
+                basic_message = result.get("message", "Tu acción ha sido procesada correctamente.")
+                await notification_service.send_immediate_notification(user_id, basic_message)
+            except:
+                pass  # Evitar loops de error
     
     async def _flujo_reaccion_publicacion(self, user_id: int, message_id: int, channel_id: int, reaction_type: str, bot=None) -> Dict[str, Any]:
         """
@@ -184,10 +405,10 @@ class CoordinadorCentral:
                     "name": mision_obj.name,
                     "points": mision_obj.reward_points
                 })
-                logger.info(f"Mission {mission_id} completed for user {user_id} via reaction")
+                log.gamification(f"Mission {mission_id} completed for user {user_id} via reaction", user_id=user_id)
                 
         except Exception as e:
-            logger.exception(f"Error checking reaction mission for user {user_id}: {e}")
+            logging.exception(f"Error checking reaction mission for user {user_id}: {e}")
 
         # 3. Obtener puntos actuales del usuario (después de misiones)
         puntos_actuales = await self.point_service.get_user_points(user_id)
@@ -284,10 +505,10 @@ class CoordinadorCentral:
                     "name": mision_obj.name,
                     "points": mision_obj.reward_points
                 })
-                logger.info(f"Mission {mission_id} completed for user {user_id} via inline reaction")
+                log.gamification(f"Mission {mission_id} completed for user {user_id} via inline reaction", user_id=user_id)
                 
         except Exception as e:
-            logger.exception(f"Error checking reaction mission for user {user_id}: {e}")
+            logging.exception(f"Error checking reaction mission for user {user_id}: {e}")
 
         # 2. Obtener puntos actuales del usuario (después de misiones)
         puntos_actuales = await self.point_service.get_user_points(user_id)
@@ -362,13 +583,16 @@ class CoordinadorCentral:
         
         # 1. Otorgar puntos por la reacción nativa - directo sin misión
         try:
-            # Otorgar 10 puntos directamente sin pasar por misiones
+            # Obtener puntos a otorgar (por defecto 10)
+            points_to_award = kwargs.get("points_to_award", 10)
+            
+            # Otorgar los puntos directamente sin pasar por misiones
             await self.point_service.add_points(
-                user_id, 10, bot=bot, skip_direct_notification=True
+                user_id, points_to_award, bot=bot, skip_direct_notification=True
             )
-            logger.info(f"Awarded 10 points to user {user_id} for native reaction to message {message_id}")
+            log.gamification(f"Awarded {points_to_award} points to user {user_id} for native reaction to message {message_id}", user_id=user_id, points=points_to_award)
         except Exception as e:
-            logger.exception(f"Error awarding points for native reaction to user {user_id}: {e}")
+            logging.exception(f"Error awarding points for native reaction to user {user_id}: {e}")
             return {
                 "success": False,
                 "message": "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde.",
@@ -409,7 +633,7 @@ class CoordinadorCentral:
         return {
             "success": True,
             "message": mensaje,
-            "points_awarded": 10,
+            "points_awarded": kwargs.get("points_to_award", 10),
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
             "missions_completed": [],  # No hay misiones completadas en reacciones nativas
@@ -600,7 +824,7 @@ class CoordinadorCentral:
             return result
             
         except Exception as e:
-            logger.exception(f"Error in async workflow {accion}: {str(e)}")
+            logging.exception(f"Error in async workflow {accion}: {str(e)}")
             
             # Emit error event
             await self.event_bus.publish(
@@ -648,7 +872,7 @@ class CoordinadorCentral:
                 yield result
             except Exception as e:
                 # Transaction will be rolled back automatically
-                logger.exception(f"Transaction failed in workflow: {e}")
+                logging.exception(f"Transaction failed in workflow: {e}")
                 raise
     
     async def execute_parallel_workflows(self, workflows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -677,7 +901,7 @@ class CoordinadorCentral:
                     **workflow_spec.get('kwargs', {})
                 )
             except Exception as e:
-                logger.exception(f"Error in parallel workflow execution: {e}")
+                logging.exception(f"Error in parallel workflow execution: {e}")
                 return {
                     "success": False,
                     "error": str(e),
@@ -816,7 +1040,7 @@ class CoordinadorCentral:
                 
         except Exception as e:
             # Don't let event emission failures break the main workflow
-            logger.exception(f"Error emitting workflow events: {e}")
+            logging.exception(f"Error emitting workflow events: {e}")
     
     # ==================== CONSISTENCY AND MONITORING ====================
     
@@ -887,7 +1111,7 @@ class CoordinadorCentral:
             return consistency_report
             
         except Exception as e:
-            logger.exception(f"Error in consistency check for user {user_id}: {e}")
+            logging.exception(f"Error in consistency check for user {user_id}: {e}")
             return {
                 "user_id": user_id,
                 "success": False,
@@ -905,7 +1129,7 @@ class CoordinadorCentral:
             Dict containing initialization results
         """
         try:
-            logger.info("Initializing coordination systems...")
+            log.startup("Initializing coordination systems...")
             
             # Set up cross-module event subscriptions
             subscriptions = await self.event_coordinator.setup_cross_module_subscriptions()
@@ -922,7 +1146,7 @@ class CoordinadorCentral:
                 source="coordinador_central"
             )
             
-            logger.info(f"Coordination systems initialized: {sum(subscriptions.values())} event subscriptions active")
+            log.success(f"Coordination systems initialized: {sum(subscriptions.values())} event subscriptions active")
             
             return {
                 "success": True,
@@ -932,7 +1156,7 @@ class CoordinadorCentral:
             }
             
         except Exception as e:
-            logger.exception(f"Error initializing coordination systems: {e}")
+            logging.exception(f"Error initializing coordination systems: {e}")
             return {
                 "success": False,
                 "error": str(e),
@@ -947,7 +1171,7 @@ class CoordinadorCentral:
             Dict containing health check results
         """
         try:
-            logger.info("Starting comprehensive system health check...")
+            log.startup("Starting comprehensive system health check...")
             
             health_report = {
                 "timestamp": asyncio.get_event_loop().time(),
@@ -1029,11 +1253,11 @@ class CoordinadorCentral:
                 source="coordinador_central"
             )
             
-            logger.info(f"System health check completed: status = {health_report['overall_status']}")
+            log.success(f"System health check completed: status = {health_report['overall_status']}")
             return health_report
             
         except Exception as e:
-            logger.exception(f"Error during system health check: {e}")
+            logging.exception(f"Error during system health check: {e}")
             return {
                 "timestamp": asyncio.get_event_loop().time(),
                 "overall_status": "error",
@@ -1068,7 +1292,7 @@ class CoordinadorCentral:
             return status
             
         except Exception as e:
-            logger.exception(f"Error getting coordination status: {e}")
+            logging.exception(f"Error getting coordination status: {e}")
             return {
                 "error": str(e),
                 "coordinador_central": {"active": False}
@@ -1185,10 +1409,10 @@ class CoordinadorCentral:
                     }
                 )
             
-            logger.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
+            logging.debug(f"Sent unified notifications for {accion.value} to user {user_id}")
             
         except Exception as e:
-            logger.exception(f"Error sending unified notifications: {e}")
+            logging.exception(f"Error sending unified notifications: {e}")
             # Fallback: enviar mensaje básico
             try:
                 basic_message = result.get("message", "Diana sonríe al ver tu progreso... 💋")

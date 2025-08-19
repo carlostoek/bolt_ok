@@ -15,7 +15,7 @@ import logging
 from .config_service import ConfigService
 from .channel_service import ChannelService
 from database.models import ButtonReaction
-from keyboards.inline_post_kb import get_reaction_kb
+from keyboards.common import get_interactive_post_kb
 from services.message_registry import store_message
 from utils.config import VIP_CHANNEL_ID, FREE_CHANNEL_ID
 
@@ -72,11 +72,13 @@ class MessageService:
 
             real_message_id = sent.message_id
 
-            counts = await self.get_reaction_counts(real_message_id)
-
-            updated_markup = get_reaction_kb(
+            # Inicializar contadores en cero para un nuevo mensaje
+            initial_counts = {emoji: 0 for emoji in raw_reactions} if raw_reactions else {}
+            
+            # Crear el markup con los conteos iniciales
+            updated_markup = get_interactive_post_kb(
                 reactions=raw_reactions,
-                current_counts=counts,
+                current_counts=initial_counts,
                 message_id=real_message_id,
                 channel_id=target_channel_id,
             )
@@ -128,29 +130,51 @@ class MessageService:
     async def register_reaction(
         self, user_id: int, message_id: int, reaction_type: str
     ) -> ButtonReaction | None:
-        # Verificar si ya existe esta reacción
+        """Register a reaction to a message and return the created reaction."""
+        logger.info(f"Registering reaction from user {user_id} for message {message_id}: {reaction_type}")
+        
+        # Asegurarnos de que message_id y user_id sean enteros
+        message_id = int(message_id)
+        user_id = int(user_id)
+
+        # Verificar si el usuario ya ha reaccionado a este mensaje
         stmt = select(ButtonReaction).where(
             ButtonReaction.message_id == message_id,
             ButtonReaction.user_id == user_id,
-            ButtonReaction.reaction_type == reaction_type,
         )
         result = await self.session.execute(stmt)
-        existing_reaction = result.scalar()
-        
-        # Si ya existe esta reacción exacta, no hacer nada
-        if existing_reaction:
-            logger.info(f"User {user_id} already reacted with {reaction_type} to message {message_id}")
-            return None
+        existing = result.scalar_one_or_none()
 
-        # Verificar si el usuario ya reaccionó con otro emoji (opcional - solo si queremos permitir una reacción por usuario)
-        # stmt = select(ButtonReaction).where(
-        #     ButtonReaction.message_id == message_id,
-        #     ButtonReaction.user_id == user_id,
-        # )
-        # result = await self.session.execute(stmt)
-        # if result.scalar():
-        #     logger.info(f"User {user_id} already has a different reaction to message {message_id}")
-        #     return None
+        if existing:
+            # Si ya existe, verificar si es la misma reacción
+            if existing.reaction_type == reaction_type:
+                logger.info(f"User {user_id} already has the same reaction to message {message_id}")
+                return None
+
+            # Si es diferente, actualizar la reacción existente
+            logger.info(f"User {user_id} changing reaction from {existing.reaction_type} to {reaction_type} on message {message_id}")
+            existing.reaction_type = reaction_type
+            await self.session.commit()
+            await self.session.refresh(existing)
+            # Forzar actualización de contadores invalidando caché de la sesión
+            await self.session.expire_all()
+            
+            # Completar misiones y registrar para minijuegos
+            from services.mission_service import MissionService
+            mission_service = MissionService(self.session)
+            mission_id = f"reaction_reaccionar_{message_id}"
+            await mission_service.complete_mission(
+                user_id,
+                mission_id,
+                reaction_type=reaction_type,
+                target_message_id=message_id,
+                bot=self.bot,
+            )
+            from services.minigame_service import MiniGameService
+            await MiniGameService(self.session).record_reaction(user_id, self.bot)
+            
+            logger.info(f"Updated reaction for user {user_id} on message {message_id} to {reaction_type}")
+            return existing
 
         # Crear nueva reacción
         reaction = ButtonReaction(
@@ -161,12 +185,11 @@ class MessageService:
         self.session.add(reaction)
         await self.session.commit()
         await self.session.refresh(reaction)
+        
+        # Forzar actualización de contadores invalidando caché de la sesión
+        await self.session.expire_all()
 
-        # Limpiar cualquier caché de conteos previos para forzar actualización
-        previous_counts_key = f"prev_counts_{message_id}"
-        if hasattr(self, "_previous_counts_cache") and previous_counts_key in self._previous_counts_cache:
-            del self._previous_counts_cache[previous_counts_key]
-
+        # Completar misiones y registrar para minijuegos
         from services.mission_service import MissionService
         mission_service = MissionService(self.session)
         mission_id = f"reaction_reaccionar_{message_id}"
@@ -180,52 +203,57 @@ class MessageService:
         from services.minigame_service import MiniGameService
         await MiniGameService(self.session).record_reaction(user_id, self.bot)
 
+        logger.info(f"Created new reaction for user {user_id} on message {message_id}: {reaction_type}")
         return reaction
 
     async def get_reaction_counts(self, message_id: int) -> dict[str, int]:
         """Return reaction counts for the given message."""
-        stmt = (
-            select(ButtonReaction.reaction_type, func.count(ButtonReaction.id))
-            .where(ButtonReaction.message_id == message_id)
-            .group_by(ButtonReaction.reaction_type)
-        )
-        result = await self.session.execute(stmt)
-        return {row[0]: row[1] for row in result.all()}
+        try:
+            # Usar un logger para ayudar en la depuración
+            logger.debug(f"Getting reaction counts for message_id={message_id}")
+            
+            # Asegurarse de que message_id sea un entero
+            message_id = int(message_id)
+            
+            # Consulta para obtener conteos de reacciones - usar una consulta más directa
+            stmt = (
+                select(ButtonReaction.reaction_type, func.count(ButtonReaction.id).label("count"))
+                .where(ButtonReaction.message_id == message_id)
+                .group_by(ButtonReaction.reaction_type)
+            )
+            result = await self.session.execute(stmt)
+            
+            # Convertir resultado a diccionario
+            counts = {row[0]: row[1] for row in result.all()}
+            
+            # Verificar que tenemos datos y loguear para depuración
+            logger.debug(f"Found reaction counts: {counts}")
+            
+            # Para depuración detallada: consultar directamente todas las reacciones para este mensaje
+            debug_stmt = select(ButtonReaction).where(ButtonReaction.message_id == message_id)
+            debug_result = await self.session.execute(debug_stmt)
+            debug_reactions = debug_result.scalars().all()
+            logger.debug(f"Raw reactions in DB for message {message_id}: {len(debug_reactions)}")
+            for reaction in debug_reactions:
+                logger.debug(f"  - User {reaction.user_id}: {reaction.reaction_type}")
+            
+            return counts
+        except Exception as e:
+            logger.error(f"Error getting reaction counts: {e}", exc_info=True)
+            return {}  # Retornar diccionario vacío en caso de error
 
     async def update_reaction_markup(self, chat_id: int, message_id: int) -> None:
         """Update inline keyboard of an interactive post with current counts."""
         chat_id_str = str(chat_id)
 
-        # Obtener conteos actuales siempre frescos
+        # Obtener conteos actuales siempre frescos - forzar una consulta a la BD
+        await self.session.expire_all()  # Forzar refrescar los datos de la sesión
         counts = await self.get_reaction_counts(message_id)
         
         # Mostrar los conteos que estamos usando para depuración
         logger.info(f"Current reaction counts for message {message_id}: {counts}")
-
-        # Key de caché para este mensaje específico
-        previous_counts_key = f"prev_counts_{message_id}"
-        if not hasattr(self, "_previous_counts_cache"):
-            self._previous_counts_cache = {}
         
-        # Obtener conteos anteriores del caché
-        previous_counts = self._previous_counts_cache.get(previous_counts_key, {})
-        
-        # Comparar si hay cambios en los conteos
-        has_changes = previous_counts != counts
-        
-        # Log detallado para debugging
-        if previous_counts:
-            logger.info(f"Previous counts: {previous_counts}, Current counts: {counts}, Has changes: {has_changes}")
-        
-        # Actualizar el caché con los nuevos conteos
-        self._previous_counts_cache[previous_counts_key] = counts.copy()
-        
-        # Si no hay cambios reales y no es la primera vez, no actualizar el markup
-        if not has_changes and previous_counts:
-            logger.info(f"No changes in reaction counts for message {message_id}, skipping update")
-            return
-
-        # Siempre forzar obtener las reacciones disponibles del canal
+        # Obtener las reacciones disponibles del canal
         raw_reactions, _ = await self.channel_service.get_reactions_and_points(chat_id)
         if not raw_reactions:
             from utils.config import DEFAULT_REACTION_BUTTONS
@@ -233,7 +261,8 @@ class MessageService:
 
         try:
             # Crear markup con los conteos actualizados
-            markup_to_edit = get_reaction_kb(
+            # Usar get_interactive_post_kb para mantener consistencia
+            markup_to_edit = get_interactive_post_kb(
                 reactions=raw_reactions,
                 current_counts=counts,
                 message_id=message_id,
