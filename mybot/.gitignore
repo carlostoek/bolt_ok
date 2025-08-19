@@ -1,0 +1,21 @@
+# Test files
+test_*.py
+*_test.py
+tests/
+test_db.sqlite
+test_notifications.py
+run_protection_tests.py
+.claude/agents/test-coverage-agent.md
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Database files
+*.sqlite
+*.db
+test_db.sqlite
+
+# Log files
+*.log
