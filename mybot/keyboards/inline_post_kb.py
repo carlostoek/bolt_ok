@@ -22,14 +22,20 @@ def get_reaction_kb(
             "Expected current_counts to be a dict, got %s", type(current_counts)
         )
         current_counts = {}
+    
+    # Depuración: ver los conteos que llegan
+    logger.debug(f"Building reaction keyboard with counts: {current_counts}")
 
     reactions_to_use = reactions if reactions else DEFAULT_REACTION_BUTTONS
 
     for emoji in reactions_to_use[:10]:
-        count = current_counts.get(emoji, 0)
+        # Obtener conteo, asegurándonos de que sea un entero
+        count = int(current_counts.get(emoji, 0))
         display = f"{emoji} {count}"
         callback_data = f"ip_{channel_id}_{message_id}_{emoji}"
         builder.button(text=display, callback_data=callback_data)
+        logger.debug(f"Added button: {emoji} with count {count}")
+
 
     keyboard_data = builder.export()
     if keyboard_data:

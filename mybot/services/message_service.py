@@ -128,6 +128,8 @@ class MessageService:
     async def register_reaction(
         self, user_id: int, message_id: int, reaction_type: str
     ) -> ButtonReaction | None:
+        # Asegurarnos de que message_id sea un entero
+        message_id = int(message_id)
         # Verificar si ya existe esta reacción exacta
         stmt = select(ButtonReaction).where(
             ButtonReaction.message_id == message_id,
@@ -189,26 +191,52 @@ class MessageService:
 
     async def get_reaction_counts(self, message_id: int) -> dict[str, int]:
         """Return reaction counts for the given message."""
-        stmt = (
-            select(ButtonReaction.reaction_type, func.count(ButtonReaction.id))
-            .where(ButtonReaction.message_id == message_id)
-            .group_by(ButtonReaction.reaction_type)
-        )
-        result = await self.session.execute(stmt)
-        return {row[0]: row[1] for row in result.all()}
+        try:
+            # Usar un logger para ayudar en la depuración
+            logger.debug(f"Getting reaction counts for message_id={message_id}")
+            
+            # Consulta para obtener conteos de reacciones
+            stmt = (
+                select(ButtonReaction.reaction_type, func.count(ButtonReaction.id))
+                .where(ButtonReaction.message_id == message_id)
+                .group_by(ButtonReaction.reaction_type)
+            )
+            result = await self.session.execute(stmt)
+            
+            # Convertir resultado a diccionario
+            counts = {row[0]: row[1] for row in result.all()}
+            
+            # Verificar que tenemos datos y loguear para depuración
+            logger.debug(f"Found reaction counts: {counts}")
+            
+            # Para depuración: consultar directamente todas las reacciones para este mensaje
+            debug_stmt = select(ButtonReaction).where(ButtonReaction.message_id == message_id)
+            debug_result = await self.session.execute(debug_stmt)
+            debug_reactions = debug_result.scalars().all()
+            logger.debug(f"Raw reactions in DB for message {message_id}: {len(debug_reactions)}")
+            for reaction in debug_reactions:
+                logger.debug(f"  - User {reaction.user_id}: {reaction.reaction_type}")
+            
+            return counts
+        except Exception as e:
+            logger.error(f"Error getting reaction counts: {e}", exc_info=True)
+            return {}  # Retornar diccionario vacío en caso de error
 
     async def update_reaction_markup(self, chat_id: int, message_id: int) -> None:
         """Update inline keyboard of an interactive post with current counts."""
         chat_id_str = str(chat_id)
 
+        # Asegurarnos de que el message_id sea un entero
+        message_id_int = int(message_id)
+        
         # Obtener conteos actuales siempre frescos
-        counts = await self.get_reaction_counts(message_id)
+        counts = await self.get_reaction_counts(message_id_int)
         
         # Mostrar los conteos que estamos usando para depuración
-        logger.info(f"Current reaction counts for message {message_id}: {counts}")
+        logger.info(f"Current reaction counts for message {message_id_int}: {counts}")
 
         # Key de caché para este mensaje específico
-        previous_counts_key = f"prev_counts_{message_id}"
+        previous_counts_key = f"prev_counts_{message_id_int}"
         if not hasattr(self, "_previous_counts_cache"):
             self._previous_counts_cache = {}
         
@@ -219,16 +247,17 @@ class MessageService:
         has_changes = previous_counts != counts
         
         # Log detallado para debugging
-        if previous_counts:
-            logger.info(f"Previous counts: {previous_counts}, Current counts: {counts}, Has changes: {has_changes}")
+        logger.info(f"Previous counts: {previous_counts}, Current counts: {counts}, Has changes: {has_changes}")
         
         # Actualizar el caché con los nuevos conteos
         self._previous_counts_cache[previous_counts_key] = counts.copy()
         
-        # Si no hay cambios reales y no es la primera vez, no actualizar el markup
-        if not has_changes and previous_counts:
-            logger.info(f"No changes in reaction counts for message {message_id}, skipping update")
-            return
+        # Siempre actualizar el markup, sin importar si hay cambios o no
+        # para asegurarnos de que los conteos se muestren correctamente
+        # (Comentamos la condición anterior que podía causar problemas)
+        # if not has_changes and previous_counts:
+        #     logger.info(f"No changes in reaction counts for message {message_id_int}, skipping update")
+        #     return
 
         # Siempre forzar obtener las reacciones disponibles del canal
         raw_reactions, _ = await self.channel_service.get_reactions_and_points(chat_id)
@@ -244,7 +273,7 @@ class MessageService:
                 message_id=message_id,
                 channel_id=chat_id,
             )
-            logger.info(f"DEBUG: Markup being sent for update: {markup_to_edit}")
+            logger.info(f"DEBUG: Markup being sent for update for message {message_id_int}: {markup_to_edit}")
 
             # Intentar actualizar el markup
             await self.bot.edit_message_reply_markup(
