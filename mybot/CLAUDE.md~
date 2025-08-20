@@ -1,0 +1,16 @@
+## Memoria de Desarrollo
+
+- Realiza commit al término de cada implementación 
+- Evita el uso de referencias herramientas externas en los commits
+
+This documentation should be updated as new features are added or architectural changes are made to the system.
+- than 100KB
+Verifying if specific features, patterns, or security measures are implemented
+Checking for the presence of certain coding patterns across the entire codebase
+Important Notes
+
+Paths in @ syntax are relative to your current working directory when invoking gemini
+The CLI will include file contents directly in the context
+No need for --yolo flag for read-only analysis
+Gemini's context window can handle entire codebases that would overflow Claude's context
+When checking implementations, be specific about what you're looking for to get accurate results

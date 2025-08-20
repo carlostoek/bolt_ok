@@ -1,0 +1,28 @@
+============================================================
+REPORTE DE MIGRACIÓN - SISTEMA DE NOTIFICACIONES UNIFICADAS
+============================================================
+
+Total de llamadas a migrar: 0
+
+Clasificación por tipo:
+  - points: 0 ocurrencias
+  - missions: 0 ocurrencias
+  - achievements: 0 ocurrencias
+  - hints: 0 ocurrencias
+  - errors: 0 ocurrencias
+  - other: 0 ocurrencias
+
+============================================================
+ARCHIVOS A MODIFICAR:
+============================================================
+
+============================================================
+RECOMENDACIONES:
+============================================================
+
+1. Actualizar handlers de reacciones primero
+2. Migrar sistema de misiones después
+3. Actualizar sistema de logros
+4. Probar cada módulo individualmente
+5. Ejecutar suite de tests completa
+        

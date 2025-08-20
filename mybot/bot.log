@@ -1679,3 +1679,200 @@ NameError: name 'session' is not defined. Did you mean: 'Mission'?
 2025-08-17 03:15:37,950 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-08-17 03:15:37,950 - root - INFO - safe_task:114 - Tarea channel_cleanup cancelada
 2025-08-17 03:15:37,950 - root - INFO - shutdown:134 - Todas las tareas cerradas
+2025-08-20 10:54:07,694 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-08-20 10:54:07,694 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-20 10:54:07,756 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-20 10:54:07,834 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-20 10:54:07,838 - __main__ - INFO - main:148 - Aplicando parches de seguridad...
+2025-08-20 10:54:07,839 - __main__ - INFO - main:153 - VIP channel ID: 0
+2025-08-20 10:54:07,839 - __main__ - INFO - main:154 - Configurando bot...
+2025-08-20 10:54:07,873 - __main__ - INFO - main:183 - Registrando handlers...
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router setup registrado
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router admin registrado
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router start_token registrado
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router start registrado
+2025-08-20 10:54:07,873 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router backpack registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router missions registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router info registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router native_reaction registrado
+2025-08-20 10:54:07,874 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router minigames registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router gamification registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router free_user registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router lore registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router narrative registrado
+2025-08-20 10:54:07,875 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-08-20 10:54:07,876 - __main__ - INFO - main:214 - Router free_channel_config registrado
+2025-08-20 10:54:07,876 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-08-20 10:54:07,876 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-08-20 10:54:07,878 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-20 10:54:07,881 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-20 10:54:07,883 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-20 10:54:07,885 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-20 10:54:07,887 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-20 10:54:08,028 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-20 10:54:08,875 - services.subscription_service - INFO - create_subscription:32 - Created VIP subscription for user 1280444712, expires: None
+2025-08-20 10:54:09,493 - root - INFO - run_vip_membership_check:120 - Synced 1 users to VIP role via channel
+2025-08-20 10:54:47,096 - services.message_service - INFO - send_interactive_post:84 - DEBUG: Markup to edit: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_40_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_40_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_40_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_40_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 0', url=None, callback_data='ip_-1001468184215_40_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-20 10:54:47,408 - services.message_registry - INFO - store_message:18 - Stored message (-1001468184215, 40)
+2025-08-20 10:54:51,168 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=40: True
+2025-08-20 10:54:51,169 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=40 valid=True
+2025-08-20 10:54:51,276 - services.point_service - INFO - add_points:254 - User 1280444712 gained 2 points (base 1, x2). Total: 7.0
+2025-08-20 10:54:51,298 - services.mission_service - INFO - complete_mission:178 - Sent unified mission completion notification to user 1280444712
+2025-08-20 10:54:51,298 - services.mission_service - INFO - complete_mission:191 - User 1280444712 successfully completed mission reaction_reaccionar_40 (Type: reaction, Message: 40).
+2025-08-20 10:54:51,363 - services.point_service - INFO - add_points:254 - User 1280444712 gained 1.0 points (base 0.5, x2). Total: 8.0
+2025-08-20 10:54:51,452 - services.point_service - INFO - add_points:254 - User 1280444712 gained 1 points (base 1, x1). Total: 9.0
+2025-08-20 10:54:51,455 - handlers.reaction_callback - INFO - handle_reaction_callback:87 - Reacción registrada para user_id=1280444712 sin notificaciones duplicadas
+2025-08-20 10:54:51,469 - services.message_service - INFO - update_reaction_markup:188 - DEBUG: Markup being sent for update: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_40_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_40_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_40_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_40_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 1', url=None, callback_data='ip_-1001468184215_40_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-20 10:54:52,599 - services.notification_service - INFO - _send_notifications_now:161 - Sent unified notification to user 1280444712: 1 items
+2025-08-20 10:55:09,115 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=40: True
+2025-08-20 10:55:09,116 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=40 valid=True
+2025-08-20 10:55:09,266 - services.point_service - INFO - add_points:254 - User 6181290784 gained 2 points (base 1, x2). Total: 7.0
+2025-08-20 10:55:09,297 - services.mission_service - INFO - complete_mission:178 - Sent unified mission completion notification to user 6181290784
+2025-08-20 10:55:09,297 - services.mission_service - INFO - complete_mission:191 - User 6181290784 successfully completed mission reaction_reaccionar_40 (Type: reaction, Message: 40).
+2025-08-20 10:55:09,363 - services.point_service - INFO - add_points:254 - User 6181290784 gained 1.0 points (base 0.5, x2). Total: 8.0
+2025-08-20 10:55:09,463 - services.point_service - INFO - add_points:254 - User 6181290784 gained 1 points (base 1, x1). Total: 9.0
+2025-08-20 10:55:09,466 - handlers.reaction_callback - INFO - handle_reaction_callback:87 - Reacción registrada para user_id=6181290784 sin notificaciones duplicadas
+2025-08-20 10:55:09,497 - services.message_service - INFO - update_reaction_markup:188 - DEBUG: Markup being sent for update: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_40_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_40_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_40_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_40_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 2', url=None, callback_data='ip_-1001468184215_40_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-20 10:55:10,984 - services.notification_service - INFO - _send_notifications_now:161 - Sent unified notification to user 6181290784: 1 items
+2025-08-20 10:55:19,299 - __main__ - ERROR - global_error_handler:89 - Error en 226871442: TypeError: 'AsyncSession' object is not callable
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 49, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 40, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 59, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 170, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 90, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/main_menu.py", line 10, in handle_backpack_button
+    await mostrar_mochila_narrativa(message)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/backpack.py", line 58, in mostrar_mochila_narrativa
+    async with session_factory() as session:
+               ^^^^^^^^^^^^^^^^^
+TypeError: 'AsyncSession' object is not callable
+2025-08-20 10:55:24,883 - __main__ - ERROR - global_error_handler:89 - Error en 226871444: AttributeError: type object 'cb' has no attribute 'answer'
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 49, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 40, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 59, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 170, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 90, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/main_menu.py", line 20, in handle_missions_button
+    await show_available_missions(fake_callback, session)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/missions_handler.py", line 13, in show_available_missions
+    await callback.answer("Cargando misiones...", show_alert=False)
+          ^^^^^^^^^^^^^^^
+AttributeError: type object 'cb' has no attribute 'answer'
+2025-08-20 10:56:28,736 - aiogram.dispatcher - WARNING - _signal_stop_polling:455 - Received SIGINT signal
+2025-08-20 10:56:28,994 - __main__ - INFO - main:249 - Cerrando bot...
+2025-08-20 10:56:28,996 - root - INFO - shutdown:126 - Cerrando tareas en segundo plano...
+2025-08-20 10:56:28,996 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-08-20 10:56:28,997 - root - INFO - safe_task:115 - Tarea channel_requests cancelada
+2025-08-20 10:56:28,997 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-08-20 10:56:28,998 - root - INFO - safe_task:115 - Tarea vip_subscriptions cancelada
+2025-08-20 10:56:28,998 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-08-20 10:56:28,998 - root - INFO - safe_task:115 - Tarea vip_memberships cancelada
+2025-08-20 10:56:28,999 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-08-20 10:56:28,999 - root - INFO - safe_task:115 - Tarea auction_monitor cancelada
+2025-08-20 10:56:29,000 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-08-20 10:56:29,000 - root - INFO - safe_task:115 - Tarea channel_cleanup cancelada
+2025-08-20 10:56:29,001 - root - INFO - shutdown:135 - Todas las tareas cerradas
