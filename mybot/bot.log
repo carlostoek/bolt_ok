@@ -2081,3 +2081,45 @@ TypeError: is_admin() takes 2 positional arguments but 3 were given
 2025-08-20 13:53:38,924 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
 2025-08-20 13:53:39,956 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
 2025-08-20 13:53:39,957 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.410102 seconds and try again... (tryings = 1, bot id = 8426456639)
+2025-08-20 16:44:30,976 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-20 16:44:30,977 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-20 16:44:31,041 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-20 16:44:31,188 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-20 16:44:31,195 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-20 16:44:31,197 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-20 16:44:31,198 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-20 16:44:31,250 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-20 16:44:31,251 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-20 16:44:31,251 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-20 16:44:31,251 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-20 16:44:31,251 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router start registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router info registrado
+2025-08-20 16:44:31,252 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-20 16:44:31,253 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:216 - Router menu_system registrado
+2025-08-20 16:44:31,254 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-20 16:44:31,255 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-20 16:44:31,257 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-20 16:44:31,263 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-20 16:44:31,266 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-20 16:44:31,269 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-20 16:44:31,272 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-20 16:44:31,485 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
