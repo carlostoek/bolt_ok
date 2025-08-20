@@ -255,6 +255,22 @@ class MenuManager:
         
         # Clear navigation history
         self._nav_history.pop(user_id, None)
+        
+    def register_menu(self, message_id: int, menu_state: str, user_id: int) -> None:
+        """
+        Register a message as an active menu with its state.
+        """
+        # Store the message and state for future reference
+        self._menu_states = getattr(self, '_menu_states', {})
+        self._menu_states[message_id] = menu_state
+        
+    def get_menu_state(self, message_id: int) -> Optional[str]:
+        """
+        Get the menu state associated with a message ID.
+        """
+        # Get the menu state for a message
+        self._menu_states = getattr(self, '_menu_states', {})
+        return self._menu_states.get(message_id)
     
     def _update_nav_history(self, user_id: int, menu_state: str) -> None:
         """Update navigation history for back button functionality."""
