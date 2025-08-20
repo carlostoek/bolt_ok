@@ -15,6 +15,7 @@ from .coordinador_central import CoordinadorCentral, AccionUsuario
 from .user_service import UserService
 from .point_service import PointService
 from .narrative_service import NarrativeService
+from .narrative_compatibility_layer import get_narrative_compatibility
 from .mission_service import MissionService
 from .achievement_service import AchievementService
 from .tenant_service import TenantService
@@ -54,6 +55,7 @@ class DianaMenuSystem:
         self.user_service = UserService(session)
         self.point_service = PointService(session)
         self.narrative_service = NarrativeService(session)
+        self.narrative_compatibility = get_narrative_compatibility(session)
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
         self.tenant_service = TenantService(session)
@@ -241,9 +243,8 @@ class DianaMenuSystem:
             user = await self.user_service.get_user(user_id)
             points = await self.point_service.get_user_points(user_id)
             
-            # Get narrative progress
-            current_fragment = await self.narrative_service.get_user_current_fragment(user_id)
-            narrative_progress = await self._calculate_narrative_progress(user_id)
+            # Get narrative progress using compatibility layer
+            narrative_data = await self.narrative_compatibility.get_user_narrative_data(user_id)
             
             # Get gamification data
             missions = await self.mission_service.get_user_missions_summary(user_id)
@@ -253,10 +254,10 @@ class DianaMenuSystem:
                 "level": getattr(user, 'level', 1) if user else 1,
                 "points": points,
                 "current_points": points,
-                "narrative_progress": narrative_progress,
-                "current_chapter": current_fragment.title if current_fragment else "Prólogo",
-                "hints_unlocked": narrative_progress // 10,  # Rough estimate
-                "decisions_made": narrative_progress // 5,   # Rough estimate
+                "narrative_progress": narrative_data.get("completion_percentage", 0),
+                "current_chapter": narrative_data.get("fragment_title", "Prólogo"),
+                "hints_unlocked": narrative_data.get("hints_unlocked", 0),
+                "decisions_made": len(narrative_data.get("decisions", [])),
                 "completed_missions": missions.get("completed", 0) if missions else 0,
                 "total_missions": missions.get("total", 0) if missions else 0,
                 "achievements": len(achievements) if achievements else 0,
@@ -266,7 +267,21 @@ class DianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error getting integrated user data: {e}")
-            return {}
+            # Return fallback data to prevent failures
+            return {
+                "level": 1,
+                "points": 0,
+                "current_points": 0,
+                "narrative_progress": 0,
+                "current_chapter": "Prólogo",
+                "hints_unlocked": 0,
+                "decisions_made": 0,
+                "completed_missions": 0,
+                "total_missions": 0,
+                "achievements": 0,
+                "streak_days": 0,
+                "last_activity": "Hoy"
+            }
     
     async def _get_admin_statistics(self) -> Dict[str, Any]:
         """Get system-wide statistics for admin overview."""
@@ -281,33 +296,32 @@ class DianaMenuSystem:
     async def _get_active_character(self, user_id: int) -> str:
         """Determine active character (Diana/Lucien) based on narrative progress."""
         try:
-            current_fragment = await self.narrative_service.get_user_current_fragment(user_id)
-            # Logic to determine character based on story progression
+            # Use compatibility layer for consistent access to narrative data
+            narrative_data = await self.narrative_compatibility.get_user_narrative_data(user_id)
+            
+            # Logic to determine character based on fragment key or progress
+            current_fragment = narrative_data.get("current_fragment")
+            
+            # Advanced logic could be implemented here based on fragment key patterns
+            # For example: if "lucien" in current_fragment: return "lucien"
+            
             # For now, default to Diana
             return "diana"
-        except Exception:
+        except Exception as e:
+            logger.error(f"Error determining active character for user {user_id}: {e}")
             return "diana"
     
     async def _calculate_narrative_progress(self, user_id: int) -> int:
-        """Calculate narrative completion percentage."""
+        """Calculate narrative completion percentage using compatibility layer."""
         try:
-            # This would calculate based on fragments completed
-            # Placeholder implementation
-            current_fragment = await self.narrative_service.get_user_current_fragment(user_id)
-            if current_fragment:
-                # Simple progress based on fragment key
-                if "level1" in current_fragment.key:
-                    return 20
-                elif "level2" in current_fragment.key:
-                    return 40
-                elif "level3" in current_fragment.key:
-                    return 60
-                elif "level4" in current_fragment.key:
-                    return 80
-                elif "level5" in current_fragment.key:
-                    return 100
-            return 0
-        except Exception:
+            # Use compatibility layer to get normalized narrative data
+            narrative_data = await self.narrative_compatibility.get_user_narrative_data(user_id)
+            
+            # Return progress percentage directly from normalized data
+            return narrative_data.get("progress_percentage", 0)
+            
+        except Exception as e:
+            logger.error(f"Error calculating narrative progress for user {user_id}: {e}")
             return 0
     
     async def _calculate_engagement_score(self, user_id: int) -> int:

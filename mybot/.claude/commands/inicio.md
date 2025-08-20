@@ -1,0 +1,1 @@
+lee el documento CLAUDE.md
