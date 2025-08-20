@@ -60,12 +60,12 @@ from handlers.lore_handlers import router as lore_router
 from handlers.missions_handler import router as missions_router
 from handlers.info_handler import router as info_router
 from handlers.free_channel_admin import router as free_channel_admin_router
-from handlers.publication_test import router as publication_test_router
+# from handlers.publication_test import router as publication_test_router  # Module not found
 from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
 from handlers.admin.free_channel_config import router as free_channel_config_router
-from handlers.menu_system_router import menu_system_router
+# from handlers.menu_system_router import menu_system_router  # Module not found
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -193,7 +193,7 @@ async def main() -> None:
             ("missions", missions_router),
             ("info", info_router),
             ("free_channel_admin", free_channel_admin_router),
-            ("publication_test", publication_test_router),
+            # ("publication_test", publication_test_router),  # Module not found
             ("vip_menu", vip.router),
             ("auction_user", auction_user_router),
             ("reaction_callback", reaction_callback_router),
@@ -208,7 +208,7 @@ async def main() -> None:
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
             ("free_channel_config", free_channel_config_router),
-            ("menu_system", menu_system_router),
+            # ("menu_system", menu_system_router),  # Module not found
         ]
         
         for name, router in routers:

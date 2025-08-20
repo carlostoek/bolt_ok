@@ -1,0 +1,8 @@
+=== Diana Narrative System Test Report ===
+
+Test Category: basic
+Date: 2025-08-20 15:36:14
+Duration: 5.29 seconds
+
+Result Code: 2
+Status: Tests completed with failures or errors (code 2).

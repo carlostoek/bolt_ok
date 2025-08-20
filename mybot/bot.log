@@ -2081,3 +2081,55 @@ TypeError: is_admin() takes 2 positional arguments but 3 were given
 2025-08-20 13:53:38,924 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
 2025-08-20 13:53:39,956 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
 2025-08-20 13:53:39,957 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.410102 seconds and try again... (tryings = 1, bot id = 8426456639)
+2025-08-20 16:27:54,419 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-20 16:27:54,419 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-20 16:27:54,478 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-20 16:27:54,701 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-20 16:27:54,708 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-20 16:27:54,709 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-20 16:27:54,710 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-20 16:27:54,773 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-20 16:27:54,774 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-20 16:27:54,774 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-20 16:27:54,774 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router start registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router info registrado
+2025-08-20 16:27:54,775 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-20 16:27:54,776 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-20 16:27:54,776 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-20 16:27:54,776 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-20 16:27:54,776 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-20 16:27:54,776 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-20 16:27:54,777 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-20 16:27:54,778 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-20 16:27:54,778 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-20 16:27:54,778 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-20 16:27:54,780 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-20 16:27:54,786 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-20 16:27:54,789 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-20 16:27:54,790 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-20 16:27:54,794 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-20 16:27:55,111 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-20 16:28:47,288 - services.message_service - INFO - send_interactive_post:84 - DEBUG: Markup to edit: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_41_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_41_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_41_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_41_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 0', url=None, callback_data='ip_-1001468184215_41_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-20 16:28:47,619 - services.message_registry - INFO - store_message:18 - Stored message (-1001468184215, 41)
+2025-08-20 16:28:52,771 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=41: True
+2025-08-20 16:28:52,771 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=41 valid=True
+2025-08-20 16:28:52,888 - services.point_service - INFO - add_points:254 - User 1280444712 gained 2 points (base 1, x2). Total: 11.0
+2025-08-20 16:28:52,908 - services.mission_service - INFO - complete_mission:178 - Sent unified mission completion notification to user 1280444712
+2025-08-20 16:28:52,908 - services.mission_service - INFO - complete_mission:191 - User 1280444712 successfully completed mission reaction_reaccionar_41 (Type: reaction, Message: 41).
+2025-08-20 16:28:52,981 - services.point_service - INFO - add_points:254 - User 1280444712 gained 1.0 points (base 0.5, x2). Total: 12.0
+2025-08-20 16:28:53,047 - services.point_service - INFO - add_points:254 - User 1280444712 gained 1 points (base 1, x1). Total: 13.0
+2025-08-20 16:28:53,049 - handlers.reaction_callback - INFO - handle_reaction_callback:87 - Reacción registrada para user_id=1280444712 sin notificaciones duplicadas
+2025-08-20 16:28:53,059 - services.message_service - INFO - update_reaction_markup:188 - DEBUG: Markup being sent for update: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_41_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_41_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_41_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_41_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 1', url=None, callback_data='ip_-1001468184215_41_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-20 16:28:54,233 - services.notification_service - INFO - _send_notifications_now:161 - Sent unified notification to user 1280444712: 1 items
