@@ -2633,3 +2633,249 @@ sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Sessi
 2025-08-23 10:44:59,454 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-08-23 10:44:59,454 - root - INFO - safe_task:116 - Tarea channel_cleanup cancelada
 2025-08-23 10:44:59,455 - root - INFO - shutdown:136 - Todas las tareas cerradas
+2025-08-23 13:59:32,791 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-23 13:59:32,792 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-23 13:59:32,844 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-23 13:59:33,044 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-23 13:59:33,051 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-23 13:59:33,051 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-23 13:59:33,052 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-23 13:59:33,119 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-23 13:59:33,119 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-23 13:59:33,119 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-23 13:59:33,119 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router start registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-23 13:59:33,120 - __main__ - INFO - main:216 - Router info registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-23 13:59:33,121 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-23 13:59:33,122 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-23 13:59:33,123 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-23 13:59:33,123 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-23 13:59:33,123 - __main__ - INFO - main:216 - Router menu_system registrado
+2025-08-23 13:59:33,123 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-23 13:59:33,123 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-23 13:59:33,125 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-23 13:59:33,131 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-23 13:59:33,134 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-23 13:59:33,140 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-23 13:59:33,143 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-23 13:59:33,280 - root - ERROR - channel_request_scheduler:43 - Unhandled error in channel request scheduler
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 149, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 300, in _handle_exception
+    raise error
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 131, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/cursor.py", line 48, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/core.py", line 132, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/core.py", line 115, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such column: bot_config.token_welcome_message
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/scheduler.py", line 32, in channel_request_scheduler
+    await run_channel_request_check(bot, session_factory)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/scheduler.py", line 20, in run_channel_request_check
+    processed_count = await free_service.process_pending_requests()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/free_channel_service.py", line 182, in process_pending_requests
+    wait_minutes = await self.get_wait_time_minutes()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/free_channel_service.py", line 58, in get_wait_time_minutes
+    config = await self.session.get(BotConfig, 1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 694, in load_on_pk_identity
+    session.execute(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
+    return meth(
+           ^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1637, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1842, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1982, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2351, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1963, in _exec_single_context
+    self.dialect.do_execute(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 943, in do_execute
+    cursor.execute(statement, parameters)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 149, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 300, in _handle_exception
+    raise error
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 131, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/cursor.py", line 48, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/core.py", line 132, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiosqlite/core.py", line 115, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: bot_config.token_welcome_message
+[SQL: SELECT bot_config.id AS bot_config_id, bot_config.free_channel_wait_time_minutes AS bot_config_free_channel_wait_time_minutes, bot_config.social_media_message AS bot_config_social_media_message, bot_config.welcome_message_template AS bot_config_welcome_message_template, bot_config.token_welcome_message AS bot_config_token_welcome_message, bot_config.auto_approval_enabled AS bot_config_auto_approval_enabled 
+FROM bot_config 
+WHERE bot_config.id = ?]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-08-23 13:59:33,323 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-23 14:00:19,911 - services.message_service - INFO - send_interactive_post:84 - DEBUG: Markup to edit: inline_keyboard=[[InlineKeyboardButton(text='👍 0', url=None, callback_data='ip_-1001468184215_44_👍', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='❤️ 0', url=None, callback_data='ip_-1001468184215_44_❤️', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='😂 0', url=None, callback_data='ip_-1001468184215_44_😂', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None), InlineKeyboardButton(text='🔥 0', url=None, callback_data='ip_-1001468184215_44_🔥', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='💯 0', url=None, callback_data='ip_-1001468184215_44_💯', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, callback_game=None, pay=None)]]
+2025-08-23 14:00:20,222 - services.message_registry - INFO - store_message:18 - Stored message (-1001468184215, 44)
+2025-08-23 14:00:24,621 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=44: True
+2025-08-23 14:00:24,621 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=44 valid=True
+2025-08-23 14:00:24,683 - __main__ - ERROR - global_error_handler:90 - Error en 226871510: InvalidRequestError: A transaction is already begun on this Session.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 49, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 40, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 59, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 170, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/reaction_callback.py", line 54, in handle_reaction_callback
+    reaction_result = await service.register_reaction(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/message_service.py", line 151, in register_reaction
+    await mission_service.complete_mission(
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/mission_service.py", line 128, in complete_mission
+    await point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 228, in add_points
+    async with self.session.begin():
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1890, in start
+    await greenlet_spawn(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1943, in begin
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+2025-08-23 14:01:06,764 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=44: True
+2025-08-23 14:01:06,765 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=44 valid=True
+2025-08-23 14:01:10,776 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=43: False
+2025-08-23 14:01:10,777 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=43 valid=False
+2025-08-23 14:01:10,777 - handlers.reaction_callback - WARNING - handle_reaction_callback:46 - [ERROR] El mensaje que se intenta editar no fue enviado por este bot o el chat_id es incorrecto.
+2025-08-23 14:01:12,249 - services.message_registry - INFO - validate_message:29 - Validation attempt for chat_id=-1001468184215, message_id=44: True
+2025-08-23 14:01:12,250 - handlers.reaction_callback - INFO - handle_reaction_callback:41 - Edit attempt chat_id=-1001468184215 message_id=44 valid=True
+2025-08-23 14:01:40,417 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-08-23 14:01:40,420 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-08-23 14:01:47,370 - utils.handler_decorators - INFO - wrapper:302 - Action 'vip_subscription_info' by user 6181290784 completed in 0.614s
+2025-08-23 14:50:12,765 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
+2025-08-23 14:50:12,787 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
