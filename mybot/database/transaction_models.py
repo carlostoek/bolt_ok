@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, BigInteger, Float, String, Text, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, BigInteger, Float, String, Text, DateTime, ForeignKey, Boolean, JSON, Index
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from .base import Base
 
 
@@ -36,3 +37,23 @@ class VipTransaction(Base):
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
     notes = Column(String, nullable=True)
+
+
+class RewardLog(Base):
+    """Log de todas las recompensas otorgadas a los usuarios."""
+    __tablename__ = "reward_logs"
+    __table_args__ = (
+        Index('ix_reward_logs_user_id', 'user_id'),
+        Index('ix_reward_logs_reward_type', 'reward_type'),
+        Index('ix_reward_logs_created_at', 'created_at'),
+    )
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    reward_type = Column(String(50), nullable=False)  # 'points', 'clue', 'achievement'
+    reward_data = Column(JSON, nullable=False)  # Datos específicos de la recompensa
+    source = Column(String(100), nullable=True)  # Origen de la recompensa
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    
+    # Relación con el usuario
+    user = relationship("User", backref="reward_logs")

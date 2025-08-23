@@ -69,6 +69,7 @@ from handlers.menu_system_router import menu_system_router
 from handlers.narrative_fragment_handler import router as narrative_fragment_router
 from handlers.unified_narrative_handler import router as unified_narrative_router
 from handlers.user_narrative_handler import router as user_narrative_router
+from handlers.reward_test_handler import router as reward_test_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -215,6 +216,7 @@ async def main() -> None:
             ("narrative_fragment", narrative_fragment_router),
             ("unified_narrative", unified_narrative_router),
             ("user_narrative", user_narrative_router),
+            ("reward_test", reward_test_router),
         ]
         
         for name, router in routers:

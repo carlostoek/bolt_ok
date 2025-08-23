@@ -419,17 +419,22 @@ class LorePiece(Base):
     """Discrete lore or clue piece that users can unlock."""
 
     __tablename__ = "lore_pieces"
+    __table_args__ = (
+        Index('ix_lore_pieces_type_active', 'content_type', 'is_active'),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     code_name = Column(String, unique=True, nullable=False)
     title = Column(String, nullable=False)
     description = Column(Text, nullable=True)
-    content_type = Column(String, nullable=False)
+    content_type = Column(String, nullable=False)  # Equivalente a clue_type en la especificación
     content = Column(Text, nullable=False)
     category = Column(String, nullable=True)
     is_main_story = Column(Boolean, default=False)
     unlock_condition_type = Column(String, nullable=True)
     unlock_condition_value = Column(String, nullable=True)
+    related_fragments = Column(JSON, default=list, nullable=False)  # IDs de fragmentos relacionados
+    unlock_conditions = Column(JSON, default=dict, nullable=False)  # Condiciones para desbloquear
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     is_active = Column(Boolean, default=True)
