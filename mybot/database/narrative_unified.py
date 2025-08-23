@@ -1,6 +1,5 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, BigInteger, JSON, Boolean, DateTime, Index
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, BigInteger, JSON, Boolean, DateTime, Index, func
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
 from uuid import uuid4
 from .base import Base
 
@@ -68,3 +67,56 @@ class NarrativeFragment(Base):
     def is_info(self):
         """Check if fragment is an info fragment."""
         return self.fragment_type == 'INFO'
+
+
+class UserNarrativeState(Base):
+    """Estado narrativo unificado del usuario.
+    
+    Este modelo rastrea el progreso del usuario en el sistema narrativo unificado,
+    incluyendo fragmentos visitados, completados, y pistas desbloqueadas.
+    """
+    
+    __tablename__ = 'user_narrative_states_unified'
+    
+    user_id = Column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    current_fragment_id = Column(String, ForeignKey('narrative_fragments_unified.id'), nullable=True)
+    visited_fragments = Column(JSON, default=list, nullable=False)  # Lista de IDs de fragmentos visitados
+    completed_fragments = Column(JSON, default=list, nullable=False)  # Lista de IDs de fragmentos completados
+    unlocked_clues = Column(JSON, default=list, nullable=False)  # Lista de códigos de pistas desbloqueadas
+    
+    # Relaciones
+    user = relationship("User", backref="narrative_state_unified", uselist=False)
+    current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id])
+    
+    def get_progress_percentage(self, session):
+        """Calcula el porcentaje de progreso del usuario.
+        
+        Args:
+            session: Sesión de base de datos SQLAlchemy
+            
+        Returns:
+            float: Porcentaje de progreso (0-100)
+        """
+        from sqlalchemy import func, select
+        # Contar fragmentos activos
+        total_fragments_result = session.execute(
+            select(func.count(NarrativeFragment.id)).where(NarrativeFragment.is_active == True)
+        )
+        total_fragments = total_fragments_result.scalar()
+        
+        if total_fragments == 0:
+            return 0
+        
+        completed_count = len(self.completed_fragments)
+        return (completed_count / total_fragments) * 100
+    
+    def has_unlocked_clue(self, clue_code):
+        """Verifica si el usuario ha desbloqueado una pista específica.
+        
+        Args:
+            clue_code (str): Código de la pista a verificar
+            
+        Returns:
+            bool: True si la pista está desbloqueada, False en caso contrario
+        """
+        return clue_code in self.unlocked_clues
