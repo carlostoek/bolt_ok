@@ -19,7 +19,7 @@ from aiogram.types import CallbackQuery, Message, User as TelegramUser
 from services.diana_menu_system import DianaMenuSystem, get_diana_menu_system
 from services.rewards.cross_module_rewards import CrossModuleRewards, get_cross_module_rewards
 from services.coordinador_central import CoordinadorCentral
-from database.models import User, UserStats, VipAccess
+from database.models import User, UserStats
 from database.narrative_models import UserNarrativeState, StoryFragment
 # Import removed - UserRole not available
 

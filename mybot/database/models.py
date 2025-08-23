@@ -48,7 +48,6 @@ class User(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     role = Column(String, default="free")
     vip_expires_at = Column(DateTime, nullable=True)
-    vip_until = Column(DateTime, nullable=True)  # Alternative naming for tests
     last_reminder_sent_at = Column(DateTime, nullable=True)
     menu_state = Column(String, default="root")
     is_admin = Column(Boolean, default=False) # New column for admin status
@@ -60,8 +59,7 @@ class User(Base):
             UserNarrativeState,
             back_populates="user",
             uselist=False,
-            lazy="selectin",
-            cascade="all, delete-orphan"
+            lazy="selectin"
         )
 
 
@@ -249,7 +247,6 @@ class UserStats(Base):
     last_activity_at = Column(DateTime, default=func.now())
     last_checkin_at = Column(DateTime, nullable=True)
     last_daily_gift_at = Column(DateTime, nullable=True)
-    last_notified_points = Column(Float, default=0)
     messages_sent = Column(Integer, default=0)
     checkin_streak = Column(Integer, default=0)
     # Track last time the user used the free roulette spin
@@ -270,52 +267,7 @@ class InviteToken(Base):
     expires_at = Column(DateTime, nullable=True)
 
 
-class SubscriptionPlan(Base):
-    __tablename__ = "subscription_plans"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    token = Column(String, unique=True, nullable=True)
-    name = Column(String, nullable=False)
-    price = Column(Integer, nullable=False)
-    duration_days = Column(Integer, nullable=False)
-    status = Column(String, default="available")
-    created_by = Column(BigInteger, nullable=False)
-    used_by = Column(BigInteger, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-    used_at = Column(DateTime, nullable=True)
 
-
-class SubscriptionToken(Base):
-    __tablename__ = "subscription_tokens"
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    token = Column(String, unique=True, nullable=False)
-    plan_id = Column(Integer, nullable=False)
-    created_by = Column(BigInteger, nullable=False)
-    used_by = Column(BigInteger, nullable=True)
-    created_at = Column(DateTime, default=func.now())
-    used_at = Column(DateTime, nullable=True)
-
-
-class Token(Base):
-    """VIP activation tokens linked to tariffs."""
-
-    __tablename__ = "tokens"
-
-    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
-    token_string = Column(String, unique=True)
-    tariff_id = Column(Integer, ForeignKey("tariffs.id"))
-    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
-    generated_at = Column(DateTime, default=func.now())
-    activated_at = Column(DateTime, nullable=True)
-    is_used = Column(Boolean, default=False)
-
-
-class Tariff(Base):
-    __tablename__ = "tariffs"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String, unique=True)
-    duration_days = Column(Integer)
-    price = Column(Integer)
 
 
 class ConfigEntry(Base):
@@ -330,6 +282,7 @@ class BotConfig(Base):
     free_channel_wait_time_minutes = Column(Integer, default=0)
     social_media_message = Column(Text, nullable=True)
     welcome_message_template = Column(Text, nullable=True)
+    token_welcome_message = Column(Text, nullable=True)
     auto_approval_enabled = Column(Boolean, default=True)
 
 
@@ -560,26 +513,6 @@ class TriviaUserAnswer(Base):
     question_id = Column(Integer, ForeignKey("trivia_questions.id"), nullable=False)
     user_answer = Column(Text, nullable=True)
     is_correct = Column(Boolean, default=False)
-
-
-# Additional models for integration testing
-class VipAccess(Base):
-    """Track VIP access grants and revocations."""
-    
-    __tablename__ = "vip_access"
-    
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
-    granted_by_achievement = Column(Boolean, default=False)
-    achievement_id = Column(Integer, ForeignKey("badges.id"), nullable=True)
-    granted_at = Column(DateTime, default=func.now())
-    expires_at = Column(DateTime, nullable=True)
-    is_paid = Column(Boolean, default=False)
-    payment_amount = Column(Float, nullable=True)
-    revocable = Column(Boolean, default=True)
-    revoked = Column(Boolean, default=False)
-    revoked_at = Column(DateTime, nullable=True)
-    revocation_reason = Column(Text, nullable=True)
 
 
 class NarrativeReward(Base):

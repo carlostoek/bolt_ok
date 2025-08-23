@@ -11,7 +11,7 @@ from services.badge_service import BadgeService
 from services.channel_service import ChannelService
 from services.user_service import UserService
 from services.subscription_service import SubscriptionService
-from database.models import User, UserStats, Badge, UserBadge, Channel, VipAccess
+from database.models import User, UserStats, Badge, UserBadge, Channel
 from aiogram.exceptions import TelegramBadRequest
 
 

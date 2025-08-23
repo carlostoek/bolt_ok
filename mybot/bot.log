@@ -2123,3 +2123,513 @@ TypeError: is_admin() takes 2 positional arguments but 3 were given
 2025-08-20 16:44:31,269 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
 2025-08-20 16:44:31,272 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
 2025-08-20 16:44:31,485 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-23 10:16:56,117 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-23 10:16:56,117 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-23 10:16:56,171 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-23 10:16:56,345 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-23 10:16:56,353 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-23 10:16:56,354 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-23 10:16:56,355 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-23 10:16:56,415 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-23 10:16:56,416 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-23 10:16:56,416 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-23 10:16:56,416 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-23 10:16:56,417 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-23 10:16:56,417 - __main__ - INFO - main:216 - Router start registrado
+2025-08-23 10:16:56,417 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router info registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-23 10:16:56,418 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-23 10:16:56,419 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:216 - Router menu_system registrado
+2025-08-23 10:16:56,420 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-23 10:16:56,421 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-23 10:16:56,423 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-23 10:16:56,428 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-23 10:16:56,431 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-23 10:16:56,435 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-23 10:16:56,439 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-23 10:16:56,675 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-23 10:16:57,582 - root - INFO - run_vip_subscription_check:71 - Sent VIP expiry reminder to 6181290784
+2025-08-23 10:17:30,822 - __main__ - CRITICAL - main:248 - Error crítico en main(): HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1025, in _wrap_create_connection
+    return await self._loop.create_connection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1132, in create_connection
+    raise exceptions[0]
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1107, in create_connection
+    sock = await self._connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1010, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 651, in sock_connect
+    return await fut
+           ^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 691, in _sock_connect_cb
+    raise OSError(err, f'Connect call failed {address}')
+TimeoutError: [Errno 110] Connect call failed ('149.154.167.220', 443)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 170, in make_request
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 1197, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 581, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 544, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 944, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1257, in _create_direct_connection
+    raise last_exc
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1226, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1033, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 245, in main
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 551, in start_polling
+    await asyncio.gather(*done)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 340, in _polling
+    user: User = await bot.me()
+                 ^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 352, in me
+    self._me = await self.get_me()
+               ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 1824, in get_me
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 480, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 177, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+2025-08-23 10:17:30,851 - __main__ - INFO - main:251 - Cerrando bot...
+2025-08-23 10:17:30,852 - root - INFO - shutdown:127 - Cerrando tareas en segundo plano...
+2025-08-23 10:17:30,852 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-08-23 10:17:30,852 - root - INFO - safe_task:116 - Tarea channel_requests cancelada
+2025-08-23 10:17:30,852 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-08-23 10:17:30,852 - root - INFO - safe_task:116 - Tarea vip_subscriptions cancelada
+2025-08-23 10:17:30,852 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-08-23 10:17:30,852 - root - INFO - safe_task:116 - Tarea vip_memberships cancelada
+2025-08-23 10:17:30,852 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-08-23 10:17:30,852 - root - INFO - safe_task:116 - Tarea auction_monitor cancelada
+2025-08-23 10:17:30,852 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-08-23 10:17:30,852 - root - INFO - safe_task:116 - Tarea channel_cleanup cancelada
+2025-08-23 10:17:30,853 - root - INFO - shutdown:136 - Todas las tareas cerradas
+2025-08-23 10:17:30,856 - root - CRITICAL - <module>:266 - Error fatal: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1025, in _wrap_create_connection
+    return await self._loop.create_connection(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1132, in create_connection
+    raise exceptions[0]
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1107, in create_connection
+    sock = await self._connect_sock(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 1010, in _connect_sock
+    await self.sock_connect(sock, address)
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 651, in sock_connect
+    return await fut
+           ^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/selector_events.py", line 691, in _sock_connect_cb
+    raise OSError(err, f'Connect call failed {address}')
+TimeoutError: [Errno 110] Connect call failed ('149.154.167.220', 443)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 170, in make_request
+    async with session.post(
+               ^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 1197, in __aenter__
+    self._resp = await self._coro
+                 ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/client.py", line 581, in _request
+    conn = await self._connector.connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 544, in connect
+    proto = await self._create_connection(req, traces, timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 944, in _create_connection
+    _, proto = await self._create_direct_connection(req, traces, timeout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1257, in _create_direct_connection
+    raise last_exc
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1226, in _create_direct_connection
+    transp, proto = await self._wrap_create_connection(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiohttp/connector.py", line 1033, in _wrap_create_connection
+    raise client_error(req.connection_key, exc) from exc
+aiohttp.client_exceptions.ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 262, in <module>
+    asyncio.run(main())
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 245, in main
+    await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 551, in start_polling
+    await asyncio.gather(*done)
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 340, in _polling
+    user: User = await bot.me()
+                 ^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 352, in me
+    self._me = await self.get_me()
+               ^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 1824, in get_me
+    return await self(call, request_timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 480, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 177, in make_request
+    raise TelegramNetworkError(method=method, message=f"{type(e).__name__}: {e}")
+aiogram.exceptions.TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [Connect call failed ('149.154.167.220', 443)]
+2025-08-23 10:21:37,837 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-23 10:21:37,837 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-23 10:21:37,868 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-23 10:21:38,116 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-23 10:21:38,125 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-23 10:21:38,126 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-23 10:21:38,127 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-23 10:21:38,179 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-23 10:21:38,179 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-23 10:21:38,179 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-23 10:21:38,179 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-23 10:21:38,179 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router start registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router info registrado
+2025-08-23 10:21:38,180 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-23 10:21:38,181 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-08-23 10:21:38,181 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-23 10:21:38,181 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-23 10:21:38,181 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-23 10:21:38,181 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-23 10:21:38,182 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-23 10:21:38,183 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-23 10:21:38,183 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-23 10:21:38,183 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-23 10:21:38,183 - __main__ - INFO - main:216 - Router menu_system registrado
+2025-08-23 10:21:38,183 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-23 10:21:38,183 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-23 10:21:38,186 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-23 10:21:38,191 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-23 10:21:38,195 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-23 10:21:38,197 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-23 10:21:38,201 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-23 10:21:38,387 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-23 10:21:39,881 - middlewares.points_middleware - ERROR - __call__:89 - Error awarding points: A transaction is already begun on this Session.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 42, in __call__
+    await service.award_message(event.from_user.id, bot)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 40, in award_message
+    progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 228, in add_points
+    async with self.session.begin():
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1890, in start
+    await greenlet_spawn(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1943, in begin
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+2025-08-23 10:21:39,912 - middlewares.points_middleware - ERROR - __call__:89 - Error awarding points: A transaction is already begun on this Session.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 42, in __call__
+    await service.award_message(event.from_user.id, bot)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 40, in award_message
+    progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 228, in add_points
+    async with self.session.begin():
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1890, in start
+    await greenlet_spawn(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1943, in begin
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+2025-08-23 10:21:39,929 - __main__ - ERROR - global_error_handler:90 - Error en 226871501: TypeError: 'AsyncSession' object is not callable
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 49, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 40, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 59, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 170, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 90, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/main_menu.py", line 10, in handle_backpack_button
+    await mostrar_mochila_narrativa(message)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/backpack.py", line 58, in mostrar_mochila_narrativa
+    async with session_factory() as session:
+               ^^^^^^^^^^^^^^^^^
+TypeError: 'AsyncSession' object is not callable
+2025-08-23 10:21:40,408 - __main__ - ERROR - global_error_handler:90 - Error en 226871503: TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 49, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 40, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 59, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 170, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 142, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 137, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 162, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/handlers/admin/admin_menu.py", line 152, in admin_back
+    await callback.answer()
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/methods/base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/bot.py", line 480, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 178, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/aiogram/client/session/base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: query is too old and response timeout expired or query ID is invalid
+2025-08-23 10:21:53,319 - aiogram.dispatcher - WARNING - _signal_stop_polling:455 - Received SIGINT signal
+2025-08-23 10:21:53,576 - __main__ - INFO - main:251 - Cerrando bot...
+2025-08-23 10:21:53,577 - root - INFO - shutdown:127 - Cerrando tareas en segundo plano...
+2025-08-23 10:21:53,578 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-08-23 10:21:53,578 - root - INFO - safe_task:116 - Tarea channel_requests cancelada
+2025-08-23 10:21:53,578 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-08-23 10:21:53,579 - root - INFO - safe_task:116 - Tarea vip_subscriptions cancelada
+2025-08-23 10:21:53,579 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-08-23 10:21:53,580 - root - INFO - safe_task:116 - Tarea vip_memberships cancelada
+2025-08-23 10:21:53,580 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-08-23 10:21:53,580 - root - INFO - safe_task:116 - Tarea auction_monitor cancelada
+2025-08-23 10:21:53,581 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-08-23 10:21:53,581 - root - INFO - safe_task:116 - Tarea channel_cleanup cancelada
+2025-08-23 10:21:53,582 - root - INFO - shutdown:136 - Todas las tareas cerradas
+2025-08-23 10:25:57,808 - __main__ - INFO - main:146 - Inicializando base de datos...
+2025-08-23 10:25:57,808 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-08-23 10:25:57,842 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-08-23 10:25:58,031 - database.setup - INFO - init_db:79 - Tablas creadas exitosamente.
+2025-08-23 10:25:58,040 - __main__ - INFO - main:149 - Aplicando parches de seguridad...
+2025-08-23 10:25:58,041 - __main__ - INFO - main:154 - VIP channel ID: 0
+2025-08-23 10:25:58,041 - __main__ - INFO - main:155 - Configurando bot...
+2025-08-23 10:25:58,086 - __main__ - INFO - main:184 - Registrando handlers...
+2025-08-23 10:25:58,086 - __main__ - INFO - main:216 - Router setup registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router admin registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router start_token registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router start registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router backpack registrado
+2025-08-23 10:25:58,087 - __main__ - INFO - main:216 - Router missions registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router info registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-08-23 10:25:58,088 - __main__ - INFO - main:216 - Router native_reaction registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router minigames registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router gamification registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router free_user registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router lore registrado
+2025-08-23 10:25:58,089 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:216 - Router narrative registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:216 - Router free_channel_config registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:216 - Router menu_system registrado
+2025-08-23 10:25:58,090 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-08-23 10:25:58,090 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-08-23 10:25:58,092 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-08-23 10:25:58,098 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-08-23 10:25:58,101 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-08-23 10:25:58,105 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-08-23 10:25:58,109 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-08-23 10:25:58,300 - services.free_channel_service - INFO - cleanup_old_requests:729 - Cleaned up 0 old channel requests
+2025-08-23 10:25:59,452 - middlewares.points_middleware - ERROR - __call__:89 - Error awarding points: A transaction is already begun on this Session.
+Traceback (most recent call last):
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 42, in __call__
+    await service.award_message(event.from_user.id, bot)
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 40, in award_message
+    progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/services/point_service.py", line 228, in add_points
+    async with self.session.begin():
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 1890, in start
+    await greenlet_spawn(
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 190, in greenlet_spawn
+    result = context.switch(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 1943, in begin
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Session.
+2025-08-23 10:44:59,192 - aiogram.dispatcher - WARNING - _signal_stop_polling:455 - Received SIGINT signal
+2025-08-23 10:44:59,451 - __main__ - INFO - main:251 - Cerrando bot...
+2025-08-23 10:44:59,452 - root - INFO - shutdown:127 - Cerrando tareas en segundo plano...
+2025-08-23 10:44:59,452 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-08-23 10:44:59,453 - root - INFO - safe_task:116 - Tarea channel_requests cancelada
+2025-08-23 10:44:59,453 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-08-23 10:44:59,453 - root - INFO - safe_task:116 - Tarea vip_subscriptions cancelada
+2025-08-23 10:44:59,453 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-08-23 10:44:59,453 - root - INFO - safe_task:116 - Tarea vip_memberships cancelada
+2025-08-23 10:44:59,454 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-08-23 10:44:59,454 - root - INFO - safe_task:116 - Tarea auction_monitor cancelada
+2025-08-23 10:44:59,454 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-08-23 10:44:59,454 - root - INFO - safe_task:116 - Tarea channel_cleanup cancelada
+2025-08-23 10:44:59,455 - root - INFO - shutdown:136 - Todas las tareas cerradas

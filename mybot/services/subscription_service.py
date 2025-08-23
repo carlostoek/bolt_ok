@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 from aiogram import Bot
 
 from services.config_service import ConfigService
 
-from database.models import VipSubscription, User, Token, Tariff
+from database.models import VipSubscription, User
+from database.transaction_models import VipTransaction
 import logging
 
 logger = logging.getLogger(__name__)
 
 
 class SubscriptionService:
+    """
+    Servicio ÚNICO para TODAS las operaciones VIP.
+    La interface pública NO CAMBIA.
+    """
+    
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -75,8 +81,6 @@ class SubscriptionService:
 
     async def extend_subscription(self, user_id: int, days: int) -> VipSubscription:
         """Extend an existing subscription or create one if missing."""
-        from datetime import timedelta
-
         now = datetime.utcnow()
         sub = await self.get_subscription(user_id)
         new_exp = now + timedelta(days=days)
@@ -157,15 +161,67 @@ class SubscriptionService:
         return sub
 
     async def is_subscription_active(self, user_id: int) -> bool:
-        """Check if user has an active VIP subscription."""
-        sub = await self.get_subscription(user_id)
-        if not sub:
-            return False
+        """Interface IDÉNTICA - ningún servicio necesita cambiar"""
+        # NUEVO: Consultar última transacción activa
+        stmt = select(VipTransaction).where(
+            VipTransaction.user_id == user_id,
+            VipTransaction.is_active == True,
+            or_(
+                VipTransaction.expires_at == None,
+                VipTransaction.expires_at > datetime.now()
+            )
+        ).order_by(VipTransaction.created_at.desc())
         
-        if sub.expires_at is None:
+        result = await self.session.execute(stmt)
+        transaction = result.scalar_one_or_none()
+        
+        if transaction:
+            # Actualizar User.vip_expires_at para compatibilidad
+            user = await self.session.get(User, user_id)
+            user.vip_expires_at = transaction.expires_at
             return True
+        return False
+    
+    async def grant_vip(self, user_id: int, duration_days: int, source: str):
+        """Otorgar VIP con auditoría completa"""
+        expires_at = datetime.now() + timedelta(days=duration_days)
         
-        return sub.expires_at > datetime.utcnow()
+        # Desactivar VIP anteriores
+        await self._deactivate_previous_vip(user_id)
+        
+        # Crear nueva transacción
+        transaction = VipTransaction(
+            user_id=user_id,
+            action="grant",
+            source=source,
+            duration_days=duration_days,
+            expires_at=expires_at,
+            is_active=True
+        )
+        self.session.add(transaction)
+        
+        # Actualizar User (por compatibilidad temporal)
+        user = await self.session.get(User, user_id)
+        user.vip_expires_at = expires_at
+        
+        await self.session.commit()
+
+    async def _deactivate_previous_vip(self, user_id: int):
+        """Desactivar transacciones VIP anteriores"""
+        stmt = select(VipTransaction).where(
+            VipTransaction.user_id == user_id,
+            VipTransaction.is_active == True
+        )
+        result = await self.session.execute(stmt)
+        previous_transactions = result.scalars().all()
+        
+        for transaction in previous_transactions:
+            transaction.is_active = False
+        
+        # Actualizar User (por compatibilidad temporal)
+        user = await self.session.get(User, user_id)
+        if user:
+            user.vip_expires_at = None
 
 
 async def get_admin_statistics(session: AsyncSession) -> dict:
@@ -178,20 +234,10 @@ async def get_admin_statistics(session: AsyncSession) -> dict:
     user_count_res = await session.execute(user_count_stmt)
     total_users = user_count_res.scalar() or 0
 
-    # Calculate revenue from used tokens
-    revenue_stmt = (
-        select(func.sum(Tariff.price))
-        .select_from(Token)
-        .join(Tariff, Token.tariff_id == Tariff.id)
-        .where(Token.is_used.is_(True))
-    )
-    revenue_res = await session.execute(revenue_stmt)
-    total_revenue = revenue_res.scalar() or 0
-
     return {
         "subscriptions_total": total_subs,
         "subscriptions_active": active_subs,
         "subscriptions_expired": expired_subs,
         "users_total": total_users,
-        "revenue_total": total_revenue,
+        "revenue_total": 0,  # Revenue calculation removed as Token/Tariff models are being deprecated
     }

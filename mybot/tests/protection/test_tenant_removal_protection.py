@@ -9,7 +9,7 @@ They verify that core flows continue working without tenant context.
 import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
 from sqlalchemy import select
-from database.models import User, ConfigEntry, Tariff
+from database.models import User, ConfigEntry
 from services.config_service import ConfigService
 from handlers.start import cmd_start
 from handlers.setup import start_setup

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sess
 from sqlalchemy.pool import StaticPool
 
 from database.base import Base
-from database.models import User, Channel, UserStats, Badge, UserBadge, VipAccess, NarrativeReward, UserRewardHistory
+from database.models import User, Channel, UserStats, Badge, UserBadge, NarrativeReward, UserRewardHistory
 from database.narrative_models import UserNarrativeState, StoryFragment, NarrativeFragment, NarrativeDecision, UserDecisionLog
 from services.coordinador_central import CoordinadorCentral
 from services.point_service import PointService

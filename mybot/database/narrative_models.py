@@ -179,7 +179,6 @@ class UserNarrativeState(Base):
     # Statistics
     fragments_visited = Column(Integer, default=0, nullable=False)
     fragments_completed = Column(Integer, default=0, nullable=False)
-    total_besitos_earned = Column(Integer, default=0, nullable=False)
     narrative_started_at = Column(DateTime, default=func.now(), nullable=False)
     last_activity_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     processing_reward = Column(Boolean, default=False, nullable=False)  # Race condition protection
@@ -200,7 +199,7 @@ class UserNarrativeState(Base):
             raise ValueError("choices_made must be a list")
         return value
 
-    @validates('fragments_visited', 'fragments_completed', 'total_besitos_earned')
+    @validates('fragments_visited', 'fragments_completed')
     def validate_positive_integers(self, key, value):
         """Ensure integer fields are non-negative."""
         if value < 0:

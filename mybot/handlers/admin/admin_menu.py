@@ -13,7 +13,7 @@ from utils.menu_manager import menu_manager
 from utils.menu_factory import menu_factory
 from services.tenant_service import TenantService
 from services import get_admin_statistics
-from database.models import Tariff, Token
+from database.models import User
 from uuid import uuid4
 from sqlalchemy import select
 from utils.messages import BOT_MESSAGES
@@ -271,33 +271,20 @@ async def admin_generate_token_cmd(message: Message, session: AsyncSession, bot:
         return
     
     try:
-        result = await session.execute(select(Tariff))
-        tariffs = result.scalars().all()
-        
-        if not tariffs:
-            await menu_manager.send_temporary_message(
-                message,
-                "❌ **Sin Tarifas Configuradas**\n\n"
-                "Primero debes configurar las tarifas VIP desde el panel de administración.",
-                auto_delete_seconds=8
-            )
-            return
-        
-        from keyboards.admin_vip_config_kb import get_tariff_select_kb
-        
-        await menu_manager.show_menu(
+        # Inform the admin that the token system has been updated
+        await menu_manager.send_temporary_message(
             message,
-            "💳 **Generar Token VIP**\n\n"
-            "Selecciona la tarifa para la cual quieres generar un token de activación:",
-            get_tariff_select_kb(tariffs),
-            session,
-            "admin_generate_token"
+            "ℹ️ **Sistema de Tokens Actualizado**\n\n"
+            "El sistema de generación de tokens VIP ha sido actualizado. "
+            "Ahora utiliza el nuevo sistema de transacciones VIP. "
+            "Por favor, use el panel de administración de VIP para gestionar accesos.",
+            auto_delete_seconds=10
         )
     except Exception as e:
         logger.error(f"Error in token generation command: {e}")
         await menu_manager.send_temporary_message(
             message,
-            "❌ **Error Temporal**\n\nNo se pudo cargar las tarifas.",
+            "❌ **Error Temporal**\n\nNo se pudo procesar la solicitud.",
             auto_delete_seconds=5
         )
 
@@ -308,50 +295,15 @@ async def generate_token_callback(callback: CallbackQuery, session: AsyncSession
         return await callback.answer("Acceso denegado", show_alert=True)
     
     try:
-        tariff_id = int(callback.data.split("_")[-1])
-        tariff = await session.get(Tariff, tariff_id)
-        
-        if not tariff:
-            await callback.answer("Tarifa no encontrada", show_alert=True)
-            return
-        
-        # Generate token
-        token_string = str(uuid4())
-        token = Token(token_string=token_string, tariff_id=tariff_id)
-        session.add(token)
-        await session.commit()
-        
-        # Create activation link
-        bot_username = (await bot.get_me()).username
-        link = f"https://t.me/{bot_username}?start={token_string}"
-        
-        from keyboards.common import get_back_kb
-        
-        success_text = (
-            f"✅ **Token VIP Generado**\n\n"
-            f"📋 **Tarifa:** {tariff.name}\n"
-            f"⏱️ **Duración:** {tariff.duration_days} días\n"
-            f"💰 **Precio:** ${tariff.price}\n\n"
-            f"🔗 **Enlace de activación:**\n"
-            f"`{link}`\n\n"
-            f"⚠️ **Importante:** Este enlace es de un solo uso. "
-            f"Compártelo directamente con el cliente."
+        await callback.answer(
+            "ℹ️ Sistema actualizado\n\n"
+            "El sistema de tokens ha sido actualizado. "
+            "Use el panel de administración de VIP para gestionar accesos.",
+            show_alert=True
         )
-        
-        await menu_manager.update_menu(
-            callback,
-            success_text,
-            get_back_kb("admin_vip"),
-            session,
-            "token_generated"
-        )
-        
-        logger.info(f"Admin {callback.from_user.id} generated token for tariff {tariff.name}")
     except Exception as e:
-        logger.error(f"Error generating token: {e}")
-        await callback.answer("Error al generar el token", show_alert=True)
-    
-    await callback.answer()
+        logger.error(f"Error in token generation callback: {e}")
+        await callback.answer("Error al procesar la solicitud", show_alert=True)
 
 # Nuevo callback para gestión del canal gratuito
 @router.callback_query(F.data == "admin_free_channel")

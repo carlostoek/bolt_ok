@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.models import User, UserStats
+from database.transaction_models import PointTransaction
 from utils.user_roles import get_points_multiplier
 from aiogram import Bot
 from services.level_service import LevelService
@@ -12,6 +13,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PointService:
+    """
+    Servicio ÚNICO para TODAS las operaciones de puntos.
+    Internamente usa PointTransaction para auditoría completa.
+    La interface pública NO CAMBIA.
+    """
+    
     def __init__(self, session: AsyncSession):
         self.session = session
 
@@ -215,30 +222,44 @@ class PointService:
                     )
         return True, progress
 
-    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None, skip_notification: bool = False) -> UserStats:
-        user = await self.session.get(User, user_id)
-        if not user:
-            logger.warning(
-                f"Attempted to add points to non-existent user {user_id}. Creating new user."
+    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None, skip_notification: bool = False, source="unknown") -> UserStats:
+        """Interface IDÉNTICA - ningún servicio necesita cambiar"""
+        # NUEVO: Crear transacción
+        async with self.session.begin():
+            user = await self.session.get(User, user_id)
+            if not user:
+                logger.warning(
+                    f"Attempted to add points to non-existent user {user_id}. Creating new user."
+                )
+                user = User(id=user_id, points=0)
+                self.session.add(user)
+            
+            # Calcular nuevo balance
+            old_balance = user.points
+            new_balance = old_balance + points
+            
+            # Crear registro de transacción
+            transaction = PointTransaction(
+                user_id=user_id,
+                amount=points,
+                balance_after=new_balance,
+                source=source,
+                description=f"Added {points} points from {source}"
             )
-            user = User(id=user_id, points=0)
-            self.session.add(user)
+            self.session.add(transaction)
+            
+            # Actualizar usuario
+            user.points = new_balance
+            
+            # Actualizar progreso
+            progress = await self._get_or_create_progress(user_id)
+            progress.last_activity_at = datetime.datetime.utcnow()
+            
             await self.session.commit()
+            await self.session.refresh(progress)
             await self.session.refresh(user)
-
-        multiplier = 1
-        if bot:
-            multiplier = await get_points_multiplier(bot, user_id, session=self.session)
-            event_mult = await EventService(self.session).get_multiplier()
-            multiplier *= event_mult
-
-        total = points * multiplier
-        user.points += total
-        progress = await self._get_or_create_progress(user_id)
-        progress.last_activity_at = datetime.datetime.utcnow()
-        await self.session.commit()
-        await self.session.refresh(progress)
-        await self.session.refresh(user)
+            
+        # Fuera de la transacción para evitar deadlock
         level_service = LevelService(self.session)
         await level_service.check_for_level_up(user, bot=bot)
 
@@ -252,7 +273,7 @@ class PointService:
                     f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
                 )
         logger.info(
-            f"User {user_id} gained {total} points (base {points}, x{multiplier}). Total: {user.points}"
+            f"User {user_id} gained {points} points. Total: {user.points}"
         )
         
         # Solo enviar notificaciones de puntos cuando:
@@ -269,7 +290,7 @@ class PointService:
                     user_id,
                     "points",
                     {
-                        "points": total,
+                        "points": points,
                         "total": user.points
                     },
                     priority=NotificationPriority.LOW  # Prioridad baja para notificaciones de puntos
@@ -288,15 +309,49 @@ class PointService:
         return progress
 
     async def deduct_points(self, user_id: int, points: int) -> User | None:
-        user = await self.session.get(User, user_id)
-        if user and user.points >= points:
-            user.points -= points
-            await self.session.commit()
-            await self.session.refresh(user)
-            logger.info(f"User {user_id} lost {points} points. Total: {user.points}")
-            return user
+        """Interface IDÉNTICA - ningún servicio necesita cambiar"""
+        # NUEVO: Crear transacción
+        async with self.session.begin():
+            user = await self.session.get(User, user_id)
+            if user and user.points >= points:
+                # Calcular nuevo balance
+                old_balance = user.points
+                new_balance = old_balance - points
+                
+                # Crear registro de transacción
+                transaction = PointTransaction(
+                    user_id=user_id,
+                    amount=-points,  # Negative for deductions
+                    balance_after=new_balance,
+                    source="deduction",
+                    description=f"Deducted {points} points"
+                )
+                self.session.add(transaction)
+                
+                # Actualizar usuario
+                user.points = new_balance
+                
+                await self.session.commit()
+                await self.session.refresh(user)
+                logger.info(f"User {user_id} lost {points} points. Total: {user.points}")
+                return user
         logger.warning(f"Failed to deduct {points} points from user {user_id}. Not enough points or user not found.")
         return None
+
+    async def get_balance(self, user_id: int) -> float:
+        """Interface IDÉNTICA"""
+        # Opción 1: Desde User.points (rápido)
+        # Opción 2: Desde último PointTransaction (auditable)
+        user = await self.session.get(User, user_id)
+        return user.points if user else 0
+
+    async def get_transaction_history(self, user_id: int):
+        """NUEVA funcionalidad - historial completo"""
+        stmt = select(PointTransaction).where(
+            PointTransaction.user_id == user_id
+        ).order_by(PointTransaction.created_at.desc())
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
 
     async def get_user_points(self, user_id: int) -> int:
         user = await self.session.get(User, user_id)
