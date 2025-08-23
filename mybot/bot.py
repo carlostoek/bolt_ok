@@ -66,6 +66,8 @@ from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
 from handlers.admin.free_channel_config import router as free_channel_config_router
 from handlers.menu_system_router import menu_system_router
+from handlers.narrative_fragment_handler import router as narrative_fragment_router
+from handlers.unified_narrative_handler import router as unified_narrative_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -209,6 +211,8 @@ async def main() -> None:
             ("admin_narrative", admin_narrative_handlers),
             ("free_channel_config", free_channel_config_router),
             ("menu_system", menu_system_router),
+            ("narrative_fragment", narrative_fragment_router),
+            ("unified_narrative", unified_narrative_router),
         ]
         
         for name, router in routers:

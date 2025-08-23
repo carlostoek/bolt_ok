@@ -2879,3 +2879,43 @@ sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Sessi
 2025-08-23 14:01:47,370 - utils.handler_decorators - INFO - wrapper:302 - Action 'vip_subscription_info' by user 6181290784 completed in 0.614s
 2025-08-23 14:50:12,765 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
 2025-08-23 14:50:12,787 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 14:59:38,597 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
+2025-08-23 14:59:38,601 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 15:02:31,493 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
+2025-08-23 15:02:31,499 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 15:02:32,512 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:02:32,513 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.385624 seconds and try again... (tryings = 1, bot id = 8426456639)
+2025-08-23 15:02:33,912 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:02:33,912 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.706965 seconds and try again... (tryings = 2, bot id = 8426456639)
+2025-08-23 15:02:35,671 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:02:35,671 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.032998 seconds and try again... (tryings = 3, bot id = 8426456639)
+2025-08-23 15:02:37,714 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:02:37,715 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.688218 seconds and try again... (tryings = 4, bot id = 8426456639)
+2025-08-23 15:08:56,635 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
+2025-08-23 15:08:56,635 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 15:09:21,387 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientOSError: [Errno 103] Software caused connection abort
+2025-08-23 15:09:21,387 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 15:14:08,395 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - Request timeout error
+2025-08-23 15:14:08,397 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8426456639)
+2025-08-23 15:14:19,439 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:14:19,440 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.434328 seconds and try again... (tryings = 1, bot id = 8426456639)
+2025-08-23 15:14:30,922 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:14:30,923 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.747513 seconds and try again... (tryings = 2, bot id = 8426456639)
+2025-08-23 15:14:42,723 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:14:42,724 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.993921 seconds and try again... (tryings = 3, bot id = 8426456639)
+2025-08-23 15:15:04,757 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:15:04,759 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.618398 seconds and try again... (tryings = 4, bot id = 8426456639)
+2025-08-23 15:15:12,398 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramNetworkError: HTTP Client says - ClientConnectorError: Cannot connect to host api.telegram.org:443 ssl:default [No address associated with hostname]
+2025-08-23 15:15:12,399 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 3.450392 seconds and try again... (tryings = 5, bot id = 8426456639)
+2025-08-23 15:25:17,760 - aiogram.dispatcher - WARNING - _signal_stop_polling:455 - Received SIGINT signal
+2025-08-23 15:25:18,035 - __main__ - INFO - main:251 - Cerrando bot...
+2025-08-23 15:25:18,036 - root - INFO - shutdown:127 - Cerrando tareas en segundo plano...
+2025-08-23 15:25:18,037 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-08-23 15:25:18,037 - root - INFO - safe_task:116 - Tarea vip_subscriptions cancelada
+2025-08-23 15:25:18,037 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-08-23 15:25:18,038 - root - INFO - safe_task:116 - Tarea vip_memberships cancelada
+2025-08-23 15:25:18,038 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-08-23 15:25:18,038 - root - INFO - safe_task:116 - Tarea auction_monitor cancelada
+2025-08-23 15:25:18,038 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-08-23 15:25:18,039 - root - INFO - safe_task:116 - Tarea channel_cleanup cancelada
+2025-08-23 15:25:18,039 - root - INFO - shutdown:136 - Todas las tareas cerradas

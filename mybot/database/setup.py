@@ -16,6 +16,7 @@ TABLES_ORDER = [
     'story_fragments',
     'narrative_choices', 
     'user_narrative_states',
+    'narrative_fragments_unified',
     'rewards',
     'lore_pieces',
     'missions',

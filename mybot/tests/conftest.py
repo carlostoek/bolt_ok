@@ -12,6 +12,7 @@ from sqlalchemy.pool import StaticPool
 from database.base import Base
 from database.models import User, Channel, UserStats, Badge, UserBadge, NarrativeReward, UserRewardHistory
 from database.narrative_models import UserNarrativeState, StoryFragment, NarrativeFragment, NarrativeDecision, UserDecisionLog
+from database.narrative_unified import NarrativeFragment as UnifiedNarrativeFragment
 from services.coordinador_central import CoordinadorCentral
 from services.point_service import PointService
 from services.user_service import UserService
@@ -40,6 +41,7 @@ async def test_engine():
     )
     
     async with engine.begin() as conn:
+        # Create all tables including our new unified narrative fragment table
         await conn.run_sync(Base.metadata.create_all)
     
     yield engine
