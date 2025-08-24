@@ -191,3 +191,11 @@ class AdminVipSubscriberStates(StatesGroup):
 
     waiting_for_days = State()
     waiting_for_new_date = State()
+
+
+class AdminGrantVipStates(StatesGroup):
+    """States for granting VIP access to a user."""
+    waiting_for_user = State()
+    waiting_for_duration = State()
+    waiting_for_reason = State()
+    confirming_grant = State()

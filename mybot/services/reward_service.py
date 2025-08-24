@@ -1,128 +1,140 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.models import Reward, User, UserReward
-from utils.text_utils import sanitize_text
-from utils.messages import BOT_MESSAGES
+from database.models import User, LorePiece, UserLorePiece
+from database.transaction_models import RewardLog
+from services.point_service import PointService
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class RewardService:
+class RewardSystem:
+    """
+    Sistema centralizado para manejar todas las recompensas
+    """
+    
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_active_rewards(self) -> list[Reward]:
-        stmt = select(Reward).where(Reward.is_active == True)
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
-
-    async def get_available_rewards(self, user_points: int) -> list[Reward]:
-        stmt = (
-            select(Reward)
-            .where(Reward.is_active == True, Reward.required_points <= user_points)
-            .order_by(Reward.required_points)
-        )
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
-
-    async def get_claimed_reward_ids(self, user_id: int) -> list[int]:
-        stmt = select(UserReward.reward_id).where(UserReward.user_id == user_id)
-        result = await self.session.execute(stmt)
-        return [row[0] for row in result.all()]
-
-    async def get_reward_by_id(self, reward_id: int) -> Reward | None:
-        return await self.session.get(Reward, reward_id)
-
-    async def list_rewards(self) -> list[Reward]:
-        """Return all rewards regardless of status."""
-        result = await self.session.execute(select(Reward))
-        return result.scalars().all()
-
-    async def claim_reward(self, user_id: int, reward_id: int) -> tuple[bool, str]:
-        """Claim a reward once the user has enough points."""
-        user = await self.session.get(User, user_id)
-        reward = await self.session.get(Reward, reward_id)
-        if not user:
-            return False, "Usuario no encontrado."
-        if not reward or not reward.is_active:
-            return False, "Recompensa no disponible."
-        if user.points < reward.required_points:
-            return (
-                False,
-                BOT_MESSAGES.get(
-                    "reward_not_enough_points",
-                    "No tienes suficientes puntos para esta recompensa.",
-                ).format(
-                    required_points=reward.required_points, user_points=int(user.points)
-                ),
+    async def grant_reward(self, user_id: int, reward_type: str, reward_data: dict, source: str = None):
+        """
+        Otorga recompensas de manera unificada
+        
+        Args:
+            user_id (int): ID del usuario
+            reward_type (str): Tipo de recompensa ('points', 'clue', 'achievement')
+            reward_data (dict): Datos específicos de la recompensa
+            source (str): Origen de la recompensa (opcional)
+        """
+        try:
+            # Verificar que el usuario exista
+            user_stmt = select(User).where(User.id == user_id)
+            user_result = await self.session.execute(user_stmt)
+            user = user_result.scalar_one_or_none()
+            
+            if not user:
+                raise ValueError(f"Usuario con ID {user_id} no encontrado")
+            
+            if reward_type == 'points':
+                await self._grant_points_reward(user, reward_data, source)
+                
+            elif reward_type == 'clue':
+                await self._grant_clue_reward(user, reward_data, source)
+                
+            elif reward_type == 'achievement':
+                await self._grant_achievement_reward(user, reward_data, source)
+            
+            # Registrar en log de recompensas
+            reward_log = RewardLog(
+                user_id=user_id,
+                reward_type=reward_type,
+                reward_data=reward_data,
+                source=source or 'system'
             )
-        stmt = select(UserReward).where(
-            UserReward.user_id == user_id, UserReward.reward_id == reward_id
-        )
-        result = await self.session.execute(stmt)
-        if result.scalar_one_or_none():
-            return False, BOT_MESSAGES.get("reward_already_claimed", "Ya reclamado")
-        self.session.add(UserReward(user_id=user_id, reward_id=reward_id))
-        await self.session.commit()
-        return True, BOT_MESSAGES.get("reward_claim_success", "Recompensa reclamada")
-
-    async def create_reward(
-        self,
-        title: str,
-        required_points: int,
-        description: str | None = None,
-        reward_type: str | None = None,
-    ) -> Reward:
-        new_reward = Reward(
-            title=sanitize_text(title),
-            description=sanitize_text(description) if description else None,
-            required_points=required_points,
-            reward_type=reward_type,
-        )
-        self.session.add(new_reward)
-        await self.session.commit()
-        await self.session.refresh(new_reward)
-        logger.info(f"New reward '{title}' created by admin.")
-        return new_reward
-
-    async def toggle_reward_status(self, reward_id: int, status: bool) -> bool:
-        reward = await self.session.get(Reward, reward_id)
-        if reward:
-            reward.is_active = status
+            self.session.add(reward_log)
             await self.session.commit()
-            logger.info(f"Reward '{reward.title}' status set to {status}.")
-            return True
-        logger.warning(f"Failed to toggle status for reward {reward_id}. Not found.")
-        return False
+            
+        except Exception as e:
+            logger.error(f"Error al otorgar recompensa: {e}")
+            raise
 
-    async def update_reward(
-        self,
-        reward_id: int,
-        *,
-        title: str | None = None,
-        required_points: int | None = None,
-        description: str | None = None,
-        reward_type: str | None = None,
-    ) -> bool:
-        reward = await self.session.get(Reward, reward_id)
-        if not reward:
-            return False
-        if title is not None:
-            reward.title = sanitize_text(title)
-        if required_points is not None:
-            reward.required_points = required_points
-        if description is not None:
-            reward.description = sanitize_text(description)
-        if reward_type is not None:
-            reward.reward_type = reward_type
-        await self.session.commit()
-        return True
+    async def _grant_points_reward(self, user: User, reward_data: dict, source: str = None):
+        """
+        Otorga recompensa de puntos
+        
+        Args:
+            user (User): Instancia de User
+            reward_data (dict): Datos de la recompensa
+            source (str): Origen de la recompensa
+        """
+        amount = reward_data.get('amount', 0)
+        if amount > 0:
+            point_service = PointService(self.session)
+            await point_service.add_points(
+                user_id=user.id,
+                points=amount,
+                source=source or 'reward',
+                description=reward_data.get('description', 'Recompensa otorgada')
+            )
 
-    async def delete_reward(self, reward_id: int) -> bool:
-        reward = await self.session.get(Reward, reward_id)
-        if not reward:
-            return False
-        await self.session.delete(reward)
-        await self.session.commit()
-        return True
+    async def _grant_clue_reward(self, user: User, reward_data: dict, source: str = None):
+        """
+        Otorga recompensa de pista
+        
+        Args:
+            user (User): Instancia de User
+            reward_data (dict): Datos de la recompensa
+            source (str): Origen de la recompensa
+        """
+        clue_code = reward_data.get('clue_code') or reward_data.get('code_name')
+        if clue_code:
+            # Buscar la pista por su código
+            clue_stmt = select(LorePiece).where(
+                LorePiece.code_name == clue_code,
+                LorePiece.is_active == True
+            )
+            clue_result = await self.session.execute(clue_stmt)
+            clue = clue_result.scalar_one_or_none()
+            
+            if clue:
+                # Verificar si el usuario ya tiene desbloqueada esta pista
+                user_clue_stmt = select(UserLorePiece).where(
+                    UserLorePiece.user_id == user.id,
+                    UserLorePiece.lore_piece_id == clue.id
+                )
+                user_clue_result = await self.session.execute(user_clue_stmt)
+                user_clue = user_clue_result.scalar_one_or_none()
+                
+                # Si no la tiene, añadirla
+                if not user_clue:
+                    user_lore_piece = UserLorePiece(
+                        user_id=user.id,
+                        lore_piece_id=clue.id
+                    )
+                    self.session.add(user_lore_piece)
+                    await self.session.commit()
+            else:
+                logger.warning(f"Pista con código {clue_code} no encontrada o inactiva")
+
+    async def _grant_achievement_reward(self, user: User, reward_data: dict, source: str = None):
+        """
+        Otorga recompensa de logro
+        
+        Args:
+            user (User): Instancia de User
+            reward_data (dict): Datos de la recompensa
+            source (str): Origen de la recompensa
+        """
+        achievement_id = reward_data.get('achievement_id')
+        if achievement_id:
+            # Asegurarse de que achievements sea un dict
+            if not isinstance(user.achievements, dict):
+                user.achievements = {}
+            
+            # Añadir el logro si no lo tiene
+            if achievement_id not in user.achievements:
+                user.achievements[achievement_id] = {
+                    "unlocked_at": reward_data.get('unlocked_at', ''),
+                    "context": reward_data.get('context', {})
+                }
+                await self.session.commit()

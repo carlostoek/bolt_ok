@@ -36,6 +36,8 @@ class NotificationData:
             key_parts.append(str(self.data.get("points", 0)))
         elif self.type == "mission":
             key_parts.append(self.data.get("name", ""))
+        elif self.type == "mission_completed":
+            key_parts.append(self.data.get("mission_id", ""))
         elif self.type == "achievement":
             key_parts.append(self.data.get("name", ""))
         return "_".join(key_parts)
@@ -213,7 +215,7 @@ class NotificationService:
                     rewards_section.append(f"✨ *+{total_new_points} besitos* ganados")
                     rewards_section.append(f"💰 *Tesoro actual:* {latest_total} besitos")
             
-            # Procesar misiones
+            # Procesar misiones (sistema antiguo)
             if "mission" in grouped:
                 missions = grouped["mission"]
                 mission_points = sum(m.get("points", 0) for m in missions)
@@ -227,6 +229,39 @@ class NotificationService:
                     rewards_section.append(f"🎯 *{len(missions)} misiones completadas*")
                     for mission in missions[:3]:  # Mostrar máximo 3
                         rewards_section.append(f"   • {mission.get('name', 'Misión')}")
+                    if len(missions) > 3:
+                        rewards_section.append(f"   • _...y {len(missions)-3} más_")
+                        
+            # Procesar misiones unificadas
+            if "mission_completed" in grouped:
+                missions = grouped["mission_completed"]
+                
+                if len(missions) == 1:
+                    mission = missions[0]
+                    rewards_section.append(f"✨ *Misión Unificada Completada:* _{mission.get('title', 'Misión Especial')}_")
+                    
+                    # Mostrar recompensas detalladas
+                    rewards_data = mission.get('rewards', {})
+                    if rewards_data:
+                        reward_items = []
+                        
+                        if 'points' in rewards_data and rewards_data['points'] > 0:
+                            reward_items.append(f"+{rewards_data['points']} besitos")
+                            
+                        if 'lore_pieces' in rewards_data and rewards_data['lore_pieces']:
+                            count = len(rewards_data['lore_pieces'])
+                            reward_items.append(f"{count} pista{'s' if count > 1 else ''}")
+                            
+                        if 'badges' in rewards_data and rewards_data['badges']:
+                            count = len(rewards_data['badges'])
+                            reward_items.append(f"{count} insignia{'s' if count > 1 else ''}")
+                            
+                        if reward_items:
+                            rewards_section.append(f"   → Recompensas: {', '.join(reward_items)}")
+                else:
+                    rewards_section.append(f"✨ *{len(missions)} Misiones Unificadas Completadas*")
+                    for mission in missions[:3]:  # Mostrar máximo 3
+                        rewards_section.append(f"   • {mission.get('title', 'Misión')}")
                     if len(missions) > 3:
                         rewards_section.append(f"   • _...y {len(missions)-3} más_")
             

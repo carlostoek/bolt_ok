@@ -32,7 +32,7 @@ from utils.admin_state import (
     AdminLevelStates,
 )
 from services.mission_service import MissionService
-from services.reward_service import RewardService
+from services.reward_service import RewardSystem as RewardService
 from services.level_service import LevelService
 from database.models import User, Mission, LorePiece
 from services.lore_piece_service import LorePieceService

@@ -6,7 +6,7 @@ import logging
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.models import ConfigEntry, User, Tariff
+from database.models import ConfigEntry, User
 from services.config_service import ConfigService
 from services.channel_service import ChannelService
 from utils.text_utils import sanitize_text
@@ -72,11 +72,6 @@ class TenantService:
             vip_channel = await self.config_service.get_vip_channel_id()
             free_channel = await self.config_service.get_free_channel_id()
             
-            # Check tariff configuration
-            stmt = select(Tariff)
-            result = await self.session.execute(stmt)
-            tariffs = result.scalars().all()
-            
             # Check gamification setup (basic missions, levels, etc.)
             from services.mission_service import MissionService
             from services.level_service import LevelService
@@ -91,9 +86,9 @@ class TenantService:
                 "channels_configured": bool(vip_channel or free_channel),
                 "vip_channel_configured": bool(vip_channel),
                 "free_channel_configured": bool(free_channel),
-                "tariffs_configured": len(tariffs) > 0,
+                "tariffs_configured": False,  # El sistema de tarifas ha sido reemplazado
                 "gamification_configured": len(missions) > 0 and len(levels) > 0,
-                "basic_setup_complete": bool(vip_channel or free_channel) and len(tariffs) > 0
+                "basic_setup_complete": bool(vip_channel or free_channel)
             }
             
         except Exception as e:
@@ -245,40 +240,11 @@ class TenantService:
         Returns:
             Dict with created tariffs
         """
-        try:
-            default_tariffs = [
-                {"name": "VIP Básico", "duration_days": 30, "price": 10},
-                {"name": "VIP Premium", "duration_days": 90, "price": 25},
-                {"name": "VIP Anual", "duration_days": 365, "price": 100}
-            ]
-            
-            created_tariffs = []
-            for tariff_data in default_tariffs:
-                tariff = Tariff(
-                    name=tariff_data["name"],
-                    duration_days=tariff_data["duration_days"],
-                    price=tariff_data["price"]
-                )
-                self.session.add(tariff)
-                created_tariffs.append(tariff_data["name"])
-            
-            await self.session.commit()
-            
-            # Mark tariffs as configured
-            await self.config_service.set_value(f"tenant_{admin_user_id}_tariffs_setup", "true")
-            
-            logger.info(f"Default tariffs created for admin {admin_user_id}")
-            return {
-                "success": True,
-                "tariffs_created": created_tariffs
-            }
-            
-        except Exception as e:
-            logger.error(f"Error creating default tariffs for admin {admin_user_id}: {e}")
-            return {
-                "success": False,
-                "error": str(e)
-            }
+        # El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP
+        return {
+            "success": False,
+            "error": "El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP"
+        }
     
     def _get_next_steps(self, config_status: Dict[str, bool]) -> list:
         """
@@ -291,9 +257,6 @@ class TenantService:
         
         if not config_status["channels_configured"]:
             steps.append("configure_channels")
-        
-        if not config_status["tariffs_configured"]:
-            steps.append("setup_tariffs")
         
         if not config_status["gamification_configured"]:
             steps.append("setup_gamification")
@@ -317,11 +280,6 @@ class TenantService:
             vip_channel_id = await self.config_service.get_vip_channel_id()
             free_channel_id = await self.config_service.get_free_channel_id()
             
-            # Get tariff count
-            stmt = select(Tariff)
-            result = await self.session.execute(stmt)
-            tariff_count = len(result.scalars().all())
-            
             # Get user count
             from sqlalchemy import func
             user_count_stmt = select(func.count()).select_from(User)
@@ -335,7 +293,7 @@ class TenantService:
                     "vip_channel_id": vip_channel_id,
                     "free_channel_id": free_channel_id
                 },
-                "tariff_count": tariff_count,
+                "tariff_count": 0,  # El sistema de tarifas ha sido reemplazado
                 "total_users": total_users,
                 "setup_complete": status["basic_setup_complete"]
             }

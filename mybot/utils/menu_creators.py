@@ -14,7 +14,7 @@ from utils.keyboard_utils import (
 )
 from utils.message_utils import get_profile_message, get_ranking_message
 from services.mission_service import MissionService
-from services.reward_service import RewardService
+from services.reward_service import RewardSystem as RewardService
 from services.point_service import PointService
 from keyboards.auction_kb import get_auction_main_kb
 

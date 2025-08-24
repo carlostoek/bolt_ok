@@ -2,10 +2,6 @@ from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton
-from aiogram import Router, F, Bot
-from aiogram.types import CallbackQuery, Message
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
@@ -14,7 +10,6 @@ from utils.user_roles import is_admin, is_vip_member
 from keyboards.admin_vip_kb import get_admin_vip_kb
 from keyboards.admin_vip_config_kb import (
     get_admin_vip_config_kb,
-    get_tariff_select_kb,
     get_vip_messages_kb,
 )
 from keyboards.admin_vip_channel_kb import get_admin_vip_channel_kb
@@ -26,13 +21,12 @@ from utils.keyboard_utils import (
 from services import (
     SubscriptionService,
     ConfigService,
-    TokenService,
     get_admin_statistics,
     BadgeService,
     AchievementService,
     MissionService,
 )
-from database.models import User, Tariff
+from database.models import User
 from utils.message_utils import get_profile_message
 from utils.text_utils import sanitize_text
 from utils.admin_state import (
@@ -75,97 +69,80 @@ async def vip_menu(callback: CallbackQuery, session: AsyncSession):
     await callback.answer()
 
 
-@router.callback_query(F.data == "vip_generate_token")
-async def vip_generate_token(callback: CallbackQuery, session: AsyncSession):
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer()
-    
-    # Get available tariffs
-    result = await session.execute(select(Tariff))
-    tariffs = result.scalars().all()
-    
-    if not tariffs:
-        await callback.answer("❌ No hay tarifas configuradas. Configura las tarifas primero.", show_alert=True)
-        return
-    
-    builder = InlineKeyboardBuilder()
-    for t in tariffs:
-        builder.button(text=f"{t.name} ({t.duration_days}d - ${t.price})", callback_data=f"vip_token_{t.id}")
-    builder.button(text="🔙 Volver", callback_data="admin_vip")
-    builder.adjust(1)
-    
-    await update_menu(
-        callback,
-        "💳 Selecciona la tarifa para generar token:",
-        builder.as_markup(),
-        session,
-        "admin_vip_generate_token",
-    )
-    await callback.answer()
+# @router.callback_query(F.data == "vip_generate_token")
+# async def vip_generate_token(callback: CallbackQuery, session: AsyncSession):
+#     if not await is_admin(callback.from_user.id, session):
+#         return await callback.answer()
+#     
+#     # Informar que el sistema ha sido actualizado
+#     builder = InlineKeyboardBuilder()
+#     builder.button(text="🔙 Volver", callback_data="admin_vip")
+#     builder.adjust(1)
+#     
+#     await update_menu(
+#         callback,
+#         "ℹ️ **Sistema actualizado**\n\n"
+#         "El sistema de tarifas VIP ha sido actualizado. "
+#         "Ahora utiliza el nuevo sistema de transacciones VIP. "
+#         "Para generar tokens VIP, use las opciones del panel de administración.",
+#         builder.as_markup(),
+#         session,
+#         "admin_vip_generate_token",
+#     )
+#     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("vip_token_"))
-async def vip_create_token(callback: CallbackQuery, session: AsyncSession, bot: Bot):
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer()
-    
-    tariff_id = int(callback.data.split("_")[-1])
-    tariff = await session.get(Tariff, tariff_id)
-    
-    if not tariff:
-        await callback.answer("❌ Tarifa no encontrada", show_alert=True)
-        return
-    
-    service = TokenService(session)
-    token = await service.create_vip_token(tariff_id)
-    
-    # Get bot username for the link
-    bot_username = (await bot.get_me()).username
-    link = f"https://t.me/{bot_username}?start={token.token_string}"
-    
-    builder = InlineKeyboardBuilder()
-    builder.button(text="❌ Invalidar Token", callback_data=f"vip_invalidate_{token.token_string}"),
-    builder.button(text="🔄 Generar Otro", callback_data=f"vip_token_{tariff_id}"),
-    builder.button(text="🔙 Volver", callback_data="admin_vip"),
-    builder.adjust(1)
-    
-    message_text = (
-        f"✅ **Token VIP Generado**\n\n"
-        f"📋 **Tarifa:** {tariff.name}\n"
-        f"⏱️ **Duración:** {tariff.duration_days} días\n"
-        f"💰 **Precio:** ${tariff.price}\n\n"
-        f"🔗 **Enlace de activación:**\n`{link}`\n\n"
-        f"⚠️ Comparte este enlace con el cliente. Una vez usado, no se puede reutilizar."
-    )
-    
-    await callback.message.edit_text(message_text, reply_markup=builder.as_markup(), parse_mode="Markdown")
-    logger.info(f"Admin {callback.from_user.id} generated VIP token for tariff {tariff.name}")
-    await callback.answer()
+# @router.callback_query(F.data.startswith("vip_token_"))
+# async def vip_create_token(callback: CallbackQuery, session: AsyncSession, bot: Bot):
+#     if not await is_admin(callback.from_user.id, session):
+#         return await callback.answer()
+#     
+#     # Informar que el sistema ha sido actualizado
+#     await callback.answer(
+#         "ℹ️ Sistema actualizado\n\n"  # Corrected: \n for newline
+#         "El sistema de tarifas VIP ha sido actualizado. "
+#         "Use el panel de administración de VIP para generar tokens.",
+#         show_alert=True
+#     )
+#     
+#     # Volver al menú VIP
+#     builder = InlineKeyboardBuilder()
+#     builder.button(text="🔙 Volver", callback_data="admin_vip")
+#     builder.adjust(1)
+#     
+#     await update_menu(
+#         callback,
+#         "🔐 Administración Canal VIP",
+#         builder.as_markup(),
+#         session,
+#         "admin_vip",
+#     )
 
 
-@router.callback_query(F.data.startswith("vip_invalidate_"))
-async def vip_invalidate_token(callback: CallbackQuery, session: AsyncSession):
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer()
-    
-    token_string = callback.data.split("_", 2)[-1]  # Get everything after "vip_invalidate_"
-    service = TokenService(session)
-    
-    success = await service.invalidate_vip_token(token_string)
-    
-    if success:
-        await callback.answer("✅ Token invalidado correctamente", show_alert=True)
-        logger.info(f"Admin {callback.from_user.id} invalidated token {token_string}")
-        # Return to VIP menu
-        await update_menu(
-            callback,
-            "🔐 Administración Canal VIP",
-            get_admin_vip_kb(),
-            session,
-            "admin_vip",
-        )
-    else:
-        await callback.answer("❌ Token no encontrado o ya usado", show_alert=True)
+
+# @router.callback_query(F.data.startswith("vip_invalidate_"))
+# async def vip_invalidate_token(callback: CallbackQuery, session: AsyncSession):
+#     if not await is_admin(callback.from_user.id, session):
+#         return await callback.answer()
+#     
+#     token_string = callback.data.split("_", 2)[-1]  # Get everything after "vip_invalidate_"
+#     service = TokenService(session)
+#     
+#     success = await service.invalidate_vip_token(token_string)
+#     
+#     if success:
+#         await callback.answer("✅ Token invalidado correctamente", show_alert=True)
+#         logger.info(f"Admin {callback.from_user.id} invalidated token {token_string}")
+#         # Return to VIP menu
+#         await update_menu(
+#             callback,
+#             "🔐 Administración Canal VIP",
+#             get_admin_vip_kb(),
+#             session,
+#             "admin_vip",
+#         )
+#     else:
+#         await callback.answer("❌ Token no encontrado o ya usado", show_alert=True)
 
 
 @router.callback_query(F.data == "vip_stats")
@@ -174,11 +151,6 @@ async def vip_stats(callback: CallbackQuery, session: AsyncSession):
         return await callback.answer()
     
     stats = await get_admin_statistics(session)
-    
-    # Get token statistics
-    stmt = select(Tariff)
-    result = await session.execute(stmt)
-    tariffs = result.scalars().all()
     
     text_lines = [
         "📊 **Estadísticas VIP**",
@@ -189,14 +161,9 @@ async def vip_stats(callback: CallbackQuery, session: AsyncSession):
         f"❌ **Expiradas:** {stats['subscriptions_expired']}",
         f"💰 **Ingresos totales:** ${stats.get('revenue_total', 0)}",
         "",
-        "📋 **Tarifas disponibles:**"
+        "ℹ️ **Sistema actualizado:**",
+        "El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP."
     ]
-    
-    if tariffs:
-        for t in tariffs:
-            text_lines.append(f"• {t.name}: {t.duration_days}d - ${t.price}")
-    else:
-        text_lines.append("• No hay tarifas configuradas")
 
     builder = InlineKeyboardBuilder()
     builder.button(text="🔙 Volver", callback_data="admin_vip")

@@ -16,6 +16,7 @@ TABLES_ORDER = [
     'story_fragments',
     'narrative_choices', 
     'user_narrative_states',
+    'narrative_fragments_unified',
     'rewards',
     'lore_pieces',
     'missions',
@@ -24,9 +25,6 @@ TABLES_ORDER = [
     'badges',
     'levels',
     'invite_tokens',
-    'subscription_plans',
-    'subscription_tokens',
-    'tariffs',
     'config_entries',
     'bot_config',
     'channels',
@@ -41,7 +39,6 @@ TABLES_ORDER = [
     'user_badges',
     'vip_subscriptions',
     'user_stats',
-    'tokens',
     'user_challenge_progress',
     'button_reactions',
     'bids',
@@ -51,6 +48,8 @@ TABLES_ORDER = [
     'trivia_questions',
     'trivia_attempts',
     'trivia_user_answers',
+    'point_transactions',
+    'vip_transactions',
 ]
 
 async def init_db():

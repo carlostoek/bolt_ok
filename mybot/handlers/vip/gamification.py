@@ -15,7 +15,7 @@ from utils.user_roles import get_user_role
 from services.point_service import PointService
 from services.achievement_service import AchievementService
 from services.mission_service import MissionService
-from services.reward_service import RewardService
+from services.reward_service import RewardSystem as RewardService
 from utils.messages import BOT_MESSAGES
 from services.message_service import MessageService
 import logging

@@ -65,7 +65,12 @@ from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
 from handlers.admin.free_channel_config import router as free_channel_config_router
-# from handlers.menu_system_router import menu_system_router  # Module not found
+from handlers.menu_system_router import menu_system_router
+from handlers.narrative_fragment_handler import router as narrative_fragment_router
+from handlers.unified_narrative_handler import router as unified_narrative_router
+from handlers.user_narrative_handler import router as user_narrative_router
+from handlers.unified_mission_handler import router as unified_mission_router
+from handlers.reward_test_handler import router as reward_test_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -208,7 +213,12 @@ async def main() -> None:
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
             ("free_channel_config", free_channel_config_router),
-            # ("menu_system", menu_system_router),  # Module not found
+            ("menu_system", menu_system_router),
+            ("narrative_fragment", narrative_fragment_router),
+            ("unified_narrative", unified_narrative_router),
+            ("user_narrative", user_narrative_router),
+            ("unified_mission", unified_mission_router),
+            ("reward_test", reward_test_router),
         ]
         
         for name, router in routers:

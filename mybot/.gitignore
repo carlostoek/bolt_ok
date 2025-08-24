@@ -7,15 +7,53 @@ test_notifications.py
 run_protection_tests.py
 .claude/agents/test-coverage-agent.md
 
-# Python cache files
+# Python bytecode
 __pycache__/
 *.py[cod]
 *$py.class
 
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
+.env
+.venv/
+ENV/
+
+# Logs
+*.log
+logs/
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+
 # Database files
-*.sqlite
 *.db
+*.sqlite
+*.sqlite3
 test_db.sqlite
 
-# Log files
-*.log
+# Specific project files
+bot.log
