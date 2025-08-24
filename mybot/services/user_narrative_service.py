@@ -3,7 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from database.narrative_unified import UserNarrativeState, NarrativeFragment
 from database.models import User, LorePiece
-from services.reward_service import RewardSystem
+from services.interfaces import IUserNarrativeService, IRewardSystem
 import logging
 
 logger = logging.getLogger(__name__)
@@ -21,12 +21,19 @@ def safe_handler(func):
     return wrapper
 
 
-class UserNarrativeService:
+class UserNarrativeService(IUserNarrativeService):
     """Servicio para gestionar el estado narrativo unificado de los usuarios."""
     
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, reward_system: IRewardSystem):
+        """
+        Constructor con inyección de dependencias.
+        
+        Args:
+            session (AsyncSession): Sesión de base de datos
+            reward_system (IRewardSystem): Sistema de recompensas
+        """
         self.session = session
-        self.reward_system = RewardSystem(session)
+        self.reward_system = reward_system
 
     async def get_or_create_user_state(self, user_id: int) -> UserNarrativeState:
         """Obtiene o crea el estado narrativo de un usuario.
@@ -36,6 +43,9 @@ class UserNarrativeService:
             
         Returns:
             UserNarrativeState: Estado narrativo del usuario
+            
+        Raises:
+            ValueError: Si el usuario no existe
         """
         stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
         result = await self.session.execute(stmt)
@@ -71,6 +81,9 @@ class UserNarrativeService:
             
         Returns:
             UserNarrativeState: Estado narrativo actualizado del usuario
+            
+        Raises:
+            ValueError: Si el fragmento no existe o está inactivo
         """
         state = await self.get_or_create_user_state(user_id)
         
@@ -105,6 +118,9 @@ class UserNarrativeService:
             
         Returns:
             UserNarrativeState: Estado narrativo actualizado del usuario
+            
+        Raises:
+            ValueError: Si el fragmento no existe o está inactivo
         """
         state = await self.get_or_create_user_state(user_id)
         
@@ -140,6 +156,9 @@ class UserNarrativeService:
             
         Returns:
             UserNarrativeState: Estado narrativo actualizado del usuario
+            
+        Raises:
+            ValueError: Si la pista no existe o está inactiva
         """
         state = await self.get_or_create_user_state(user_id)
         

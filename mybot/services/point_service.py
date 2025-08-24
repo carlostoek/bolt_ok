@@ -1,9 +1,11 @@
+from typing import List, Optional, Tuple, Any, Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.models import User, UserStats
 from database.transaction_models import PointTransaction
 from utils.user_roles import get_points_multiplier
 from aiogram import Bot
+from services.interfaces import IPointService, INotificationService
 from services.level_service import LevelService
 from services.achievement_service import AchievementService
 from services.event_service import EventService
@@ -12,17 +14,42 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class PointService:
+
+class PointService(IPointService):
     """
     Servicio ÚNICO para TODAS las operaciones de puntos.
     Internamente usa PointTransaction para auditoría completa.
-    La interface pública NO CAMBIA.
     """
     
-    def __init__(self, session: AsyncSession):
+    def __init__(self, 
+                 session: AsyncSession,
+                 level_service: LevelService,
+                 achievement_service: AchievementService,
+                 notification_service: Optional[INotificationService] = None):
+        """
+        Constructor con inyección de dependencias.
+        
+        Args:
+            session (AsyncSession): Sesión de base de datos
+            level_service (LevelService): Servicio de niveles
+            achievement_service (AchievementService): Servicio de logros
+            notification_service (Optional[INotificationService]): Servicio de notificaciones
+        """
         self.session = session
+        self.level_service = level_service
+        self.achievement_service = achievement_service
+        self.notification_service = notification_service
 
     async def _get_or_create_progress(self, user_id: int) -> UserStats:
+        """
+        Obtiene o crea el progreso de un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            
+        Returns:
+            UserStats: Progreso del usuario
+        """
         progress = await self.session.get(UserStats, user_id)
         if not progress:
             progress = UserStats(user_id=user_id)
@@ -31,29 +58,36 @@ class PointService:
             await self.session.refresh(progress)
         return progress
 
-    async def award_message(self, user_id: int, bot: Bot) -> UserStats | None:
+    async def award_message(self, user_id: int, bot: Bot) -> Optional[UserStats]:
+        """
+        Otorga puntos por envío de mensaje.
+        
+        Args:
+            user_id (int): ID del usuario
+            bot (Bot): Instancia del bot
+            
+        Returns:
+            Optional[UserStats]: Progreso actualizado o None si no se otorgaron puntos
+        """
         progress = await self._get_or_create_progress(user_id)
         now = datetime.datetime.utcnow()
         if progress.last_activity_at and (now - progress.last_activity_at).total_seconds() < 30:
             return None
+        
         # Omitir notificación ya que la información se enviará a través del sistema unificado
         progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
         progress.messages_sent += 1
         await self.session.commit()
         
-        ach_service = AchievementService(self.session)
-        await ach_service.check_message_achievements(user_id, progress.messages_sent, bot=bot)
-        new_badges = await ach_service.check_user_badges(user_id)
+        new_badges = await self.achievement_service.check_message_achievements(user_id, progress.messages_sent, bot=bot)
+        new_badges.extend(await self.achievement_service.check_user_badges(user_id))
         
         # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
-            await ach_service.award_badge(user_id, badge.id)
-            if bot:
+            await self.achievement_service.award_badge(user_id, badge.id)
+            if bot and self.notification_service:
                 try:
-                    from services.notification_service import NotificationService, NotificationPriority
-                    notification_service = NotificationService(self.session, bot)
-                    
-                    await notification_service.add_notification(
+                    await self.notification_service.add_notification(
                         user_id,
                         "badge",
                         {
@@ -61,21 +95,32 @@ class PointService:
                             "icon": badge.icon or "🏅",
                             "description": getattr(badge, 'description', '')
                         },
-                        priority=NotificationPriority.MEDIUM
+                        priority=2  # MEDIUM
                     )
                     
                     logger.debug(f"Sent unified badge notification to user {user_id}")
-                except ImportError:
+                except Exception as e:
                     # Fallback al método anterior
+                    logger.error(f"Error sending badge notification: {e}")
                     await bot.send_message(
                         user_id,
                         f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
                     )
+                    
         return progress
 
-    async def award_reaction(
-        self, user: User, message_id: int, bot: Bot
-    ) -> UserStats | None:
+    async def award_reaction(self, user: User, message_id: int, bot: Bot) -> Optional[UserStats]:
+        """
+        Otorga puntos por reacción a un mensaje.
+        
+        Args:
+            user (User): Instancia del usuario
+            message_id (int): ID del mensaje
+            bot (Bot): Instancia del bot
+            
+        Returns:
+            Optional[UserStats]: Progreso actualizado o None si no se otorgaron puntos
+        """
         # First check if we already processed this reaction
         progress = await self._get_or_create_progress(user.id)
         now = datetime.datetime.utcnow()
@@ -88,31 +133,28 @@ class PointService:
         # Only then award points - Omitir notificación para usar sistema unificado
         progress = await self.add_points(user.id, 0.5, bot=bot, skip_notification=True)
         
-        ach_service = AchievementService(self.session)
-        new_badges = await ach_service.check_user_badges(user.id)
+        new_badges = await self.achievement_service.check_user_badges(user.id)
         
         # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
-            await ach_service.award_badge(user.id, badge.id)
-            if bot:
+            await self.achievement_service.award_badge(user.id, badge.id)
+            if bot and self.notification_service:
                 try:
-                    from services.notification_service import NotificationService, NotificationPriority
-                    notification_service = NotificationService(self.session, bot)
-                    
-                    await notification_service.add_notification(
-                        user_id,
+                    await self.notification_service.add_notification(
+                        user.id,
                         "badge",
                         {
                             "name": badge.name,
                             "icon": badge.icon or "🏅",
                             "description": getattr(badge, 'description', '')
                         },
-                        priority=NotificationPriority.MEDIUM
+                        priority=2  # MEDIUM
                     )
                     
                     logger.debug(f"Sent unified badge notification to user {user.id}")
-                except ImportError:
+                except Exception as e:
                     # Fallback al método anterior
+                    logger.error(f"Error sending badge notification: {e}")
                     await bot.send_message(
                         user.id,
                         f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
@@ -120,21 +162,27 @@ class PointService:
         return progress
 
     async def award_poll(self, user_id: int, bot: Bot) -> UserStats:
+        """
+        Otorga puntos por participación en encuesta.
+        
+        Args:
+            user_id (int): ID del usuario
+            bot (Bot): Instancia del bot
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
         # Omitir notificación ya que la información se enviará a través del sistema unificado
         progress = await self.add_points(user_id, 2, bot=bot, skip_notification=True)
         
-        ach_service = AchievementService(self.session)
-        new_badges = await ach_service.check_user_badges(user_id)
+        new_badges = await self.achievement_service.check_user_badges(user_id)
         
         # Usar el sistema unificado de notificaciones para las insignias si está disponible
         for badge in new_badges:
-            await ach_service.award_badge(user_id, badge.id)
-            if bot:
+            await self.achievement_service.award_badge(user_id, badge.id)
+            if bot and self.notification_service:
                 try:
-                    from services.notification_service import NotificationService, NotificationPriority
-                    notification_service = NotificationService(self.session, bot)
-                    
-                    await notification_service.add_notification(
+                    await self.notification_service.add_notification(
                         user_id,
                         "badge",
                         {
@@ -142,19 +190,30 @@ class PointService:
                             "icon": badge.icon or "🏅",
                             "description": getattr(badge, 'description', '')
                         },
-                        priority=NotificationPriority.MEDIUM
+                        priority=2  # MEDIUM
                     )
                     
                     logger.debug(f"Sent unified badge notification to user {user_id}")
-                except ImportError:
+                except Exception as e:
                     # Fallback al método anterior
+                    logger.error(f"Error sending badge notification: {e}")
                     await bot.send_message(
                         user_id,
                         f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
                     )
         return progress
 
-    async def daily_checkin(self, user_id: int, bot: Bot) -> tuple[bool, UserStats]:
+    async def daily_checkin(self, user_id: int, bot: Bot) -> Tuple[bool, UserStats]:
+        """
+        Otorga puntos por check-in diario.
+        
+        Args:
+            user_id (int): ID del usuario
+            bot (Bot): Instancia del bot
+            
+        Returns:
+            Tuple[bool, UserStats]: (Éxito, Progreso actualizado)
+        """
         progress = await self._get_or_create_progress(user_id)
         now = datetime.datetime.utcnow()
         if progress.last_checkin_at and (now - progress.last_checkin_at).total_seconds() < 86400:
@@ -171,38 +230,31 @@ class PointService:
         await self.session.commit()
         
         # Usar el sistema unificado para las notificaciones de daily_checkin
-        try:
-            if bot:
-                from services.notification_service import NotificationService, NotificationPriority
-                notification_service = NotificationService(self.session, bot)
-                
-                await notification_service.add_notification(
+        if bot and self.notification_service:
+            try:
+                await self.notification_service.add_notification(
                     user_id,
                     "checkin",
                     {
                         "streak": progress.checkin_streak,
                         "points": 10
                     },
-                    priority=NotificationPriority.MEDIUM
+                    priority=2  # MEDIUM
                 )
                 
                 logger.debug(f"Sent unified checkin notification to user {user_id}")
-        except ImportError:
-            pass  # Sin fallback, ya que se maneja en el channel_engagement_service
+            except Exception as e:
+                logger.error(f"Error sending checkin notification: {e}")
         
-        ach_service = AchievementService(self.session)
-        await ach_service.check_checkin_achievements(user_id, progress.checkin_streak, bot=bot)
-        new_badges = await ach_service.check_user_badges(user_id)
+        await self.achievement_service.check_checkin_achievements(user_id, progress.checkin_streak, bot=bot)
+        new_badges = await self.achievement_service.check_user_badges(user_id)
         
         # Usar el sistema unificado de notificaciones para las insignias
         for badge in new_badges:
-            await ach_service.award_badge(user_id, badge.id)
-            if bot:
+            await self.achievement_service.award_badge(user_id, badge.id)
+            if bot and self.notification_service:
                 try:
-                    from services.notification_service import NotificationService, NotificationPriority
-                    notification_service = NotificationService(self.session, bot)
-                    
-                    await notification_service.add_notification(
+                    await self.notification_service.add_notification(
                         user_id,
                         "badge",
                         {
@@ -210,20 +262,34 @@ class PointService:
                             "icon": badge.icon or "🏅",
                             "description": getattr(badge, 'description', '')
                         },
-                        priority=NotificationPriority.MEDIUM
+                        priority=2  # MEDIUM
                     )
                     
                     logger.debug(f"Sent unified badge notification to user {user_id}")
-                except ImportError:
+                except Exception as e:
                     # Fallback al método anterior
+                    logger.error(f"Error sending badge notification: {e}")
                     await bot.send_message(
                         user_id,
                         f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
                     )
         return True, progress
 
-    async def add_points(self, user_id: int, points: float, *, bot: Bot | None = None, skip_notification: bool = False, source="unknown") -> UserStats:
-        """Interface IDÉNTICA - ningún servicio necesita cambiar"""
+    async def add_points(self, user_id: int, points: float, *, bot: Optional[Bot] = None, 
+                         skip_notification: bool = False, source: str = "unknown") -> UserStats:
+        """
+        Añade puntos a un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            points (float): Cantidad de puntos a añadir
+            bot (Optional[Bot]): Instancia del bot
+            skip_notification (bool): Si se debe omitir la notificación
+            source (str): Origen de los puntos
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
         # NUEVO: Crear transacción
         async with self.session.begin():
             user = await self.session.get(User, user_id)
@@ -260,13 +326,11 @@ class PointService:
             await self.session.refresh(user)
             
         # Fuera de la transacción para evitar deadlock
-        level_service = LevelService(self.session)
-        await level_service.check_for_level_up(user, bot=bot)
+        await self.level_service.check_for_level_up(user, bot=bot)
 
-        ach_service = AchievementService(self.session)
-        new_badges = await ach_service.check_user_badges(user_id)
+        new_badges = await self.achievement_service.check_user_badges(user_id)
         for badge in new_badges:
-            await ach_service.award_badge(user_id, badge.id)
+            await self.achievement_service.award_badge(user_id, badge.id)
             if bot:
                 await bot.send_message(
                     user_id,
@@ -281,24 +345,28 @@ class PointService:
         # 2. Hay bot disponible
         # 3. El incremento desde la última notificación es significativo (>=5)
         if not skip_notification and bot and user.points - progress.last_notified_points >= 5:
-            try:
-                # Intentar usar el sistema de notificaciones unificadas
-                from services.notification_service import NotificationService, NotificationPriority
-                notification_service = NotificationService(self.session, bot)
-                
-                await notification_service.add_notification(
-                    user_id,
-                    "points",
-                    {
-                        "points": points,
-                        "total": user.points
-                    },
-                    priority=NotificationPriority.LOW  # Prioridad baja para notificaciones de puntos
-                )
-                
-                logger.debug(f"Sent unified points notification to user {user_id}")
-            except ImportError:
-                # Fallback al método anterior
+            if self.notification_service:
+                try:
+                    await self.notification_service.add_notification(
+                        user_id,
+                        "points",
+                        {
+                            "points": points,
+                            "total": user.points
+                        },
+                        priority=3  # LOW
+                    )
+                    
+                    logger.debug(f"Sent unified points notification to user {user_id}")
+                except Exception as e:
+                    # Fallback al método anterior
+                    logger.error(f"Error sending points notification: {e}")
+                    await bot.send_message(
+                        user_id,
+                        f"Has acumulado {user.points:.1f} puntos en total",
+                    )
+            else:
+                # Fallback sin sistema de notificaciones
                 await bot.send_message(
                     user_id,
                     f"Has acumulado {user.points:.1f} puntos en total",
@@ -308,8 +376,17 @@ class PointService:
             await self.session.commit()
         return progress
 
-    async def deduct_points(self, user_id: int, points: int) -> User | None:
-        """Interface IDÉNTICA - ningún servicio necesita cambiar"""
+    async def deduct_points(self, user_id: int, points: int) -> Optional[User]:
+        """
+        Resta puntos a un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            points (int): Cantidad de puntos a restar
+            
+        Returns:
+            Optional[User]: Usuario actualizado o None si no se pudieron restar los puntos
+        """
         # NUEVO: Crear transacción
         async with self.session.begin():
             user = await self.session.get(User, user_id)
@@ -339,14 +416,30 @@ class PointService:
         return None
 
     async def get_balance(self, user_id: int) -> float:
-        """Interface IDÉNTICA"""
+        """
+        Obtiene el balance de puntos de un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            
+        Returns:
+            float: Balance de puntos
+        """
         # Opción 1: Desde User.points (rápido)
         # Opción 2: Desde último PointTransaction (auditable)
         user = await self.session.get(User, user_id)
         return user.points if user else 0
 
-    async def get_transaction_history(self, user_id: int):
-        """NUEVA funcionalidad - historial completo"""
+    async def get_transaction_history(self, user_id: int) -> List[PointTransaction]:
+        """
+        Obtiene el historial de transacciones de un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            
+        Returns:
+            List[PointTransaction]: Lista de transacciones
+        """
         stmt = select(PointTransaction).where(
             PointTransaction.user_id == user_id
         ).order_by(PointTransaction.created_at.desc())
@@ -354,11 +447,28 @@ class PointService:
         return result.scalars().all()
 
     async def get_user_points(self, user_id: int) -> int:
+        """
+        Obtiene los puntos de un usuario.
+        
+        Args:
+            user_id (int): ID del usuario
+            
+        Returns:
+            int: Puntos del usuario
+        """
         user = await self.session.get(User, user_id)
         return user.points if user else 0
 
-    async def get_top_users(self, limit: int = 10) -> list[User]:
-        """Return the top users ordered by points."""
+    async def get_top_users(self, limit: int = 10) -> List[User]:
+        """
+        Obtiene los usuarios con más puntos.
+        
+        Args:
+            limit (int): Límite de usuarios a retornar
+            
+        Returns:
+            List[User]: Lista de usuarios
+        """
         stmt = select(User).order_by(User.points.desc()).limit(limit)
         result = await self.session.execute(stmt)
         top_users = result.scalars().all()
