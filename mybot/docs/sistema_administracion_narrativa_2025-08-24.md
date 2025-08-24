@@ -17,10 +17,15 @@ Este documento presenta un plan detallado para la implementación de un Sistema 
 - Módulo `modules/narrative/story_engine.py` para la lógica de progresión
 - Integración con `CoordinadorCentral` para flujos completos
 
-### Integración con Admin
-- Sistema de menús a través de `menu_manager` y `menu_factory`
-- Estructura de teclados con patrones consistentes
-- Routers admin en `handlers/admin/admin_menu.py`
+### Sistema de Menús Diana
+- Sistema de menús completo y avanzado implementado en `services/diana_menu_system.py`
+- Cuatro módulos de menús especializados:
+  - `DianaAdminMenu`: Menú administrativo con más de 30 botones
+  - `DianaUserMenu`: Menú para usuarios regulares
+  - `DianaNarrativeMenu`: Menú de narrativa
+  - `DianaGamificationMenu`: Menú de gamificación
+- Integración a través de `services/diana_menu_integration_impl.py`
+- Soporte para navegación, callbacks y compatibilidad con el sistema existente
 
 ## Componentes Planificados
 
@@ -94,20 +99,6 @@ def get_narrative_admin_keyboard():
         ]
     )
     return keyboard
-
-def get_narrative_fragments_list_keyboard(fragments, offset=0, limit=5, total=0, filter_type=None):
-    """Teclado para la lista paginada de fragmentos."""
-    # Implementación del teclado
-
-def get_fragment_detail_keyboard(fragment_id):
-    """Teclado para la vista detallada de un fragmento."""
-    # Implementación del teclado
-
-def get_storyboard_view_keyboard(root_id=None, view_type="tree"):
-    """Teclado para la visualización del storyboard."""
-    # Implementación del teclado
-
-# Más teclados para diferentes funcionalidades...
 ```
 
 ### 3. Handlers (narrative_admin.py)
@@ -154,8 +145,6 @@ async def visualize_narrative(callback: CallbackQuery, session: AsyncSession):
     """Muestra la visualización del storyboard."""
     # Iniciar StoryboardService
     # Generar y mostrar visualización
-
-# Más handlers para diferentes funcionalidades...
 ```
 
 ### 4. StoryboardService
@@ -181,52 +170,107 @@ class StoryboardService:
     async def get_connection_statistics(self, fragment_id):
         """Obtiene estadísticas de conexiones de un fragmento."""
         # Métricas como número de usuarios que siguen cada camino
+```
+
+## Plan de Integración con Diana Menu System
+
+### Integración con DianaAdminMenu
+
+El sistema actual ya cuenta con una sección narrativa en `services/diana_menus/admin_menu.py` que incluye:
+
+```python
+async def show_narrative_admin(self, callback: CallbackQuery) -> None:
+    """
+    Narrative content administration panel.
+    """
+    if not await is_admin(callback.from_user.id, self.session):
+        await callback.answer("❌ Acceso denegado", show_alert=True)
+        return
+    
+    try:
+        # Get narrative statistics
+        narrative_stats = await self._get_narrative_stats()
         
-    # Métodos auxiliares para diferentes tipos de visualizaciones...
-```
+        text = f"""
+📖 **ADMINISTRACIÓN NARRATIVA**
+*Control del contenido y experiencias interactivas*
 
-## Plan de Integración
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-### Cambios en admin_menu.py
+📚 **Estado del Contenido**
+• Fragmentos totales: {narrative_stats.get('total_fragments', 0)}
+• Fragmentos VIP: {narrative_stats.get('vip_fragments', 0)}
+• Usuarios en historia: {narrative_stats.get('users_in_story', 0)}
+• Decisiones disponibles: {narrative_stats.get('total_decisions', 0)}
 
-```python
-# Importación del router
-from .narrative_admin import router as narrative_admin_router
+🎭 **Personajes**
+• Diana - Fragmentos: {narrative_stats.get('diana_fragments', 0)}
+• Lucien - Fragmentos: {narrative_stats.get('lucien_fragments', 0)}
+• Interacciones activas: {narrative_stats.get('active_interactions', 0)}
 
-# Incluir router en la lista
-router.include_router(narrative_admin_router)
-```
+🔓 **Contenido VIP**
+• Accesos VIP hoy: {narrative_stats.get('vip_access_today', 0)}
+• Fragmentos premium: {narrative_stats.get('premium_content', 0)}
+• Conversiones a VIP: {narrative_stats.get('vip_conversions', 0)}
 
-### Modificación de Teclados Existentes
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-```python
-def get_admin_manage_content_keyboard():
-    """Returns the keyboard for content management options."""
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            # Líneas existentes...
+✍️ **Herramientas de Creación**
+Gestiona la experiencia narrativa completa
+        """
+        
+        keyboard = [
             [
-                InlineKeyboardButton(text="🎁 Catálogo VIP", callback_data="admin_content_rewards"),
-                InlineKeyboardButton(text="📖 Narrativa", callback_data="narrative_admin_menu")  # Nueva opción
+                InlineKeyboardButton("📝 Gestionar Fragmentos", callback_data="admin_fragments_manage"),
+                InlineKeyboardButton("🔮 Decisiones", callback_data="admin_decisions_manage")
             ],
-            # Más líneas existentes...
+            [
+                InlineKeyboardButton("🎭 Personajes", callback_data="admin_characters_manage"),
+                InlineKeyboardButton("👑 Contenido VIP", callback_data="admin_vip_content")
+            ],
+            [
+                InlineKeyboardButton("🗝️ Pistas", callback_data="admin_hints_manage"),
+                InlineKeyboardButton("📊 Progreso Usuarios", callback_data="admin_narrative_progress")
+            ],
+            [
+                InlineKeyboardButton("🎨 Personalización", callback_data="admin_narrative_themes"),
+                InlineKeyboardButton("⚙️ Configuración", callback_data="admin_narrative_config")
+            ],
+            [
+                InlineKeyboardButton("◀️ Volver", callback_data="admin_menu"),
+                InlineKeyboardButton("❌ Cerrar", callback_data="close_menu")
+            ]
         ]
-    )
-    return keyboard
+        
+        await safe_edit(
+            callback.message,
+            text,
+            reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+        )
+        await callback.answer("📖 Administración narrativa cargada")
+        
+    except Exception as e:
+        logger.error(f"Error showing narrative admin: {e}")
+        await callback.answer("❌ Error cargando administración narrativa", show_alert=True)
 ```
+
+Nuestra implementación deberá:
+1. Implementar los handlers para las callback `admin_fragments_manage`
+2. Integrarse con el sistema de menús existente
+3. Compartir estadísticas con el DianaAdminMenu
 
 ## Plan de Implementación por Fases
 
 ### Fase 1: Administración Básica
 1. Crear `services/narrative_admin_service.py` con funciones básicas
-2. Crear `keyboards/narrative_admin_kb.py` con teclados principales
-3. Implementar `handlers/admin/narrative_admin.py` con handlers básicos
-4. Integrar con `admin_menu.py`
+2. Crear `handlers/admin/narrative_admin.py` con handlers básicos
+3. Integrar con DianaAdminMenu existente
+4. Implementar handlers para callback_data "admin_fragments_manage"
 5. Pruebas de funcionalidad básica
 
 ### Fase 2: Visualización y Edición Avanzada
 1. Implementar `services/storyboard_service.py`
-2. Extender `narrative_admin.py` con visualización
+2. Extender handlers con visualización
 3. Agregar funcionalidad de edición avanzada
 4. Pruebas de integración
 
@@ -277,22 +321,33 @@ class TestNarrativeAdminIntegration:
         # Simular flujo de creación...
 ```
 
-### Pruebas de Rendimiento
+### Pruebas de Integración con Diana Menu System
 
 ```python
-# tests/performance/test_narrative_admin_performance.py
-class TestNarrativeAdminPerformance:
+# tests/integration/test_diana_narrative_integration.py
+class TestDianaNarrativeIntegration:
     @pytest.mark.asyncio
-    async def test_large_fragments_list_performance(self, session: AsyncSession):
-        """Prueba el rendimiento con una gran cantidad de fragmentos."""
-        service = NarrativeAdminService(session)
+    async def test_admin_fragments_manage(self, session: AsyncSession):
+        """Prueba la integración con el botón admin_fragments_manage del Diana Menu System."""
+        # Configurar callback
+        callback = AsyncMock()
+        callback.data = "admin_fragments_manage"
         
-        # Crear 100 fragmentos de prueba...
+        # Simular handler
+        from handlers.admin.narrative_admin import handle_admin_fragments_manage
+        await handle_admin_fragments_manage(callback, session)
         
-        # Medir tiempo de respuesta para diferentes tamaños de página...
+        # Verificar que se actualiza el mensaje correctamente
+        assert callback.message.edit_text.called or safe_edit.called
 ```
 
 ## Consideraciones Técnicas
+
+### Integración con Diana Menu System
+- Mantener compatibilidad con el sistema de menús existente
+- Implementar handlers para todos los callback_data definidos en DianaAdminMenu
+- Compartir estadísticas para mostrar en el panel administrativo
+- Respetar la estética y estructura de los menús existentes
 
 ### Rendimiento
 - Paginación para todas las listas
@@ -323,4 +378,4 @@ class TestNarrativeAdminPerformance:
 
 ## Conclusión
 
-El Sistema de Administración Narrativa propuesto proporcionará herramientas robustas para la gestión de contenido narrativo, visualización de storyboards y análisis de engagement. Su implementación en fases permitirá una integración gradual y sin disrupciones con el sistema existente, mejorando significativamente la capacidad de administración del bot Diana.
+El Sistema de Administración Narrativa propuesto proporcionará herramientas robustas para la gestión de contenido narrativo, visualización de storyboards y análisis de engagement. Su implementación se integrará perfectamente con el sistema de menús Diana existente, manteniendo la coherencia y usabilidad del sistema actual mientras añade funcionalidades avanzadas de gestión narrativa.
