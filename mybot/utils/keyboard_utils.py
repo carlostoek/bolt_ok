@@ -5,8 +5,10 @@ from aiogram.types import (
     ReplyKeyboardMarkup,
     KeyboardButton,
 )
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from database.models import User
 from utils.messages import BOT_MESSAGES
+from utils.callback_factories import MissionCallbackFactory
 
 
 def get_main_menu_keyboard():
@@ -194,8 +196,8 @@ def get_admin_manage_content_keyboard():
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="👥 Usuarios", callback_data="admin_manage_users"),
-                InlineKeyboardButton(text="🎯 Misiones", callback_data="admin_content_missions")
+                InlineKeyboardButton(text="🎯 Misiones Unif.", callback_data="admin_content_missions"),
+                InlineKeyboardButton(text="🗺️ Pistas", callback_data="admin_content_lore_pieces")
             ],
             [
                 InlineKeyboardButton(text="🏅 Insignias", callback_data="admin_content_badges"),
@@ -203,15 +205,7 @@ def get_admin_manage_content_keyboard():
             ],
             [
                 InlineKeyboardButton(text="🎁 Catálogo VIP", callback_data="admin_content_rewards"),
-                InlineKeyboardButton(text="🏛️ Subastas", callback_data="admin_auction_main")
-            ],
-            [
-                InlineKeyboardButton(text="🎁 Regalos Diarios", callback_data="admin_content_daily_gifts"),
-                InlineKeyboardButton(text="🕹 Minijuegos", callback_data="admin_content_minigames")
-            ],
-            [
-                InlineKeyboardButton(text="🗺️ Pistas", callback_data="admin_content_lore_pieces"),
-                InlineKeyboardButton(text="🎉 Eventos", callback_data="admin_manage_events_sorteos")
+                InlineKeyboardButton(text="🎁 Regalos", callback_data="admin_content_daily_gifts")
             ],
             [
                 InlineKeyboardButton(text="🔄 Actualizar", callback_data="admin_manage_content"),
@@ -228,10 +222,10 @@ def get_admin_content_missions_keyboard():
         inline_keyboard=[
             [
                 InlineKeyboardButton(text="➕ Crear Misión", callback_data="admin_create_mission"),
-                InlineKeyboardButton(text="👁 Ver Activas", callback_data="admin_view_missions")
+                InlineKeyboardButton(text="👁 Ver Misiones", callback_data="admin_list_missions")
             ],
             [
-                InlineKeyboardButton(text="✅ Activar", callback_data="admin_toggle_mission"),
+                InlineKeyboardButton(text="✅ Activar/Desactivar", callback_data="admin_toggle_mission"),
                 InlineKeyboardButton(text="🗑 Eliminar", callback_data="admin_delete_mission")
             ],
             [
@@ -242,7 +236,7 @@ def get_admin_content_missions_keyboard():
     )
     return keyboard
     
-def get_back_keyboard(callback_data: str) -> InlineKeyboardMarkup:
+def get_back_keyboard(callback_data: str = "menu_principal") -> InlineKeyboardMarkup:
     """Return a simple keyboard with a single back button."""
     keyboard = [[InlineKeyboardButton(text="🔙 Volver", callback_data=callback_data)]]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
@@ -469,6 +463,145 @@ def get_mission_completed_keyboard() -> InlineKeyboardMarkup:
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def get_missions_keyboard(missions: list[dict]) -> InlineKeyboardMarkup:
+    """Keyboard para misiones unificadas.
+    
+    Args:
+        missions: Lista de misiones con formato {id, title, mission_type, is_completed, progress_percentage}
+    """
+    builder = InlineKeyboardBuilder()
+    
+    # Mostrar misiones agrupadas por tipo
+    main_missions = [m for m in missions if m["mission_type"] == "MAIN" and not m["is_completed"]]
+    side_missions = [m for m in missions if m["mission_type"] == "SIDE" and not m["is_completed"]]
+    daily_missions = [m for m in missions if m["mission_type"] == "DAILY" and not m["is_completed"]]
+    weekly_missions = [m for m in missions if m["mission_type"] == "WEEKLY" and not m["is_completed"]]
+    event_missions = [m for m in missions if m["mission_type"] == "EVENT" and not m["is_completed"]]
+    completed_missions = [m for m in missions if m["is_completed"]]
+    
+    # Añadir misiones principales (máximo 3)
+    for mission in main_missions[:3]:
+        progress = int(mission["progress_percentage"])
+        builder.button(
+            text=f"📜 {mission['title']} ({progress}%)",
+            callback_data=MissionCallbackFactory(action="details", mission_id=mission["id"])
+        )
+    
+    # Añadir misiones secundarias (máximo 3)
+    for mission in side_missions[:3]:
+        progress = int(mission["progress_percentage"])
+        builder.button(
+            text=f"📌 {mission['title']} ({progress}%)",
+            callback_data=MissionCallbackFactory(action="details", mission_id=mission["id"])
+        )
+    
+    # Añadir misiones diarias (máximo 2)
+    for mission in daily_missions[:2]:
+        progress = int(mission["progress_percentage"])
+        builder.button(
+            text=f"🔄 {mission['title']} ({progress}%)",
+            callback_data=MissionCallbackFactory(action="details", mission_id=mission["id"])
+        )
+    
+    # Añadir misiones semanales (máximo 2)
+    for mission in weekly_missions[:2]:
+        progress = int(mission["progress_percentage"])
+        builder.button(
+            text=f"📅 {mission['title']} ({progress}%)",
+            callback_data=MissionCallbackFactory(action="details", mission_id=mission["id"])
+        )
+    
+    # Añadir misiones de evento si hay (máximo 2)
+    for mission in event_missions[:2]:
+        progress = int(mission["progress_percentage"])
+        builder.button(
+            text=f"🎉 {mission['title']} ({progress}%)",
+            callback_data=MissionCallbackFactory(action="details", mission_id=mission["id"])
+        )
+    
+    # Botones de filtrado
+    if len(main_missions) > 3 or len(side_missions) > 3 or len(daily_missions) > 2 or len(weekly_missions) > 2:
+        builder.row(
+            InlineKeyboardButton(
+                text="📜 Principales", 
+                callback_data=MissionCallbackFactory(action="list", mission_type="MAIN").pack()
+            ),
+            InlineKeyboardButton(
+                text="📌 Secundarias", 
+                callback_data=MissionCallbackFactory(action="list", mission_type="SIDE").pack()
+            ),
+            width=2
+        )
+        builder.row(
+            InlineKeyboardButton(
+                text="🔄 Diarias", 
+                callback_data=MissionCallbackFactory(action="list", mission_type="DAILY").pack()
+            ),
+            InlineKeyboardButton(
+                text="📅 Semanales", 
+                callback_data=MissionCallbackFactory(action="list", mission_type="WEEKLY").pack()
+            ),
+            width=2
+        )
+    
+    # Botón para misiones completadas
+    if completed_missions:
+        builder.button(
+            text=f"✅ Completadas ({len(completed_missions)})",
+            callback_data=MissionCallbackFactory(action="list", mission_type="completed")
+        )
+    
+    # Botones de navegación
+    builder.row(
+        InlineKeyboardButton(text="🔄 Actualizar", callback_data=MissionCallbackFactory(action="list").pack()),
+        InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal"),
+        width=2
+    )
+    
+    # Ajustar layout
+    builder.adjust(1)
+    
+    return builder.as_markup()
+
+
+def get_mission_details_keyboard(mission_id: str, is_completed: bool) -> InlineKeyboardMarkup:
+    """Keyboard para detalles de misión unificada.
+    
+    Args:
+        mission_id: ID de la misión
+        is_completed: Si la misión está completada
+    """
+    builder = InlineKeyboardBuilder()
+    
+    # Si no está completada, mostrar botón para completar
+    if not is_completed:
+        builder.button(
+            text="✅ Completar Misión",
+            callback_data=MissionCallbackFactory(action="complete", mission_id=mission_id)
+        )
+    
+    # Botón para conectar con narrativa
+    builder.button(
+        text="📜 Conectar con Historia",
+        callback_data=MissionCallbackFactory(action="narrative_connect", mission_id=mission_id)
+    )
+    
+    # Botones de navegación
+    builder.row(
+        InlineKeyboardButton(
+            text="🔙 Volver a Misiones",
+            callback_data=MissionCallbackFactory(action="list").pack()
+        ),
+        InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal"),
+        width=2
+    )
+    
+    # Ajustar layout
+    builder.adjust(1)
+    
+    return builder.as_markup()
 
 
 # Funciones helper para mensajes con la guía de estilo aplicada

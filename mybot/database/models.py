@@ -12,15 +12,14 @@ from sqlalchemy import (
     Float,
     UniqueConstraint,
     Enum,
+    Index,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declared_attr
 from uuid import uuid4
 from sqlalchemy.sql import func
 from sqlalchemy.future import select
 import enum
 from .base import Base
-from sqlalchemy import Column, BigInteger, String, Float, Integer, JSON, DateTime
-from sqlalchemy.orm import relationship, declared_attr
 
 
 

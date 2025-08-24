@@ -3,7 +3,7 @@ from .badge_service import BadgeService
 from .level_service import LevelService
 from .mission_service import MissionService
 from .point_service import PointService
-from .reward_service import RewardService
+from .reward_service import RewardSystem as RewardService
 from .subscription_service import SubscriptionService, get_admin_statistics
 from .token_service import TokenService, validate_token
 from .config_service import ConfigService

@@ -19,7 +19,7 @@ class UserNarrativeStates(StatesGroup):
 
 @router.message(F.text == "/start_narrative")
 async def start_narrative(message: Message, session: AsyncSession):
-    \"\"\"Inicia la experiencia narrativa para el usuario.\"\"\"
+    """Inicia la experiencia narrativa para el usuario."""
     user_id = message.from_user.id
     
     try:
@@ -58,7 +58,7 @@ async def start_narrative(message: Message, session: AsyncSession):
 
 @router.message(F.text == "/narrative_progress")
 async def show_progress(message: Message, session: AsyncSession):
-    \"\"\"Muestra el progreso del usuario en la narrativa.\"\"\"
+    """Muestra el progreso del usuario en la narrativa."""
     user_id = message.from_user.id
     
     try:
@@ -75,14 +75,14 @@ async def show_progress(message: Message, session: AsyncSession):
 
 @router.message(F.text == "/unlock_clue")
 async def start_unlock_clue(message: Message, state: FSMContext):
-    \"\"\"Inicia el proceso de desbloqueo de una pista.\"\"\"
+    """Inicia el proceso de desbloqueo de una pista."""
     await message.answer("🗝️ Por favor, envíame el código de la pista que deseas desbloquear:")
     await state.set_state(UserNarrativeStates.waiting_for_clue_code)
 
 
 @router.message(UserNarrativeStates.waiting_for_clue_code)
 async def process_clue_code(message: Message, state: FSMContext, session: AsyncSession):
-    \"\"\"Procesa el código de la pista y la desbloquea para el usuario.\"\"\"
+    """Procesa el código de la pista y la desbloquea para el usuario."""
     user_id = message.from_user.id
     clue_code = message.text.strip()
     

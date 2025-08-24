@@ -17,6 +17,7 @@ from .point_service import PointService
 from .reconciliation_service import ReconciliationService
 from .event_bus import get_event_bus, EventType, Event
 from .notification_service import NotificationService
+from .unified_mission_service import UnifiedMissionService
 
 logger = logging.getLogger(__name__)
 
@@ -28,6 +29,8 @@ class AccionUsuario(enum.Enum):
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
+    COMPLETAR_FRAGMENTO_NARRATIVO = "completar_fragmento_narrativo"
+    DESBLOQUEAR_PISTA = "desbloquear_pista"
 
 class CoordinadorCentral:
     """
@@ -52,6 +55,7 @@ class CoordinadorCentral:
         self.narrative_service = NarrativeService(session)
         self.point_service = PointService(session)
         self.reconciliation_service = ReconciliationService(session)
+        self.unified_mission_service = UnifiedMissionService(session)
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
     
@@ -93,6 +97,18 @@ class CoordinadorCentral:
                 return result
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
                 result = await self._flujo_verificar_engagement(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
+            elif accion == AccionUsuario.COMPLETAR_FRAGMENTO_NARRATIVO:
+                result = await self._flujo_completar_fragmento_narrativo(user_id, **kwargs)
+                # Enviar notificaciones unificadas si está habilitado
+                if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
+                    await self._send_unified_notifications(notification_service, user_id, result, accion)
+                return result
+            elif accion == AccionUsuario.DESBLOQUEAR_PISTA:
+                result = await self._flujo_desbloquear_pista(user_id, **kwargs)
                 # Enviar notificaciones unificadas si está habilitado
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
@@ -837,6 +853,150 @@ class CoordinadorCentral:
     
     # ==================== SISTEMA DE NOTIFICACIONES UNIFICADAS ====================
     
+    async def _flujo_completar_fragmento_narrativo(self, user_id: int, fragment_id: str, bot=None) -> Dict[str, Any]:
+        """
+        Flujo para manejar la actualización de progreso de misiones cuando un usuario completa un fragmento narrativo.
+        
+        Args:
+            user_id: ID del usuario
+            fragment_id: ID del fragmento narrativo completado
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con resultados y mensajes
+        """
+        # 1. Actualizar progreso de misiones con el fragmento narrativo
+        completed_missions = await self.unified_mission_service.update_user_progress(
+            user_id,
+            "narrative_fragment",
+            {"fragment_id": fragment_id},
+            bot=bot
+        )
+        
+        if not completed_missions:
+            return {
+                "success": True,
+                "message": "Diana te observa mientras avanzas en la historia...",
+                "fragment_id": fragment_id,
+                "missions_updated": False,
+                "action": "fragment_completed_no_mission_progress"
+            }
+        
+        # 2. Construir resultado con misiones completadas
+        mission_data = []
+        total_points = 0
+        
+        for mission, is_new in completed_missions:
+            if is_new:
+                # Solo contar puntos para misiones recién completadas
+                mission_points = mission.rewards.get("points", 0) if mission.rewards else 0
+                total_points += mission_points
+                
+                mission_data.append({
+                    "id": mission.id,
+                    "title": mission.title,
+                    "description": mission.description,
+                    "points": mission_points,
+                    "mission_type": mission.mission_type,
+                    "rewards": mission.rewards
+                })
+        
+        # 3. Obtener puntos actuales del usuario
+        current_points = await self.point_service.get_user_points(user_id)
+        
+        # 4. Generar mensaje de respuesta
+        if mission_data:
+            if len(mission_data) == 1:
+                mission = mission_data[0]
+                mensaje = f"Diana te observa con una sonrisa de satisfacción...\n\n*¡Misión completada!* {mission['title']}\n\n+{mission['points']} besitos 💋"
+            else:
+                mensaje = f"Diana te observa con una sonrisa de satisfacción...\n\n*¡{len(mission_data)} misiones completadas!*\n\n+{total_points} besitos 💋 en total"
+        else:
+            mensaje = "Diana te observa mientras avanzas en la historia..."
+        
+        return {
+            "success": True,
+            "message": mensaje,
+            "fragment_id": fragment_id,
+            "missions_completed": mission_data,
+            "missions_updated": True,
+            "mission_points_awarded": total_points,
+            "total_points": current_points,
+            "action": "fragment_completed_mission_progress"
+        }
+
+    async def _flujo_desbloquear_pista(self, user_id: int, piece_code: str, bot=None) -> Dict[str, Any]:
+        """
+        Flujo para manejar la actualización de progreso de misiones cuando un usuario desbloquea una pista.
+        
+        Args:
+            user_id: ID del usuario
+            piece_code: Código de la pista desbloqueada
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con resultados y mensajes
+        """
+        # 1. Actualizar progreso de misiones con la pista desbloqueada
+        completed_missions = await self.unified_mission_service.update_user_progress(
+            user_id,
+            "lore_piece",
+            {"piece_code": piece_code},
+            bot=bot
+        )
+        
+        if not completed_missions:
+            return {
+                "success": True,
+                "message": "Diana sonríe mientras descubres una nueva pista...",
+                "piece_code": piece_code,
+                "missions_updated": False,
+                "action": "lore_piece_unlocked_no_mission_progress"
+            }
+        
+        # 2. Construir resultado con misiones completadas
+        mission_data = []
+        total_points = 0
+        
+        for mission, is_new in completed_missions:
+            if is_new:
+                # Solo contar puntos para misiones recién completadas
+                mission_points = mission.rewards.get("points", 0) if mission.rewards else 0
+                total_points += mission_points
+                
+                mission_data.append({
+                    "id": mission.id,
+                    "title": mission.title,
+                    "description": mission.description,
+                    "points": mission_points,
+                    "mission_type": mission.mission_type,
+                    "rewards": mission.rewards
+                })
+        
+        # 3. Obtener puntos actuales del usuario
+        current_points = await self.point_service.get_user_points(user_id)
+        
+        # 4. Generar mensaje de respuesta
+        if mission_data:
+            if len(mission_data) == 1:
+                mission = mission_data[0]
+                mensaje = f"Diana te mira con admiración...\n\n*¡Misión completada!* {mission['title']}\n\n+{mission['points']} besitos 💋"
+            else:
+                mensaje = f"Diana te mira con admiración...\n\n*¡{len(mission_data)} misiones completadas!*\n\n+{total_points} besitos 💋 en total"
+        else:
+            mensaje = "Diana sonríe mientras descubres una nueva pista..."
+        
+        return {
+            "success": True,
+            "message": mensaje,
+            "piece_code": piece_code,
+            "missions_completed": mission_data,
+            "missions_updated": True,
+            "mission_points_awarded": total_points,
+            "total_points": current_points,
+            "action": "lore_piece_unlocked_mission_progress"
+        }
+        
     async def _send_unified_notifications(self, notification_service: NotificationService, 
                                      user_id: int, result: Dict[str, Any], 
                                      accion: AccionUsuario) -> None:
@@ -884,17 +1044,32 @@ class CoordinadorCentral:
                               if mission.get("important") or mission.get("points", 0) >= 30 
                               else NotificationPriority.MEDIUM)
                     
-                    await notification_service.add_notification(
-                        user_id,
-                        "mission",
-                        {
-                            "name": mission.get("name", "Misión Completada"),
-                            "points": mission.get("points", 0),
-                            "description": mission.get("description"),
-                            "reward_type": mission.get("reward_type", "points")
-                        },
-                        priority=priority
-                    )
+                    # Usar tipo de notificación mission_completed para misiones unificadas
+                    if accion in [AccionUsuario.COMPLETAR_FRAGMENTO_NARRATIVO, AccionUsuario.DESBLOQUEAR_PISTA]:
+                        await notification_service.add_notification(
+                            user_id,
+                            "mission_completed",
+                            {
+                                "mission_id": mission.get("id", ""),
+                                "title": mission.get("title", "Misión Completada"),
+                                "description": mission.get("description"),
+                                "rewards": mission.get("rewards", {})
+                            },
+                            priority=priority
+                        )
+                    else:
+                        # Mantener compatibilidad con sistema antiguo
+                        await notification_service.add_notification(
+                            user_id,
+                            "mission",
+                            {
+                                "name": mission.get("name", "Misión Completada"),
+                                "points": mission.get("points", 0),
+                                "description": mission.get("description"),
+                                "reward_type": mission.get("reward_type", "points")
+                            },
+                            priority=priority
+                        )
             
             # === NOTIFICACIONES DE LOGROS ===
             if result.get("achievement_unlocked"):

@@ -202,23 +202,43 @@ class UnifiedNarrativeService:
         if not fragment.triggers:
             return
             
-        # Procesar recompensas de puntos
+        # Procesar recompensas de puntos usando el sistema unificado
         reward_points = fragment.triggers.get("reward_points", 0)
-        if reward_points > 0 and self.point_service and self.bot:
-            await self.point_service.add_points(
-                user_id, 
-                reward_points, 
-                source="narrative_fragment",
-                description=f"Recompensa por fragmento: {fragment.title}",
-                bot=self.bot
-            )
-            logger.info(f"Usuario {user_id} recibió {reward_points} puntos del fragmento {fragment.id}")
+        if reward_points > 0:
+            try:
+                from services.reward_service import RewardSystem
+                reward_system = RewardSystem(self.session)
+                await reward_system.grant_reward(
+                    user_id=user_id,
+                    reward_type='points',
+                    reward_data={
+                        'amount': reward_points,
+                        'description': f'Recompensa por fragmento: {fragment.title}'
+                    },
+                    source='unified_narrative_fragment'
+                )
+                logger.info(f"Usuario {user_id} recibió {reward_points} puntos del fragmento {fragment.id}")
+            except Exception as e:
+                logger.error(f"Error al otorgar puntos al usuario {user_id}: {e}")
         
-        # Procesar desbloqueo de pistas
+        # Procesar desbloqueo de pistas usando el sistema unificado
         unlock_lore = fragment.triggers.get("unlock_lore")
-        if unlock_lore and self.bot:
-            # En una implementación completa, desbloquearíamos la pista
-            logger.info(f"Fragmento {fragment.id} desbloquea pista: {unlock_lore}")
+        if unlock_lore:
+            try:
+                from services.reward_service import RewardSystem
+                reward_system = RewardSystem(self.session)
+                await reward_system.grant_reward(
+                    user_id=user_id,
+                    reward_type='clue',
+                    reward_data={
+                        'clue_code': unlock_lore,
+                        'description': f'Pista desbloqueada por fragmento: {fragment.title}'
+                    },
+                    source='unified_narrative_fragment'
+                )
+                logger.info(f"Fragmento {fragment.id} desbloquea pista: {unlock_lore}")
+            except Exception as e:
+                logger.error(f"Error al desbloquear pista {unlock_lore} para usuario {user_id}: {e}")
     
     async def _count_accessible_fragments(self, user_id: int) -> int:
         """Cuenta los fragmentos accesibles para el usuario."""

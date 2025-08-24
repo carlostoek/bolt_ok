@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from database.narrative_unified import UserNarrativeState, NarrativeFragment
 from database.models import User, LorePiece
+from services.reward_service import RewardSystem
 import logging
 
 logger = logging.getLogger(__name__)
@@ -25,6 +26,7 @@ class UserNarrativeService:
     
     def __init__(self, session: AsyncSession):
         self.session = session
+        self.reward_system = RewardSystem(session)
 
     async def get_or_create_user_state(self, user_id: int) -> UserNarrativeState:
         """Obtiene o crea el estado narrativo de un usuario.
@@ -216,18 +218,36 @@ class UserNarrativeService:
         # Procesar recompensas de puntos
         if "reward_points" in fragment.triggers:
             points = fragment.triggers["reward_points"]
-            # Aquí se llamaría al servicio de puntos para otorgarlos
-            # Por ahora, solo registramos en el log
-            logger.info(f"Otorgando {points} puntos al usuario {user_id} por completar fragmento {fragment.id}")
+            try:
+                await self.reward_system.grant_reward(
+                    user_id=user_id,
+                    reward_type='points',
+                    reward_data={
+                        'amount': points,
+                        'description': f'Recompensa por completar fragmento: {fragment.title}'
+                    },
+                    source='narrative_fragment'
+                )
+                logger.info(f"Otorgados {points} puntos al usuario {user_id} por completar fragmento {fragment.id}")
+            except Exception as e:
+                logger.error(f"Error al otorgar puntos al usuario {user_id}: {e}")
             
         # Procesar desbloqueo de pistas
         if "unlock_lore" in fragment.triggers:
             clue_code = fragment.triggers["unlock_lore"]
             try:
-                await self.unlock_clue(user_id, clue_code)
+                await self.reward_system.grant_reward(
+                    user_id=user_id,
+                    reward_type='clue',
+                    reward_data={
+                        'clue_code': clue_code,
+                        'description': f'Pista desbloqueada por completar fragmento: {fragment.title}'
+                    },
+                    source='narrative_fragment'
+                )
                 logger.info(f"Desbloqueada pista {clue_code} para usuario {user_id}")
-            except ValueError as e:
-                logger.warning(f"No se pudo desbloquear pista {clue_code} para usuario {user_id}: {e}")
+            except Exception as e:
+                logger.error(f"Error al desbloquear pista {clue_code} para usuario {user_id}: {e}")
 
     async def reset_user_progress(self, user_id: int) -> UserNarrativeState:
         """Restablece el progreso narrativo del usuario.

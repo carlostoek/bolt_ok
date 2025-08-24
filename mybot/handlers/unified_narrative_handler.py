@@ -10,6 +10,7 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.unified_narrative_service import UnifiedNarrativeService
+from services.unified_mission_service import UnifiedMissionService
 from services.narrative_fragment_service import NarrativeFragmentService
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
@@ -151,6 +152,100 @@ async def continue_unified_narrative(callback: CallbackQuery, session: AsyncSess
     
     await callback.answer()
 
+
+@router.callback_query(F.data == "mission:list")
+@safe_handler("Error al cargar las misiones disponibles.")
+@track_usage("list_missions")
+@transaction()
+async def show_missions_from_narrative(callback: CallbackQuery, session: AsyncSession):
+    """Muestra las misiones disponibles desde la narrativa."""
+    user_id = callback.from_user.id
+    
+    # Inicializar servicio de misiones
+    mission_service = UnifiedMissionService(session, callback.bot)
+    
+    # Obtener misiones disponibles
+    missions = await mission_service.get_user_available_missions(user_id)
+    
+    if not missions:
+        await callback.message.edit_text(
+            "🎯 **Misiones**\n\n"
+            "No tienes misiones disponibles en este momento.",
+            reply_markup=get_narrative_stats_keyboard()
+        )
+        await callback.answer()
+        return
+    
+    # Contar misiones por tipo y estado
+    main_active = sum(1 for m in missions if m["mission_type"] == "MAIN" and not m["is_completed"])
+    side_active = sum(1 for m in missions if m["mission_type"] == "SIDE" and not m["is_completed"])
+    daily_active = sum(1 for m in missions if m["mission_type"] == "DAILY" and not m["is_completed"])
+    weekly_active = sum(1 for m in missions if m["mission_type"] == "WEEKLY" and not m["is_completed"])
+    completed = sum(1 for m in missions if m["is_completed"])
+    
+    # Construir texto
+    text = "🎯 **Misiones Disponibles**\n\n"
+    
+    if main_active > 0:
+        text += f"📜 **Principales**: {main_active} activas\n"
+    if side_active > 0:
+        text += f"📌 **Secundarias**: {side_active} activas\n"
+    if daily_active > 0:
+        text += f"🔄 **Diarias**: {daily_active} activas\n"
+    if weekly_active > 0:
+        text += f"📅 **Semanales**: {weekly_active} activas\n"
+    if completed > 0:
+        text += f"✅ **Completadas**: {completed} misiones\n"
+    
+    # Mencionar misiones relacionadas con la narrativa
+    narrative_service = UnifiedNarrativeService(session, callback.bot)
+    current_fragment = await narrative_service.get_user_current_fragment(user_id)
+    
+    if current_fragment:
+        narrative_missions = []
+        for mission in missions:
+            if not mission["is_completed"] and "narrative_fragments" in mission.get("requirements", {}):
+                if current_fragment.id in mission["requirements"]["narrative_fragments"]:
+                    narrative_missions.append(mission)
+        
+        if narrative_missions:
+            text += "\n**Misiones relacionadas con tu narrativa actual:**\n"
+            for mission in narrative_missions[:3]:  # Mostrar máximo 3
+                progress = mission["progress_percentage"]
+                text += f"• {mission['title']} ({progress:.0f}%)\n"
+    
+    text += "\nUsa el comando /misiones para gestionar tus misiones."
+    
+    # Mostrar resultados
+    await callback.message.edit_text(
+        text,
+        reply_markup=get_narrative_stats_keyboard()
+    )
+    await callback.answer()
+
+
+async def _update_mission_progress(user_id: int, fragment_id: str, session: AsyncSession, bot=None):
+    """Actualiza el progreso de misiones relacionadas con un fragmento narrativo."""
+    try:
+        # Inicializar servicio de misiones
+        mission_service = UnifiedMissionService(session, bot)
+        
+        # Actualizar progreso
+        completed_missions = await mission_service.update_user_progress(
+            user_id,
+            "narrative_fragment",
+            {"fragment_id": fragment_id}
+        )
+        
+        logger.info(f"Usuario {user_id} progresó en misiones con fragmento {fragment_id}")
+        if completed_missions:
+            logger.info(f"Usuario {user_id} completó {len(completed_missions)} misiones")
+            
+        return completed_missions
+    except Exception as e:
+        logger.error(f"Error al actualizar progreso de misiones: {e}")
+        return []
+
 async def _display_unified_narrative_fragment(
     message: Message, 
     fragment, 
@@ -158,6 +253,10 @@ async def _display_unified_narrative_fragment(
     is_callback: bool = False
 ):
     """Muestra un fragmento narrativo unificado con sus opciones."""
+    # Actualizar progreso de misiones relacionadas con este fragmento
+    user_id = message.from_user.id
+    await _update_mission_progress(user_id, fragment.id, session, message.bot)
+    
     # Formatear el texto del fragmento
     character_emoji = "📖"
     
@@ -168,6 +267,11 @@ async def _display_unified_narrative_fragment(
         reward_points = fragment.triggers.get("reward_points", 0)
         if reward_points > 0:
             fragment_text += f"\n\n✨ *Has ganado {reward_points} puntos*"
+        
+        # Mostrar información de pistas desbloqueadas
+        unlock_lore = fragment.triggers.get("unlock_lore")
+        if unlock_lore:
+            fragment_text += f"\n\n🗝️ *Has desbloqueado una nueva pista*"
     
     # Crear teclado con opciones para fragmentos de decisión
     keyboard = await _get_unified_narrative_keyboard(fragment, session)
@@ -199,6 +303,7 @@ async def _get_unified_narrative_keyboard(fragment, session: AsyncSession):
     
     # Agregar botones de navegación
     builder.button(text="📊 Mis Estadísticas", callback_data="narrative_stats")
+    builder.button(text="🎯 Misiones", callback_data="mission:list")
     builder.button(text="❓ Ayuda", callback_data="narrative_help")
     builder.button(text="↩️ Volver", callback_data="continue_narrative")
     

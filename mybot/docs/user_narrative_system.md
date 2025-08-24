@@ -55,9 +55,9 @@ El sistema utiliza los siguientes modelos existentes:
 - `NarrativeFragment` (de `database/narrative_unified.py`)
 - `LorePiece` (de `database/models.py`)
 
-### Sistema de Puntos
+### Sistema Unificado de Recompensas
 
-Cuando un usuario completa un fragmento, los triggers del fragmento pueden otorgar puntos al usuario a través del sistema de puntos existente.
+El sistema interactúa con el Sistema Unificado de Recompensas para otorgar puntos y desbloquear pistas a los usuarios cuando completan fragmentos narrativos.
 
 ### Sistema de Pistas
 
