@@ -14,6 +14,7 @@ from database.models import (
 )
 from utils.text_utils import sanitize_text
 import logging
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,12 @@ class MissionService:
     def __init__(self, session: AsyncSession):
         self.session = session
         from services.point_service import PointService
-        self.point_service = PointService(session)
+        from services.level_service import LevelService
+        from services.achievement_service import AchievementService
+        
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
 
     async def get_active_missions(self, user_id: int = None, mission_type: str = None) -> list[Mission]:
         """
@@ -34,7 +40,7 @@ class MissionService:
         if mission_type:
             stmt = stmt.where(Mission.type == mission_type)
         result = await self.session.execute(stmt)
-        missions = [m for m in result.scalars().all() if not m.duration_days or (m.created_at + datetime.timedelta(days=m.duration_days)) > datetime.datetime.utcnow()]
+        missions = [m for m in result.scalars().all() if not m.duration_days or (m.created_at + timedelta(days=m.duration_days)) > datetime.utcnow()]
 
         if user_id: # Filter out completed missions for a specific user based on reset rules
             user = await self.session.get(User, user_id)
@@ -112,7 +118,7 @@ class MissionService:
             return False, None
 
         # Add mission to user's completed list with timestamp
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         user.missions_completed[mission.id] = now
         
 
@@ -123,7 +129,12 @@ class MissionService:
         point_service = self.point_service # assuming point_service is still available in __init__
         if not hasattr(self, 'point_service'): # Fallback if not initialized in __init__
              from services.point_service import PointService
-             point_service = PointService(self.session)
+             from services.level_service import LevelService
+             from services.achievement_service import AchievementService
+             
+             level_service = LevelService(self.session)
+             achievement_service = AchievementService(self.session)
+             point_service = PointService(self.session, level_service, achievement_service)
 
         await point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
 
@@ -263,7 +274,7 @@ class MissionService:
                 progress = record.progress_value
             if progress >= mission.target_value:
                 record.completed = True
-                record.completed_at = datetime.datetime.utcnow()
+                record.completed_at = datetime.utcnow()
                 # Añadir puntos sin notificación
                 await self.point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
                 if bot:

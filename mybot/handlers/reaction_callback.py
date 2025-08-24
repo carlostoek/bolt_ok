@@ -65,12 +65,19 @@ async def handle_reaction_callback(
         return
 
     from services.point_service import PointService
+    from services.level_service import LevelService
+    from services.achievement_service import AchievementService
 
     points_dict = await channel_service.get_reaction_points(channel_id)
     points = float(points_dict.get(reaction_type, 0.0))
 
+    # Crear instancias de servicios necesarios
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    point_service = PointService(session, level_service, achievement_service)
+
     # Award points to the user with proper transaction handling
-    await PointService(session).add_points(
+    await point_service.add_points(
         callback.from_user.id, 
         points, 
         bot=bot, 
@@ -83,12 +90,12 @@ async def handle_reaction_callback(
     mission_service = MissionService(session)
     
     # Update mission progress with proper bot instance for notifications
+    # update_progress solo acepta los parámetros (user_id, mission_type, increment, current_value, bot)
     await mission_service.update_progress(
         callback.from_user.id, 
         "reaction", 
         bot=bot,  # Pass bot instance for proper notifications
-        message_id=message_id,
-        reaction_type=reaction_type
+        increment=1
     )
     
     logger.info(f"Reacción registrada para user_id={callback.from_user.id} con {points} puntos")

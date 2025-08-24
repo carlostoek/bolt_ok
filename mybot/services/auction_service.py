@@ -18,6 +18,8 @@ from database.models import (
 )
 from utils.text_utils import anonymize_username, format_points, format_time_remaining
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,9 @@ logger = logging.getLogger(__name__)
 class AuctionService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
 
     async def create_auction(
         self,

@@ -8,6 +8,8 @@ from sqlalchemy.future import select
 from services.point_service import PointService
 from services.user_service import UserService
 from services.config_service import ConfigService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +21,9 @@ class ChannelEngagementService:
     
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.user_service = UserService(session)
         self.config_service = ConfigService(session)
     
