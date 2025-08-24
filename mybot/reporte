@@ -1,0 +1,46 @@
+
+  El botón de "Narrativa" en el           menú de administración no está          respondiendo correctamente. La          principal causa parece ser una
+  desconexión entre los módulos y
+  componentes del sistema:                                                        1. Error de importación de              teclados: La función                    get_narrative_admin_keyboard() se        está utilizando en el archivo
+  handlers/admin_narrative_handlers       .py, pero las importaciones hacen        referencia a un módulo que             parece estar en una ubicación
+  diferente:                              from                                    handlers.admin.narrative_admin_kb        import (
+      get_narrative_admin_keyboard,
+      get_fragments_list_keyboard,            # otros teclados...
+  )                                       2. Ruta de archivos                     inconsistente: Parece haber
+  confusión entre los archivos:             - handlers/admin_narrative_hand
+  lers.py (registrado en bot.py)
+    -                                     handlers/admin/narrative_admin.py
+   (implementación real)
+    - handlers/admin/narrative_admi
+  n_kb.py (definiciones de                teclados)
+  3. Problemas con los tests: Las         pruebas fallan porque buscan            módulos en rutas incorrectas. Las
+   importaciones no coinciden con         la estructura real de archivos.
+                                          Ruta del teclado actual                                                         La ruta actual del teclado
+  utilizado para el menú de               administración narrativa es:
+  /data/data/com.termux/files/home/       repos/bolt_ok/mybot/handlers/admi       n/narrative_admin_kb.py               
+  El método utilizado para generar        el teclado principal es                 get_narrative_admin_keyboard().       
+  Recomendaciones para resolver el        problema                                                                        1. Resolver la inconsistencia de
+  rutas: Decidir si mantener la           funcionalidad en handlers/admin_n
+  arrative_handlers.py o en handler       s/admin/narrative_admin.py. El          router registrado en bot.py es el
+   primero.                               2. Corregir las importaciones:          Actualizar las importaciones para
+   que apunten a la ubicación             correcta de los módulos de
+  teclado.                                3. Estructura correcta: La              estructura recomendada sería:             - handlers/admin_narrative_hand       lers.py: Archivo principal con          handlers                                  -
+  keyboards/admin_narrative_kb.py:
+  Definiciones de teclados para           narrativa
+    - services/narrative_admin_serv       ice.py: Servicios para
+  administración narrativa                4. Solución más sencilla: Copiar        el contenido completo de                narrative_admin_kb.py a una             ubicación que coincida con las
+  importaciones actuales.
+
+El menú principal de                    administrador donde se muestra el        botón de "Narrativa" se
+  encuentra en la ruta:                                                           /data/data/com.termux/files/home/       repos/bolt_ok/mybot/keyboards/adm       in_main_kb.py
+
+  El botón de "Narrativa" está            configurado en la línea 30 con:
+  builder.button(text="📖
+  Narrativa", callback_data="admin_
+  fragments_manage")
+                                          Este botón usa el callback_data
+  "admin_fragments_manage", que           debe ser manejado por el handler        correspondiente en handlers/admin       _narrative_handlers.py. El
+  problema principal parece ser que
+   el handler necesita                    importaciones correctas para
+  poder manejar este callback y           generar el teclado adecuado para        la administración narrativa.
+

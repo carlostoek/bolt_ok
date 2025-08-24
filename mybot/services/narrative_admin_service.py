@@ -14,6 +14,8 @@ from services.event_bus import get_event_bus, EventType
 
 logger = logging.getLogger(__name__)
 
+VALID_FRAGMENT_TYPES = ["STORY", "DECISION", "INFO"]
+
 class NarrativeAdminService:
     """
     Servicio para administración de contenido narrativo.
@@ -29,6 +31,147 @@ class NarrativeAdminService:
         """
         self.session = session
         self.event_bus = get_event_bus()
+        
+    async def get_narrative_stats(self) -> Dict[str, Any]:
+        """
+        Obtiene estadísticas globales del sistema narrativo.
+        
+        Returns:
+            Dict con estadísticas de fragmentos, usuarios y engagement
+        """
+        try:
+            # Total de fragmentos
+            total_query = select(func.count(NarrativeFragment.id))
+            total_result = await self.session.execute(total_query)
+            total_fragments = total_result.scalar() or 0
+            
+            # Fragmentos por tipo
+            by_type_query = select(NarrativeFragment.fragment_type, func.count(NarrativeFragment.id))\
+                .group_by(NarrativeFragment.fragment_type)
+            fragments_by_type_result = await self.session.execute(by_type_query)
+            fragments_by_type = dict(fragments_by_type_result.all())
+            
+            # Fragmentos activos
+            active_query = select(func.count(NarrativeFragment.id))\
+                .where(NarrativeFragment.is_active == True)
+            active_result = await self.session.execute(active_query)
+            active_fragments = active_result.scalar() or 0
+            
+            # Fragmentos con conexiones
+            connections_query = select(func.count(NarrativeFragment.id))\
+                .where(NarrativeFragment.choices.cast(str) != '[]')
+            connections_result = await self.session.execute(connections_query)
+            fragments_with_connections = connections_result.scalar() or 0
+            
+            # Usuarios en narrativa
+            users_query = select(func.count(UserNarrativeState.user_id))
+            users_result = await self.session.execute(users_query)
+            users_in_narrative = users_result.scalar() or 0
+            
+            # Promedio de fragmentos completados por usuario
+            avg_completed_query = select(func.avg(func.array_length(UserNarrativeState.completed_fragments, 1)))\
+                .where(func.array_length(UserNarrativeState.completed_fragments, 1) > 0)
+            avg_completed_result = await self.session.execute(avg_completed_query)
+            avg_fragments_completed = avg_completed_result.scalar() or 0
+            
+            # Construir diccionario de estadísticas
+            stats = {
+                "total_fragments": total_fragments,
+                "active_fragments": active_fragments,
+                "inactive_fragments": total_fragments - active_fragments,
+                "fragments_by_type": fragments_by_type,
+                "fragments_with_connections": fragments_with_connections,
+                "users_in_narrative": users_in_narrative,
+                "avg_fragments_completed": avg_fragments_completed
+            }
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"Error obteniendo estadísticas narrativas: {e}")
+            return {
+                "total_fragments": 0,
+                "active_fragments": 0,
+                "inactive_fragments": 0,
+                "fragments_by_type": {"STORY": 0, "DECISION": 0, "INFO": 0},
+                "fragments_with_connections": 0,
+                "users_in_narrative": 0,
+                "avg_fragments_completed": 0
+            }
+            
+    async def get_fragment_details(self, fragment_id: str) -> Dict[str, Any]:
+        """
+        Obtiene detalles completos de un fragmento incluyendo estadísticas de uso.
+        
+        Args:
+            fragment_id: ID del fragmento
+            
+        Returns:
+            Dict con detalles del fragmento y estadísticas
+            
+        Raises:
+            ValueError: Si el fragmento no existe
+        """
+        try:
+            # Obtener el fragmento
+            query = select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
+            result = await self.session.execute(query)
+            fragment = result.scalar_one_or_none()
+            
+            if not fragment:
+                raise ValueError(f"Fragmento con ID '{fragment_id}' no encontrado")
+            
+            # Obtener estadísticas de uso
+            # Usuarios que tienen este fragmento como actual
+            active_users_query = select(func.count(UserNarrativeState.user_id))\
+                .where(UserNarrativeState.current_fragment_id == fragment_id)
+            active_users_result = await self.session.execute(active_users_query)
+            active_users = active_users_result.scalar() or 0
+            
+            # Usuarios que han visitado este fragmento
+            visited_users_query = select(func.count(UserNarrativeState.user_id))\
+                .where(UserNarrativeState.visited_fragments.contains([fragment_id]))
+            visited_users_result = await self.session.execute(visited_users_query)
+            visited_users = visited_users_result.scalar() or 0
+            
+            # Usuarios que han completado este fragmento
+            completed_users_query = select(func.count(UserNarrativeState.user_id))\
+                .where(UserNarrativeState.completed_fragments.contains([fragment_id]))
+            completed_users_result = await self.session.execute(completed_users_query)
+            completed_users = completed_users_result.scalar() or 0
+            
+            # Calcular tasa de finalización
+            completion_rate = (completed_users / visited_users * 100) if visited_users > 0 else 0
+            
+            # Construir diccionario de detalles
+            fragment_details = {
+                "id": fragment.id,
+                "title": fragment.title,
+                "content": fragment.content,
+                "type": fragment.fragment_type,
+                "created_at": str(fragment.created_at) if fragment.created_at else None,
+                "updated_at": str(fragment.updated_at) if fragment.updated_at else None,
+                "is_active": fragment.is_active,
+                "choices": fragment.choices or [],
+                "triggers": fragment.triggers or {},
+                "required_clues": fragment.required_clues or [],
+                "statistics": {
+                    "active_users": active_users,
+                    "visited_users": visited_users,
+                    "completed_users": completed_users,
+                    "completion_rate": round(completion_rate, 1)
+                }
+            }
+            
+            return fragment_details
+            
+        except ValueError as ve:
+            # Re-lanzar ValueError para que el handler pueda manejarlo
+            raise ve
+        except Exception as e:
+            logger.error(f"Error obteniendo detalles del fragmento '{fragment_id}': {e}")
+            raise ValueError(f"Error al obtener detalles del fragmento: {e}")
+
     
     async def get_all_fragments(self, 
                                page: int = 1, 

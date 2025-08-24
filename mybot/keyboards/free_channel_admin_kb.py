@@ -11,7 +11,7 @@ def get_free_channel_admin_kb(channel_configured: bool = False) -> InlineKeyboar
     
     if channel_configured:
         builder.button(text="⏰ Tiempo Espera", callback_data="set_wait_time")
-        builder.button(text="🔗 Crear Enlace", callback_data="create_invite_link")
+        builder.button(text="👥 Usuarios", callback_data="admin_manage_users")
         builder.button(text="📝 Enviar Contenido", callback_data="send_to_free_channel")
         builder.button(text="⚡ Procesar Ahora", callback_data="process_pending_now")
         builder.button(text="🧹 Limpiar Antiguas", callback_data="cleanup_old_requests")
