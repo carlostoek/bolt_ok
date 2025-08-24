@@ -104,5 +104,5 @@ async def process_clue_code(message: Message, state: FSMContext, session: AsyncS
 
 # Register the router
 def register_user_narrative_handlers(dp):
-    \"\"\"Register user narrative handlers with the dispatcher.\"\"\"
+    """Register user narrative handlers with the dispatcher."""
     dp.include_router(router)
