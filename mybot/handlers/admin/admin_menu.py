@@ -34,6 +34,7 @@ from .subscription_plans import router as subscription_plans_router
 from .game_admin import router as game_admin_router
 from .event_admin import router as event_admin_router
 from .admin_config import router as admin_config_router
+from .narrative_admin import router as narrative_admin_router
 
 router.include_router(vip_router)
 router.include_router(free_router)
@@ -43,6 +44,7 @@ router.include_router(subscription_plans_router)
 router.include_router(game_admin_router)
 router.include_router(event_admin_router)
 router.include_router(admin_config_router)
+router.include_router(narrative_admin_router)
 
 @router.message(Command("admin"))
 async def admin_start(message: Message, session: AsyncSession):
@@ -304,6 +306,18 @@ async def generate_token_callback(callback: CallbackQuery, session: AsyncSession
     except Exception as e:
         logger.error(f"Error in token generation callback: {e}")
         await callback.answer("Error al procesar la solicitud", show_alert=True)
+
+# Callback para gestión del sistema narrativo
+@router.callback_query(F.data == "admin_fragments_manage")
+async def admin_fragments_redirect(callback: CallbackQuery, session: AsyncSession):
+    """Redirigir a la gestión del sistema narrativo."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+    
+    # Importar y llamar al handler principal de administración narrativa
+    from handlers.admin.narrative_admin import handle_admin_fragments_manage
+    await handle_admin_fragments_manage(callback, session)
+    await callback.answer()
 
 # Nuevo callback para gestión del canal gratuito
 @router.callback_query(F.data == "admin_free_channel")

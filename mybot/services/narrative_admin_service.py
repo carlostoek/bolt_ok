@@ -234,7 +234,7 @@ class NarrativeAdminService:
             
             # Emitir evento de creación
             await self.event_bus.publish(
-                EventType.ADMIN_ACTION,
+                EventType.CONSISTENCY_CHECK,
                 0,  # ID del sistema
                 {
                     "action": "fragment_created",
@@ -320,7 +320,7 @@ class NarrativeAdminService:
             
             # Emitir evento de actualización
             await self.event_bus.publish(
-                EventType.ADMIN_ACTION,
+                EventType.CONSISTENCY_CHECK,
                 0,  # ID del sistema
                 {
                     "action": "fragment_updated",
@@ -382,7 +382,7 @@ class NarrativeAdminService:
             
             # Emitir evento de borrado
             await self.event_bus.publish(
-                EventType.ADMIN_ACTION,
+                EventType.CONSISTENCY_CHECK,
                 0,  # ID del sistema
                 {
                     "action": "fragment_deleted",
@@ -536,7 +536,7 @@ class NarrativeAdminService:
             
             # Emitir evento de actualización
             await self.event_bus.publish(
-                EventType.ADMIN_ACTION,
+                EventType.CONSISTENCY_CHECK,
                 0,  # ID del sistema
                 {
                     "action": "fragment_connections_updated",
@@ -597,12 +597,22 @@ class NarrativeAdminService:
             users_in_narrative_result = await self.session.execute(users_in_narrative_query)
             users_in_narrative = users_in_narrative_result.scalar() or 0
             
-            # Tasa de engagement promedio
-            avg_completion_query = select(
-                func.avg(func.array_length(UserNarrativeState.completed_fragments, 1))
-            ).select_from(UserNarrativeState)
-            avg_completion_result = await self.session.execute(avg_completion_query)
-            avg_completion = avg_completion_result.scalar() or 0
+            # Tasa de engagement promedio - compatible con SQLite
+            try:
+                # Intentar obtener todos los estados de usuario
+                user_states_query = select(UserNarrativeState)
+                user_states_result = await self.session.execute(user_states_query)
+                user_states = user_states_result.scalars().all()
+                
+                # Calcular manualmente el promedio de fragmentos completados
+                if user_states:
+                    total_completed = sum(len(state.completed_fragments) for state in user_states)
+                    avg_completion = total_completed / len(user_states)
+                else:
+                    avg_completion = 0
+            except Exception as e:
+                logger.warning(f"Error calculando promedio de fragmentos completados: {e}")
+                avg_completion = 0
             
             return {
                 "total_fragments": total_fragments,
@@ -665,13 +675,17 @@ class NarrativeAdminService:
             # Obtener pistas desbloqueadas
             unlocked_clues = user_state.unlocked_clues
             
+            current_fragment_data = None
+            if current_fragment:
+                current_fragment_data = {
+                    "id": current_fragment.id,
+                    "title": current_fragment.title,
+                    "type": current_fragment.fragment_type
+                }
+            
             return {
                 "user_id": user_id,
-                "current_fragment": {
-                    "id": current_fragment.id if current_fragment else None,
-                    "title": current_fragment.title if current_fragment else None,
-                    "type": current_fragment.fragment_type if current_fragment else None
-                } if current_fragment else None,
+                "current_fragment": current_fragment_data,
                 "visited_fragments_count": visited_count,
                 "completed_fragments_count": completed_count,
                 "progress_percentage": progress_percentage,
@@ -804,7 +818,7 @@ class NarrativeAdminService:
             
             # Emitir evento de reinicio
             await self.event_bus.publish(
-                EventType.ADMIN_ACTION,
+                EventType.CONSISTENCY_CHECK,
                 user_id,
                 {
                     "action": "user_narrative_reset",

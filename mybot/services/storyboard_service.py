@@ -793,7 +793,16 @@ class StoryboardService:
             raise
         except Exception as e:
             logger.error(f"Error encontrando camino óptimo: {e}")
-            return {"error": str(e)}
+            # Solo devolver error si hay un mensaje concreto
+            if str(e):
+                return {"error": str(e)}
+            else:
+                # Si no hay mensaje de error, devolver un resultado válido pero indicando que no se encontró camino
+                return {
+                    "path": [],
+                    "path_details": [],
+                    "message": "No se pudo encontrar un camino entre los fragmentos"
+                }
     
     async def _bfs_shortest_path(self, 
                                 graph: Dict[str, List[str]], 

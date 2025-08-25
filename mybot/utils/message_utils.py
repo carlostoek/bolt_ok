@@ -7,6 +7,11 @@ from services.achievement_service import ACHIEVEMENTS
 from utils.messages import BOT_MESSAGES
 from utils.text_utils import anonymize_username
 import datetime
+import logging
+from typing import Optional
+from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup
+
+logger = logging.getLogger(__name__)
 
 
 async def get_profile_message(
@@ -143,3 +148,41 @@ async def get_mission_completed_message(mission: Mission) -> str:
         mission_name=mission.name,
         points_reward=mission.reward_points,
     )
+
+
+async def safe_edit(
+    callback: CallbackQuery, 
+    text: str, 
+    kb: Optional[InlineKeyboardMarkup] = None,
+    parse_mode: str = "HTML"
+) -> bool:
+    """
+    Edita un mensaje de forma segura, manejando excepciones.
+    
+    Args:
+        callback: Callback query recibido del usuario
+        text: Nuevo texto para el mensaje
+        kb: Teclado inline opcional
+        parse_mode: Modo de parsing del texto
+        
+    Returns:
+        bool: True si la edición fue exitosa, False en caso contrario
+    """
+    try:
+        if callback.message:
+            await callback.message.edit_text(
+                text=text,
+                reply_markup=kb,
+                parse_mode=parse_mode
+            )
+            return True
+        else:
+            logger.warning("No se puede editar: mensaje no disponible")
+            return False
+    except Exception as e:
+        logger.error(f"Error al editar mensaje: {e}")
+        try:
+            await callback.answer(f"❌ Error al editar mensaje: {e}", show_alert=True)
+        except Exception as e2:
+            logger.error(f"Error adicional al notificar fallo: {e2}")
+        return False

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import sys
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional, Set
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -79,18 +80,23 @@ class NotificationService:
             priority: Prioridad de la notificación
         """
         try:
+            print(f"[DEBUGGER:notification_service.add_notification:83] user_id={user_id}, notification_type={notification_type}, data={data}, priority={priority}", file=sys.stderr)
             notification = NotificationData(notification_type, data, priority)
             
             # Verificar duplicados
+            print(f"[DEBUGGER:notification_service.add_notification:87] notification.hash={notification.hash}, in processed_hashes={notification.hash in self.processed_hashes.get(user_id, set())}", file=sys.stderr)
             if notification.hash in self.processed_hashes[user_id]:
                 logger.debug(f"Skipping duplicate notification {notification.hash} for user {user_id}")
+                print(f"[DEBUGGER:notification_service.add_notification:90] SKIPPING DUPLICATE hash={notification.hash}", file=sys.stderr)
                 return
             
             # Añadir a procesados
+            print(f"[DEBUGGER:notification_service.add_notification:94] Adding hash={notification.hash} to processed_hashes", file=sys.stderr)
             self.processed_hashes[user_id].add(notification.hash)
             
             # Añadir a la cola
             self.pending_notifications[user_id].append(notification)
+            print(f"[DEBUGGER:notification_service.add_notification:98] Queue length after adding: {len(self.pending_notifications[user_id])}", file=sys.stderr)
             
             # Verificar si debemos enviar inmediatamente
             should_send_now = (
@@ -98,28 +104,37 @@ class NotificationService:
                 priority == NotificationPriority.CRITICAL
             )
             
+            print(f"[DEBUGGER:notification_service.add_notification:106] should_send_now={should_send_now}, queue_size={len(self.pending_notifications[user_id])}, max_size={self.max_queue_size}, is_critical={priority == NotificationPriority.CRITICAL}", file=sys.stderr)
+            
             if should_send_now:
                 # Enviar inmediatamente si es crítico o la cola está llena
+                print(f"[DEBUGGER:notification_service.add_notification:110] Sending notifications immediately", file=sys.stderr)
                 await self._send_notifications_now(user_id)
             else:
                 # Programar envío con delay según prioridad
+                print(f"[DEBUGGER:notification_service.add_notification:114] Scheduling send with priority {priority}", file=sys.stderr)
                 await self._schedule_send_with_priority(user_id, priority)
             
             logger.debug(f"Added {notification_type} notification for user {user_id} with priority {priority}")
             
         except Exception as e:
             logger.exception(f"Error adding notification for user {user_id}: {e}")
+            print(f"[DEBUGGER:notification_service.add_notification:121] ERROR: {str(e)}", file=sys.stderr)
     
     async def _schedule_send_with_priority(self, user_id: int, priority: int) -> None:
         """Programa el envío con delay basado en prioridad."""
+        print(f"[DEBUGGER:notification_service._schedule_send_with_priority:124] Scheduling send for user_id={user_id}, priority={priority}", file=sys.stderr)
         # Cancelar tarea anterior si existe
         if user_id in self.scheduled_tasks:
+            print(f"[DEBUGGER:notification_service._schedule_send_with_priority:127] Cancelling existing task for user_id={user_id}", file=sys.stderr)
             self.scheduled_tasks[user_id].cancel()
         
         # Obtener delay según prioridad
         delay = self.aggregation_delays.get(priority, 1.0)
+        print(f"[DEBUGGER:notification_service._schedule_send_with_priority:132] Using delay={delay} for priority={priority}", file=sys.stderr)
         
         # Programar nueva tarea
+        print(f"[DEBUGGER:notification_service._schedule_send_with_priority:135] Creating new task for user_id={user_id}", file=sys.stderr)
         self.scheduled_tasks[user_id] = asyncio.create_task(
             self._delayed_send(user_id, delay)
         )
@@ -127,26 +142,35 @@ class NotificationService:
     async def _delayed_send(self, user_id: int, delay: float) -> None:
         """Envía notificaciones después del delay especificado."""
         try:
+            print(f"[DEBUGGER:notification_service._delayed_send:143] Starting delay={delay} for user_id={user_id}", file=sys.stderr)
             await asyncio.sleep(delay)
+            print(f"[DEBUGGER:notification_service._delayed_send:145] Delay completed, sending notifications for user_id={user_id}", file=sys.stderr)
             await self._send_notifications_now(user_id)
         except asyncio.CancelledError:
+            print(f"[DEBUGGER:notification_service._delayed_send:148] Task cancelled for user_id={user_id}", file=sys.stderr)
             pass
         except Exception as e:
             logger.exception(f"Error in delayed send for user {user_id}: {e}")
+            print(f"[DEBUGGER:notification_service._delayed_send:152] ERROR for user_id={user_id}: {str(e)}", file=sys.stderr)
     
     async def _send_notifications_now(self, user_id: int) -> None:
         """Envía todas las notificaciones pendientes inmediatamente."""
         try:
+            print(f"[DEBUGGER:notification_service._send_notifications_now:138] Starting send for user_id={user_id}", file=sys.stderr)
             if user_id not in self.pending_notifications:
+                print(f"[DEBUGGER:notification_service._send_notifications_now:140] No pending notifications for user_id={user_id}", file=sys.stderr)
                 return
             
             notifications = self.pending_notifications.pop(user_id, [])
+            print(f"[DEBUGGER:notification_service._send_notifications_now:144] Popped {len(notifications)} notifications for user_id={user_id}", file=sys.stderr)
             
             if not notifications:
+                print(f"[DEBUGGER:notification_service._send_notifications_now:147] No notifications to send for user_id={user_id}", file=sys.stderr)
                 return
             
             # Limpiar tarea programada
             if user_id in self.scheduled_tasks:
+                print(f"[DEBUGGER:notification_service._send_notifications_now:152] Cleaning up scheduled task for user_id={user_id}", file=sys.stderr)
                 del self.scheduled_tasks[user_id]
             
             # Ordenar por prioridad
@@ -154,25 +178,36 @@ class NotificationService:
             
             # Agrupar por tipo
             grouped = self._group_notifications_by_type(notifications)
+            print(f"[DEBUGGER:notification_service._send_notifications_now:159] Grouped notifications by type: {list(grouped.keys())}", file=sys.stderr)
             
             # Construir mensaje unificado
             message = await self._build_enhanced_unified_message(grouped)
+            print(f"[DEBUGGER:notification_service._send_notifications_now:163] Built message length: {len(message) if message else 0}", file=sys.stderr)
             
             if message:
+                print(f"[DEBUGGER:notification_service._send_notifications_now:166] Sending message to user_id={user_id}", file=sys.stderr)
                 await safe_send_message(self.bot, user_id, message, parse_mode="Markdown")
                 logger.info(f"Sent unified notification to user {user_id}: {len(notifications)} items")
+                print(f"[DEBUGGER:notification_service._send_notifications_now:169] Message sent successfully to user_id={user_id}", file=sys.stderr)
             
             # Limpiar hashes procesados después de un tiempo
+            print(f"[DEBUGGER:notification_service._send_notifications_now:172] Creating cleanup task for user_id={user_id}", file=sys.stderr)
             asyncio.create_task(self._cleanup_processed_hashes(user_id))
             
         except Exception as e:
             logger.exception(f"Error sending notifications for user {user_id}: {e}")
+            print(f"[DEBUGGER:notification_service._send_notifications_now:177] ERROR for user_id={user_id}: {str(e)}", file=sys.stderr)
     
     async def _cleanup_processed_hashes(self, user_id: int, delay: int = 60) -> None:
         """Limpia los hashes procesados después de un tiempo."""
+        print(f"[DEBUGGER:notification_service._cleanup_processed_hashes:193] Starting cleanup task for user_id={user_id}, delay={delay}", file=sys.stderr)
         await asyncio.sleep(delay)
+        print(f"[DEBUGGER:notification_service._cleanup_processed_hashes:195] Delay completed, cleaning up hashes for user_id={user_id}", file=sys.stderr)
         if user_id in self.processed_hashes:
+            hash_count = len(self.processed_hashes[user_id])
+            print(f"[DEBUGGER:notification_service._cleanup_processed_hashes:198] Clearing {hash_count} hashes for user_id={user_id}", file=sys.stderr)
             self.processed_hashes[user_id].clear()
+            print(f"[DEBUGGER:notification_service._cleanup_processed_hashes:200] Hashes cleared for user_id={user_id}", file=sys.stderr)
     
     def _group_notifications_by_type(self, notifications: List[NotificationData]) -> Dict[str, List[Dict[str, Any]]]:
         """Agrupa notificaciones por tipo para consolidación."""
