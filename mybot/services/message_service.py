@@ -81,7 +81,7 @@ class MessageService:
                 channel_id=target_channel_id,
             )
 
-            logger.info(f"DEBUG: Markup to edit: {updated_markup}")
+            logger.debug(f"Markup to edit: {updated_markup}")
 
             await self.bot.edit_message_reply_markup(
                 chat_id=target_channel_id_str,
@@ -197,7 +197,7 @@ class MessageService:
                 message_id=message_id,
                 channel_id=chat_id,
             )
-            logger.info(f"DEBUG: Markup being sent for update: {markup_to_edit}")
+            logger.debug(f"Markup being sent for update: {markup_to_edit}")
 
             await self.bot.edit_message_reply_markup(
                 chat_id=chat_id_str,

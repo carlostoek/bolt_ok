@@ -130,6 +130,7 @@ class PointService(IPointService):
         # First check if we already processed this reaction
         progress = await self._get_or_create_progress(user.id)
         now = datetime.datetime.utcnow()
+        
         if progress.last_reaction_at and (now - progress.last_reaction_at).total_seconds() < 5:
             return None  # Skip if same reaction within 5 seconds
             

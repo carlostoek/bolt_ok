@@ -81,7 +81,7 @@ async def handle_reaction_callback(
         callback.from_user.id, 
         points, 
         bot=bot, 
-        skip_notification=False,  # Allow notifications to be sent
+        skip_notification=True,  # Prevent duplicate notification
         source=f"reaction_{reaction_type}_message_{message_id}"
     )
     
@@ -90,12 +90,13 @@ async def handle_reaction_callback(
     mission_service = MissionService(session)
     
     # Update mission progress with proper bot instance for notifications
-    # update_progress solo acepta los parámetros (user_id, mission_type, increment, current_value, bot)
+    # Pass _skip_notification=True to avoid duplicate notifications
     await mission_service.update_progress(
         callback.from_user.id, 
         "reaction", 
         bot=bot,  # Pass bot instance for proper notifications
-        increment=1
+        increment=1,
+        _skip_notification=True  # Skip notification to avoid duplication
     )
     
     logger.info(f"Reacción registrada para user_id={callback.from_user.id} con {points} puntos")

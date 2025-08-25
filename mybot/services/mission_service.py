@@ -148,15 +148,18 @@ class MissionService:
         unlock_code = getattr(mission, "unlocks_lore_piece_code", None)
         if not unlock_code and mission.action_data:
             unlock_code = mission.action_data.get("unlocks_lore_piece_code")
+        
         if unlock_code:
             lore_stmt = select(LorePiece).where(LorePiece.code_name == unlock_code)
             lore_piece = (await self.session.execute(lore_stmt)).scalar_one_or_none()
+            
             if lore_piece:
                 check_stmt = select(UserLorePiece).where(
                     UserLorePiece.user_id == user_id,
                     UserLorePiece.lore_piece_id == lore_piece.id,
                 )
                 exists = (await self.session.execute(check_stmt)).scalar_one_or_none()
+                
                 if not exists:
                     self.session.add(UserLorePiece(user_id=user_id, lore_piece_id=lore_piece.id))
                     logger.info(
@@ -187,7 +190,7 @@ class MissionService:
                 )
                 
                 logger.info(f"Sent unified mission completion notification to user {user_id}")
-            except ImportError:
+            except ImportError as e:
                 # Fallback al método anterior si no está disponible el servicio unificado
                 from utils.message_utils import get_mission_completed_message
                 from utils.keyboard_utils import get_mission_completed_keyboard
@@ -250,8 +253,10 @@ class MissionService:
         increment: int = 1,
         current_value: int | None = None,
         bot=None,
+        _skip_notification=False,
     ) -> None:
         missions = await self.get_active_missions(mission_type=mission_type)
+        
         for mission in missions:
             stmt = select(UserMissionEntry).where(
                 UserMissionEntry.user_id == user_id,
@@ -259,25 +264,32 @@ class MissionService:
             )
             result = await self.session.execute(stmt)
             record = result.scalar_one_or_none()
+            
             if not record:
                 record = UserMissionEntry(user_id=user_id, mission_id=mission.id)
                 self.session.add(record)
+                
             if record.completed:
                 continue
+            
             if mission_type == "login_streak" and current_value is not None:
                 progress = current_value
                 record.progress_value = progress
             else:
                 if record.progress_value is None:
                     record.progress_value = 0
+                    
                 record.progress_value += increment
                 progress = record.progress_value
+                
             if progress >= mission.target_value:
                 record.completed = True
                 record.completed_at = datetime.utcnow()
+                
                 # Añadir puntos sin notificación
                 await self.point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
-                if bot:
+                
+                if bot and not _skip_notification:
                     # Usar servicio de notificaciones unificadas si está disponible
                     try:
                         from services.notification_service import NotificationService, NotificationPriority
@@ -295,7 +307,7 @@ class MissionService:
                         )
                         
                         logger.info(f"Sent unified mission completion notification to user {user_id}")
-                    except ImportError:
+                    except ImportError as e:
                         # Fallback al método anterior si no está disponible el servicio unificado
                         from utils.message_utils import get_mission_completed_message
                         from utils.keyboard_utils import get_mission_completed_keyboard
@@ -306,6 +318,7 @@ class MissionService:
                             text,
                             reply_markup=get_mission_completed_keyboard(),
                         )
+                        
         await self.session.commit()
 
     async def delete_mission(self, mission_id: str) -> bool:
