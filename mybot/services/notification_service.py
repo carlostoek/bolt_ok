@@ -32,14 +32,36 @@ class NotificationData:
     def _generate_hash(self) -> str:
         """Genera un hash único para evitar duplicados."""
         key_parts = [self.type]
+        
+        # Add timestamp minute to improve duplicate detection for frequent notifications
+        minute_str = str(self.timestamp.minute)
+
         if self.type == "points":
+            # Include point amount and add source if available
             key_parts.append(str(self.data.get("points", 0)))
+            if "source" in self.data:
+                key_parts.append(self.data.get("source", ""))
         elif self.type == "mission":
             key_parts.append(self.data.get("name", ""))
+            # Add mission_id if available for better uniqueness
+            if "mission_id" in self.data:
+                key_parts.append(str(self.data.get("mission_id", "")))
         elif self.type == "mission_completed":
             key_parts.append(self.data.get("mission_id", ""))
+            # Add timestamp for better uniqueness
+            key_parts.append(minute_str)
         elif self.type == "achievement":
             key_parts.append(self.data.get("name", ""))
+            # Add achievement_id if available for better uniqueness
+            if "achievement_id" in self.data:
+                key_parts.append(str(self.data.get("achievement_id", "")))
+        elif self.type == "badge":
+            # Better badge duplicate detection
+            key_parts.append(self.data.get("name", ""))
+        
+        # For all notification types, add the minute timestamp for short-term deduplication
+        key_parts.append(minute_str)
+
         return "_".join(key_parts)
 
 class NotificationService:
@@ -168,7 +190,7 @@ class NotificationService:
         except Exception as e:
             logger.exception(f"Error sending notifications for user {user_id}: {e}")
     
-    async def _cleanup_processed_hashes(self, user_id: int, delay: int = 60) -> None:
+    async def _cleanup_processed_hashes(self, user_id: int, delay: int = 30) -> None:
         """Limpia los hashes procesados después de un tiempo."""
         await asyncio.sleep(delay)
         if user_id in self.processed_hashes:

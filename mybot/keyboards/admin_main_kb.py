@@ -25,9 +25,9 @@ async def get_admin_main_kb(session: AsyncSession = None):
     builder.button(text=vip_text, callback_data="admin_vip")
     builder.button(text=free_text, callback_data="admin_free")
     
-    # Fila 2: Sistema de gamificación completo
+    # Fila 2: Sistemas de gamificación y narrativa
     builder.button(text="🎮 Gamificación", callback_data="admin_manage_content")
-    builder.button(text="👥 Usuarios", callback_data="admin_manage_users")
+    builder.button(text="📖 Narrativa", callback_data="admin_fragments_manage")
     
     # Fila 3: Comercio y eventos
     builder.button(text="🏛️ Subastas", callback_data="admin_auction_main")

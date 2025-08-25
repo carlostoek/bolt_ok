@@ -59,11 +59,11 @@ The application is built using a modular architecture with several key component
 
 3. **Event Bus**: Centralized event dispatching system for module communication. Implements a publish-subscribe pattern.
 
-4. **Database Layer**: SQLAlchemy models in `database/models.py` and `database/narrative_models.py`.
+4. **Database Layer**: SQLAlchemy models in `database/models.py` and `database/narrative_unified.py`. Note: `database/narrative_models.py` is now deprecated; use the unified models instead.
 
 ### Key Services
 
-- **NarrativeService**: Manages interactive storylines and user progress
+- **UserNarrativeService**: Manages interactive storylines and user progress using the unified narrative models
 - **PointService**: Handles user points economy and transactions
 - **MissionService**: Manages user missions and completion criteria
 - **AchievementService**: Handles unlocking of achievements
@@ -184,8 +184,9 @@ await notification_service.send_immediate_notification(
    - Missions and achievements may be triggered
 
 2. **Narrative Progression**:
-   - Users navigate through story fragments
-   - Decisions can unlock different paths
+   - Users navigate through story fragments using the unified narrative system
+   - Decisions can unlock different paths through the choice system
+   - Triggers in fragments can award points, unlock clues, and more
    - VIP content requires subscription
 
 3. **Gamification Integration**:
@@ -199,3 +200,4 @@ This documentation should be updated as new features are added or architectural 
 
 - [Sistema de Notificaciones Unificadas](docs/sistema_notificaciones.md)
 - [Sistema de Gestión de Solicitudes de Canal](docs/sistema_gestion_solicitudes_canal.md)
+- [Sistema Narrativo Unificado](docs/LECTURA_FORZOSA_ANTES_DE_CUALQUIER_IMPLEMENTACIÓN.md)

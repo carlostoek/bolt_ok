@@ -65,27 +65,42 @@ async def handle_reaction_callback(
         return
 
     from services.point_service import PointService
+    from services.level_service import LevelService
+    from services.achievement_service import AchievementService
 
     points_dict = await channel_service.get_reaction_points(channel_id)
     points = float(points_dict.get(reaction_type, 0.0))
 
-    # Omitir notificaciones directas, serán manejadas por el sistema unificado
-    await PointService(session).add_points(callback.from_user.id, points, bot=bot, skip_notification=True)
+    # Crear instancias de servicios necesarios
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    point_service = PointService(session, level_service, achievement_service)
+
+    # Award points to the user with proper transaction handling
+    await point_service.add_points(
+        callback.from_user.id, 
+        points, 
+        bot=bot, 
+        skip_notification=True,  # Prevent duplicate notification
+        source=f"reaction_{reaction_type}_message_{message_id}"
+    )
     
-    # Obtener servicio de misiones y actualizar progreso sin enviar notificaciones duplicadas
+    # Get mission service and update progress
     from services.mission_service import MissionService
     mission_service = MissionService(session)
     
-    # Actualizar progreso de misiones, pero pasando bot=None para evitar notificaciones duplicadas
-    # Las notificaciones serán manejadas por el sistema unificado en otro lugar
+    # Update mission progress with proper bot instance for notifications
+    # Pass _skip_notification=True to avoid duplicate notifications
     await mission_service.update_progress(
         callback.from_user.id, 
         "reaction", 
-        bot=None  # Pasar None para evitar envío de notificaciones directas
+        bot=bot,  # Pass bot instance for proper notifications
+        increment=1,
+        _skip_notification=True  # Skip notification to avoid duplication
     )
     
-    logger.info(f"Reacción registrada para user_id={callback.from_user.id} sin notificaciones duplicadas")
+    logger.info(f"Reacción registrada para user_id={callback.from_user.id} con {points} puntos")
 
     await service.update_reaction_markup(chat_id, message_id)
-    # Mostrar solo la notificación emergente sin enviar un mensaje adicional
+    # Show popup notification with points
     await callback.answer(BOT_MESSAGES["reaction_registered_points"].format(points=points))

@@ -81,7 +81,7 @@ class MessageService:
                 channel_id=target_channel_id,
             )
 
-            logger.info(f"DEBUG: Markup to edit: {updated_markup}")
+            logger.debug(f"Markup to edit: {updated_markup}")
 
             await self.bot.edit_message_reply_markup(
                 chat_id=target_channel_id_str,
@@ -106,6 +106,12 @@ class MessageService:
                         )
 
             from services.mission_service import MissionService
+            from services.level_service import LevelService
+            from services.achievement_service import AchievementService
+            
+            # Crear servicios necesarios para MissionService
+            level_service = LevelService(self.session)
+            achievement_service = AchievementService(self.session)
             mission_service = MissionService(self.session)
             await mission_service.create_mission(
                 name=f"Reaccionar {real_message_id}",
@@ -146,6 +152,12 @@ class MessageService:
         await self.session.refresh(reaction)
 
         from services.mission_service import MissionService
+        from services.level_service import LevelService
+        from services.achievement_service import AchievementService
+        
+        # Crear servicios necesarios para MissionService
+        level_service = LevelService(self.session)
+        achievement_service = AchievementService(self.session)
         mission_service = MissionService(self.session)
         mission_id = f"reaction_reaccionar_{message_id}"
         await mission_service.complete_mission(
@@ -185,7 +197,7 @@ class MessageService:
                 message_id=message_id,
                 channel_id=chat_id,
             )
-            logger.info(f"DEBUG: Markup being sent for update: {markup_to_edit}")
+            logger.debug(f"Markup being sent for update: {markup_to_edit}")
 
             await self.bot.edit_message_reply_markup(
                 chat_id=chat_id_str,

@@ -4,11 +4,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import UserStats, MiniGamePlay, Mission, UserMissionEntry
 from .point_service import PointService
 from .mission_service import MissionService
+from .level_service import LevelService
+from .achievement_service import AchievementService
 
 class MiniGameService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
 
     async def play_roulette(self, user_id: int, bot: Bot, *, cost: int = 5) -> int:
         """Play roulette. Returns points won."""

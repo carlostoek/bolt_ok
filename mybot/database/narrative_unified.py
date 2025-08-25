@@ -86,7 +86,7 @@ class UserNarrativeState(Base):
     
     # Relaciones
     user = relationship("User", backref="narrative_state_unified", uselist=False)
-    current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id])
+    current_fragment = relationship("database.narrative_unified.NarrativeFragment", foreign_keys=[current_fragment_id])
     
     def get_progress_percentage(self, session):
         """Calcula el porcentaje de progreso del usuario.

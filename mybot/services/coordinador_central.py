@@ -53,7 +53,12 @@ class CoordinadorCentral:
         self.event_coordinator = EventCoordinator(session)
         # Servicios base
         self.narrative_service = NarrativeService(session)
-        self.point_service = PointService(session)
+        
+        # Inyectar dependencias para PointService
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
+        
         self.reconciliation_service = ReconciliationService(session)
         self.unified_mission_service = UnifiedMissionService(session)
         # Event bus for inter-module communication

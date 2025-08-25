@@ -352,7 +352,8 @@ class DianaCompatibilityBridge:
             # Determinar si este callback debería ser manejado por Diana basado en su patrón
             diana_patterns = [
                 "admin_menu", "user_menu", "admin_refresh", "user_refresh",
-                "user_narrative", "user_games", "user_profile", "close_menu"
+                "user_narrative", "user_games", "user_profile", "close_menu",
+                "admin_fragments_manage"
             ]
             
             if data in diana_patterns:

@@ -14,6 +14,7 @@ from database.models import (
 )
 from utils.text_utils import sanitize_text
 import logging
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +25,12 @@ class MissionService:
     def __init__(self, session: AsyncSession):
         self.session = session
         from services.point_service import PointService
-        self.point_service = PointService(session)
+        from services.level_service import LevelService
+        from services.achievement_service import AchievementService
+        
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
 
     async def get_active_missions(self, user_id: int = None, mission_type: str = None) -> list[Mission]:
         """
@@ -34,7 +40,7 @@ class MissionService:
         if mission_type:
             stmt = stmt.where(Mission.type == mission_type)
         result = await self.session.execute(stmt)
-        missions = [m for m in result.scalars().all() if not m.duration_days or (m.created_at + datetime.timedelta(days=m.duration_days)) > datetime.datetime.utcnow()]
+        missions = [m for m in result.scalars().all() if not m.duration_days or (m.created_at + timedelta(days=m.duration_days)) > datetime.utcnow()]
 
         if user_id: # Filter out completed missions for a specific user based on reset rules
             user = await self.session.get(User, user_id)
@@ -112,7 +118,7 @@ class MissionService:
             return False, None
 
         # Add mission to user's completed list with timestamp
-        now = datetime.datetime.now().isoformat()
+        now = datetime.now().isoformat()
         user.missions_completed[mission.id] = now
         
 
@@ -123,7 +129,12 @@ class MissionService:
         point_service = self.point_service # assuming point_service is still available in __init__
         if not hasattr(self, 'point_service'): # Fallback if not initialized in __init__
              from services.point_service import PointService
-             point_service = PointService(self.session)
+             from services.level_service import LevelService
+             from services.achievement_service import AchievementService
+             
+             level_service = LevelService(self.session)
+             achievement_service = AchievementService(self.session)
+             point_service = PointService(self.session, level_service, achievement_service)
 
         await point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
 
@@ -137,15 +148,18 @@ class MissionService:
         unlock_code = getattr(mission, "unlocks_lore_piece_code", None)
         if not unlock_code and mission.action_data:
             unlock_code = mission.action_data.get("unlocks_lore_piece_code")
+        
         if unlock_code:
             lore_stmt = select(LorePiece).where(LorePiece.code_name == unlock_code)
             lore_piece = (await self.session.execute(lore_stmt)).scalar_one_or_none()
+            
             if lore_piece:
                 check_stmt = select(UserLorePiece).where(
                     UserLorePiece.user_id == user_id,
                     UserLorePiece.lore_piece_id == lore_piece.id,
                 )
                 exists = (await self.session.execute(check_stmt)).scalar_one_or_none()
+                
                 if not exists:
                     self.session.add(UserLorePiece(user_id=user_id, lore_piece_id=lore_piece.id))
                     logger.info(
@@ -176,7 +190,7 @@ class MissionService:
                 )
                 
                 logger.info(f"Sent unified mission completion notification to user {user_id}")
-            except ImportError:
+            except ImportError as e:
                 # Fallback al método anterior si no está disponible el servicio unificado
                 from utils.message_utils import get_mission_completed_message
                 from utils.keyboard_utils import get_mission_completed_keyboard
@@ -239,8 +253,10 @@ class MissionService:
         increment: int = 1,
         current_value: int | None = None,
         bot=None,
+        _skip_notification=False,
     ) -> None:
         missions = await self.get_active_missions(mission_type=mission_type)
+        
         for mission in missions:
             stmt = select(UserMissionEntry).where(
                 UserMissionEntry.user_id == user_id,
@@ -248,25 +264,32 @@ class MissionService:
             )
             result = await self.session.execute(stmt)
             record = result.scalar_one_or_none()
+            
             if not record:
                 record = UserMissionEntry(user_id=user_id, mission_id=mission.id)
                 self.session.add(record)
+                
             if record.completed:
                 continue
+            
             if mission_type == "login_streak" and current_value is not None:
                 progress = current_value
                 record.progress_value = progress
             else:
                 if record.progress_value is None:
                     record.progress_value = 0
+                    
                 record.progress_value += increment
                 progress = record.progress_value
+                
             if progress >= mission.target_value:
                 record.completed = True
-                record.completed_at = datetime.datetime.utcnow()
+                record.completed_at = datetime.utcnow()
+                
                 # Añadir puntos sin notificación
                 await self.point_service.add_points(user_id, mission.reward_points, bot=bot, skip_notification=True)
-                if bot:
+                
+                if bot and not _skip_notification:
                     # Usar servicio de notificaciones unificadas si está disponible
                     try:
                         from services.notification_service import NotificationService, NotificationPriority
@@ -284,7 +307,7 @@ class MissionService:
                         )
                         
                         logger.info(f"Sent unified mission completion notification to user {user_id}")
-                    except ImportError:
+                    except ImportError as e:
                         # Fallback al método anterior si no está disponible el servicio unificado
                         from utils.message_utils import get_mission_completed_message
                         from utils.keyboard_utils import get_mission_completed_keyboard
@@ -295,6 +318,7 @@ class MissionService:
                             text,
                             reply_markup=get_mission_completed_keyboard(),
                         )
+                        
         await self.session.commit()
 
     async def delete_mission(self, mission_id: str) -> bool:
