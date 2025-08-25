@@ -30,7 +30,6 @@ coverage.xml
 *.cover
 .hypothesis/
 .pytest_cache/
-tests/
 
 # Jupyter Notebook
 .ipynb_checkpoints

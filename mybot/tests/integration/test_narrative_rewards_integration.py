@@ -11,10 +11,10 @@ from services.narrative_service import NarrativeService
 from services.point_service import PointService
 from services.badge_service import BadgeService
 from services.integration.narrative_point_service import NarrativePointService
-from database.models import User, UserStats, Badge, UserBadge
+from database.models import User, UserStats, Badge, UserBadge, NarrativeReward
 from database.narrative_models import (
     NarrativeFragment, UserNarrativeState, NarrativeDecision, 
-    UserDecisionLog, NarrativeReward
+    UserDecisionLog
 )
 
 
@@ -22,14 +22,11 @@ from database.narrative_models import (
 class TestNarrativeRewardsIntegration:
     """Tests críticos para la integración entre progreso narrativo y sistema de recompensas."""
 
-    async def test_narrative_completion_awards_points(self, session, test_user):
+    async def test_narrative_completion_awards_points(self, session, test_user, point_service):
         """
         CRITICAL: Test que protege el otorgamiento de puntos por completar narrativas.
         Completar fragmentos narrativos DEBE otorgar puntos según configuración.
         """
-        narrative_service = NarrativeService(session)
-        point_service = PointService(session)
-        
         # Create narrative fragment with point reward
         story_fragment = NarrativeFragment(
             key="story_chapter_1",
@@ -88,8 +85,12 @@ class TestNarrativeRewardsIntegration:
         narrative_service = NarrativeService(session)
         
         # Create narrative decisions with different rewards
+        # Usar IDs únicos para evitar conflictos
+        import time
+        base_id = int(time.time() * 1000) % 1000000
+        
         generous_decision = NarrativeDecision(
-            id=1,
+            id=base_id + 1,
             fragment_key="moral_choice",
             text="Ayudar al personaje necesitado",
             next_fragment_key="generous_path",
@@ -98,7 +99,7 @@ class TestNarrativeRewardsIntegration:
         )
         
         selfish_decision = NarrativeDecision(
-            id=2,
+            id=base_id + 2,
             fragment_key="moral_choice", 
             text="Ignorar al personaje necesitado",
             next_fragment_key="selfish_path",
@@ -126,7 +127,7 @@ class TestNarrativeRewardsIntegration:
         
         # Test generous decision
         initial_points = test_user.points
-        result_fragment = await narrative_service.process_user_decision(test_user.id, 1)
+        result_fragment = await narrative_service.process_user_decision(test_user.id, base_id + 1)
         
         # Critical assertions - generous choice must award more points
         assert result_fragment.key == "generous_path", "Must advance to generous path"
@@ -134,7 +135,7 @@ class TestNarrativeRewardsIntegration:
         # Verify decision was logged
         stmt = select(UserDecisionLog).where(
             UserDecisionLog.user_id == test_user.id,
-            UserDecisionLog.decision_id == 1
+            UserDecisionLog.decision_id == base_id + 1
         )
         result = await session.execute(stmt)
         decision_log = result.scalar_one_or_none()
@@ -152,16 +153,16 @@ class TestNarrativeRewardsIntegration:
         session.add(user_state)
         await session.commit()
         
-        result_fragment_2 = await narrative_service.process_user_decision(test_user.id, 2)
+        result_fragment_2 = await narrative_service.process_user_decision(test_user.id, base_id + 2)
         
         assert result_fragment_2.key == "selfish_path", "Must advance to selfish path"
 
-    async def test_prevent_duplicate_narrative_rewards(self, session, test_user):
+    async def test_prevent_duplicate_narrative_rewards(self, session, test_user, point_service):
         """
         CRITICAL: Test que protege contra recompensas duplicadas por el mismo progreso.
         Un usuario NO debe poder obtener recompensas múltiples por el mismo fragmento narrativo.
         """
-        point_service = PointService(session)
+        # El point_service ya está disponible como fixture
         
         # Create fragment with one-time reward
         unique_fragment = NarrativeFragment(
@@ -264,24 +265,33 @@ class TestNarrativeRewardsIntegration:
         # Simulate user completing fragments
         completed_fragments = []
         for i, fragment in enumerate(fragments):
-            user_state = UserNarrativeState(
-                user_id=test_user.id,
-                current_fragment_key=fragment.key,
-                fragments_completed=i + 1  # Track completion count
-            )
-            
             # Delete existing state to update
             stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == test_user.id)
             result = await session.execute(stmt)
             existing_state = result.scalar_one_or_none()
             if existing_state:
                 await session.delete(existing_state)
+                await session.commit()
+            
+            user_state = UserNarrativeState(
+                user_id=test_user.id,
+                current_fragment_key=fragment.key,
+                fragments_completed=i + 1  # Track completion count
+            )
             
             session.add(user_state)
             await session.commit()
             completed_fragments.append(fragment.key)
         
         # Check if user qualifies for narrative badge
+        # Delete existing state to update
+        stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == test_user.id)
+        result = await session.execute(stmt)
+        existing_state = result.scalar_one_or_none()
+        if existing_state:
+            await session.delete(existing_state)
+            await session.commit()
+            
         final_state = UserNarrativeState(
             user_id=test_user.id,
             current_fragment_key="milestone_fragment_5",
@@ -320,8 +330,12 @@ class TestNarrativeRewardsIntegration:
         narrative_service = NarrativeService(session)
         
         # Create choice that affects future rewards
+        # Usar ID único para evitar conflictos
+        import time
+        decision_id = int(time.time() * 1000) % 1000000 + 1000
+        
         karma_decision = NarrativeDecision(
-            id=1,
+            id=decision_id,
             fragment_key="karma_choice",
             text="Actuar con bondad",
             next_fragment_key="good_karma_path",
@@ -342,13 +356,13 @@ class TestNarrativeRewardsIntegration:
         await session.commit()
         
         # Process karma-affecting decision
-        result_fragment = await narrative_service.process_user_decision(test_user.id, 1)
+        result_fragment = await narrative_service.process_user_decision(test_user.id, decision_id)
         assert result_fragment.key == "good_karma_path", "Must advance to good karma path"
         
         # Verify decision was logged with karma modifier
         stmt = select(UserDecisionLog).where(
             UserDecisionLog.user_id == test_user.id,
-            UserDecisionLog.decision_id == 1
+            UserDecisionLog.decision_id == decision_id
         )
         result = await session.execute(stmt)
         decision_log = result.scalar_one_or_none()
@@ -364,13 +378,13 @@ class TestNarrativeRewardsIntegration:
         assert user_karma > 0, "Good decision must provide positive karma"
         assert total_expected > base_points, "Good karma must enhance future rewards"
 
-    async def test_rollback_on_reward_transaction_failure(self, session, test_user):
+    async def test_rollback_on_reward_transaction_failure(self, session, test_user, point_service):
         """
         CRITICAL: Test que protege contra inconsistencias en transacciones de recompensas.
         Si falla el otorgamiento de recompensas, la transacción debe hacer rollback completo.
         """
         narrative_service = NarrativeService(session)
-        point_service = PointService(session)
+        # El point_service ya está disponible como fixture
         
         # Create complex reward scenario
         complex_fragment = NarrativeFragment(
@@ -418,13 +432,13 @@ class TestNarrativeRewardsIntegration:
         preserved_state = result.scalar_one_or_none()
         assert preserved_state.current_fragment_key == "pre_complex_reward", "Narrative state must be preserved"
 
-    async def test_concurrent_narrative_progression_point_safety(self, session, test_user):
+    async def test_concurrent_narrative_progression_point_safety(self, session, test_user, point_service):
         """
         CRITICAL: Test que protege contra condiciones de carrera en recompensas narrativas.
         Múltiples progresiones narrativas simultáneas NO deben causar recompensas duplicadas.
         """
         narrative_service = NarrativeService(session)
-        point_service = PointService(session)
+        # El point_service ya está disponible como fixture
         
         # Create fragment with race condition potential
         race_fragment = NarrativeFragment(

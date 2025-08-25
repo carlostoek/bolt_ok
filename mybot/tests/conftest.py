@@ -2,6 +2,7 @@
 Configuración global de pytest para tests de protección.
 """
 import pytest
+import pytest_asyncio
 import asyncio
 import logging
 import datetime
@@ -30,7 +31,7 @@ def event_loop():
     yield loop
     loop.close()
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="session")
 async def test_engine():
     """Crear engine de test con SQLite en memoria."""
     engine = create_async_engine(
@@ -47,18 +48,21 @@ async def test_engine():
     yield engine
     await engine.dispose()
 
-@pytest.fixture
+@pytest_asyncio.fixture(scope="session")
 async def session_factory(test_engine):
     """Factory para crear sesiones de test."""
-    return async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+    # Crear y devolver la fábrica de sesiones
+    factory = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+    return factory
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def session(session_factory):
     """Sesión de base de datos para test individual."""
+    # Crear una sesión nueva para cada test
     async with session_factory() as session:
         yield session
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def mock_bot():
     """Mock del bot de Telegram."""
     bot = AsyncMock()
@@ -69,11 +73,15 @@ async def mock_bot():
 
 # === FIXTURES DE DATOS DE PRUEBA ===
 
-@pytest.fixture
-async def test_user(session):
+@pytest_asyncio.fixture
+async def test_user(session, request):
     """Usuario de prueba básico."""
+    # Generar un ID único para cada test
+    import time
+    unique_id = int(time.time() * 1000000) % (10**9)  # ID único basado en timestamp
+    
     user = User(
-        id=123456789,
+        id=unique_id,
         first_name="TestUser",
         username="testuser",
         role="free",
@@ -85,11 +93,15 @@ async def test_user(session):
     await session.refresh(user)
     return user
 
-@pytest.fixture
-async def vip_user(session):
+@pytest_asyncio.fixture
+async def vip_user(session, request):
     """Usuario VIP de prueba."""
+    # Generar un ID único para cada test
+    import time
+    unique_id = (int(time.time() * 1000000) % (10**9)) + 1  # ID único basado en timestamp
+    
     user = User(
-        id=987654321,
+        id=unique_id,
         first_name="VIPUser", 
         username="vipuser",
         role="vip",
@@ -102,11 +114,15 @@ async def vip_user(session):
     await session.refresh(user)
     return user
 
-@pytest.fixture
-async def admin_user(session):
+@pytest_asyncio.fixture
+async def admin_user(session, request):
     """Usuario administrador de prueba."""
+    # Generar un ID único para cada test
+    import time
+    unique_id = (int(time.time() * 1000000) % (10**9)) + 2  # ID único basado en timestamp
+    
     user = User(
-        id=111222333,
+        id=unique_id,
         first_name="AdminUser",
         username="adminuser", 
         role="admin",
@@ -118,7 +134,7 @@ async def admin_user(session):
     await session.refresh(user)
     return user
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def test_channel(session):
     """Canal de prueba."""
     channel = Channel(
@@ -132,7 +148,7 @@ async def test_channel(session):
     await session.refresh(channel)
     return channel
 
-@pytest.fixture
+@pytest_asyncio.fixture
 async def user_progress(session, test_user):
     """Progreso de usuario de prueba."""
     progress = UserStats(
@@ -153,9 +169,34 @@ def coordinador_central(session):
     return CoordinadorCentral(session)
 
 @pytest.fixture
-def point_service(session):
+def level_service(session):
+    """Servicio de niveles para tests."""
+    from services.level_service import LevelService
+    from unittest.mock import AsyncMock
+    
+    # Crear un mock del servicio de niveles para evitar problemas de transacciones
+    mock_level_service = AsyncMock(spec=LevelService)
+    mock_level_service.session = session
+    mock_level_service.check_for_level_up = AsyncMock()
+    mock_level_service.get_level_for_points = AsyncMock(return_value=1)
+    return mock_level_service
+
+@pytest.fixture
+def achievement_service(session):
+    """Servicio de logros para tests."""
+    from services.achievement_service import AchievementService
+    from unittest.mock import AsyncMock
+    
+    # Crear un mock del servicio de logros para evitar problemas de transacciones
+    mock_achievement_service = AsyncMock(spec=AchievementService)
+    mock_achievement_service.session = session
+    return mock_achievement_service
+
+@pytest.fixture
+def point_service(session, level_service, achievement_service):
     """Servicio de puntos para tests."""
-    return PointService(session)
+    from services.point_service import PointService
+    return PointService(session, level_service, achievement_service)
 
 @pytest.fixture
 def user_service(session):

@@ -37,9 +37,9 @@ TEST_INFO_FRAGMENT = {
 
 
 @pytest.mark.asyncio
-async def test_create_fragment(test_session: AsyncSession):
+async def test_create_fragment(session: AsyncSession):
     """Test creating a narrative fragment."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Test creating a story fragment
     fragment = await service.create_fragment(**TEST_STORY_FRAGMENT)
@@ -52,9 +52,9 @@ async def test_create_fragment(test_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_fragment(test_session: AsyncSession):
+async def test_get_fragment(session: AsyncSession):
     """Test retrieving a narrative fragment."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Create a fragment first
     created_fragment = await service.create_fragment(**TEST_DECISION_FRAGMENT)
@@ -68,9 +68,9 @@ async def test_get_fragment(test_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_get_fragments_by_type(test_session: AsyncSession):
+async def test_get_fragments_by_type(session: AsyncSession):
     """Test retrieving fragments by type."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Create fragments of different types
     await service.create_fragment(**TEST_STORY_FRAGMENT)
@@ -91,9 +91,9 @@ async def test_get_fragments_by_type(test_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_update_fragment(test_session: AsyncSession):
+async def test_update_fragment(session: AsyncSession):
     """Test updating a narrative fragment."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Create a fragment
     fragment = await service.create_fragment(**TEST_STORY_FRAGMENT)
@@ -111,9 +111,9 @@ async def test_update_fragment(test_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_delete_fragment(test_session: AsyncSession):
+async def test_delete_fragment(session: AsyncSession):
     """Test deleting a narrative fragment."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Create a fragment
     fragment = await service.create_fragment(**TEST_INFO_FRAGMENT)
@@ -128,9 +128,9 @@ async def test_delete_fragment(test_session: AsyncSession):
 
 
 @pytest.mark.asyncio
-async def test_check_user_access(test_session: AsyncSession):
+async def test_check_user_access(session: AsyncSession):
     """Test checking user access to fragments."""
-    service = NarrativeFragmentService(test_session)
+    service = NarrativeFragmentService(session)
     
     # Create a fragment with required clues
     fragment = await service.create_fragment(**TEST_DECISION_FRAGMENT)

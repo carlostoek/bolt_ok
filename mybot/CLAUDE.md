@@ -24,17 +24,28 @@ python bot.py
 ### Running Tests
 
 ```bash
-# Run all tests
-python -m unittest discover -s tests
+# Run all tests with pytest (recomendado para tests asíncronos)
+python -m pytest tests/
 
-# Run a specific test
-python -m unittest tests.services.test_reaction_system
+# Run a specific test file
+python -m pytest tests/services/test_reaction_system.py
 
-# Run a specific integration test
-python -m unittest tests.integration.test_narrative_engagement_integration
+# Run a specific test function
+python -m pytest tests/integration/test_narrative_admin_integration.py::test_view_fragment_integration
 
-# Run protection tests (for data integrity)
-python run_protection_tests.py
+# Run with verbose output
+python -m pytest -v tests/
+
+# Run with coverage report
+python -m pytest --cov=. --cov-report=term-missing
+
+# Run narrative admin tests specifically
+./run_narrative_admin_tests.py
+
+# Run with scripts de utilidad
+./test.sh           # Ejecutar todos los tests
+./test.sh quick     # Ejecutar tests rápidos
+./test.sh coverage  # Ejecutar tests con cobertura
 ```
 
 ### Notification System Script
@@ -132,6 +143,8 @@ The Diana Menu System provides a unified interface across all modules:
    - Add unit tests for new services in `tests/services/`
    - Add integration tests for cross-module functionality in `tests/integration/`
    - Use the fixtures in `tests/conftest.py` for database and bot mocking
+   - Para tests asíncronos, usar `@pytest.mark.asyncio` y `@pytest_asyncio.fixture`
+   - Configurar correctamente AsyncMock para context managers asíncronos
 
 ## Database Operations
 
@@ -196,8 +209,88 @@ await notification_service.send_immediate_notification(
 
 This documentation should be updated as new features are added or architectural changes are made to the system.
 
+## Configuración y Herramientas de Testing Asíncrono
+
+### Scripts de Desarrollo
+
+```bash
+# Configurar entorno de desarrollo
+./setup.sh
+
+# Ejecutar el bot en modo desarrollo
+./dev.sh
+
+# Ejecutar tests
+./test.sh
+
+# Ejecutar tests específicos de narrativa admin
+./run_narrative_admin_tests.py
+```
+
+### Mocking Correcto para Tests Asíncronos
+
+```python
+# Configuración correcta para mocks de SQLAlchemy async
+session_mock = AsyncMock()
+mock_context = AsyncMock()
+mock_context.__aenter__.return_value = session_mock
+session_mock.begin.return_value = mock_context
+
+# Mocks para aiogram 3
+callback = MagicMock()
+callback.answer = AsyncMock()
+```
+
+### Fixtures de pytest-asyncio
+
+```python
+# En conftest.py
+import pytest
+import pytest_asyncio
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+
+@pytest.fixture(scope="session")
+def event_loop():
+    """Crear loop de eventos para tests async."""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
+    yield loop
+    loop.close()
+
+@pytest_asyncio.fixture(scope="session")
+async def test_engine():
+    """Crear engine de test con SQLite en memoria."""
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///:memory:",
+        poolclass=StaticPool,
+        connect_args={"check_same_thread": False},
+        echo=False
+    )
+    
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    yield engine
+    await engine.dispose()
+
+@pytest_asyncio.fixture(scope="session")
+async def session_factory(test_engine):
+    """Factory para crear sesiones de test."""
+    factory = async_sessionmaker(test_engine, class_=AsyncSession, expire_on_commit=False)
+    return factory
+
+@pytest_asyncio.fixture
+async def session(session_factory):
+    """Sesión de base de datos para test individual."""
+    async with session_factory() as session:
+        yield session
+```
+
 ## Documentation
 
 - [Sistema de Notificaciones Unificadas](docs/sistema_notificaciones.md)
 - [Sistema de Gestión de Solicitudes de Canal](docs/sistema_gestion_solicitudes_canal.md)
 - [Sistema Narrativo Unificado](docs/LECTURA_FORZOSA_ANTES_DE_CUALQUIER_IMPLEMENTACIÓN.md)
+- [Guía del Sistema Administrativo de Narrativa](docs/guia_sistema_administrativo_narrativa.md)
+- [Configuración del Entorno de Desarrollo](README_SETUP.md)
+- [Solución de Problemas](TROUBLESHOOTING.md)

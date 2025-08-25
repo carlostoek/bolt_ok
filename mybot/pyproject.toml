@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "mybot"
+version = "0.1.0"
+description = "Bot de Telegram con narrativa interactiva"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+aiogram = "^3.0"
+SQLAlchemy = "^2.0.0"
+aiosqlite = "^0.17.0"
+APScheduler = "^3.10.0"
+python-dotenv = "^1.0.0"
+asyncpg = "^0.27.0"
+psycopg2-binary = "^2.9.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.10.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+testpaths = ["tests"]
+addopts = "--cov=. --cov-report=term-missing"
