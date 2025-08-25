@@ -32,6 +32,7 @@ class NotificationData:
     
     def _generate_hash(self) -> str:
         """Genera un hash único para evitar duplicados."""
+        print(f"[DEBUGGER:NotificationData._generate_hash:33] Generating hash for type={self.type}, data={self.data}", file=sys.stderr)
         key_parts = [self.type]
         if self.type == "points":
             key_parts.append(str(self.data.get("points", 0)))
@@ -41,7 +42,9 @@ class NotificationData:
             key_parts.append(self.data.get("mission_id", ""))
         elif self.type == "achievement":
             key_parts.append(self.data.get("name", ""))
-        return "_".join(key_parts)
+        hash_value = "_".join(key_parts)
+        print(f"[DEBUGGER:NotificationData._generate_hash:43] Generated hash={hash_value} for type={self.type}", file=sys.stderr)
+        return hash_value
 
 class NotificationService:
     """
