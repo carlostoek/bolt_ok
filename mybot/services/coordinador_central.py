@@ -18,6 +18,9 @@ from .reconciliation_service import ReconciliationService
 from .event_bus import get_event_bus, EventType, Event
 from .notification_service import NotificationService
 from .unified_mission_service import UnifiedMissionService
+from .emotional_state_service import EmotionalStateService
+from .level_service import LevelService
+from .achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +34,7 @@ class AccionUsuario(enum.Enum):
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
     COMPLETAR_FRAGMENTO_NARRATIVO = "completar_fragmento_narrativo"
     DESBLOQUEAR_PISTA = "desbloquear_pista"
+    ANALIZAR_ESTADO_EMOCIONAL = "analizar_estado_emocional"
 
 class CoordinadorCentral:
     """
@@ -61,6 +65,8 @@ class CoordinadorCentral:
         
         self.reconciliation_service = ReconciliationService(session)
         self.unified_mission_service = UnifiedMissionService(session)
+        # Servicio de estados emocionales
+        self.emotional_state_service = EmotionalStateService(session)
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
     
@@ -118,6 +124,8 @@ class CoordinadorCentral:
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
                     await self._send_unified_notifications(notification_service, user_id, result, accion)
                 return result
+            elif accion == AccionUsuario.ANALIZAR_ESTADO_EMOCIONAL:
+                return await self._flujo_analizar_estado_emocional(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -1185,3 +1193,150 @@ class CoordinadorCentral:
                 )
             except:
                 pass
+    
+    # ==================== FLUJOS PARA ESTADOS EMOCIONALES ====================
+    
+    async def _flujo_analizar_estado_emocional(self, user_id: int, interaction_data: Dict[str, Any], bot=None) -> Dict[str, Any]:
+        """
+        Flujo para analizar y actualizar el estado emocional de un usuario basado en sus interacciones.
+        
+        Args:
+            user_id: ID del usuario
+            interaction_data: Datos de la interacción a analizar
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con resultados y estado emocional actualizado
+        """
+        try:
+            # 1. Analizar emoción basada en la interacción
+            inferred_emotion = await self.emotional_state_service.analyze_interaction_emotion(
+                user_id, interaction_data
+            )
+            
+            # 2. Obtener contexto emocional actual para comparación
+            current_context = await self.emotional_state_service.get_user_emotional_state(user_id)
+            
+            # 3. Determinar intensidad basada en el cambio emocional
+            intensity = self._calculate_emotional_intensity(
+                current_context.primary_state, inferred_emotion, interaction_data
+            )
+            
+            # 4. Actualizar estado emocional si hay cambio significativo
+            if (inferred_emotion != current_context.primary_state or 
+                abs(intensity - current_context.intensity) > 0.2):
+                
+                trigger = self._generate_emotional_trigger(interaction_data)
+                updated_context = await self.emotional_state_service.update_emotional_state(
+                    user_id, inferred_emotion, intensity, trigger
+                )
+                
+                # 5. Obtener tono recomendado para contenido futuro
+                recommended_tone = await self.emotional_state_service.get_recommended_content_tone(user_id)
+                
+                return {
+                    "success": True,
+                    "emotion_changed": True,
+                    "previous_state": current_context.primary_state.value,
+                    "new_state": updated_context.primary_state.value,
+                    "intensity": updated_context.intensity,
+                    "recommended_tone": recommended_tone,
+                    "trigger": trigger,
+                    "message": f"Diana percibe un cambio en tu estado de ánimo... ({updated_context.primary_state.value})",
+                    "action": "emotional_state_updated"
+                }
+            else:
+                # 6. Estado emocional sin cambios significativos
+                return {
+                    "success": True,
+                    "emotion_changed": False,
+                    "current_state": current_context.primary_state.value,
+                    "intensity": current_context.intensity,
+                    "recommended_tone": await self.emotional_state_service.get_recommended_content_tone(user_id),
+                    "message": "Diana observa tu estado actual con comprensión...",
+                    "action": "emotional_state_analyzed"
+                }
+                
+        except Exception as e:
+            logger.exception(f"Error en análisis de estado emocional para usuario {user_id}: {e}")
+            return {
+                "success": False,
+                "message": "Diana parece confundida y no puede interpretar tus emociones ahora...",
+                "error": str(e),
+                "action": "emotional_analysis_failed"
+            }
+    
+    def _calculate_emotional_intensity(self, current_state, new_state, interaction_data: Dict[str, Any]) -> float:
+        """
+        Calcula la intensidad emocional basada en el cambio de estado y los datos de interacción.
+        
+        Args:
+            current_state: Estado emocional actual
+            new_state: Nuevo estado emocional inferido
+            interaction_data: Datos de la interacción
+            
+        Returns:
+            float: Intensidad calculada (0.0 a 1.0)
+        """
+        base_intensity = 0.5
+        
+        # Ajustar según tipo de interacción
+        interaction_type = interaction_data.get("type", "")
+        
+        if interaction_type == "fragment_completion":
+            completion_time = interaction_data.get("completion_time", 60)
+            if completion_time < 30:  # Muy rápido = alta intensidad
+                base_intensity = 0.8
+            elif completion_time > 180:  # Muy lento = intensidad media
+                base_intensity = 0.6
+        
+        elif interaction_type == "choice_selection":
+            choice_text = interaction_data.get("choice_text", "").lower()
+            if any(word in choice_text for word in ["amor", "pasión", "deseo"]):
+                base_intensity = 0.9  # Opciones emocionales intensas
+            elif any(word in choice_text for word in ["ayudar", "cuidar"]):
+                base_intensity = 0.7  # Opciones empáticas
+        
+        elif interaction_type == "failed_attempt":
+            attempts = interaction_data.get("attempts", 1)
+            base_intensity = min(0.9, 0.3 + (attempts * 0.2))  # Más intentos = más frustración
+        
+        # Ajustar según cambio de estado emocional
+        if current_state != new_state:
+            # Estados más intensos
+            if new_state.value in ["excited", "frustrated", "satisfied"]:
+                base_intensity = min(1.0, base_intensity + 0.2)
+        
+        return round(base_intensity, 2)
+    
+    def _generate_emotional_trigger(self, interaction_data: Dict[str, Any]) -> str:
+        """
+        Genera una descripción del trigger emocional basada en los datos de interacción.
+        
+        Args:
+            interaction_data: Datos de la interacción
+            
+        Returns:
+            str: Descripción del trigger
+        """
+        interaction_type = interaction_data.get("type", "unknown")
+        
+        trigger_templates = {
+            "fragment_completion": "completed_narrative_fragment",
+            "choice_selection": f"selected_choice_{interaction_data.get('choice_id', 'unknown')}",
+            "failed_attempt": f"failed_after_{interaction_data.get('attempts', 1)}_attempts",
+            "poll_answer": "participated_in_poll",
+            "reaction": f"reacted_with_{interaction_data.get('reaction_type', 'unknown')}",
+            "message": "sent_message",
+            "command": f"used_command_{interaction_data.get('command', 'unknown')}"
+        }
+        
+        base_trigger = trigger_templates.get(interaction_type, interaction_type)
+        
+        # Agregar contexto adicional si está disponible
+        if interaction_data.get("fragment_id"):
+            base_trigger += f"_fragment_{interaction_data['fragment_id']}"
+        elif interaction_data.get("channel_id"):
+            base_trigger += f"_channel_{interaction_data['channel_id']}"
+        
+        return base_trigger
