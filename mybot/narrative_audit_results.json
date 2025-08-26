@@ -1,0 +1,103 @@
+{
+  "fragment_performance": {
+    "basic_fragment_loading": {
+      "avg": 31.06251541757956,
+      "p50": 25.41753847617656,
+      "p95": 57.581219606800005,
+      "p99": 58.11538500711322,
+      "threshold": 50,
+      "passes": true
+    },
+    "fragment_with_choices": {
+      "avg": 21.300007769605145,
+      "p50": 19.03523103101179,
+      "p95": 37.783026916440576,
+      "p99": 37.95699996408075,
+      "threshold": 80,
+      "passes": true
+    },
+    "fragment_with_requirements": {
+      "avg": 24.838623096002266,
+      "p50": 24.23892298247665,
+      "p95": 42.715803935425356,
+      "p99": 42.85815393086523,
+      "threshold": 60,
+      "passes": true
+    },
+    "narrative_transitions": {
+      "avg": 44.916034751804546,
+      "p50": 40.895192010793835,
+      "p95": 75.80431129899807,
+      "p99": 76.04884589090943,
+      "threshold": 100,
+      "passes": true
+    }
+  },
+  "admin_performance": {
+    "fragment_listing": {
+      "avg": 16.26791544840671,
+      "p50": 15.834576508495957,
+      "p95": 24.721842777216807,
+      "threshold": 500,
+      "passes": true
+    },
+    "fragment_editing": {
+      "avg": 14.790476846974343,
+      "p50": 13.1933075026609,
+      "p95": 27.374272514134645,
+      "threshold": 300,
+      "passes": true
+    },
+    "fragment_creation": {
+      "avg": 18.391784466803074,
+      "p50": 18.930922960862517,
+      "p95": 22.882538032718003,
+      "threshold": 300,
+      "passes": true
+    },
+    "stats_visualization": {
+      "avg": 87.1738770743832,
+      "p50": 61.43492297269404,
+      "p95": 214.5125389797613,
+      "threshold": 2000,
+      "passes": true
+    }
+  },
+  "user_state_performance": {
+    "progress_calculation": {
+      "avg": 16.1694000067655,
+      "p50": 16.579691960942,
+      "p95": 23.352069943211973,
+      "threshold": 100,
+      "passes": true
+    },
+    "state_updates": {
+      "avg": 10.725261608604342,
+      "p50": 9.325038525275886,
+      "p95": 19.34618431259878,
+      "threshold": 50,
+      "passes": true
+    }
+  },
+  "database_performance": {
+    "fragment_by_id": 3.7077546201180667,
+    "user_state_loading": 4.760455379728228,
+    "fragments_by_type": 8.63043568097055,
+    "aggregation_queries": 1.6788459615781903
+  },
+  "code_quality": {
+    "async_patterns": true,
+    "proper_session_management": true,
+    "transaction_handling": true,
+    "error_handling": true,
+    "issues_found": []
+  },
+  "concurrent_performance": {
+    "concurrent_users": 100,
+    "total_time_ms": 1540.737614966929,
+    "avg_time_per_user_ms": 15.40737614966929,
+    "users_per_second": 64.9039778276241,
+    "performance_maintained": true
+  },
+  "overall_assessment": {}
+}

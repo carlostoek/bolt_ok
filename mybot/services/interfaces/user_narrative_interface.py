@@ -1,7 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import List, Dict, Optional, Any, Tuple
+from dataclasses import dataclass, field
 
 from database.narrative_unified import UserNarrativeState, NarrativeFragment
+
+
+@dataclass
+class NarrativeServiceResult:
+    """Resultado estandarizado para operaciones del servicio narrativo."""
+    success: bool
+    data: Dict[str, Any]
+    metadata: Dict[str, Any]
+    errors: List[str] = field(default_factory=list)
 
 
 class IUserNarrativeService(ABC):
