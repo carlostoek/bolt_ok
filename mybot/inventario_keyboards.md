@@ -1,0 +1,1046 @@
+### Inventario de Textos en `keyboards/`
+
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 7
+- **Texto:** "➕ Crear Subasta"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 8
+- **Texto:** "📋 Subastas Activas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 9
+- **Texto:** "📊 Subastas Pendientes"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 10
+- **Texto:** "🏁 Finalizar Subasta"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 11
+- **Texto:** "❌ Cancelar Subasta"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 12
+- **Texto:** "📈 Estadísticas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 13
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 21
+- **Texto:** "1 hora"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 22
+- **Texto:** "3 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 23
+- **Texto:** "6 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 24
+- **Texto:** "12 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 25
+- **Texto:** "24 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 26
+- **Texto:** "48 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 27
+- **Texto:** "72 horas"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 28
+- **Texto:** "🔙 Cancelar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 36
+- **Texto:** "✅ Configuración Básica"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 37
+- **Texto:** "⚙️ Configuración Avanzada"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 38
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 45
+- **Texto:** "✅ Crear Subasta"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 46
+- **Texto:** "✏️ Editar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 47
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 65
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 75
+- **Texto:** "🏁 Finalizar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 76
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 78
+- **Texto:** "▶️ Iniciar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 79
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 81
+- **Texto:** "📊 Ver Detalles"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 82
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 89
+- **Texto:** "✅ Confirmar"
+---
+- **Archivo:** `keyboards/admin_auction_kb.py`
+- **Línea:** 90
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_channel_config_kb.py`
+- **Línea:** 7
+- **Texto:** "✅ Guardar"
+---
+- **Archivo:** `keyboards/admin_channel_config_kb.py`
+- **Línea:** 8
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_channels_kb.py`
+- **Línea:** 10
+- **Texto:** "➕ Agregar Canal"
+---
+- **Archivo:** `keyboards/admin_channels_kb.py`
+- **Línea:** 11
+- **Texto:** "⏱ Configurar Espera"
+---
+- **Archivo:** `keyboards/admin_channels_kb.py`
+- **Línea:** 12
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_channels_kb.py`
+- **Línea:** 22
+- **Texto:** "0 min"
+---
+- **Archivo:** `keyboards/admin_channels_kb.py`
+- **Línea:** 24
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 6
+- **Texto:** "📺 Agregar Canales"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 7
+- **Texto:** "⏱️ Schedulers"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 8
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 9
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 20
+- **Texto:** "⏰ Tiempo de Espera"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 24
+- **Texto:** "📱 Mensaje Social"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 31
+- **Texto:** "🎉 Mensaje de Bienvenida"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 39
+- **Texto:** "📋 Ver Pendientes"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 43
+- **Texto:** "🔄 Procesar Ahora"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 49
+- **Texto:** "📋 Ver Pendientes"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 53
+- **Texto:** "🔄 Procesar Ahora"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 60
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 70
+- **Texto:** "💎 Solo VIP"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 71
+- **Texto:** "💬 Solo FREE"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 72
+- **Texto:** "🔗 Ambos Canales"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 73
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 79
+- **Texto:** "⏲ Canal General"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 80
+- **Texto:** "⏲ Canal VIP"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 81
+- **Texto:** "▶️ Ejecutar Ahora"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 82
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 88
+- **Texto:** "✅ Aceptar"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 89
+- **Texto:** "🏠 Menú Principal"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 95
+- **Texto:** "✅ Guardar"
+---
+- **Archivo:** `keyboards/admin_config_kb.py`
+- **Línea:** 96
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 6
+- **Texto:** "⚡ Eventos"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 7
+- **Texto:** "🎟 Sorteos"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 8
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 15
+- **Texto:** "➕ Crear Evento"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 16
+- **Texto:** "📃 Eventos Activos"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 17
+- **Texto:** "⛔ Finalizar Evento"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 18
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 25
+- **Texto:** "➕ Crear Sorteo"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 26
+- **Texto:** "📃 Sorteos Activos"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 27
+- **Texto:** "🏁 Finalizar Sorteo"
+---
+- **Archivo:** `keyboards/admin_event_kb.py`
+- **Línea:** 28
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 20
+- **Texto:** "⏰ Tiempo de Espera"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 24
+- **Texto:** "📱 Mensaje Social"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 31
+- **Texto:** "🎉 Mensaje de Bienvenida"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 39
+- **Texto:** "📋 Ver Pendientes"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 43
+- **Texto:** "🔄 Procesar Ahora"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 49
+- **Texto:** "📋 Ver Pendientes"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 53
+- **Texto:** "🔄 Procesar Ahora"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 62
+- **Texto:** "📊 Estadísticas Detalladas"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 70
+- **Texto:** "🔧 Configuración Avanzada"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 78
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 89
+- **Texto:** "📊 Exportar Datos"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 93
+- **Texto:** "🧹 Limpiar Antiguos"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 100
+- **Texto:** "📈 Métricas Semanales"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 106
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 113
+- **Texto:** "🔴 Desactivar Auto-aprobación"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 113
+- **Texto:** "🟢 Activar Auto-aprobación"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 123
+- **Texto:** "🔗 Crear Enlace de Invitación"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 129
+- **Texto:** "📝 Configurar Canal"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 133
+- **Texto:** "🧹 Limpiar Todo"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 139
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 150
+- **Texto:** "✅ Confirmar"
+---
+- **Archivo:** `keyboards/admin_free_channel_kb.py`
+- **Línea:** 154
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_kb.py`
+- **Línea:** 7
+- **Texto:** "Botón de administración"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 11
+- **Texto:** "💎 Canal VIP"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 12
+- **Texto:** "💬 Canal Free"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 23
+- **Texto:** "🎮 Gamificación"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 24
+- **Texto:** "📖 Narrativa"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 27
+- **Texto:** "🏛️ Subastas"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 28
+- **Texto:** "🎉 Eventos"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 31
+- **Texto:** "📊 Estadísticas"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 32
+- **Texto:** "⚙️ Configuración"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 35
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/admin_main_kb.py`
+- **Línea:** 36
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 5
+- **Texto:** "📖 Listar Trivias"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 6
+- **Texto:** "➕ Crear Nueva Trivia"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 12
+- **Texto:** "📝 Abierta"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 13
+- **Texto:** "🔘 Opciones múltiples"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 19
+- **Texto:** "✅ Sí"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 19
+- **Texto:** "❌ No"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 25
+- **Texto:** "✅ Confirmar"
+---
+- **Archivo:** `keyboards/admin_trivia_kb.py`
+- **Línea:** 26
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 8
+- **Texto:** "📊 Estadísticas"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 9
+- **Texto:** "🔑 Generar Token"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 10
+- **Texto:** "👥 Suscriptores"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 11
+- **Texto:** "🏅 Asignar Insignia"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 12
+- **Texto:** "📝 Publicar Canal"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 13
+- **Texto:** "⚙️ Configuración"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 14
+- **Texto:** "💋 Config Reacciones"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 15
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/admin_vip_channel_kb.py`
+- **Línea:** 16
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 6
+- **Texto:** "💰 Tarifas"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 7
+- **Texto:** "✉️ Mensajes"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 8
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 9
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 16
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 23
+- **Texto:** "📣 Recordatorio"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 24
+- **Texto:** "👋 Despedida"
+---
+- **Archivo:** `keyboards/admin_vip_config_kb.py`
+- **Línea:** 25
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 6
+- **Texto:** "📊 Estadísticas"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 7
+- **Texto:** "🔑 Generar Token"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 8
+- **Texto:** "👥 Suscriptores"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 9
+- **Texto:** "🏅 Asignar Insignia"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 10
+- **Texto:** "📝 Publicar Canal"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 11
+- **Texto:** "⚙️ Configuración"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 12
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/admin_vip_kb.py`
+- **Línea:** 13
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 8
+- **Texto:** "🔥 Subastas Activas"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 9
+- **Texto:** "📋 Mis Subastas"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 10
+- **Texto:** "🏆 Historial"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 11
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 40
+- **Texto:** "⬅️ Anterior"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 42
+- **Texto:** "Siguiente ➡️"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 47
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 56
+- **Texto:** "💰 Hacer Puja"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 59
+- **Texto:** "🔔 Notificaciones"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 61
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 62
+- **Texto:** "📊 Ver Pujas"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 63
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 81
+- **Texto:** "✏️ Cantidad Personalizada"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 82
+- **Texto:** "🔙 Cancelar"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 89
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 98
+- **Texto:** "🔕 Desactivar Notificaciones"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 100
+- **Texto:** "🔔 Activar Notificaciones"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 102
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 111
+- **Texto:** "⬅️ Anterior"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 113
+- **Texto:** "Siguiente ➡️"
+---
+- **Archivo:** `keyboards/auction_kb.py`
+- **Línea:** 114
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/common.py`
+- **Línea:** 12
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 11
+- **Texto:** "⏰ Tiempo Espera"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 12
+- **Texto:** "👥 Usuarios"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 13
+- **Texto:** "📝 Enviar Contenido"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 14
+- **Texto:** "⚡ Procesar Ahora"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 15
+- **Texto:** "🧹 Limpiar Antiguas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 16
+- **Texto:** "📊 Estadísticas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 17
+- **Texto:** "💋 Config Reacciones"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 18
+- **Texto:** "🔄 Actualizar"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 20
+- **Texto:** "⚙️ Configurar Canal"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 22
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 30
+- **Texto:** "⚡ Inmediato"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 31
+- **Texto:** "⏱️ 5 min"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 32
+- **Texto:** "🕐 15 min"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 33
+- **Texto:** "🕕 30 min"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 34
+- **Texto:** "⏰ 1 hora"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 35
+- **Texto:** "🕑 2 horas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 36
+- **Texto:** "🕕 6 horas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 37
+- **Texto:** "🕛 12 horas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 38
+- **Texto:** "📅 24 horas"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 43
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 51
+- **Texto:** "📎 Agregar Media"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 52
+- **Texto:** "➡️ Sin Media"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 53
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 62
+- **Texto:** "✅ Protección: ON"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 62
+- **Texto:** "❌ Protección: OFF"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 66
+- **Texto:** "📤 Publicar"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 67
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 70
+- **Texto:** "🎭 Reacciones"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 78
+- **Texto:** "📋 Enlace Estándar"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 79
+- **Texto:** "⏰ Enlace Temporal"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 80
+- **Texto:** "👥 Enlace Limitado"
+---
+- **Archivo:** `keyboards/free_channel_admin_kb.py`
+- **Línea:** 81
+- **Texto:** "↩️ Volver"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 29
+- **Texto:** "➡️ Continuar"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 34
+- **Texto:** "📖 Ver Mi Historia"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 41
+- **Texto:** "📊 Mi Progreso"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 46
+- **Texto:** "❓ Ayuda"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 55
+- **Texto:** "📖 Continuar Historia"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 56
+- **Texto:** "❓ Ayuda"
+---
+- **Archivo:** `keyboards/narrative_kb.py`
+- **Línea:** 57
+- **Texto:** "🏠 Menú Principal"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 6
+- **Texto:** "💫 Encanto Inicial – $150 MXN"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 7
+- **Texto:** "🔥 Sensualidad Revelada – $200 MXN"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 8
+- **Texto:** "💋 Pasión Desbordante – $250 MXN"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 9
+- **Texto:** "🔞 Intimidad Explosiva – $300 MXN"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 10
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 16
+- **Texto:** "Me interesa 🔥"
+---
+- **Archivo:** `keyboards/packs_kb.py`
+- **Línea:** 17
+- **Texto:** "🔙 Regresar"
+---
+- **Archivo:** `keyboards/publication_test_kb.py`
+- **Línea:** 6
+- **Texto:** "✅ Confirmar"
+---
+- **Archivo:** `keyboards/publication_test_kb.py`
+- **Línea:** 13
+- **Texto:** "Test completado"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 8
+- **Texto:** "📢 Configurar Canales"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 9
+- **Texto:** "🎮 Configurar Gamificación"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 10
+- **Texto:** "💳 Configurar Tarifas VIP"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 11
+- **Texto:** "✅ Finalizar Configuración"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 12
+- **Texto:** "⏭️ Omitir Configuración"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 18
+- **Texto:** "🔐 Configurar Canal VIP"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 19
+- **Texto:** "🆓 Configurar Canal Gratuito"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 20
+- **Texto:** "📋 Configurar Ambos"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 21
+- **Texto:** "⏭️ Omitir por Ahora"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 22
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 28
+- **Texto:** "🎯 Configurar Misiones"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 29
+- **Texto:** "🏅 Configurar Insignias"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 30
+- **Texto:** "🎁 Configurar Recompensas"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 31
+- **Texto:** "📊 Configurar Niveles"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 32
+- **Texto:** "✅ Usar Configuración por Defecto"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 33
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 39
+- **Texto:** "💎 Crear Tarifa Básica"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 40
+- **Texto:** "👑 Crear Tarifa Premium"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 41
+- **Texto:** "🎯 Configuración Personalizada"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 42
+- **Texto:** "⏭️ Configurar Más Tarde"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 43
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 49
+- **Texto:** "🛠️ Ir al Panel de Admin"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 50
+- **Texto:** "📖 Ver Guía de Uso"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 51
+- **Texto:** "🔧 Configuración Avanzada"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 57
+- **Texto:** "✅ Confirmar Canal"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 58
+- **Texto:** "🔄 Detectar Otro"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 59
+- **Texto:** "✏️ Ingresar Manualmente"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 60
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 66
+- **Texto:** "✅ Confirmar"
+---
+- **Archivo:** `keyboards/setup_kb.py`
+- **Línea:** 67
+- **Texto:** "❌ Cancelar"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 7
+- **Texto:** "🎁 Desbloquear Regalo"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 8
+- **Texto:** "🎀 Mis Packs"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 9
+- **Texto:** "🔐 Explorar VIP"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 10
+- **Texto:** "💌 Contenido Custom"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 11
+- **Texto:** "🎮 Juego Kinky"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 12
+- **Texto:** "🌐 Sígueme"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 18
+- **Texto:** "🔥 Me Interesa"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 19
+- **Texto:** "↩️ Regresar"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 29
+- **Texto:** "❓ FAQ"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 30
+- **Texto:** "📢 Novedades"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 31
+- **Texto:** "↩️ Menú Principal"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 37
+- **Texto:** "🎮 Jugar"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 38
+- **Texto:** "🏆 Puntuación"
+---
+- **Archivo:** `keyboards/subscription_kb.py`
+- **Línea:** 39
+- **Texto:** "↩️ Menú Principal"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 6
+- **Texto:** "ℹ️ Sistema Actualizado"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 7
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 14
+- **Texto:** "ℹ️ Sistema Actualizado"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 15
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 22
+- **Texto:** "ℹ️ Sistema Actualizado"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 23
+- **Texto:** "🔙 Volver"
+---
+- **Archivo:** `keyboards/tarifas_kb.py`
+- **Línea:** 30
+- **Texto:** "ℹ️ Sistema Actualizado"
+---
+- **Archivo:** `keyboards/vip_game_kb.py`
+- **Línea:** 6
+- **Texto:** "Mi perfil"
+---
+- **Archivo:** `keyboards/vip_game_kb.py`
+- **Línea:** 7
+- **Texto:** "Ganar puntos"
+---

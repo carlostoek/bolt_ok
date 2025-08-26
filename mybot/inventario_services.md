@@ -1,0 +1,1017 @@
+### Inventario de Textos en `services/`
+
+- **Archivo:** `services/achievement_service.py`
+- **Línea:** 16
+- **Texto:** "🏅 ¡Logro desbloqueado: Primer Mensaje! Has enviado 1 mensaje."
+---
+- **Archivo:** `services/achievement_service.py`
+- **Línea:** 22
+- **Texto:** "🏅 ¡Logro desbloqueado: Conversador! Has enviado 100 mensajes."
+---
+- **Archivo:** `services/achievement_service.py`
+- **Línea:** 28
+- **Texto:** "🏅 ¡Logro desbloqueado: Invitador! Has invitado a 5 amigos."
+---
+- **Archivo:** `services/achievement_service.py`
+- **Línea:** 34
+- **Texto:** "🏅 ¡Logro desbloqueado: Check-in 7 días!"
+---
+- **Archivo:** `services/achievement_service.py`
+- **Línea:** 40
+- **Texto:** "🏅 ¡Logro desbloqueado: VIP Supporter! Gracias por tu suscripción."
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 90
+- **Texto:** "Subasta no encontrada"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 93
+- **Texto:** "La subasta no está activa"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 96
+- **Texto:** "La subasta ha finalizado"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 101
+- **Texto:** "No tienes suficientes puntos. Necesitas {amount}, tienes {format_points(user.points)}"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 106
+- **Texto:** "La puja mínima es {min_bid} puntos"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 110
+- **Texto:** "Ya eres el pujador más alto"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 117
+- **Texto:** "La subasta está limitada a {auction.max_participants} participantes"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 144
+- **Texto:** "¡Puja de {amount} puntos realizada con éxito!"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 161
+- **Texto:** "🎉 ¡Felicidades! Has ganado la subasta '{auction.name}'\n🏆 Premio: {auction.prize_description}\n💰 Puja ganadora: {auction.current_highest_bid} puntos\n\nTe contactaremos pronto para entregarte tu premio."
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 320
+- **Texto:** "🔔 Nueva puja en '{auction.name}'\n💰 Puja actual: {amount} puntos\n👤 Pujador: {bidder_display}\n⏰ Tiempo restante: {time_remaining}\n\n¡Haz tu puja para no perder la oportunidad!"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 343
+- **Texto:** "Nadie"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 346
+- **Texto:** "🏁 Subasta finalizada: '{auction.name}'\n🏆 Ganador: {winner_display}\n💰 Puja ganadora: {auction.current_highest_bid} puntos\n🎁 Premio: {auction.prize_description}"
+---
+- **Archivo:** `services/auction_service.py`
+- **Línea:** 363
+- **Texto:** "❌ Subasta cancelada: '{auction.name}'\nLa subasta ha sido cancelada por el administrador.\nDisculpa las molestias."
+---
+- **Archivo:** `services/badge_service.py`
+- **Línea:** 100
+- **Texto:** "🏅 Has obtenido la insignia {badge.emoji or ''} {badge.name}!"
+---
+- **Archivo:** `services/channel_service.py`
+- **Línea:** 40
+- **Texto:** "Canal ID {channel_id_int}"
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 78
+- **Texto:** "Acción no reconocida por el sistema."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 84
+- **Texto:** "Un error inesperado ha ocurrido. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 103
+- **Texto:** "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 113
+- **Texto:** "El jardín de los secretos esconde más de lo que revela a simple vista..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 114
+- **Texto:** "Las sombras del pasillo susurran verdades que nadie se atreve a pronunciar..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 115
+- **Texto:** "Bajo la luz de la luna, los amantes intercambian más que simples caricias..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 116
+- **Texto:** "El sabor prohibido de sus labios esconde un secreto ancestral..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 117
+- **Texto:** "En la habitación del placer, las reglas convencionales se desvanecen..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 118
+- **Texto:** "El último velo cae, revelando la verdad que siempre estuvo ante tus ojos..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 126
+- **Texto:** "Diana sonríe al notar tu reacción... *+10 besitos* 💋 han sido añadidos a tu cuenta."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 128
+- **Texto:** "*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 150
+- **Texto:** "Diana te mira con deseo, pero niega suavemente con la cabeza...\n\n*\"Este contenido requiere una suscripción VIP, mi amor. Algunas fantasías son solo para mis amantes más dedicados...\"*\n\nUsa /vip para acceder a contenido exclusivo."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 159
+- **Texto:** "Diana te toma de la mano y te guía hacia un nuevo capítulo de vuestra historia..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 173
+- **Texto:** "Diana suspira con anhelo...\n\n*\"Esta decisión requiere más besitos de los que tienes ahora, mi amor. Algunas fantasías necesitan más... intensidad.\"*\n\nNecesitas más besitos para esta elección. Participa en los canales para conseguir más."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 181
+- **Texto:** "Diana parece confundida por tu elección...\n\n*\"No logro entender lo que deseas, mi amor. ¿Podrías intentarlo de nuevo?\"*"
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 189
+- **Texto:** "Diana asiente con una sonrisa seductora mientras la historia toma un nuevo rumbo..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 207
+- **Texto:** "Diana nota tu participación, pero parece que algo no ha funcionado correctamente..."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 215
+- **Texto:** "Diana lee con interés tu publicación, sus ojos brillan de emoción...\n\n*+5 besitos* 💋 por compartir tus pensamientos."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 216
+- **Texto:** "Diana sonríe al leer tu comentario, mordiendo suavemente su labio inferior...\n\n*+2 besitos* 💋 por tu participación."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 217
+- **Texto:** "Diana asiente al ver tu voto, apreciando tu opinión...\n\n*+1 besito* 💋 por participar."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 218
+- **Texto:** "Diana nota tu mensaje, un suave rubor colorea sus mejillas...\n\n*+1 besito* 💋 por tu actividad."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 221
+- **Texto:** "Diana aprecia tu participación...\n\n*+1 besito* 💋 añadido."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 241
+- **Texto:** "Diana te observa con una sonrisa paciente...\n\n*\"Ya nos hemos visto hoy, mi amor. Regresa mañana para más recompensas...\"*"
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 251
+- **Texto:** "Diana te recibe con un abrazo apasionado...\n\n*\"¡Has vuelto por {streak} días consecutivos, mi amor! Tu dedicación merece una recompensa especial...\"*\n\n*+25 besitos* 💋 por tu constancia semanal."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 253
+- **Texto:** "Diana te recibe con una sonrisa cálida...\n\n*\"Me alegra verte de nuevo, mi amor. Este es tu día {streak} consecutivo visitándome...\"*\n\n*+10 besitos* 💋 por tu visita diaria."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 300
+- **Texto:** "Un error inesperado ha ocurrido. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `services/coordinador_central.py`
+- **Línea:** 610
+- **Texto:** "Diana te envía una sonrisa misteriosa... 💋"
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 29
+- **Texto:** "❌ Error accediendo al sistema Diana. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 44
+- **Texto:** "❌ Error accediendo al panel administrativo Diana."
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 62
+- **Texto:** "❌ Error procesando acción Diana"
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 78
+- **Texto:** "❌ Error en navegación Diana"
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 91
+- **Texto:** "Sistema Diana integrado correctamente"
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 98
+- **Texto:** "Error inicializando coordinación Diana"
+---
+- **Archivo:** `services/diana_menu_integration.py`
+- **Línea:** 105
+- **Texto:** "Error integrando sistema Diana"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 30
+- **Texto:** "❌ Error accediendo al sistema Diana. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 45
+- **Texto:** "❌ Error accediendo al panel administrativo Diana."
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 64
+- **Texto:** "❌ Error procesando acción Diana"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 80
+- **Texto:** "❌ Error en navegación Diana"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 110
+- **Texto:** "Sistema Diana iniciado correctamente"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 116
+- **Texto:** "Error inicializando Diana"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 122
+- **Texto:** "Error crítico inicializando sistema Diana"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 131
+- **Texto:** "Diana Menu System no está inicializado"
+---
+- **Archivo:** `services/diana_menu_integration_impl.py`
+- **Línea:** 149
+- **Texto:** "Error verificando salud del sistema Diana"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 60
+- **Texto:** "❌ Error cargando el menú principal. Inténtalo de nuevo."
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 74
+- **Texto:** "🎭 **Panel de Administración Diana**\n\nUsa los comandos administrativos existentes o accede através de los menús inline."
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 86
+- **Texto:** "💋 **Menú Principal Diana**\n\nBienvenido a tu experiencia personalizada con Diana."
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 128
+- **Texto:** "🔧 Función '{data}' en desarrollo"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 132
+- **Texto:** "❌ Error procesando la acción"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 180
+- **Texto:** "🔄 Panel administrativo actualizado"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 183
+- **Texto:** "🔄 Menú principal actualizado"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 189
+- **Texto:** "❌ Menú cerrado"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 191
+- **Texto:** "❌ Menú cerrado"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 199
+- **Texto:** "❌ Error en función administrativa"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 209
+- **Texto:** "❌ Error en función narrativa"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 219
+- **Texto:** "❌ Error en función de gamificación"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 229
+- **Texto:** "❌ Error en función de usuario"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 242
+- **Texto:** "Diana Menu System operativo"
+---
+- **Archivo:** `services/diana_menu_system.py`
+- **Línea:** 248
+- **Texto:** "Error inicializando sistema Diana"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 24
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 58
+- **Texto:** "🎭 Panel administrativo cargado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 62
+- **Texto:** "❌ Error cargando panel administrativo"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 68
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 108
+- **Texto:** "👥 Gestión de usuarios cargada"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 112
+- **Texto:** "❌ Error cargando gestión de usuarios"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 118
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 154
+- **Texto:** "🎮 Administración de gamificación cargada"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 158
+- **Texto:** "❌ Error cargando administración de gamificación"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 164
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 200
+- **Texto:** "📖 Administración narrativa cargada"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 204
+- **Texto:** "❌ Error cargando administración narrativa"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 210
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 250
+- **Texto:** "👑 Sistema VIP cargado"
+---
+- **Archivo:** `services/diana_menus/admin_menu.py`
+- **Línea:** 254
+- **Texto:** "❌ Error cargando sistema VIP"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 50
+- **Texto:** "🎮 Centro de gamificación cargado"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 54
+- **Texto:** "❌ Error cargando centro de gamificación"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 100
+- **Texto:** "🎯 Centro de desafíos cargado"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 104
+- **Texto:** "❌ Error cargando centro de desafíos"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 150
+- **Texto:** "🏆 Galería de logros cargada"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 154
+- **Texto:** "❌ Error cargando galería de logros"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 202
+- **Texto:** "💋 Economía de besitos cargada"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 206
+- **Texto:** "❌ Error cargando economía de besitos"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 254
+- **Texto:** "⭐ Sistema de conexión cargado"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 258
+- **Texto:** "❌ Error cargando sistema de conexión"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 280
+- **Texto:** "• No hay misiones disponibles"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 292
+- **Texto:** "• No hay misiones especiales disponibles"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 301
+- **Texto:** "• No hay desafíos temporales activos"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 331
+- **Texto:** "• No hay logros recientes"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 340
+- **Texto:** "• No hay objetivos próximos definidos"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 345
+- **Texto:** "• No hay logros épicos disponibles aún"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 402
+- **Texto:** "• No hay beneficios especiales en este nivel"
+---
+- **Archivo:** `services/diana_menus/gamification_menu.py`
+- **Línea:** 408
+- **Texto:** "• Información no disponible"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 49
+- **Texto:** "📖 {character.title()} te da la bienvenida..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 53
+- **Texto:** "❌ Error cargando centro narrativo"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 80
+- **Texto:** "📖 Historia cargada"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 84
+- **Texto:** "❌ Error cargando historia"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 130
+- **Texto:** "🎒 Mochila de pistas cargada"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 134
+- **Texto:** "❌ Error cargando mochila de pistas"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 174
+- **Texto:** "🔮 Centro de decisiones cargado"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 178
+- **Texto:** "❌ Error cargando centro de decisiones"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 220
+- **Texto:** "🎭 Selección de personaje"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 224
+- **Texto:** "❌ Error cargando selección de personaje"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 247
+- **Texto:** "👑 Contenido VIP desbloqueado"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 249
+- **Texto:** "🔒 Contenido VIP (Requiere suscripción)"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 255
+- **Texto:** "Apenas comenzamos a conocernos, pero ya siento la conexión..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 257
+- **Texto:** "Cada momento contigo revela una nueva faceta de mi ser..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 259
+- **Texto:** "Nuestros caminos se entrelazan de maneras que no imaginé..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 261
+- **Texto:** "Has llegado a lugares de mi corazón que creí cerrados para siempre..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 263
+- **Texto:** "Los misterios más profundos requieren de almas valientes para descubrirlos..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 291
+- **Texto:** "🔒 Contenido VIP requerido"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 314
+- **Texto:** "📖 Historia comenzando..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 323
+- **Texto:** "• No hay pistas recientes"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 332
+- **Texto:** "• Continúa la historia para más revelaciones"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 337
+- **Texto:** "• No hay decisiones pendientes"
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 346
+- **Texto:** "Escucha a tu corazón, pero no olvides que algunas decisiones requieren valentía..."
+---
+- **Archivo:** `services/diana_menus/narrative_menu.py`
+- **Línea:** 348
+- **Texto:** "Las decisiones más profundas nacen de la contemplación y el entendimiento..."
+---
+- **Archivo:** `services/diana_menus/stub.py`
+- **Línea:** 23
+- **Texto:** "🚧 **Módulo Diana en Desarrollo** 🚧\n\nEste componente del Diana Menu System está actualmente en desarrollo.\nEstará disponible en futuras versiones."
+---
+- **Archivo:** `services/diana_menus/stub.py`
+- **Línea:** 39
+- **Texto:** "🎭 **Panel de Administración Diana** 🚧\n\nEl panel de administración Diana está en desarrollo.\nPróximamente dispondrás de funcionalidades avanzadas de administración."
+---
+- **Archivo:** `services/diana_menus/stub.py`
+- **Línea:** 54
+- **Texto:** "💋 **Menú Principal Diana** 🚧\n\nEl menú principal de Diana está en desarrollo.\nPróximamente disfrutarás de una experiencia completamente personalizada."
+---
+- **Archivo:** `services/diana_menus/stub.py`
+- **Línea:** 75
+- **Texto:** "📖 **Hub Narrativo Diana** 🚧\n\nEl hub narrativo de Diana está en desarrollo.\nPróximamente podrás disfrutar de historias inmersivas."
+---
+- **Archivo:** `services/diana_menus/stub.py`
+- **Línea:** 96
+- **Texto:** "🎮 **Hub de Gamificación Diana** 🚧\n\nEl hub de gamificación de Diana está en desarrollo.\nPróximamente accederás a misiones, logros y recompensas."
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 50
+- **Texto:** "❌ Error cargando tu menú personal"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 94
+- **Texto:** "👤 Tu perfil completo"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 98
+- **Texto:** "❌ Error cargando perfil"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 138
+- **Texto:** "🌅 Actividades diarias cargadas"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 142
+- **Texto:** "❌ Error cargando actividades diarias"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 182
+- **Texto:** "🏆 Galería de logros cargada"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 186
+- **Texto:** "❌ Error cargando galería de logros"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 231
+- **Texto:** "Buenos días, mi amor"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 233
+- **Texto:** "Buenas tardes, cariño"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 235
+- **Texto:** "Buenas noches, mi seductor"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 237
+- **Texto:** "Hora de secretos nocturnos"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 239
+- **Texto:** "Lucien te da la bienvenida"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 248
+- **Texto:** "📖 Continúa tu historia personal"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 251
+- **Texto:** "🎯 Completa misiones para ganar besitos"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 254
+- **Texto:** "👑 Descubre el contenido VIP exclusivo"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 300
+- **Texto:** "🔥 Muy Activo"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 302
+- **Texto:** "⚡ Activo"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 304
+- **Texto:** "🌟 Moderado"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 306
+- **Texto:** "💤 Casual"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 380
+- **Texto:** "• No hay logros recientes"
+---
+- **Archivo:** `services/diana_menus/user_menu.py`
+- **Línea:** 387
+- **Texto:** "• No hay objetivos próximos"
+---
+- **Archivo:** `services/enhanced_channel_service.py`
+- **Línea:** 33
+- **Texto:** "🎉 **¡Bienvenido al Canal Gratuito!**\n\n✅ Tu solicitud ha sido aprobada exitosamente.\n🎯 Ya puedes acceder a todo el contenido gratuito disponible.\n\n📱 Explora nuestro contenido y participa en las actividades.\n🎮 ¡No olvides usar los comandos del bot para ganar puntos!\n\n¡Disfruta de la experiencia! 🚀"
+---
+- **Archivo:** `services/enhanced_channel_service.py`
+- **Línea:** 60
+- **Texto:** "🎉 **¡Bienvenido a nuestro contenido exclusivo!**\n\n✅ Tu acceso ha sido activado exitosamente mediante token.\n🎯 Disfruta de todo el contenido premium disponible.\n\n📱 Explora nuestro contenido especial y participa en las actividades VIP.\n🎮 ¡No olvides usar los comandos del bot para ganar puntos exclusivos!\n\n¡Disfruta de la experiencia premium! 🚀"
+---
+- **Archivo:** `services/enhanced_channel_service.py`
+- **Línea:** 87
+- **Texto:** "⏰ **Recordatorio de Suscripción**\n\nTu suscripción VIP expira en 24 horas.\n\n¿Deseas renovar tu acceso para continuar disfrutando de los beneficios exclusivos?\n\nContacta con un administrador para más información."
+---
+- **Archivo:** `services/enhanced_channel_service.py`
+- **Línea:** 114
+- **Texto:** "👋 **Hasta pronto**\n\nTu suscripción VIP ha expirado.\n\nGracias por ser parte de nuestra comunidad.\nEsperamos verte pronto nuevamente.\n\nSi deseas renovar tu acceso, contacta con un administrador."
+---
+- **Archivo:** `services/free_channel_service.py`
+- **Línea:** 100
+- **Texto:** "📋 **Solicitud Recibida**\n\nTu solicitud para unirte al canal gratuito ha sido registrada.\n\n⏰ **Tiempo de espera**: {wait_text}\n✅ Serás aprobado automáticamente una vez transcurrido este tiempo.\n\n¡Gracias por tu paciencia!"
+---
+- **Archivo:** `services/free_channel_service.py`
+- **Línea:** 107
+- **Texto:** "📋 **Solicitud Recibida**\n\nTu solicitud para unirte al canal gratuito ha sido registrada.\n\n✅ Serás aprobado inmediatamente.\n\n¡Bienvenido!"
+---
+- **Archivo:** `services/free_channel_service.py`
+- **Línea:** 163
+- **Texto:** "🎉 **¡Bienvenido al Canal Gratuito!**\n\n✅ Tu solicitud ha sido aprobada exitosamente.\n🎯 Ya puedes acceder a todo el contenido gratuito disponible.\n\n📱 Explora nuestro contenido y participa en las actividades.\n🎮 ¡No olvides usar los comandos del bot para ganar puntos!\n\n¡Disfruta de la experiencia! 🚀"
+---
+- **Archivo:** `services/free_channel_service.py`
+- **Línea:** 200
+- **Texto:** "🌟 **¡Hola {user_name}!**\n\n¡Gracias por tu interés en unirte a nuestro canal gratuito!\n\n🔗 **Mientras esperas la aprobación, ¡síguenos en nuestras redes sociales!**\n\n📱 **Instagram**: @tu_instagram\n🐦 **Twitter**: @tu_twitter\n📘 **Facebook**: facebook.com/tu_pagina\n🎵 **TikTok**: @tu_tiktok\n\n📺 **YouTube**: youtube.com/tu_canal\n\n¡No te pierdas nuestro contenido exclusivo y mantente al día con todas las novedades!\n\n⏰ Tu solicitud de acceso al canal será procesada automáticamente pronto.\n\n¡Gracias por acompañarnos en esta aventura! 🚀"
+---
+- **Archivo:** `services/integration/channel_engagement_service.py`
+- **Línea:** 100
+- **Texto:** "🎉 ¡Felicidades! Has completado {progress.checkin_streak} días de participación. Bonus semanal: +25 puntos"
+---
+- **Archivo:** `services/integration/narrative_access_service.py`
+- **Línea:** 40
+- **Texto:** "Este contenido requiere una suscripción VIP activa."
+---
+- **Archivo:** `services/integration/narrative_point_service.py`
+- **Línea:** 49
+- **Texto:** "No tienes suficientes puntos para esta decisión."
+---
+- **Archivo:** `services/integration/narrative_point_service.py`
+- **Línea:** 58
+- **Texto:** "Decisión no encontrada."
+---
+- **Archivo:** `services/integration/narrative_point_service.py`
+- **Línea:** 73
+- **Texto:** "Error al procesar la decisión."
+---
+- **Archivo:** `services/level_service.py`
+- **Línea:** 110
+- **Texto:** "Has desbloqueado una nueva pista: {lore_piece.title}"
+---
+- **Archivo:** `services/narrative_engine.py`
+- **Línea:** 30
+- **Texto:** "No se encontró fragmento inicial 'start'"
+---
+- **Archivo:** `services/narrative_engine.py`
+- **Línea:** 42
+- **Texto:** "No se encontró fragmento inicial 'start'"
+---
+- **Archivo:** `services/narrative_engine.py`
+- **Línea:** 69
+- **Texto:** "Fragmento de destino no encontrado: {selected_choice.destination_fragment_key}"
+---
+- **Archivo:** `services/narrative_fragment_service.py`
+- **Línea:** 38
+- **Texto:** "Invalid fragment type: {fragment_type}"
+---
+- **Archivo:** `services/narrative_fragment_service.py`
+- **Línea:** 100
+- **Texto:** "Invalid fragment type: {fragment_type}"
+---
+- **Archivo:** `services/narrative_loader.py`
+- **Línea:** 29
+- **Texto:** "Formato de archivo no válido en {filepath}"
+---
+- **Archivo:** `services/narrative_loader.py`
+- **Línea:** 40
+- **Texto:** "Fragmento sin fragment_id/key, saltando"
+---
+- **Archivo:** `services/narrative_loader.py`
+- **Línea:** 51
+- **Texto:** "No se puede crear un fragmento sin fragment_id/key."
+---
+- **Archivo:** `services/narrative_loader.py`
+- **Línea:** 108
+- **Texto:** "Ya existen fragmentos narrativos, saltando carga por defecto"
+---
+- **Archivo:** `services/narrative_loader.py`
+- **Línea:** 261
+- **Texto:** "Narrativa por defecto cargada exitosamente"
+---
+- **Archivo:** `services/narrative_service.py`
+- **Línea:** 28
+- **Texto:** "Decision not found"
+---
+- **Archivo:** `services/notification_service.py`
+- **Línea:** 200
+- **Texto:** "💋 *Diana te envía una sonrisa misteriosa...*\n\nHas progresado en tu viaje. ¡Continúa explorando!"
+---
+- **Archivo:** `services/plan_service.py`
+- **Línea:** 13
+- **Texto:** "El sistema de planes ha sido reemplazado por el nuevo sistema de transacciones VIP"
+---
+- **Archivo:** `services/plan_service.py`
+- **Línea:** 17
+- **Texto:** "El sistema de planes ha sido reemplazado por el nuevo sistema de transacciones VIP"
+---
+- **Archivo:** `services/plan_service.py`
+- **Línea:** 21
+- **Texto:** "El sistema de planes ha sido reemplazado por el nuevo sistema de transacciones VIP"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 150
+- **Texto:** "🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 181
+- **Texto:** "🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 224
+- **Texto:** "🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 269
+- **Texto:** "Has acumulado {user.points:.1f} puntos en total"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 275
+- **Texto:** "Has acumulado {user.points:.1f} puntos en total"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 341
+- **Texto:** "🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!"
+---
+- **Archivo:** `services/point_service.py`
+- **Línea:** 382
+- **Texto:** "🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 68
+- **Texto:** "User referenced but not found in database"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 88
+- **Texto:** "User has negative points"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 98
+- **Texto:** "User level doesn't match points"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 118
+- **Texto:** "User has duplicate badge awards"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 132
+- **Texto:** "UserBadge references non-existent Badge {user_badge.badge_id}"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 151
+- **Texto:** "User has narrative state with empty fragment reference"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 164
+- **Texto:** "Error during consistency check: {str(e)}"
+---
+- **Archivo:** `services/reconciliation_service.py`
+- **Línea:** 184
+- **Texto:** "VIP user has surprisingly low points"
+---
+- **Archivo:** `services/reward_service.py`
+- **Línea:** 26
+- **Texto:** "Usuario con ID {user_id} no encontrado"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 20
+- **Texto:** "Processed {processed_count} pending channel requests"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 25
+- **Texto:** "Channel request scheduler started"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 33
+- **Texto:** "Channel request scheduler cancelled"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 45
+- **Texto:** "Tu suscripción VIP expira pronto."
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 47
+- **Texto:** "Tu suscripción VIP ha expirado."
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 90
+- **Texto:** "VIP subscription scheduler started"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 98
+- **Texto:** "VIP subscription scheduler cancelled"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 119
+- **Texto:** "VIP membership scheduler started"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 127
+- **Texto:** "VIP membership scheduler cancelled"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 136
+- **Texto:** "Auto-ended {len(expired_auctions)} expired auctions"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 142
+- **Texto:** "Auction monitor scheduler started"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 148
+- **Texto:** "Auction monitor scheduler cancelled"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 157
+- **Texto:** "Cleaned up {cleaned_count} old channel requests"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 163
+- **Texto:** "Free channel cleanup scheduler started"
+---
+- **Archivo:** `services/scheduler.py`
+- **Línea:** 169
+- **Texto:** "Free channel cleanup scheduler cancelled"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 46
+- **Texto:** "No se encontraron fragmentos activos"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 55
+- **Texto:** "Fragmento raíz con ID {root_fragment_id} no encontrado"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 62
+- **Texto:** "Tipo de visualización '{view_type}' no soportado"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 87
+- **Texto:** "Fragmento con ID {fragment_id} no encontrado"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 200
+- **Texto:** "Fragmento con ID {fragment_id} no encontrado"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 210
+- **Texto:** "Fragmento con ID {fragment_id} no encontrado"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 500
+- **Texto:** "No hay camino entre los fragmentos especificados"
+---
+- **Archivo:** `services/storyboard_service.py`
+- **Línea:** 518
+- **Texto:** "No se pudo encontrar un camino entre los fragmentos"
+---
+- **Archivo:** `services/subscription_service.py`
+- **Línea:** 141
+- **Texto:** "El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP"
+---
+- **Archivo:** `services/tenant_service.py`
+- **Línea:** 141
+- **Texto:** "El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP"
+---
+- **Archivo:** `services/token_service.py`
+- **Línea:** 25
+- **Texto:** "Invalid or expired token"
+---
+- **Archivo:** `services/unified_mission_service.py`
+- **Línea:** 70
+- **Texto:** "Tipo de misión inválido. Debe ser uno de: {', '.join(valid_types)}"
+---
+- **Archivo:** `services/unified_mission_service.py`
+- **Línea:** 110
+- **Texto:** "Misión no encontrada o inactiva"
+---
+- **Archivo:** `services/unified_mission_service.py`
+- **Línea:** 120
+- **Texto:** "Misión {mission_id} ya completada por usuario {user_id}"
+---
+- **Archivo:** `services/unified_mission_service.py`
+- **Línea:** 126
+- **Texto:** "Misión {mission_id} en cooldown para usuario {user_id}"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 36
+- **Texto:** "No se encontró fragmento inicial 'start'"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 48
+- **Texto:** "No se encontró fragmento inicial 'start'"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 63
+- **Texto:** "❌ Decisión inválida"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 70
+- **Texto:** "❌ Decisión inválida"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 79
+- **Texto:** "❌ No puedes tomar esta decisión ahora. Puede que necesites más puntos o cumplir otros requisitos."
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 105
+- **Texto:** "*Lucien te está esperando...*"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 118
+- **Texto:** "❌ **Historia No Encontrada**\n\nNo se pudo cargar tu historia unificada. Usa `/historia_unificada` para comenzar."
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 129
+- **Texto:** "🎯 **Misiones**\n\nNo tienes misiones disponibles en este momento."
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 152
+- **Texto:** "Usa el comando /misiones para gestionar tus misiones."
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 174
+- **Texto:** "✨ *Has ganado {reward_points} puntos*"
+---
+- **Archivo:** `services/unified_narrative_service.py`
+- **Línea:** 178
+- **Texto:** "🗝️ *Has desbloqueado una nueva pista*"
+---
+- **Archivo:** `services/user_narrative_service.py`
+- **Línea:** 40
+- **Texto:** "Usuario con ID {user_id} no encontrado"
+---
+- **Archivo:** `services/user_narrative_service.py`
+- **Línea:** 58
+- **Texto:** "Fragmento con ID {fragment_id} no encontrado o inactivo"
+---
+- **Archivo:** `services/user_narrative_service.py`
+- **Línea:** 76
+- **Texto:** "Fragmento con ID {fragment_id} no encontrado o inactivo"
+---
+- **Archivo:** `services/user_narrative_service.py`
+- **Línea:** 94
+- **Texto:** "Pista con código {clue_code} no encontrada o inactiva"
+---
+- **Archivo:** `services/user_narrative_service.py`
+- **Línea:** 150
+- **Texto:** "Usuario con ID {user_id} no tiene progreso narrativo"
+---
+- **Archivo:** `services/user_service.py`
+- **Línea:** 14
+- **Texto:** "Error getting user {telegram_id}: {e}"
+---
+- **Archivo:** `services/user_service.py`
+- **Línea:** 20
+- **Texto:** "Secondary error getting user {telegram_id}: {e2}"

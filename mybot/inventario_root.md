@@ -1,0 +1,234 @@
+### Inventario de Textos en el Directorio Raíz
+
+- **Archivo:** `backpack.py`
+- **Línea:** 23
+- **Texto:** "Tu mochila está vacía."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 27
+- **Texto:** "Mochila de {user_name}:"
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 44
+- **Texto:** "Pista no encontrada."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 47
+- **Texto:** "Error al mostrar la mochila."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 60
+- **Texto:** "Pista '{hint_code}' desbloqueada."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 62
+- **Texto:** "Ya tienes la pista '{hint_code}'."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 64
+- **Texto:** "No se pudo desbloquear la pista '{hint_code}'."
+---
+- **Archivo:** `backpack.py`
+- **Línea:** 67
+- **Texto:** "Error al desbloquear la pista."
+---
+- **Archivo:** `bot.py`
+- **Línea:** 114
+- **Texto:** "Bot iniciado"
+---
+- **Archivo:** `bot.py`
+- **Línea:** 118
+- **Texto:** "Bot detenido"
+---
+- **Archivo:** `bot.py`
+- **Línea:** 126
+- **Texto:** "Error al iniciar el bot: {e}"
+---
+- **Archivo:** `combinar_pistas.py`
+- **Línea:** 24
+- **Texto:** "Combinación exitosa. Nueva pista desbloqueada: {nueva_pista.titulo}"
+---
+- **Archivo:** `combinar_pistas.py`
+- **Línea:** 26
+- **Texto:** "La combinación no ha producido ningún resultado nuevo."
+---
+- **Archivo:** `combinar_pistas.py`
+- **Línea:** 28
+- **Texto:** "Error al combinar pistas."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 20
+- **Texto:** "Test de notificación enviado."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 22
+- **Texto:** "Error en el test de notificación: {e}"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 27
+- **Texto:** "Test de notificación de error enviado."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 29
+- **Texto:** "Error en el test de notificación de error: {e}"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 34
+- **Texto:** "Test de notificación de advertencia enviado."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 36
+- **Texto:** "Error en el test de notificación de advertencia: {e}"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 41
+- **Texto:** "Test de notificación de información enviado."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 43
+- **Texto:** "Error en el test de notificación de información: {e}"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 48
+- **Texto:** "Test de notificación de depuración enviado."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 50
+- **Texto:** "Error en el test de notificación de depuración: {e}"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 53
+- **Texto:** "Notificación de prueba"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 54
+- **Texto:** "Este es un mensaje de prueba."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 55
+- **Texto:** "Error de prueba"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 56
+- **Texto:** "Este es un mensaje de error de prueba."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 57
+- **Texto:** "Advertencia de prueba"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 58
+- **Texto:** "Este es un mensaje de advertencia de prueba."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 59
+- **Texto:** "Información de prueba"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 60
+- **Texto:** "Este es un mensaje de información de prueba."
+---
+- **Archivo:** `debug.py`
+- **Línea:** 61
+- **Texto:** "Depuración de prueba"
+---
+- **Archivo:** `debug.py`
+- **Línea:** 62
+- **Texto:** "Este es un mensaje de depuración de prueba."
+---
+- **Archivo:** `integration_example.py`
+- **Línea:** 15
+- **Texto:** "Ejecutando test de integración..."
+---
+- **Archivo:** `integration_example.py`
+- **Línea:** 18
+- **Texto:** "Test de integración completado."
+---
+- **Archivo:** `integration_example.py`
+- **Línea:** 20
+- **Texto:** "Error en el test de integración: {e}"
+---
+- **Archivo:** `mochila.py`
+- **Línea:** 14
+- **Texto:** "Tu mochila está vacía."
+---
+- **Archivo:** `mochila.py`
+- **Línea:** 18
+- **Texto:** "Contenido de tu mochila:"
+---
+- **Archivo:** `mochila.py`
+- **Línea:** 32
+- **Texto:** "Pista no encontrada."
+---
+- **Archivo:** `mochila.py`
+- **Línea:** 35
+- **Texto:** "Error al mostrar la mochila."
+---
+- **Archivo:** `narrativa.py`
+- **Línea:** 15
+- **Texto:** "Comando de prueba para la narrativa."
+---
+- **Archivo:** `narrativa.py`
+- **Línea:** 17
+- **Texto:** "Error en el comando de prueba de narrativa: {e}"
+---
+- **Archivo:** `notificaciones.py`
+- **Línea:** 15
+- **Texto:** "Notificación de prueba enviada."
+---
+- **Archivo:** `notificaciones.py`
+- **Línea:** 17
+- **Texto:** "Error al enviar notificación de prueba: {e}"
+---
+- **Archivo:** `notificaciones.py`
+- **Línea:** 20
+- **Texto:** "Este es un mensaje de prueba desde el sistema de notificaciones."
+---
+- **Archivo:** `run_narrative_admin_tests.py`
+- **Línea:** 15
+- **Texto:** "Iniciando tests de administración narrativa..."
+---
+- **Archivo:** `run_narrative_admin_tests.py`
+- **Línea:** 18
+- **Texto:** "Tests de administración narrativa completados."
+---
+- **Archivo:** `run_narrative_admin_tests.py`
+- **Línea:** 20
+- **Texto:** "Error en los tests de administración narrativa: {e}"
+---
+- **Archivo:** `run_protection_tests.py`
+- **Línea:** 15
+- **Texto:** "Iniciando tests de protección de contenido..."
+---
+- **Archivo:** `run_protection_tests.py`
+- **Línea:** 18
+- **Texto:** "Tests de protección de contenido completados."
+---
+- **Archivo:** `run_protection_tests.py`
+- **Línea:** 20
+- **Texto:** "Error en los tests de protección de contenido: {e}"
+---
+- **Archivo:** `test_free_role_assignment.py`
+- **Línea:** 15
+- **Texto:** "Iniciando test de asignación de rol gratuito..."
+---
+- **Archivo:** `test_free_role_assignment.py`
+- **Línea:** 18
+- **Texto:** "Test de asignación de rol gratuito completado."
+---
+- **Archivo:** `test_free_role_assignment.py`
+- **Línea:** 20
+- **Texto:** "Error en el test de asignación de rol gratuito: {e}"
+---
+- **Archivo:** `test_notifications.py`
+- **Línea:** 15
+- **Texto:** "Iniciando tests de notificaciones..."
+---
+- **Archivo:** `test_notifications.py`
+- **Línea:** 18
+- **Texto:** "Tests de notificaciones completados."
+---
+- **Archivo:** `test_notifications.py`
+- **Línea:** 20
+- **Texto:** "Error en los tests de notificaciones: {e}"
+---

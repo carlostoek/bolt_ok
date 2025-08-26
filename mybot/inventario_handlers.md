@@ -1,0 +1,2519 @@
+### Inventario de Textos en `handlers/`
+
+- **Archivo:** `handlers/admin.py`
+- **Línea:** 23
+- **Texto:** "Menú de administración"
+---
+- **Archivo:** `handlers/admin.py`
+- **Línea:** 29
+- **Texto:** "Acción de administración"
+---
+- **Archivo:** `handlers/admin.py`
+- **Línea:** 42
+- **Texto:** "Schedulers ejecutados"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 26
+- **Texto:** "Envía los emojis separados por espacios para las reacciones del canal VIP:"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 36
+- **Texto:** "Envía los emojis separados por espacios para las reacciones del canal Free:"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 45
+- **Texto:** "❌ Acceso Denegado."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 50
+- **Texto:** "Por favor, envía los emojis separados por espacios."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 57
+- **Texto:** "No se detectaron emojis válidos. Por favor, intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 64
+- **Texto:** "Has ingresado más de 10 reacciones. Por favor, ingresa un máximo de 10."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 72
+- **Texto:** "Ahora, envía los puntos para CADA REACCIÓN, separados por espacios y en el MISMO ORDEN en que las enviaste.\n\n"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 75
+- **Texto:** "Ejemplo: si enviaste '👍 ❤️ 🔥' y quieres que '👍' valga 0.5, '❤️' valga 1.0 y '🔥' valga 2.0, entonces envía:\n"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 78
+- **Texto:** "`0.5 1.0 2.0`"
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 84
+- **Texto:** "Por favor, envía los puntos separados por espacios."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 94
+- **Texto:** "El número de puntos ingresados ({len(points_str)}) no coincide con el número de reacciones ({len(reactions)}).\nPor favor, asegúrate de ingresar un punto para cada reacción, en el mismo orden."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 104
+- **Texto:** "Los puntos no pueden ser negativos. Por favor, inténtalo de nuevo."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 111
+- **Texto:** "Punto inválido '{p_str}'. Por favor, ingresa solo números (ej: 0.5 1.0)."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 117
+- **Texto:** "Puntos guardados temporalmente. Pulsa '✅ Guardar' para aplicar los cambios o '❌ Cancelar' para abortar."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 130
+- **Texto:** "Configuración de reacciones VIP cancelada."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 135
+- **Texto:** "Configuración de reacciones Free cancelada."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 140
+- **Texto:** "Configuración cancelada. Volviendo al menú principal."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 144
+- **Texto:** "Configuración cancelada."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 156
+- **Texto:** "Error: ID del canal no especificado para guardar reacciones."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 162
+- **Texto:** "Algo salió mal: No se pudo determinar el canal. Intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 168
+- **Texto:** "Debes ingresar al menos una reacción."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 193
+- **Texto:** "Botones de reacción y puntos actualizados para el canal {channel_name} (ID: `{target_channel_id}`)."
+---
+- **Archivo:** `handlers/admin/admin_config.py`
+- **Línea:** 197
+- **Texto:** "Configuración guardada."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 48
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 52
+- **Texto:** "⚙️ **PANEL DE ADMINISTRACIÓN COMPLETO**\n\nBienvenido al centro de control del bot. Desde aquí puedes gestionar todos los aspectos del sistema: usuarios, canales, gamificación, subastas, eventos y configuraciones avanzadas."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 63
+- **Texto:** "❌ **Acceso Denegado**\n\nNo tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 74
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudo cargar el panel de administración."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 81
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 113
+- **Texto:** "Error al cargar estadísticas"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 120
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 131
+- **Texto:** "Error en la navegación"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 137
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 147
+- **Texto:** "Error al cargar el menú principal"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 157
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 162
+- **Texto:** "🎮 **Panel de Gestión de Gamificación**\n\nDesde aquí puedes administrar usuarios, misiones, recompensas, niveles, minijuegos, subastas y eventos. Elige una opción para empezar:"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 174
+- **Texto:** "Error al cargar el panel de gamificación"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 184
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 193
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 220
+- **Texto:** "Error al cargar la configuración"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 229
+- **Texto:** "❌ **Acceso Denegado**\n\nNo tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 238
+- **Texto:** "ℹ️ **Sistema de Tokens Actualizado**\n\nEl sistema de generación de tokens VIP ha sido actualizado. Ahora utiliza el nuevo sistema de transacciones VIP. Por favor, use el panel de administración de VIP para gestionar accesos."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 247
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudo procesar la solicitud."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 254
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 258
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tokens ha sido actualizado. Use el panel de administración de VIP para gestionar accesos."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 265
+- **Texto:** "Error al procesar la solicitud"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 271
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 282
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 292
+- **Texto:** "❌ **Acceso Denegado**\n\nNo tienes permisos para usar este comando."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 305
+- **Texto:** "✅ Pista '<b>{hint_code_to_give}</b>' desbloqueada para el usuario <b>{target_user_id}</b>."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 310
+- **Texto:** "⚠️ La pista '<b>{hint_code_to_give}</b>' ya la tiene el usuario <b>{target_user_id}</b> o no existe."
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 315
+- **Texto:** "❌ Uso incorrecto. Formato: <code>/give_hint <user_id> <hint_code></code>"
+---
+- **Archivo:** `handlers/admin/admin_menu.py`
+- **Línea:** 320
+- **Texto:** "❌ Uso incorrecto. Formato: <code>/give_hint <user_id> <hint_code></code>"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 35
+- **Texto:** "🏛️ **Administración de Subastas**\n\nGestiona las subastas en tiempo real del sistema."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 48
+- **Texto:** "📝 **Crear Nueva Subasta**\n\nIngresa el nombre de la subasta:"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 60
+- **Texto:** "❌ El nombre debe tener al menos 3 caracteres."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 65
+- **Texto:** "✅ Nombre: **{name}**\n\n📝 Ahora ingresa una descripción para la subasta:"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 77
+- **Texto:** "✅ Descripción guardada.\n\n🎁 Ahora describe el premio de la subasta:"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 89
+- **Texto:** "❌ La descripción del premio debe ser más detallada."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 94
+- **Texto:** "🎁 Premio: **{prize}**\n\n💰 Ingresa el precio inicial de la subasta (en puntos):"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 107
+- **Texto:** "❌ Ingresa un número válido mayor a 0."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 112
+- **Texto:** "💰 Precio inicial: **{initial_price} puntos**\n\n⏰ Selecciona la duración de la subasta:"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 128
+- **Texto:** "¿Confirmas la creación de esta subasta?"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 152
+- **Texto:** "La subasta ya está disponible para los usuarios."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 162
+- **Texto:** "❌ Error al crear la subasta: {str(e)}"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 176
+- **Texto:** "📋 **Subastas Activas**\n\nNo hay subastas activas en este momento."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 200
+- **Texto:** "⏳ **Subastas Pendientes**\n\nNo hay subastas pendientes."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 224
+- **Texto:** "❌ Subasta no encontrada"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 256
+- **Texto:** "❌ Subasta no encontrada"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 262
+- **Texto:** "⚠️ **Confirmar Finalización**\n\n¿Estás seguro de que quieres finalizar la subasta **{auction.name}**?\n\nEsta acción no se puede deshacer."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 276
+- **Texto:** "Sin ganador"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 285
+- **Texto:** "Se han enviado las notificaciones correspondientes."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 291
+- **Texto:** "❌ No se pudo finalizar la subasta."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 305
+- **Texto:** "❌ Subasta no encontrada"
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 311
+- **Texto:** "⚠️ **Confirmar Cancelación**\n\n¿Estás seguro de que quieres cancelar la subasta **{auction.name}**?\n\nEsta acción no se puede deshacer y se notificará a todos los participantes."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 326
+- **Texto:** "La subasta ha sido cancelada exitosamente.\nSe han enviado las notificaciones a todos los participantes."
+---
+- **Archivo:** `handlers/admin/auction_admin.py`
+- **Línea:** 333
+- **Texto:** "❌ No se pudo cancelar la subasta."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 31
+- **Texto:** "Administrar canales\n\nNo hay canales configurados."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 45
+- **Texto:** "Ingresa el ID del canal VIP o reenvía un mensaje del canal aquí.\nPuedes escribir directamente el ID del canal (debes ser administrador del canal para obtenerlo), o puedes reenviar un mensaje del canal aquí y el bot extraerá automáticamente el ID del remitente."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 68
+- **Texto:** "ID inválido. Intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 72
+- **Texto:** "✅ **Canal VIP registrado:**\n📢 {vip_channel_title or 'Sin nombre'} (ID: {chat_id})\n\nAhora ingresa el ID del canal FREE o reenvía un mensaje del canal."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 91
+- **Texto:** "ID inválido. Intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 114
+- **Texto:** "Los canales han sido configurados exitosamente en el sistema."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 124
+- **Texto:** "Tiempo actual: {current} minutos"
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 142
+- **Texto:** "Tiempo actualizado a {minutes} minutos."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 157
+- **Texto:** "Canales actualizados:\n\n"
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 159
+- **Texto:** "No hay canales configurados."
+---
+- **Archivo:** `handlers/admin/channel_admin.py`
+- **Línea:** 167
+- **Texto:** "Canal eliminado"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 30
+- **Texto:** "Configuración del bot"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 40
+- **Texto:** "Envía el emoji para la primera reacción:"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 51
+- **Texto:** "Se alcanzó el número máximo de reacciones (10)."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 57
+- **Texto:** "Ingresa los puntos para esta reacción:"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 65
+- **Texto:** "Ingresa un número válido para los puntos:"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 72
+- **Texto:** "Máximo de reacciones alcanzado."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 74
+- **Texto:** "Reacción registrada. Envía otro emoji o presiona Aceptar."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 89
+- **Texto:** "Debes ingresar al menos una reacción."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 97
+- **Texto:** "Botones de reacción actualizados."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 106
+- **Texto:** "Intervalos actuales:\nCanal: {ch}s\nVIP: {vip}s"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 115
+- **Texto:** "¿Qué tipo de canales deseas configurar?"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 125
+- **Texto:** "Por favor reenvía un mensaje desde tu canal VIP para detectar el ID."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 135
+- **Texto:** "Por favor reenvía un mensaje desde tu canal FREE para detectar el ID."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 145
+- **Texto:** "Primero, reenvía un mensaje desde tu canal VIP para detectar el ID."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 154
+- **Texto:** "Ingresa el intervalo en segundos para revisar solicitudes de canal:"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 164
+- **Texto:** "Ingresa el intervalo en segundos para revisar suscripciones VIP:"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 173
+- **Texto:** "Schedulers ejecutados"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 181
+- **Texto:** "Ingresa un número válido."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 185
+- **Texto:** "Intervalo actualizado."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 204
+- **Texto:** "ID inválido. Intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 208
+- **Texto:** "✅ **Canal VIP detectado:**\n📢 {vip_display}"
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 216
+- **Texto:** "✅ Configuración guardada correctamente."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 220
+- **Texto:** "Ahora reenvía un mensaje desde tu canal FREE."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 240
+- **Texto:** "ID inválido. Intenta de nuevo."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 245
+- **Texto:** "Los IDs de los canales VIP y FREE no deben ser iguales."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 276
+- **Texto:** "Ingresa un número válido."
+---
+- **Archivo:** `handlers/admin/config_menu.py`
+- **Línea:** 280
+- **Texto:** "Intervalo actualizado."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 22
+- **Texto:** "Gestionar Eventos y Sorteos"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 34
+- **Texto:** "Menú de Eventos"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 46
+- **Texto:** "Menú de Sorteos"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 57
+- **Texto:** "Nombre del evento:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 66
+- **Texto:** "Descripción del evento:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 74
+- **Texto:** "Multiplicador de puntos (ej. 2 para doble):"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 82
+- **Texto:** "Ingresa un número válido:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 87
+- **Texto:** "Evento creado."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 98
+- **Texto:** "Eventos activos:\n"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 100
+- **Texto:** "No hay eventos activos."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 111
+- **Texto:** "No hay eventos activos"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 121
+- **Texto:** "Selecciona el evento a finalizar:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 131
+- **Texto:** "Evento finalizado."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 142
+- **Texto:** "Nombre del sorteo:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 151
+- **Texto:** "Descripción del sorteo:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 159
+- **Texto:** "Premio del sorteo:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 167
+- **Texto:** "Sorteo creado."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 178
+- **Texto:** "Sorteos activos:\n"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 180
+- **Texto:** "No hay sorteos activos."
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 191
+- **Texto:** "No hay sorteos activos"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 201
+- **Texto:** "Selecciona el sorteo a finalizar:"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 212
+- **Texto:** "Sorteo finalizado. Ganador ID {raffle.winner_id}"
+---
+- **Archivo:** `handlers/admin/event_admin.py`
+- **Línea:** 214
+- **Texto:** "Sorteo finalizado. Sin participantes."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 27
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 46
+- **Texto:** "Configurar tiempo de espera para aprobaciones."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 50
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 55
+- **Texto:** "⏰ **Configurar Tiempo de Espera**\n\nIngresa el tiempo de espera en minutos antes de aprobar automáticamente las solicitudes.\n\n📝 **Ejemplos:**\n• `0` - Aprobar inmediatamente\n• `5` - Esperar 5 minutos\n• `60` - Esperar 1 hora\n• `1440` - Esperar 24 horas\n\nEnvía el número de minutos:"
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 70
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 76
+- **Texto:** "❌ El tiempo de espera no puede ser negativo."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 82
+- **Texto:** "✅ Configurado para aprobar solicitudes **inmediatamente**."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 84
+- **Texto:** "✅ Tiempo de espera configurado a **{wait_minutes} minutos**."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 92
+- **Texto:** "✅ Tiempo de espera configurado a **{time_text}**."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 95
+- **Texto:** "❌ Error al configurar el tiempo de espera."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 99
+- **Texto:** "❌ Por favor, ingresa un número válido de minutos."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 105
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 110
+- **Texto:** "📱 **Configurar Mensaje de Redes Sociales**\n\nEste mensaje se envía automáticamente cuando un usuario solicita unirse al canal gratuito.\n\n💡 **Puedes usar:**\n• `{user_name}` - Se reemplaza por el nombre del usuario\n• Markdown para formato\n• Enlaces a tus redes sociales\n\n📝 **Envía el mensaje personalizado:**"
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 126
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 131
+- **Texto:** "❌ El mensaje es muy largo. Máximo 4000 caracteres."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 137
+- **Texto:** "✅ Mensaje de redes sociales configurado exitosamente."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 139
+- **Texto:** "❌ Error al configurar el mensaje de redes sociales."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 145
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 150
+- **Texto:** "🎉 **Configurar Mensaje de Bienvenida**\n\nEste mensaje se envía cuando un usuario es aprobado al canal gratuito.\n\n💡 **Puedes usar:**\n• Markdown para formato\n• Emojis para hacer el mensaje más atractivo\n• Instrucciones sobre cómo usar el canal\n\n📝 **Envía el mensaje de bienvenida:**"
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 165
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 170
+- **Texto:** "❌ El mensaje es muy largo. Máximo 4000 caracteres."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 176
+- **Texto:** "✅ Mensaje de bienvenida configurado exitosamente."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 178
+- **Texto:** "❌ Error al configurar el mensaje de bienvenida."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 184
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 190
+- **Texto:** "✅ Se procesaron {processed} solicitudes pendientes."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 192
+- **Texto:** "ℹ️ No hay solicitudes pendientes para procesar."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 198
+- **Texto:** "❌ No tienes permisos de administrador."
+---
+- **Archivo:** `handlers/admin/free_channel_config.py`
+- **Línea:** 211
+- **Texto:** "ℹ️ No hay solicitudes pendientes."
+---
+- **Archivo:** `handlers/admin/free_menu.py`
+- **Línea:** 17
+- **Texto:** "Menú de Administración de Canal Gratuito"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 100
+- **Texto:** "Ingresa la cantidad de puntos a sumar a {user_id}:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 111
+- **Texto:** "Ingresa la cantidad de puntos a restar a {user_id}:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 121
+- **Texto:** "Cantidad inválida. Ingresa un número."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 126
+- **Texto:** "Se han sumado {amount} puntos a {user_id}."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 129
+- **Texto:** "Se han restado {amount} puntos a {user_id}."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 136
+- **Texto:** "Usuario no encontrado"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 140
+- **Texto:** "Perfil de {display}\nPuntos: {user.points}"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 147
+- **Texto:** "Ingresa un ID o nombre de usuario:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 167
+- **Texto:** "No se encontraron usuarios."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 177
+- **Texto:** "📌 Misiones - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 188
+- **Texto:** "Configuración actualizada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 195
+- **Texto:** "Ingresa el nombre de la misión:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 204
+- **Texto:** "Ingresa la descripción de la misión:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 218
+- **Texto:** "🎯 Tipo de misión"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 233
+- **Texto:** "📊 Cantidad requerida"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 243
+- **Texto:** "Ingresa un número válido:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 247
+- **Texto:** "🏆 Recompensa en puntos"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 256
+- **Texto:** "Ingresa un número válido de puntos:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 260
+- **Texto:** "⏳ Duración (en días, 0 para permanente)"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 269
+- **Texto:** "Ingresa un número válido de días:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 280
+- **Texto:** "✅ Misión creada correctamente"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 298
+- **Texto:** "Activar o desactivar misiones:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 309
+- **Texto:** "Misión no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 313
+- **Texto:** "Misión {status}"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 324
+- **Texto:** "Activar o desactivar misiones:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 338
+- **Texto:** "Misiones activas:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 338
+- **Texto:** "No hay misiones activas."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 351
+- **Texto:** "Selecciona la misión a eliminar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 361
+- **Texto:** "Misión no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 370
+- **Texto:** "¿Eliminar misión {mission.name}?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 379
+- **Texto:** "❌ Misión eliminada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 388
+- **Texto:** "🏅 Insignias - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 398
+- **Texto:** "📛 Nombre de la insignia:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 407
+- **Texto:** "📝 Descripción (corta):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 415
+- **Texto:** "🎯 Requisito (ej. 'Alcanzar nivel 5'):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 423
+- **Texto:** "🖼️ Emoji o símbolo (opcional, escribe 'no' para omitir):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 438
+- **Texto:** "Insignia creada correctamente"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 449
+- **Texto:** "No hay insignias definidas."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 459
+- **Texto:** "No hay insignias para eliminar"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 463
+- **Texto:** "Selecciona la insignia a eliminar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 473
+- **Texto:** "Insignia no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 482
+- **Texto:** "¿Eliminar '{badge.name}'?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 492
+- **Texto:** "Insignia eliminada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 501
+- **Texto:** "📈 Niveles - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 511
+- **Texto:** "🎁 Recompensas (Catálogo VIP) - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 521
+- **Texto:** "📦 Subastas - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 539
+- **Texto:** "🎁 Regalos Diarios - Selecciona una opción:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 553
+- **Texto:** "🕹 Minijuegos - Configuración:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 564
+- **Texto:** "Configuración actualizada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 571
+- **Texto:** "La funcionalidad de crear pistas ha sido deshabilitada."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 579
+- **Texto:** "Ingresa la cantidad de puntos para el regalo diario:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 589
+- **Texto:** "Ingresa un número válido."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 600
+- **Texto:** "Regalo diario actualizado."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 650
+- **Texto:** "Lista de recompensas:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 650
+- **Texto:** "No hay recompensas."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 664
+- **Texto:** "Selecciona la recompensa a eliminar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 674
+- **Texto:** "Recompensa no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 683
+- **Texto:** "¿Eliminar recompensa {reward.title}?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 730
+- **Texto:** "Selecciona la recompensa a editar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 740
+- **Texto:** "Recompensa no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 814
+- **Texto:** "No hay niveles definidos."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 822
+- **Texto:** "Número del nivel:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 836
+- **Texto:** "Nombre del nivel:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 844
+- **Texto:** "Puntos requeridos:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 856
+- **Texto:** "Recompensa (opcional, '-' para ninguna):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 865
+- **Texto:** "Crear nivel {data['level_number']} - {data['name']} con {data['points']} pts y recompensa '{data['reward'] or '-'}'?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 900
+- **Texto:** "Selecciona el nivel a editar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 910
+- **Texto:** "Nivel no encontrado"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 914
+- **Texto:** "Nuevo número de nivel:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 928
+- **Texto:** "Nuevo nombre:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 936
+- **Texto:** "Nuevos puntos requeridos:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 948
+- **Texto:** "Nueva recompensa (opcional, '-' para ninguna):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 971
+- **Texto:** "No se puede eliminar el último nivel"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 980
+- **Texto:** "Selecciona el nivel a eliminar:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 990
+- **Texto:** "No se puede eliminar el último nivel"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 994
+- **Texto:** "Nivel no encontrado"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1003
+- **Texto:** "¿Eliminar nivel {level.level_id} - {level.name}?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1013
+- **Texto:** "No se puede eliminar el último nivel"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1050
+- **Texto:** "No hay pistas registradas."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1090
+- **Texto:** "Pista no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1120
+- **Texto:** "Archivo no disponible para previsualización."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1122
+- **Texto:** "Archivo no disponible para previsualización."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1132
+- **Texto:** "Pista no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1137
+- **Texto:** "⚠️ ¿Estás seguro de que quieres eliminar la pista {code}?\n\nEsta acción no se puede deshacer."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1158
+- **Texto:** "Pista eliminada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1166
+- **Texto:** "Pista no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1170
+- **Texto:** "✅ La pista {code} ahora está activa."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1170
+- **Texto:** "❌ La pista {code} ahora está inactiva."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1178
+- **Texto:** "Ingresa el code_name de la pista:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1188
+- **Texto:** "Ese code_name ya existe. Ingresa otro:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1192
+- **Texto:** "Título de la pista:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1200
+- **Texto:** "Descripción (opcional, '-' para omitir):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1209
+- **Texto:** "Categoría de la pista:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1219
+- **Texto:** "¿Es parte de la historia principal?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1239
+- **Texto:** "Selecciona el tipo de contenido:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1249
+- **Texto:** "Ingresa el texto de la pista:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1252
+- **Texto:** "Envía el archivo correspondiente:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1266
+- **Texto:** "✅ Pista creada correctamente"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1300
+- **Texto:** "Pista no encontrada"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1311
+- **Texto:** "Nuevo título:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1322
+- **Texto:** "Título actualizado."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1331
+- **Texto:** "Nueva descripción ('-' para vaciar):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1344
+- **Texto:** "Descripción actualizada."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1353
+- **Texto:** "Nueva categoría ('-' para ninguna):"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1366
+- **Texto:** "Categoría actualizada."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1379
+- **Texto:** "¿Es parte de la historia principal?"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1398
+- **Texto:** "Actualizado."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1411
+- **Texto:** "Selecciona el nuevo tipo de contenido:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1422
+- **Texto:** "Ingresa el nuevo texto:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1425
+- **Texto:** "Envía el nuevo archivo:"
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1435
+- **Texto:** "Contenido actualizado."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1449
+- **Texto:** "Envía un archivo válido."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1454
+- **Texto:** "Contenido actualizado."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1468
+- **Texto:** "Envía un archivo válido."
+---
+- **Archivo:** `handlers/admin/game_admin.py`
+- **Línea:** 1479
+- **Texto:** "✅ Pista creada correctamente"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 41
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 66
+- **Texto:** "📖 Administración narrativa cargada"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 70
+- **Texto:** "❌ Error al cargar administración narrativa"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 81
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 126
+- **Texto:** "📄 Lista de fragmentos cargada"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 130
+- **Texto:** "❌ Error al cargar fragmentos"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 136
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 144
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 190
+- **Texto:** "📄 Fragmento '{fragment['id']}' cargado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 194
+- **Texto:** "❌ Error al cargar fragmento"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 240
+- **Texto:** "📖 Administración narrativa cargada"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 244
+- **Texto:** "❌ Error cargando sistema de administración narrativa"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 298
+- **Texto:** "📝 Listado de fragmentos cargado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 302
+- **Texto:** "❌ Error cargando fragmentos"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 312
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 369
+- **Texto:** "📝 Fragmento {fragment_details['title']} cargado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 373
+- **Texto:** "❌ Error: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 376
+- **Texto:** "❌ Error cargando detalles del fragmento"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 399
+- **Texto:** "📝 Inicio de creación de fragmento"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 403
+- **Texto:** "❌ Error iniciando creación"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 413
+- **Texto:** "❌ Tipo de fragmento no válido"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 438
+- **Texto:** "Tipo {type_names.get(fragment_type, fragment_type)} seleccionado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 442
+- **Texto:** "❌ Error seleccionando tipo"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 451
+- **Texto:** "❌ Creación de fragmento cancelada."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 457
+- **Texto:** "❌ El título no puede estar vacío. Por favor, envíe un título válido."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 461
+- **Texto:** "❌ El título es demasiado largo (máximo 200 caracteres). Por favor, acórtelo."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 487
+- **Texto:** "❌ Error procesando título. Por favor, inténtelo de nuevo."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 496
+- **Texto:** "❌ Creación de fragmento cancelada."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 502
+- **Texto:** "❌ El contenido no puede estar vacío. Por favor, envíe contenido válido."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 530
+- **Texto:** "❌ Error de validación: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 533
+- **Texto:** "❌ Error creando fragmento. Por favor, inténtelo de nuevo."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 543
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 570
+- **Texto:** "✏️ Modo de edición activado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 574
+- **Texto:** "❌ Error: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 577
+- **Texto:** "❌ Error iniciando edición"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 587
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 610
+- **Texto:** "⚠️ Confirme la eliminación"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 614
+- **Texto:** "❌ Error: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 617
+- **Texto:** "❌ Error preparando eliminación"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 627
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 643
+- **Texto:** "✅ Fragmento desactivado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 647
+- **Texto:** "❌ Error: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 650
+- **Texto:** "❌ Error eliminando fragmento"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 688
+- **Texto:** "🔖 Storyboard cargado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 692
+- **Texto:** "❌ Error cargando storyboard"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 730
+- **Texto:** "📊 Analíticas cargadas"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 734
+- **Texto:** "❌ Error cargando analíticas"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 754
+- **Texto:** "🔍 Introduzca términos de búsqueda"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 758
+- **Texto:** "❌ Error iniciando búsqueda"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 767
+- **Texto:** "❌ Búsqueda cancelada."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 773
+- **Texto:** "❌ Por favor, introduzca al menos 2 caracteres para buscar."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 813
+- **Texto:** "❌ Error realizando búsqueda. Por favor, inténtelo de nuevo."
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 823
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 861
+- **Texto:** "🔄 Conexiones cargadas"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 865
+- **Texto:** "❌ Error: {str(e)}"
+---
+- **Archivo:** `handlers/admin/narrative_admin.py`
+- **Línea:** 868
+- **Texto:** "❌ Error cargando conexiones"
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 30
+- **Texto:** "💳 **Sistema VIP Actualizado**\n\nEl sistema de tarifas VIP ha sido actualizado y ahora utiliza el nuevo sistema de transacciones VIP. Las tarifas antiguas ya no están disponibles.\n\nPara gestionar accesos VIP, use el panel de administración de VIP."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 45
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado. Use el panel de administración de VIP para gestionar accesos."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 56
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado. Las tarifas antiguas ya no están disponibles."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 65
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 75
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 84
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 94
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado. Use el panel de administración de VIP para gestionar accesos."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 104
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado. Use el panel de administración de VIP para gestionar accesos."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 113
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 122
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 131
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado."
+---
+- **Archivo:** `handlers/admin/subscription_plans.py`
+- **Línea:** 141
+- **Texto:** "ℹ️ Sistema actualizado\n\nEl sistema de tarifas VIP ha sido actualizado. Las tarifas antiguas ya no están disponibles."
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 20
+- **Texto:** "📚 Menú de administración de Trivias:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 26
+- **Texto:** "Sin trivias activas."
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 28
+- **Texto:** "📚 *Trivias activas:*
+{text}"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 34
+- **Texto:** "✏️ Envía el título para la nueva trivia:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 40
+- **Texto:** "🔢 ¿Cuántas preguntas tendrá esta trivia? (ej: 5)"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 46
+- **Texto:** "⚠️ Ingresa solo números."
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 50
+- **Texto:** "📝 Escribe la primera pregunta:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 56
+- **Texto:** "🧐 ¿Qué tipo de pregunta es?"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 63
+- **Texto:** "✔️ Escribe la respuesta correcta:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 66
+- **Texto:** "🔠 Envía las opciones separadas por comas (ej: Rojo,Azul,Verde):"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 74
+- **Texto:** "✅ Indica cuál es la respuesta correcta exactamente como la escribiste en las opciones:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 80
+- **Texto:** "💎 ¿Cuántos puntos vale esta pregunta?"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 86
+- **Texto:** "⚠️ Ingresa solo números."
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 90
+- **Texto:** "🔓 ¿Esta pregunta desbloquea contenido?"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 107
+- **Texto:** "🎯 Trivia lista para guardar. ¿Confirmar creación?"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 112
+- **Texto:** "📝 Escribe la pregunta #{data['current_question']}:"
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 118
+- **Texto:** "✅ Trivia creada exitosamente."
+---
+- **Archivo:** `handlers/admin/trivia_admin.py`
+- **Línea:** 120
+- **Texto:** "❌ Creación cancelada."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 24
+- **Texto:** "❌ Solo los administradores pueden usar este comando."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 33
+- **Texto:** "✅ **Narrativa Cargada**\n\nLos fragmentos narrativos han sido cargados exitosamente."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 36
+- **Texto:** "❌ **Error**: {str(e)}"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 42
+- **Texto:** "❌ Solo los administradores pueden usar este comando."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 47
+- **Texto:** "📤 **Subir Narrativa**\n\nEnvía un archivo JSON con el fragmento narrativo.\n\n**Formato esperado:**\n```json\n{\n  \"fragment_id\": \"UNIQUE_ID\",\n  \"content\": \"Texto del fragmento\",\n  \"character\": \"Lucien\",\n  \"level\": 1,\n  \"required_besitos\": 0,\n  \"reward_besitos\": 5,\n  \"decisions\": [\n    {\n      \"text\": \"Opción 1\",\n      \"next_fragment\": \"NEXT_ID\"\n    }\n  ]\n}\n```"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 70
+- **Texto:** "❌ No se detectó ningún documento."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 74
+- **Texto:** "❌ El archivo debe ser un JSON (.json)."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 86
+- **Texto:** "✅ **Fragmento Cargado**\n\nEl fragmento narrativo se ha cargado exitosamente."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 89
+- **Texto:** "❌ **Error de JSON**: {str(e)}"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 91
+- **Texto:** "❌ **Error**: {str(e)}"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 100
+- **Texto:** "❌ Solo los administradores pueden usar este comando."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 134
+- **Texto:** "❌ **Error**: {str(e)}"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 139
+- **Texto:** "❌ Solo los administradores pueden usar este comando."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 145
+- **Texto:** "❌ **Uso**: `/reset_narrative <user_id>`\n\nEjemplo: `/reset_narrative 123456789`"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 159
+- **Texto:** "✅ **Narrativa Reiniciada**\n\nLa historia del usuario {target_user_id} ha sido reiniciada."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 161
+- **Texto:** "❌ El usuario {target_user_id} no tiene progreso narrativo."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 164
+- **Texto:** "❌ ID de usuario inválido."
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 166
+- **Texto:** "❌ **Error**: {str(e)}"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 178
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 203
+- **Texto:** "📖 Administración narrativa cargada"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 207
+- **Texto:** "❌ Error al cargar administración narrativa"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 220
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 263
+- **Texto:** "📄 Lista de fragmentos cargada"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 267
+- **Texto:** "❌ Error al cargar fragmentos"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 273
+- **Texto:** "❌ Acceso denegado"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 281
+- **Texto:** "❌ ID de fragmento no especificado"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 327
+- **Texto:** "📄 Fragmento '{fragment['id']}' cargado"
+---
+- **Archivo:** `handlers/admin_narrative_handlers.py`
+- **Línea:** 331
+- **Texto:** "❌ Error al cargar fragmento"
+---
+- **Archivo:** `handlers/channel_access.py`
+- **Línea:** 31
+- **Texto:** "🎉 **¡Bienvenido al Canal Gratuito!**\n\nTu acceso ha sido confirmado exitosamente.\n¡Disfruta de todo el contenido gratuito disponible!"
+---
+- **Archivo:** `handlers/channel_handlers.py`
+- **Línea:** 48
+- **Texto:** "Diana sonríe al verte unirte a su círculo íntimo...\n\n*+5 besitos* 💋 por unirte al canal."
+---
+- **Archivo:** `handlers/daily_gift.py`
+- **Línea:** 12
+- **Texto:** "Regalos diarios deshabilitados."
+---
+- **Archivo:** `handlers/daily_gift.py`
+- **Línea:** 16
+- **Texto:** "Has recibido {points} puntos"
+---
+- **Archivo:** `handlers/daily_gift.py`
+- **Línea:** 18
+- **Texto:** "Ya reclamaste el regalo diario."
+---
+- **Archivo:** `handlers/diana_handler.py`
+- **Línea:** 29
+- **Texto:** "❌ Error accediendo al sistema Diana. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `handlers/diana_handler.py`
+- **Línea:** 43
+- **Texto:** "ℹ️ El panel administrativo Diana no está disponible en este momento. Accediendo al panel administrativo clásico..."
+---
+- **Archivo:** `handlers/diana_handler.py`
+- **Línea:** 48
+- **Texto:** "❌ Error accediendo al panel administrativo Diana. Inténtalo de nuevo más tarde."
+---
+- **Archivo:** `handlers/diana_handler.py`
+- **Línea:** 63
+- **Texto:** "ℹ️ Acción no disponible en Diana Menu System"
+---
+- **Archivo:** `handlers/diana_handler.py`
+- **Línea:** 67
+- **Texto:** "❌ Error procesando acción Diana"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 28
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 42
+- **Texto:** "❌ **Canal no configurado**\n\nConfigura tu canal gratuito para comenzar."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 54
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 59
+- **Texto:** "🆓 **Configurar Canal Gratuito**\n\nPara configurar tu canal gratuito, reenvía cualquier mensaje del canal aquí.\nEl bot detectará automáticamente el ID del canal.\n\n**Importante**: Asegúrate de que el bot sea administrador del canal con permisos para aprobar solicitudes de unión."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 78
+- **Texto:** "❌ **ID Inválido**\n\nPor favor, reenvía un mensaje del canal o ingresa un ID válido."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 90
+- **Texto:** "✅ **Canal Gratuito Configurado**\n\n🆓 **{channel_title or 'Sin nombre'} (ID: {channel_id})**\n\nEl canal ha sido configurado exitosamente. Los usuarios podrán solicitar unirse y serán aprobados automáticamente según el tiempo de espera configurado."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 100
+- **Texto:** "❌ **Error de Configuración**\n\nNo se pudo configurar el canal. Intenta nuevamente."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 109
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 115
+- **Texto:** "⏰ **Configurar Tiempo de Espera**\n\n**Tiempo actual**: {current_wait} minutos\n\nSelecciona el nuevo tiempo de espera para aprobar automáticamente las solicitudes de unión al canal gratuito:"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 124
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 132
+- **Texto:** "inmediatamente"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 134
+- **Texto:** "{minutes} minutos"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 141
+- **Texto:** "{hours} horas"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 144
+- **Texto:** "✅ Tiempo configurado: {time_text}"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 147
+- **Texto:** "❌ Error al configurar el tiempo"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 153
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 164
+- **Texto:** "🔗 **Enlace de Invitación Creado**\n\n**Enlace**: `{invite_link}`\n\n📋 **Características**:\n• Expira en 7 días\n• Requiere aprobación (solicitud de unión)\n• Los usuarios serán aprobados automáticamente según el tiempo configurado\n\nComparte este enlace para que los usuarios puedan solicitar unirse al canal gratuito."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 174
+- **Texto:** "❌ Error al crear el enlace"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 180
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 185
+- **Texto:** "📝 **Enviar Contenido al Canal Gratuito**\n\nEnvía el texto que deseas publicar en el canal gratuito.\nDespués podrás agregar multimedia y configurar la protección del contenido."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 200
+- **Texto:** "📝 **Texto del Post**\n\n{message.text}\n\n¿Deseas agregar archivos multimedia (fotos, videos, documentos)?"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 209
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 214
+- **Texto:** "📎 **Agregar Multimedia**\n\nEnvía los archivos que deseas incluir (fotos, videos, documentos, audio).\nPuedes enviar múltiples archivos.\n\nCuando termines, usa el botón 'Continuar sin multimedia' para proceder."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 249
+- **Texto:** "📎 **Archivos agregados**: {len(media_files)}\n\nPuedes enviar más archivos o continuar con la configuración."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 255
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 261
+- **Texto:** "🔒 **Configurar Protección del Contenido**\n\n📝 **Texto**: {data.get('post_text', 'Sin texto')[:100]}...\n📎 **Archivos multimedia**: {media_count}\n\n¿Deseas proteger el contenido? (Los usuarios no podrán reenviarlo o copiarlo)"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 280
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 310
+- **Texto:** "con protección"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 310
+- **Texto:** "sin protección"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 314
+- **Texto:** "✅ **Contenido Publicado**\n\nEl contenido ha sido enviado al canal gratuito {protection_text}.\n\n📝 **ID del mensaje**: {sent_message.message_id}\n📎 **Archivos incluidos**: {media_count}"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 321
+- **Texto:** "❌ **Error al Publicar**\n\nNo se pudo enviar el contenido al canal. Verifica que el bot tenga permisos de administrador en el canal."
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 330
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 336
+- **Texto:** "✅ Procesadas {processed_count} solicitudes pendientes"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 345
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/free_channel_admin.py`
+- **Línea:** 351
+- **Texto:** "🧹 Limpiadas {cleaned_count} solicitudes antiguas"
+---
+- **Archivo:** `handlers/free_user.py`
+- **Línea:** 22
+- **Texto:** "Menú gratuito"
+---
+- **Archivo:** `handlers/free_user.py`
+- **Línea:** 36
+- **Texto:** "Menú gratuito"
+---
+- **Archivo:** `handlers/free_user.py`
+- **Línea:** 110
+- **Texto:** "Interés en pack {pack_id} de {user.first_name} (@{user.username or user.id})"
+---
+- **Archivo:** `handlers/info_handler.py`
+- **Línea:** 9
+- **Texto:** "La Guía del Viajero aún está en desarrollo. ¡Pronto estará disponible!"
+---
+- **Archivo:** `handlers/lore_handlers.py`
+- **Línea:** 22
+- **Texto:** "Aún no has desbloqueado ninguna pista."
+---
+- **Archivo:** `handlers/lore_handlers.py`
+- **Línea:** 36
+- **Texto:** "Aquí están las pistas que has descubierto hasta ahora en tu mochila:"
+---
+- **Archivo:** `handlers/lore_handlers.py`
+- **Línea:** 46
+- **Texto:** "Pista no encontrada"
+---
+- **Archivo:** `handlers/lore_handlers.py`
+- **Línea:** 58
+- **Texto:** "No se pudo mostrar la pista"
+---
+- **Archivo:** `handlers/main_menu.py`
+- **Línea:** 13
+- **Texto:** "💰 **Tu Billetera**\n\nFuncionalidad en desarrollo..."
+---
+- **Archivo:** `handlers/main_menu.py`
+- **Línea:** 22
+- **Texto:** "⚙️ **Configuración**\n\nOpciones de usuario..."
+---
+- **Archivo:** `handlers/main_menu.py`
+- **Línea:** 26
+- **Texto:** "❓ **Ayuda**\n\nGuía de uso del bot..."
+---
+- **Archivo:** `handlers/menu_system_router.py`
+- **Línea:** 26
+- **Texto:** "ℹ️ Acción no disponible en el sistema de menús"
+---
+- **Archivo:** `handlers/menu_system_router.py`
+- **Línea:** 30
+- **Texto:** "❌ Error procesando acción del menú"
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 12
+- **Texto:** "Minijuegos deshabilitados."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 16
+- **Texto:** "Ganaste {points} puntos"
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 22
+- **Texto:** "Minijuegos deshabilitados."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 27
+- **Texto:** "¡Reto iniciado! Reacciona a {count} publicaciones en pocos minutos."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 49
+- **Texto:** "Minijuegos deshabilitados."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 53
+- **Texto:** "Ganaste {points} puntos"
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 58
+- **Texto:** "Minijuegos deshabilitados."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 70
+- **Texto:** "Minijuegos deshabilitados."
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 73
+- **Texto:** "¡Correcto! +5 puntos"
+---
+- **Archivo:** `handlers/minigames.py`
+- **Línea:** 75
+- **Texto:** "Respuesta incorrecta."
+---
+- **Archivo:** `handlers/missions_handler.py`
+- **Línea:** 12
+- **Texto:** "Cargando misiones..."
+---
+- **Archivo:** `handlers/missions_handler.py`
+- **Línea:** 17
+- **Texto:** "No hay misiones disponibles actualmente."
+---
+- **Archivo:** `handlers/missions_handler.py`
+- **Línea:** 20
+- **Texto:** "Aquí están tus misiones actuales:\n\n"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 30
+- **Texto:** "📝 Creando un nuevo fragmento narrativo.\n\nPor favor, envíame el título del fragmento:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 37
+- **Texto:** "❌ El título no puede estar vacío. Por favor, envíame un título válido:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 41
+- **Texto:** "📄 Ahora envíame el contenido del fragmento:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 48
+- **Texto:** "❌ El contenido no puede estar vacío. Por favor, envíame un contenido válido:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 61
+- **Texto:** "Por favor, responde con el número correspondiente al tipo de fragmento:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 73
+- **Texto:** "❌ Opción no válida. Por favor, responde con 1, 2 o 3:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 80
+- **Texto:** "🔗 Para fragmentos de decisión, puedes agregar opciones.\nEnvíame las opciones en formato JSON, o escribe 'ninguna' si no hay opciones:\n\nEjemplo:\n[\"text\": \"Opción 1\", \"next_fragment_id\": \"uuid-aqui\"}, {\"text\": \"Opción 2\", \"next_fragment_id\": \"otro-uuid-aqui\"}]"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 88
+- **Texto:** "🎁 Ahora puedes agregar triggers (recompensas/efectos).\nEnvíame los triggers en formato JSON, o escribe 'ninguno' si no hay triggers:\n\nEjemplo:\n{\"reward_points\": 10, \"unlock_lore\": \"codigo-pista\"}"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 103
+- **Texto:** "❌ Formato JSON inválido: {str(e)}\n\nPor favor, envíame las opciones en formato JSON válido:\n[\"text\": \"Opción 1\", \"next_fragment_id\": \"uuid-aqui\"}, ...]\n\nO escribe 'ninguna' si no hay opciones:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 112
+- **Texto:** "🎁 Ahora puedes agregar triggers (recompensas/efectos).\nEnvíame los triggers en formato JSON, o escribe 'ninguno' si no hay triggers:\n\nEjemplo:\n{\"reward_points\": 10, \"unlock_lore\": \"codigo-pista\"}"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 127
+- **Texto:** "❌ Formato JSON inválido: {str(e)}\n\nPor favor, envíame los triggers en formato JSON válido:\n{\"reward_points\": 10, \"unlock_lore\": \"codigo-pista\"}\n\nO escribe 'ninguno' si no hay triggers:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 136
+- **Texto:** "🗝️ Finalmente, puedes especificar las pistas requeridas.\nEnvíame una lista de códigos de pistas separadas por comas, o escribe 'ninguna' si no hay requisitos:\n\nEjemplo:\npista-1,pista-2,pista-3"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 163
+- **Texto:** "❌ Error al crear el fragmento: {str(e)}"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 199
+- **Texto:** "🆔 Por favor, envíame el ID del fragmento que deseas obtener:"
+---
+- **Archivo:** `handlers/narrative_fragment_handler.py`
+- **Línea:** 208
+- **Texto:** "❌ No se encontró un fragmento con ese ID."
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 29
+- **Texto:** "❌ **Historia No Disponible**\n\nNo se pudo cargar la narrativa. Puede que necesites completar algunas misiones primero o que el sistema esté en mantenimiento."
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 40
+- **Texto:** "❌ Decisión inválida"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 46
+- **Texto:** "❌ Decisión inválida"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 55
+- **Texto:** "❌ No puedes tomar esta decisión ahora. Puede que necesites más besitos o cumplir otros requisitos."
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 74
+- **Texto:** "❌ Error en la continuación automática"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 80
+- **Texto:** "❌ No hay continuación automática disponible"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 106
+- **Texto:** "*Lucien te está esperando...*"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 119
+- **Texto:** "❌ **Historia No Encontrada**\n\nNo se pudo cargar tu historia. Usa `/historia` para comenzar."
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 137
+- **Texto:** "💡 **Consejo**: Presta atención a cada detalle, algunas pistas están ocultas en las reacciones y misiones."
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 151
+- **Texto:** "🌟 **Estado**: Historia no iniciada\n🎭 **Sugerencia**: Usa \"Continuar Historia\" para comenzar"
+---
+- **Archivo:** `handlers/narrative_handler.py`
+- **Línea:** 166
+- **Texto:** "✨ *Has ganado {fragment.reward_besitos} besitos*"
+---
+- **Archivo:** `handlers/narrative_handlers.py`
+- **Línea:** 24
+- **Texto:** "Opción no válida"
+---
+- **Archivo:** `handlers/narrative_handlers.py`
+- **Línea:** 40
+- **Texto:** "Para conseguir más besitos, puedes:\n• Participar en los canales oficiales\n• Reaccionar a publicaciones\n• Completar misiones diarias con /misiones"
+---
+- **Archivo:** `handlers/native_reaction_handler.py`
+- **Línea:** 56
+- **Texto:** "No se pudo procesar tu reacción."
+---
+- **Archivo:** `handlers/native_reaction_handler.py`
+- **Línea:** 64
+- **Texto:** "Diana parece haber perdido tu reacción entre sus pensamientos... Inténtalo de nuevo."
+---
+- **Archivo:** `handlers/native_reaction_handler.py`
+- **Línea:** 110
+- **Texto:** "Diana sonríe al ver tu reacción... 💋"
+---
+- **Archivo:** `handlers/publication_test.py`
+- **Línea:** 22
+- **Texto:** "🔬 Test de publicación desde el bot. Pulsa el botón para confirmar."
+---
+- **Archivo:** `handlers/publication_test.py`
+- **Línea:** 26
+- **Texto:** "Mensaje de prueba enviado al canal."
+---
+- **Archivo:** `handlers/publication_test.py`
+- **Línea:** 35
+- **Texto:** "✔️ Confirmado"
+---
+- **Archivo:** `handlers/publication_test.py`
+- **Línea:** 37
+- **Texto:** "✔️ Confirmado"
+---
+- **Archivo:** `handlers/publication_test.py`
+- **Línea:** 44
+- **Texto:** "Test confirmado"
+---
+- **Archivo:** `handlers/reaction_callback.py`
+- **Línea:** 32
+- **Texto:** "[ERROR] El mensaje que se intenta editar no fue enviado por este bot o el chat_id es incorrecto."
+---
+- **Archivo:** `handlers/reaction_callback.py`
+- **Línea:** 40
+- **Texto:** "Ya has reaccionado a este post."
+---
+- **Archivo:** `handlers/reaction_handler.py`
+- **Línea:** 33
+- **Texto:** "Mensaje no válido."
+---
+- **Archivo:** `handlers/reaction_handler.py`
+- **Línea:** 49
+- **Texto:** "Reacción registrada"
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 20
+- **Texto:** "✅ Se han otorgado 100 puntos como recompensa de prueba."
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 24
+- **Texto:** "❌ Ocurrió un error al otorgar la recompensa de puntos."
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 40
+- **Texto:** "✅ Se ha otorgado una pista como recompensa de prueba."
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 44
+- **Texto:** "❌ Ocurrió un error al otorgar la recompensa de pista."
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 60
+- **Texto:** "✅ Se ha otorgado un logro como recompensa de prueba."
+---
+- **Archivo:** `handlers/reward_test_handler.py`
+- **Línea:** 64
+- **Texto:** "❌ Ocurrió un error al otorgar la recompensa de logro."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 36
+- **Texto:** "❌ **Acceso Denegado**\n\nSolo los administradores pueden acceder a la configuración inicial."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 45
+- **Texto:** "❌ **Error de Inicialización**\n\n{init_result['error']}"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 59
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 70
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 81
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 92
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 99
+- **Texto:** "🛠️ **Configuración de Ambos Canales (Próximamente)**\n\nEsta opción te guiará para configurar ambos canales simultáneamente. Por ahora, por favor, configúralos individualmente. Gracias."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 121
+- **Texto:** "❌ **ID Inválido**\n\nPor favor, reenvía un mensaje del canal o ingresa un ID válido."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 136
+- **Texto:** "✅ **Canal VIP Detectado**\n\n**ID del Canal**: `{channel_id}`{title_text}\n\n¿Es este el canal correcto?"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 156
+- **Texto:** "❌ **ID Inválido**\n\nPor favor, reenvía un mensaje del canal o ingresa un ID válido."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 171
+- **Texto:** "✅ **Canal Gratuito Detectado**\n\n**ID del Canal**: `{channel_id}`{title_text}\n\n¿Es este el canal correcto?"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 181
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 190
+- **Texto:** "Error: No se encontró información del canal"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 228
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 251
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 278
+- **Texto:** "❌ **ID Inválido**\n\nPor favor, ingresa un ID numérico válido para el canal. Debe empezar con `-100`."
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 287
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 296
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 307
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 318
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 329
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 339
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 350
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 363
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 376
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 387
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 398
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 407
+- **Texto:** "❌ **Acción Cancelada**\n\nLa configuración ha sido cancelada. Puedes intentar nuevamente cuando quieras.\n\n**Siguiente paso**: {text.splitlines()[0]}"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 418
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 432
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 446
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 460
+- **Texto:** "Acceso denegado"
+---
+- **Archivo:** `handlers/setup.py`
+- **Línea:** 471
+- **Texto:** "🎲 **Panel de Gestión de Gamificación Kinky**\n\n¡Bienvenido al centro de control de todos tus juegos y actividades! Aquí puedes gestionar usuarios, misiones, recompensas y más. Elige lo que quieres hacer:"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 41
+- **Texto:** "❌ **Error Crítico**\n\nNo se pudo inicializar la configuración de administrador. Por favor, contacta a soporte."
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 48
+- **Texto:** "👑 **¡Bienvenido, Administrador!**\n\n"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 57
+- **Texto:** "🎛️ **Panel de Control Activado**"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 62
+- **Texto:** "❌ Error al cargar el panel de administración. Intenta nuevamente en unos segundos."
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 71
+- **Texto:** "🌟 **¡Bienvenido!**\n\n"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 73
+- **Texto:** "✨ **¡Bienvenido, Miembro VIP!**\n\n"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 77
+- **Texto:** "✨ **Bienvenido de vuelta**\n\n"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 79
+- **Texto:** "🌟 **¡Hola de nuevo!**\n\n"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 88
+- **Texto:** "📱 **Menú Principal Activado**"
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 94
+- **Texto:** "❌ **Error Temporal**\n\nHubo un problema al cargar el menú. Por favor, intenta nuevamente en unos segundos."
+---
+- **Archivo:** `handlers/start.py`
+- **Línea:** 100
+- **Texto:** "❌ **Error del Sistema**\n\nOcurrió un error inesperado. El equipo técnico ha sido notificado."
+---
+- **Archivo:** `handlers/trivia_handler.py`
+- **Línea:** 29
+- **Texto:** "No hay trivias disponibles actualmente."
+---
+- **Archivo:** `handlers/user/start_token.py`
+- **Línea:** 24
+- **Texto:** "❌ Token inválido o ya utilizado."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 30
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 35
+- **Texto:** "🏛️ **Subastas en Tiempo Real**\n\nParticipa en subastas exclusivas y gana premios únicos."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 48
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 56
+- **Texto:** "🔥 **Subastas Activas**\n\nNo hay subastas activas en este momento.\n\n¡Mantente atento! Pronto habrá nuevas oportunidades."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 78
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 85
+- **Texto:** "❌ Subasta no encontrada"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 129
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 136
+- **Texto:** "❌ Subasta no encontrada"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 145
+- **Texto:** "❌ Esta subasta no está activa"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 149
+- **Texto:** "❌ Ya eres el pujador más alto"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 154
+- **Texto:** "❌ No tienes suficientes puntos. Necesitas {min_bid}, tienes {format_points(user.points)}"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 163
+- **Texto:** "💰 **Hacer Puja - {auction.name}**\n\n🎯 **Puja mínima:** {min_bid} pts\n💎 **Tus puntos:** {format_points(user.points)} pts\n\nSelecciona la cantidad que deseas pujar:"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 174
+- **Texto:** "❌ Error en la sesión"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 184
+- **Texto:** "💰 **Confirmar Puja**\n\n🏛️ **Subasta:** {auction.name}\n💎 **Tu puja:** {amount} pts\n🔥 **Puja actual:** {auction.current_highest_bid or 0} pts\n\n¿Confirmas esta puja?"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 193
+- **Texto:** "✏️ **Puja Personalizada**\n\nIngresa la cantidad que deseas pujar (mínimo {min_bid} pts):"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 205
+- **Texto:** "❌ Ingresa un número válido."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 214
+- **Texto:** "❌ La puja mínima es {min_bid} pts."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 220
+- **Texto:** "❌ No tienes suficientes puntos. Tienes {format_points(user.points)}, necesitas {amount}."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 230
+- **Texto:** "💰 **Confirmar Puja**\n\n🏛️ **Subasta:** {auction.name}\n💎 **Tu puja:** {amount} pts\n🔥 **Puja actual:** {auction.current_highest_bid or 0} pts\n\n¿Confirmas esta puja?"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 246
+- **Texto:** "✅ **Puja Realizada**\n\n{message}\n\n🔔 Recibirás notificaciones si alguien supera tu puja."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 254
+- **Texto:** "❌ **Error al Pujar**\n\n{message}"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 263
+- **Texto:** "❌ **Puja Cancelada**\n\nPuedes intentar pujar nuevamente cuando quieras."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 271
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 279
+- **Texto:** "📋 **Mis Subastas**\n\nNo estás participando en ninguna subasta actualmente.\n\n¡Explora las subastas activas para participar!"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 306
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 317
+- **Texto:** "🏆 **Historial de Subastas**\n\nNo tienes historial de subastas finalizadas."
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 341
+- **Texto:** "❌ No estás participando en esta subasta"
+---
+- **Archivo:** `handlers/vip/auction_user.py`
+- **Línea:** 348
+- **Texto:** "🔔 Notificaciones {status}"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 24
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP.\n¡Suscríbete para acceder a todas las recompensas!"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 35
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudieron cargar las recompensas. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 45
+- **Texto:** "Error al cargar el menú principal"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 54
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 63
+- **Texto:** "Error al cargar el menú"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 70
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 75
+- **Texto:** "Debes iniciar con /start"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 96
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 107
+- **Texto:** "¡Recompensa reclamada exitosamente!"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 112
+- **Texto:** "Error al reclamar la recompensa"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 118
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 127
+- **Texto:** "Misión no encontrada."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 144
+- **Texto:** "Error al cargar los detalles de la misión"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 150
+- **Texto:** "Esta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 160
+- **Texto:** "Error: Usuario o misión no encontrada."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 165
+- **Texto:** "Ya completaste esta misión. ¡Pronto habrá más!"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 178
+- **Texto:** "¡Misión completada exitosamente!"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 182
+- **Texto:** "No puedes completar esta misión ahora mismo o requiere una acción externa."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 187
+- **Texto:** "Error al completar la misión"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 193
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 208
+- **Texto:** "🎯 ¡Desafío completado! +100 puntos adicionales"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 213
+- **Texto:** "ℹ️ **Check-in Ya Realizado**\n\nYa realizaste tu check-in hoy. Vuelve mañana."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 219
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudo procesar el check-in. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 226
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 236
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudo cargar tu perfil. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 243
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 253
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudieron cargar las misiones. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 260
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 270
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudieron cargar las recompensas. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 277
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 287
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudieron cargar las subastas. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 294
+- **Texto:** "❌ **Acceso Restringido**\n\nEsta función está disponible solo para miembros VIP."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 300
+- **Texto:** "Comando disponible solo para VIP"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 310
+- **Texto:** "❌ **Error Temporal**\n\nNo se pudo cargar el ranking. Intenta nuevamente."
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 319
+- **Texto:** "ℹ️ **Comando No Reconocido**\n\nNo entendí ese comando. Aquí tienes el menú principal:\n\n"
+---
+- **Archivo:** `handlers/vip/gamification.py`
+- **Línea:** 325
+- **Texto:** "❌ **Error Temporal**\n\nHubo un problema. Usa /start para volver al menú principal."
+---
+- **Archivo:** `handlers/vip/menu.py`
+- **Línea:** 60
+- **Texto:** "Sin fecha de término"
+---
+- **Archivo:** `handlers/vip/menu.py`
+- **Línea:** 93
+- **Texto:** "Aún no has desbloqueado ninguna insignia. ¡Sigue participando!"
+---
+- **Archivo:** `handlers/vip/menu.py`
+- **Línea:** 148
+- **Texto:** "Participa en misiones y actividades para ganar puntos."
+---
+- **Archivo:** `handlers/vip/menu.py`
+- **Línea:** 159
+- **Texto:** "Usuario no encontrado."
+---
