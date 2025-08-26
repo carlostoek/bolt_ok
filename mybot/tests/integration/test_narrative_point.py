@@ -3,7 +3,7 @@ Tests for the NarrativePointService integration.
 """
 import pytest
 from unittest.mock import AsyncMock, patch, MagicMock
-from mybot.services.integration.narrative_point_service import NarrativePointService
+from services.integration.narrative_point_service import NarrativePointService
 
 @pytest.mark.asyncio
 async def test_can_make_decision_no_points_required():

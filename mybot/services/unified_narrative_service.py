@@ -22,7 +22,12 @@ class UnifiedNarrativeService:
     def __init__(self, session: AsyncSession, bot=None):
         self.session = session
         self.bot = bot
-        self.point_service = PointService(session) if session else None
+        if session:
+            level_service = LevelService(session)
+            achievement_service = AchievementService(session)
+            self.point_service = PointService(session, level_service, achievement_service)
+        else:
+            self.point_service = None
         self.fragment_service = NarrativeFragmentService(session)
     
     async def get_user_current_fragment(self, user_id: int) -> Optional[UnifiedNarrativeFragment]:

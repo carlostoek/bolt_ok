@@ -10,9 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..coordinador_central import CoordinadorCentral, AccionUsuario
 from ..point_service import PointService
-from ..mission_service import MissionService
-from ..achievement_service import AchievementService
 from ..level_service import LevelService
+from ..achievement_service import AchievementService
 from utils.message_safety import safe_edit
 from utils.user_roles import get_user_role
 
@@ -27,7 +26,9 @@ class DianaGamificationMenu:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.coordinador = CoordinadorCentral(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
         self.level_service = LevelService(session)

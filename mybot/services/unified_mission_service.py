@@ -653,7 +653,11 @@ class UnifiedMissionService:
             # Otorgar puntos
             if "points" in rewards and rewards["points"] > 0:
                 from services.point_service import PointService
-                point_service = PointService(self.session)
+                from services.level_service import LevelService
+                from services.achievement_service import AchievementService
+                level_service = LevelService(self.session)
+                achievement_service = AchievementService(self.session)
+                point_service = PointService(self.session, level_service, achievement_service)
                 await point_service.add_points(
                     user_id, 
                     rewards["points"], 

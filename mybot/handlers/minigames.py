@@ -3,6 +3,8 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKe
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.config_service import ConfigService
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from utils.messages import BOT_MESSAGES
 import random
 
@@ -58,7 +60,9 @@ async def play_dice(message: Message, session: AsyncSession, bot: Bot):
         return
     dice_msg = await bot.send_dice(message.chat.id)
     score = dice_msg.dice.value
-    await PointService(session).add_points(message.from_user.id, score, bot=bot)
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    await PointService(session, level_service, achievement_service).add_points(message.from_user.id, score, bot=bot)
     await message.answer(BOT_MESSAGES.get("dice_points", "Ganaste {points} puntos").format(points=score))
 
 @router.message(F.text.regexp("/trivia"))
@@ -79,8 +83,11 @@ async def trivia_answer(callback: CallbackQuery, session: AsyncSession, bot: Bot
     config = ConfigService(session)
     if (await config.get_value("minigames_enabled")) == "false":
         return await callback.answer(BOT_MESSAGES.get("minigames_disabled", "Minijuegos deshabilitados."), show_alert=True)
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    point_service = PointService(session, level_service, achievement_service)
     if callback.data == "trivia_correct":
-        await PointService(session).add_points(callback.from_user.id, 5, bot=bot)
+        await point_service.add_points(callback.from_user.id, 5, bot=bot)
         await callback.message.edit_text(BOT_MESSAGES.get("trivia_correct", "¡Correcto! +5 puntos"))
     else:
         await callback.message.edit_text(BOT_MESSAGES.get("trivia_wrong", "Respuesta incorrecta."))

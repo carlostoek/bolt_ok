@@ -3,7 +3,7 @@ Tests for the NarrativeAccessService integration.
 """
 import pytest
 from unittest.mock import AsyncMock, patch
-from mybot.services.integration.narrative_access_service import NarrativeAccessService
+from services.integration.narrative_access_service import NarrativeAccessService
 
 @pytest.mark.asyncio
 async def test_can_access_fragment_non_vip():

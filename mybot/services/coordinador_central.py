@@ -21,6 +21,7 @@ from .unified_mission_service import UnifiedMissionService
 from .emotional_state_service import EmotionalStateService
 from .level_service import LevelService
 from .achievement_service import AchievementService
+from .content_delivery_service import ContentDeliveryService
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +68,7 @@ class CoordinadorCentral:
         self.unified_mission_service = UnifiedMissionService(session)
         # Servicio de estados emocionales
         self.emotional_state_service = EmotionalStateService(session)
+        self.content_delivery_service = ContentDeliveryService()
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
     

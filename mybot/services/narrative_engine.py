@@ -9,6 +9,8 @@ from sqlalchemy import select, and_
 from database.models import User
 from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

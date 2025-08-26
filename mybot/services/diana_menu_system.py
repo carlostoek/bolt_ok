@@ -18,6 +18,7 @@ from .narrative_service import NarrativeService
 from .narrative_compatibility_layer import get_narrative_compatibility
 from .mission_service import MissionService
 from .achievement_service import AchievementService
+from .content_delivery_service import ContentDeliveryService, ContentPackage, ContentType
 from .tenant_service import TenantService
 from .event_bus import get_event_bus, EventType
 from .diana_menus.admin_menu import DianaAdminMenu
@@ -59,10 +60,11 @@ class DianaMenuSystem:
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
         self.tenant_service = TenantService(session)
+        self.content_delivery_service = ContentDeliveryService()
         
         # Specialized menu modules
         self.admin_menu = DianaAdminMenu(session)
-        self.user_menu = DianaUserMenu(session)
+        self.user_menu = DianaUserMenu(session, self)
         self.narrative_menu = DianaNarrativeMenu(session)
         self.gamification_menu = DianaGamificationMenu(session)
         
@@ -423,6 +425,41 @@ class DianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling user action {data}: {e}")
             await callback.answer("❌ Error en función de usuario", show_alert=True)
+
+    async def deliver_content(self, content_id: str, context: Dict[str, Any], callback: CallbackQuery) -> bool:
+        """
+        Prepara y entrega contenido utilizando el ContentDeliveryService.
+
+        Args:
+            content_id: El ID del contenido a entregar.
+            context: El contexto para la entrega (incluye user_id, chat_id, etc.).
+            callback: El objeto CallbackQuery que originó la acción.
+
+        Returns:
+            True si la entrega fue exitosa, False en caso contrario.
+        """
+        try:
+            # Añadir bot y message al contexto
+            context["bot"] = callback.bot
+            context["message"] = callback.message
+
+            package = await self.content_delivery_service.prepare_content(content_id, context)
+            
+            # Personalización adicional si es necesario
+            if package.content_type == ContentType.TEXT:
+                package.payload = await self.content_delivery_service.personalize_content(package.payload, context)
+
+            # Validar restricciones
+            is_valid, reasons = await self.content_delivery_service.validate_delivery_constraints(package, context)
+            if not is_valid:
+                logger.warning(f"No se pueden cumplir las restricciones de entrega para {content_id}: {reasons}")
+                # Opcional: enviar un mensaje al usuario sobre por qué no se puede entregar el contenido
+                return False
+
+            return await self.content_delivery_service.deliver_content(package, context)
+        except Exception as e:
+            logger.error(f"Error al entregar contenido {content_id}: {e}")
+            return False
 
 # ==================== GLOBAL INSTANCE AND INTEGRATION ====================
 

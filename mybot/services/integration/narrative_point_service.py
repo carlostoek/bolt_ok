@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from services.narrative_service import NarrativeService
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from database.narrative_models import NarrativeDecision
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,9 @@ class NarrativePointService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.narrative_service = NarrativeService(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
     
     async def can_make_decision(self, user_id: int, decision_id: int) -> bool:
         """

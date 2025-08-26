@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..coordinador_central import CoordinadorCentral, AccionUsuario
 from ..point_service import PointService
+from ..level_service import LevelService
+from ..achievement_service import AchievementService
 from ..narrative_service import NarrativeService
 from ..mission_service import MissionService
 from ..achievement_service import AchievementService
@@ -25,10 +27,13 @@ class DianaUserMenu:
     Focuses on user engagement and seamless navigation between features.
     """
     
-    def __init__(self, session: AsyncSession):
+    def __init__(self, session: AsyncSession, menu_system: 'DianaMenuSystem'):
         self.session = session
+        self.menu_system = menu_system
         self.coordinador = CoordinadorCentral(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.narrative_service = NarrativeService(session)
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
@@ -82,10 +87,16 @@ class DianaUserMenu:
             
             keyboard = await self._build_main_menu_keyboard(user_role, user_data)
             
-            await safe_edit(
-                callback.message,
-                text,
-                reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
+            await self.menu_system.deliver_content(
+                content_id="main_user_menu",
+                context={
+                    "user_id": user_id,
+                    "chat_id": callback.message.chat.id,
+                    "message_id": callback.message.message_id,
+                    "text": text,
+                    "reply_markup": InlineKeyboardMarkup(inline_keyboard=keyboard)
+                },
+                callback=callback
             )
             await callback.answer(f"💋 Bienvenido de vuelta...")
             

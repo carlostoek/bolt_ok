@@ -8,6 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.event_bus import get_event_bus, EventType, Event
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from services.badge_service import BadgeService
 from services.user_service import UserService
 from services.reconciliation_service import ReconciliationService
@@ -36,7 +38,9 @@ class EventCoordinator:
         self.event_bus = get_event_bus()
         
         # Initialize services that will respond to events
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.badge_service = BadgeService(session)
         self.user_service = UserService(session)
         self.reconciliation_service = ReconciliationService(session)

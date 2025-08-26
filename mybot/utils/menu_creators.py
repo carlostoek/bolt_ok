@@ -16,6 +16,8 @@ from utils.message_utils import get_profile_message, get_ranking_message
 from services.mission_service import MissionService
 from services.reward_service import RewardSystem as RewardService
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from keyboards.auction_kb import get_auction_main_kb
 
 async def create_profile_menu(user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
@@ -89,7 +91,9 @@ async def create_auction_menu(user_id: int, session: AsyncSession) -> Tuple[str,
 
 async def create_ranking_menu(user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
     """Create the ranking menu for a user."""
-    point_service = PointService(session)
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    point_service = PointService(session, level_service, achievement_service)
     top_users = await point_service.get_top_users(limit=10)
     
     ranking_text = await get_ranking_message(top_users, user_id)
