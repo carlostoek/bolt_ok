@@ -9,7 +9,7 @@ from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMar
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..coordinador_central import CoordinadorCentral
-from ..tenant_service import TenantService
+from ..admin_service import AdminService
 from ..user_service import UserService
 from utils.message_safety import safe_edit
 from utils.user_roles import is_admin
@@ -25,7 +25,7 @@ class DianaAdminMenu:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.coordinador = CoordinadorCentral(session)
-        self.tenant_service = TenantService(session)
+        self.admin_service = AdminService(session)
         self.user_service = UserService(session)
     
     async def show_main_admin_panel(self, callback: CallbackQuery) -> None:

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import User
 from utils.text_utils import sanitize_text
@@ -82,3 +83,33 @@ class UserService:
         await self.session.commit()
         await self.session.refresh(user)
         return user
+
+    async def ensure_admin_user(self, user_id: int) -> Dict[str, Any]:
+        """
+        Ensure user exists and has admin role.
+        
+        Returns:
+            Dict with user information and status  
+        """
+        try:
+            user = await self.session.get(User, user_id)
+            if not user:
+                user = User(id=user_id, role="admin")
+                self.session.add(user)
+            else:
+                user.role = "admin"
+            
+            await self.session.commit()
+            
+            return {
+                "success": True,
+                "user_id": user_id,
+                "role": "admin"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error ensuring admin user {user_id}: {e}")
+            return {
+                "success": False,
+                "error": str(e)
+            }

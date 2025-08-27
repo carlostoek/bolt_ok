@@ -12,7 +12,7 @@ from utils.text_utils import sanitize_text
 from utils.menu_manager import menu_manager
 from utils.menu_factory import menu_factory 
 from utils.user_roles import clear_role_cache, is_admin
-from services.tenant_service import TenantService
+from services.admin_service import AdminService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,12 +69,12 @@ async def cmd_start(message: Message, session: AsyncSession):
         # Check if this is an admin
         if await is_admin(user_id, session):
             logger.info(f"Admin user {user_id} accessing start command")
-            tenant_service = TenantService(session)
+            admin_service = AdminService(session)
             
-            # Initialize tenant for admin
-            init_result = await tenant_service.initialize_tenant(user_id)
-            if not init_result["success"]:
-                logger.error(f"Failed to initialize tenant for admin {user_id}: {init_result['error']}")
+            # Ensure admin user
+            admin_result = await admin_service.ensure_admin_user(user_id)
+            if not admin_result["success"]:
+                logger.error(f"Failed to ensure admin user {user_id}: {admin_result['error']}")
                 await message.answer(
                     "❌ **Error Crítico**\n\n"
                     "No se pudo inicializar la configuración de administrador. "

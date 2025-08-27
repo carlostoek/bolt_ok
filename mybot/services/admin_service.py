@@ -1,22 +1,21 @@
 """
-Multi-tenant service for managing independent bot configurations.
-Allows multiple users to set up their own bot instances with separate channels and settings.
+Admin service for centralized admin operations.
+Replaces tenant-specific functionality with direct admin management.
 """
 import logging
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from database.models import ConfigEntry, User
+from sqlalchemy import select, func
+from database.models import User
 from services.config_service import ConfigService
 from services.channel_service import ChannelService
-from utils.text_utils import sanitize_text
 
 logger = logging.getLogger(__name__)
 
-class TenantService:
+class AdminService:
     """
-    Service for managing multi-tenant bot configurations.
-    Each admin can configure their own channels, tariffs, and settings.
+    Service for admin-specific operations and dashboard data.
+    Provides admin functionality without pseudo-multitenant complexity.
     """
     
     def __init__(self, session: AsyncSession):
@@ -24,51 +23,45 @@ class TenantService:
         self.config_service = ConfigService(session)
         self.channel_service = ChannelService(session)
     
-    async def initialize_tenant(self, admin_user_id: int) -> Dict[str, Any]:
+    async def ensure_admin_user(self, user_id: int) -> Dict[str, Any]:
         """
-        Initialize a new tenant configuration for an admin user.
+        Ensure user exists and has admin role.
         
         Returns:
-            Dict with initialization status and next steps
+            Dict with user information and status
         """
         try:
-            # Ensure user exists and is marked as admin
-            user = await self.session.get(User, admin_user_id)
+            user = await self.session.get(User, user_id)
             if not user:
-                user = User(id=admin_user_id, role="admin")
+                user = User(id=user_id, role="admin")
                 self.session.add(user)
             else:
                 user.role = "admin"
             
             await self.session.commit()
             
-            # Check if tenant is already configured
-            config_status = await self.get_tenant_status(admin_user_id)
-            
-            logger.info(f"Initialized tenant for admin {admin_user_id}")
+            logger.info(f"Admin user ensured: {user_id}")
             return {
                 "success": True,
-                "user_id": admin_user_id,
-                "status": config_status,
-                "next_steps": self._get_next_steps(config_status)
+                "user_id": user_id,
+                "role": "admin"
             }
             
         except Exception as e:
-            logger.error(f"Error initializing tenant for {admin_user_id}: {e}")
+            logger.error(f"Error ensuring admin user {user_id}: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
     
-    async def get_tenant_status(self, admin_user_id: int) -> Dict[str, bool]:
+    async def get_setup_status(self) -> Dict[str, bool]:
         """
-        Get the configuration status for a tenant.
+        Get global setup status for the bot.
         
         Returns:
-            Dict with boolean flags for each configuration aspect
+            Dict with boolean flags for setup completion
         """
         try:
-            # Check channel configuration
             vip_channel = await self.config_service.get_vip_channel_id()
             free_channel = await self.config_service.get_free_channel_id()
             
@@ -86,31 +79,66 @@ class TenantService:
                 "channels_configured": bool(vip_channel or free_channel),
                 "vip_channel_configured": bool(vip_channel),
                 "free_channel_configured": bool(free_channel),
-                "tariffs_configured": False,  # El sistema de tarifas ha sido reemplazado
                 "gamification_configured": len(missions) > 0 and len(levels) > 0,
                 "basic_setup_complete": bool(vip_channel or free_channel)
             }
             
         except Exception as e:
-            logger.error(f"Error getting tenant status for {admin_user_id}: {e}")
+            logger.error(f"Error getting setup status: {e}")
             return {
                 "channels_configured": False,
                 "vip_channel_configured": False,
                 "free_channel_configured": False,
-                "tariffs_configured": False,
                 "gamification_configured": False,
                 "basic_setup_complete": False
             }
     
+    async def get_dashboard_data(self, admin_user_id: int) -> Dict[str, Any]:
+        """
+        Get dashboard data for admin view.
+        
+        Returns:
+            Dict with admin dashboard information
+        """
+        try:
+            setup_status = await self.get_setup_status()
+            
+            # Get channel information
+            vip_channel_id = await self.config_service.get_vip_channel_id()
+            free_channel_id = await self.config_service.get_free_channel_id()
+            
+            # Get user count
+            user_count_stmt = select(func.count()).select_from(User)
+            user_count_result = await self.session.execute(user_count_stmt)
+            total_users = user_count_result.scalar() or 0
+            
+            return {
+                "admin_user_id": admin_user_id,
+                "configuration_status": setup_status,
+                "channels": {
+                    "vip_channel_id": vip_channel_id,
+                    "free_channel_id": free_channel_id
+                },
+                "total_users": total_users,
+                "setup_complete": setup_status["basic_setup_complete"]
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting dashboard data: {e}")
+            return {
+                "admin_user_id": admin_user_id,
+                "error": str(e)
+            }
+
     async def configure_channels(
         self, 
         admin_user_id: int, 
-        vip_channel_id: Optional[int] = None,
-        free_channel_id: Optional[int] = None,
-        channel_titles: Optional[Dict[str, str]] = None
+        vip_channel_id: int = None,
+        free_channel_id: int = None,
+        channel_titles: Dict[str, str] = None
     ) -> Dict[str, Any]:
         """
-        Configure channels for a tenant.
+        Configure channels for the bot.
         
         Args:
             admin_user_id: The admin user configuring the channels
@@ -129,17 +157,14 @@ class TenantService:
                 title = channel_titles.get("vip") if channel_titles else None
                 await self.channel_service.add_channel(vip_channel_id, title)
                 results["vip_configured"] = True
-                logger.info(f"VIP channel {vip_channel_id} configured for admin {admin_user_id}")
+                logger.info(f"VIP channel {vip_channel_id} configured by admin {admin_user_id}")
             
             if free_channel_id:
                 await self.config_service.set_free_channel_id(free_channel_id)
                 title = channel_titles.get("free") if channel_titles else None
                 await self.channel_service.add_channel(free_channel_id, title)
                 results["free_configured"] = True
-                logger.info(f"Free channel {free_channel_id} configured for admin {admin_user_id}")
-            
-            # Set tenant as configured
-            await self.config_service.set_value(f"tenant_{admin_user_id}_channels_setup", "true")
+                logger.info(f"Free channel {free_channel_id} configured by admin {admin_user_id}")
             
             return {
                 "success": True,
@@ -152,10 +177,10 @@ class TenantService:
                 "success": False,
                 "error": str(e)
             }
-    
+
     async def setup_default_gamification(self, admin_user_id: int) -> Dict[str, Any]:
         """
-        Set up default gamification elements for a new tenant.
+        Set up default gamification elements.
         
         Returns:
             Dict with setup results
@@ -215,10 +240,7 @@ class TenantService:
                 )
                 created_missions.append(mission.name)
             
-            # Mark gamification as configured
-            await self.config_service.set_value(f"tenant_{admin_user_id}_gamification_setup", "true")
-            
-            logger.info(f"Default gamification setup completed for admin {admin_user_id}")
+            logger.info(f"Default gamification setup completed by admin {admin_user_id}")
             return {
                 "success": True,
                 "missions_created": created_missions,
@@ -230,77 +252,5 @@ class TenantService:
             logger.error(f"Error setting up gamification for admin {admin_user_id}: {e}")
             return {
                 "success": False,
-                "error": str(e)
-            }
-    
-    async def create_default_tariffs(self, admin_user_id: int) -> Dict[str, Any]:
-        """
-        Create default VIP tariffs for a new tenant.
-        
-        Returns:
-            Dict with created tariffs
-        """
-        # El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP
-        return {
-            "success": False,
-            "error": "El sistema de tarifas ha sido reemplazado por el nuevo sistema de transacciones VIP"
-        }
-    
-    def _get_next_steps(self, config_status: Dict[str, bool]) -> list:
-        """
-        Determine the next configuration steps based on current status.
-        
-        Returns:
-            List of recommended next steps
-        """
-        steps = []
-        
-        if not config_status["channels_configured"]:
-            steps.append("configure_channels")
-        
-        if not config_status["gamification_configured"]:
-            steps.append("setup_gamification")
-        
-        if not steps:
-            steps.append("configuration_complete")
-        
-        return steps
-    
-    async def get_tenant_summary(self, admin_user_id: int) -> Dict[str, Any]:
-        """
-        Get a comprehensive summary of the tenant's configuration.
-        
-        Returns:
-            Dict with complete tenant information
-        """
-        try:
-            status = await self.get_tenant_status(admin_user_id)
-            
-            # Get channel information
-            vip_channel_id = await self.config_service.get_vip_channel_id()
-            free_channel_id = await self.config_service.get_free_channel_id()
-            
-            # Get user count
-            from sqlalchemy import func
-            user_count_stmt = select(func.count()).select_from(User)
-            user_count_result = await self.session.execute(user_count_stmt)
-            total_users = user_count_result.scalar() or 0
-            
-            return {
-                "admin_user_id": admin_user_id,
-                "configuration_status": status,
-                "channels": {
-                    "vip_channel_id": vip_channel_id,
-                    "free_channel_id": free_channel_id
-                },
-                "tariff_count": 0,  # El sistema de tarifas ha sido reemplazado
-                "total_users": total_users,
-                "setup_complete": status["basic_setup_complete"]
-            }
-            
-        except Exception as e:
-            logger.error(f"Error getting tenant summary for {admin_user_id}: {e}")
-            return {
-                "admin_user_id": admin_user_id,
                 "error": str(e)
             }

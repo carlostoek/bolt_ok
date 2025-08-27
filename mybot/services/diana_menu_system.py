@@ -18,7 +18,7 @@ from .narrative_service import NarrativeService
 from .narrative_compatibility_layer import get_narrative_compatibility
 from .mission_service import MissionService
 from .achievement_service import AchievementService
-from .tenant_service import TenantService
+from .admin_service import AdminService
 from .event_bus import get_event_bus, EventType
 from .diana_menus.admin_menu import DianaAdminMenu
 from .diana_menus.user_menu import DianaUserMenu
@@ -58,7 +58,7 @@ class DianaMenuSystem:
         self.narrative_compatibility = get_narrative_compatibility(session)
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
-        self.tenant_service = TenantService(session)
+        self.admin_service = AdminService(session)
         
         # Specialized menu modules
         self.admin_menu = DianaAdminMenu(session)

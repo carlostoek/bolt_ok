@@ -11,7 +11,7 @@ from keyboards.admin_kb import get_admin_kb
 from utils.user_roles import is_admin
 from utils.menu_manager import menu_manager
 from utils.menu_factory import menu_factory
-from services.tenant_service import TenantService
+from services.admin_service import AdminService
 from services import get_admin_statistics
 from database.models import User
 from uuid import uuid4
@@ -93,9 +93,9 @@ async def admin_stats(callback: CallbackQuery, session: AsyncSession):
     try:
         stats = await get_admin_statistics(session)
         
-        # Get additional tenant-specific stats
-        tenant_service = TenantService(session)
-        tenant_summary = await tenant_service.get_tenant_summary(callback.from_user.id)
+        # Get additional admin-specific stats
+        admin_service = AdminService(session)
+        dashboard_data = await admin_service.get_dashboard_data(callback.from_user.id)
         
         text_lines = [
             "📊 **Estadísticas del Sistema**",
@@ -112,12 +112,13 @@ async def admin_stats(callback: CallbackQuery, session: AsyncSession):
             "⚙️ **Configuración**"
         ]
         
-        if "error" not in tenant_summary:
-            channels = tenant_summary.get("channels", {})
+        if "error" not in dashboard_data:
+            channels = dashboard_data.get("channels", {})
+            config_status = dashboard_data.get("configuration_status", {})
             text_lines.extend([
                 f"• Canal VIP: {'✅' if channels.get('vip_channel_id') else '❌'}",
                 f"• Canal Gratuito: {'✅' if channels.get('free_channel_id') else '❌'}",
-                f"• Tarifas configuradas: {tenant_summary.get('tariff_count', 0)}"
+                f"• Gamificación: {'✅' if config_status.get('gamification_configured') else '❌'}"
             ])
         
         from keyboards.common import get_back_kb
@@ -228,16 +229,15 @@ async def admin_bot_config(callback: CallbackQuery, session: AsyncSession):
         from keyboards.common import get_back_kb
         
         # Get current configuration status
-        tenant_service = TenantService(session)
-        tenant_summary = await tenant_service.get_tenant_summary(callback.from_user.id)
+        admin_service = AdminService(session)
+        dashboard_data = await admin_service.get_dashboard_data(callback.from_user.id)
         
         config_text = "⚙️ **Configuración del Bot**\n\n"
         
-        if "error" not in tenant_summary:
-            status = tenant_summary["configuration_status"]
+        if "error" not in dashboard_data:
+            status = dashboard_data["configuration_status"]
             config_text += "**Estado actual:**\n"
             config_text += f"📢 Canales: {'✅ Configurados' if status['channels_configured'] else '❌ Pendiente'}\n"
-            config_text += f"💳 Tarifas: {'✅ Configuradas' if status['tariffs_configured'] else '❌ Pendiente'}\n"
             config_text += f"🎮 Gamificación: {'✅ Configurada' if status['gamification_configured'] else '❌ Pendiente'}\n\n"
             
             if not status["basic_setup_complete"]:

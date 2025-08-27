@@ -1,9 +1,13 @@
 from __future__ import annotations
 
+import logging
+from typing import Dict
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import ConfigEntry
 from utils.text_utils import sanitize_text
+
+logger = logging.getLogger(__name__)
 
 
 class ConfigService:
@@ -111,3 +115,42 @@ class ConfigService:
         """Store reaction points as a semicolon separated list."""
         text = ";".join(str(p) for p in points)
         return await self.set_value(self.REACTION_POINTS_KEY, text)
+
+    async def get_setup_status(self) -> Dict[str, bool]:
+        """
+        Get global setup status for the bot.
+        
+        Returns:
+            Dict with boolean flags for setup completion
+        """
+        try:
+            vip_channel = await self.get_vip_channel_id()
+            free_channel = await self.get_free_channel_id()
+            
+            # Check gamification setup (basic missions, levels, etc.)
+            from services.mission_service import MissionService
+            from services.level_service import LevelService
+            
+            mission_service = MissionService(self.session)
+            level_service = LevelService(self.session)
+            
+            missions = await mission_service.get_active_missions()
+            levels = await level_service.list_levels()
+            
+            return {
+                "channels_configured": bool(vip_channel or free_channel),
+                "vip_channel_configured": bool(vip_channel),
+                "free_channel_configured": bool(free_channel),
+                "gamification_configured": len(missions) > 0 and len(levels) > 0,
+                "basic_setup_complete": bool(vip_channel or free_channel)
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting setup status: {e}")
+            return {
+                "channels_configured": False,
+                "vip_channel_configured": False,
+                "free_channel_configured": False,
+                "gamification_configured": False,
+                "basic_setup_complete": False
+            }

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.user_roles import is_admin
 from utils.menu_manager import menu_manager
-from services.tenant_service import TenantService
+from services.admin_service import AdminService
 from keyboards.setup_kb import (
     get_setup_main_kb,
     get_setup_channels_kb,
@@ -52,15 +52,14 @@ async def start_setup(message: Message, session: AsyncSession):
         )
         return
     
-    tenant_service = TenantService(session)
-    # Aquí puedes optar por inicializar el tenant o solo verificar el estado
-    # Lo dejo como estaba para mantener la compatibilidad con tu lógica de tenant_service
-    init_result = await tenant_service.initialize_tenant(message.from_user.id)
+    admin_service = AdminService(session)
+    # Ensure admin user
+    admin_result = await admin_service.ensure_admin_user(message.from_user.id)
     
-    if not init_result["success"]:
+    if not admin_result["success"]:
         await menu_manager.send_temporary_message(
             message,
-            f"❌ **Error de Inicialización**\n\n{init_result['error']}",
+            f"❌ **Error de Inicialización**\n\n{admin_result['error']}",
             auto_delete_seconds=10
         )
         return
@@ -261,17 +260,17 @@ async def confirm_channel_setup(callback: CallbackQuery, state: FSMContext, sess
         await callback.answer("Error: No se encontró información del canal", show_alert=True)
         return
     
-    tenant_service = TenantService(session)
+    admin_service = AdminService(session)
     
     # Configure the channel
     if channel_type == "vip":
-        result = await tenant_service.configure_channels(
+        result = await admin_service.configure_channels(
             callback.from_user.id,
             vip_channel_id=channel_id,
             channel_titles={"vip": channel_title} if channel_title else None
         )
     else:
-        result = await tenant_service.configure_channels(
+        result = await admin_service.configure_channels(
             callback.from_user.id,
             free_channel_id=channel_id,
             channel_titles={"free": channel_title} if channel_title else None
