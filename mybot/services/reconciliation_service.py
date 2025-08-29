@@ -63,7 +63,14 @@ class ReconciliationService:
             session: Database session for performing reconciliation operations
         """
         self.session = session
-        self.point_service = PointService(session)
+        
+        # Initialize dependent services with proper dependency injection
+        from services.level_service import LevelService
+        from services.achievement_service import AchievementService
+        
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.user_service = UserService(session)
         self.narrative_service = NarrativeService(session)
         self.badge_service = BadgeService(session)

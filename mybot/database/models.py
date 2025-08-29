@@ -546,3 +546,17 @@ class UserRewardHistory(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "fragment_key", name="uix_user_reward_history"),
     )
+
+
+class InteractionLog(Base):
+    """Log de interacciones de usuario para análisis y seguimiento."""
+    
+    __tablename__ = "interaction_logs"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    interaction_type = Column(String, nullable=False)
+    interaction_data = Column(JSON, nullable=True)
+    timestamp = Column(DateTime, default=func.now())
+    session_id = Column(String, nullable=True)
+    source = Column(String, nullable=True)  # handler, service, etc.

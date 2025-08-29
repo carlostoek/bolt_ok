@@ -22,6 +22,16 @@ class ContentType(Enum):
     EDUCATIONAL = "educational"
 
 
+class DeliveryChannel(Enum):
+    """Canales de entrega disponibles para contenido."""
+    DIRECT_MESSAGE = "direct_message"
+    CHANNEL_POST = "channel_post"
+    INLINE_MESSAGE = "inline_message"
+    NOTIFICATION = "notification"
+    EMAIL = "email"
+    PUSH_NOTIFICATION = "push_notification"
+
+
 class DeliveryPriority(Enum):
     """Prioridad de entrega de contenido."""
     CRITICAL = 1    # Debe entregarse inmediatamente
