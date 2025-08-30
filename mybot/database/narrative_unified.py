@@ -88,7 +88,7 @@ class UserNarrativeState(Base):
     user = relationship("User", backref="narrative_state_unified", uselist=False)
     current_fragment = relationship("database.narrative_unified.NarrativeFragment", foreign_keys=[current_fragment_id])
     
-    def get_progress_percentage(self, session):
+    async def get_progress_percentage(self, session):
         """Calcula el porcentaje de progreso del usuario.
         
         Args:
@@ -99,7 +99,7 @@ class UserNarrativeState(Base):
         """
         from sqlalchemy import func, select
         # Contar fragmentos activos
-        total_fragments_result = session.execute(
+        total_fragments_result = await session.execute(
             select(func.count(NarrativeFragment.id)).where(NarrativeFragment.is_active == True)
         )
         total_fragments = total_fragments_result.scalar()

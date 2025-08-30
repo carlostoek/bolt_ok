@@ -106,7 +106,7 @@ async def vip_user(session, request):
         username="vipuser",
         role="vip",
         points=500.0,
-        vip_until=datetime.datetime.utcnow() + datetime.timedelta(days=30),  # 30 días
+        vip_expires_at=datetime.datetime.utcnow() + datetime.timedelta(days=30),  # 30 días
         created_at=datetime.datetime.utcnow()
     )
     session.add(user)
@@ -163,13 +163,27 @@ async def user_progress(session, test_user):
 
 # === FIXTURES DE SERVICIOS ===
 
-@pytest.fixture
-def coordinador_central(session):
-    """Coordinador central para tests."""
-    return CoordinadorCentral(session)
+@pytest_asyncio.fixture
+async def coordinador_central(session, level_service, achievement_service):
+    """Coordinador central para tests con dependencias correctas."""
+    from services.coordinador_central import CoordinadorCentral
+    from services.notification_service import NotificationService
+    from unittest.mock import AsyncMock
+    
+    # Mock bot for notification service
+    mock_bot = AsyncMock()
+    notification_service = NotificationService(session, mock_bot)
+    
+    # Create coordinador with proper dependencies
+    coordinador = CoordinadorCentral(session)
+    
+    # Override internal services with properly initialized ones
+    coordinador.point_service = PointService(session, level_service, achievement_service, notification_service)
+    
+    return coordinador
 
-@pytest.fixture
-def level_service(session):
+@pytest_asyncio.fixture
+async def level_service(session):
     """Servicio de niveles para tests."""
     from services.level_service import LevelService
     from unittest.mock import AsyncMock
@@ -177,12 +191,13 @@ def level_service(session):
     # Crear un mock del servicio de niveles para evitar problemas de transacciones
     mock_level_service = AsyncMock(spec=LevelService)
     mock_level_service.session = session
-    mock_level_service.check_for_level_up = AsyncMock()
+    mock_level_service.check_for_level_up = AsyncMock(return_value=None)
     mock_level_service.get_level_for_points = AsyncMock(return_value=1)
+    mock_level_service.get_user_level = AsyncMock(return_value=1)
     return mock_level_service
 
-@pytest.fixture
-def achievement_service(session):
+@pytest_asyncio.fixture
+async def achievement_service(session):
     """Servicio de logros para tests."""
     from services.achievement_service import AchievementService
     from unittest.mock import AsyncMock
@@ -190,28 +205,37 @@ def achievement_service(session):
     # Crear un mock del servicio de logros para evitar problemas de transacciones
     mock_achievement_service = AsyncMock(spec=AchievementService)
     mock_achievement_service.session = session
+    mock_achievement_service.check_achievements = AsyncMock(return_value=[])
+    mock_achievement_service.unlock_achievement = AsyncMock(return_value=True)
     return mock_achievement_service
 
-@pytest.fixture
-def point_service(session, level_service, achievement_service):
+@pytest_asyncio.fixture
+async def point_service(session, level_service, achievement_service):
     """Servicio de puntos para tests."""
     from services.point_service import PointService
-    return PointService(session, level_service, achievement_service)
+    from services.notification_service import NotificationService
+    from unittest.mock import AsyncMock
+    
+    # Mock bot for notification service
+    mock_bot = AsyncMock()
+    notification_service = NotificationService(session, mock_bot)
+    
+    return PointService(session, level_service, achievement_service, notification_service)
 
-@pytest.fixture
-def user_service(session):
+@pytest_asyncio.fixture
+async def user_service(session):
     """Servicio de usuarios para tests."""
     return UserService(session)
 
 # === FIXTURES DE MIDDLEWARE ===
 
-@pytest.fixture
-def user_middleware(session_factory):
+@pytest_asyncio.fixture
+async def user_middleware(session_factory):
     """Middleware de registro de usuarios."""
     return UserRegistrationMiddleware()
 
-@pytest.fixture
-def points_middleware():
+@pytest_asyncio.fixture
+async def points_middleware():
     """Middleware de puntos."""
     return PointsMiddleware()
 
