@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 
 from ..point_service import PointService
+from ..level_service import LevelService
+from ..achievement_service import AchievementService
 from ..narrative_service import NarrativeService
 from ..user_service import UserService
 from ..mission_service import MissionService
@@ -21,7 +23,7 @@ from ..integration.channel_engagement_service import ChannelEngagementService
 from ..event_bus import get_event_bus, EventType
 from ..diana_menu_system import get_diana_menu_system
 from database.models import User
-from database.narrative_models import UserNarrativeState
+from database.narrative_unified import UserNarrativeState
 from utils.handler_decorators import safe_handler
 from utils.message_safety import safe_send_message
 
@@ -90,7 +92,9 @@ class EngagementRewardsFlow:
         self.session = session
         
         # Core services
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         self.narrative_service = NarrativeService(session)
         self.user_service = UserService(session)
         self.mission_service = MissionService(session)

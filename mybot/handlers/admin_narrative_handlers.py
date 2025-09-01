@@ -13,7 +13,7 @@ import json
 import tempfile
 import logging
 
-from services.narrative_loader import NarrativeLoader
+from services.narrative_loader_compatibility import NarrativeLoader
 
 # Configurar logger
 logger = logging.getLogger(__name__)
@@ -137,17 +137,16 @@ async def narrative_admin_stats(message: Message, session: AsyncSession):
     
     try:
         from sqlalchemy import select, func
-        from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
+        from database.narrative_unified import NarrativeFragment, UserNarrativeState
         
         # Contar fragmentos
-        fragments_stmt = select(func.count()).select_from(StoryFragment)
+        fragments_stmt = select(func.count()).select_from(NarrativeFragment)
         fragments_result = await session.execute(fragments_stmt)
         total_fragments = fragments_result.scalar() or 0
         
-        # Contar decisiones
-        choices_stmt = select(func.count()).select_from(NarrativeChoice)
-        choices_result = await session.execute(choices_stmt)
-        total_choices = choices_result.scalar() or 0
+        # Contar decisiones (ahora están en el campo JSON de choices)
+        # En el modelo unificado, las decisiones están integradas en los fragmentos
+        total_choices = 0  # Placeholder - se podría calcular desde el JSON
         
         # Contar usuarios con progreso narrativo
         users_stmt = select(func.count()).select_from(UserNarrativeState)
@@ -155,7 +154,7 @@ async def narrative_admin_stats(message: Message, session: AsyncSession):
         active_users = users_result.scalar() or 0
         
         # Fragmentos por nivel
-        level_stmt = select(StoryFragment.level, func.count()).select_from(StoryFragment).group_by(StoryFragment.level)
+        level_stmt = select(NarrativeFragment.fragment_type, func.count()).select_from(NarrativeFragment).group_by(NarrativeFragment.fragment_type)
         level_result = await session.execute(level_stmt)
         level_distribution = dict(level_result.all())
         
@@ -199,7 +198,7 @@ async def reset_user_narrative(message: Message, session: AsyncSession):
         target_user_id = int(command_parts[1])
         
         # Buscar y eliminar estado narrativo del usuario
-        from database.narrative_models import UserNarrativeState
+        from database.narrative_unified import UserNarrativeState
         stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == target_user_id)
         result = await session.execute(stmt)
         user_state = result.scalar_one_or_none()

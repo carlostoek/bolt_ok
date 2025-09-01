@@ -3,12 +3,16 @@ from aiogram import Bot
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import UserStats
 from .point_service import PointService
+from .level_service import LevelService
+from .achievement_service import AchievementService
 from .config_service import ConfigService
 
 class DailyGiftService:
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         self.config_service = ConfigService(session)
 
     async def claim_gift(self, user_id: int, bot: Bot) -> tuple[bool, int]:

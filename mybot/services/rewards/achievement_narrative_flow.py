@@ -20,7 +20,7 @@ from ..point_service import PointService
 from ..event_bus import get_event_bus, EventType
 from ..diana_menu_system import get_diana_menu_system
 from database.models import Achievement, User
-from database.narrative_models import NarrativeFragment, UserNarrativeState
+from database.narrative_unified import NarrativeFragment, UserNarrativeState
 from utils.handler_decorators import safe_handler
 from utils.message_safety import safe_send_message
 

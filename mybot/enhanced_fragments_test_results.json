@@ -1,0 +1,92 @@
+{
+  "test_timestamp": "2024-12-10T12:00:00Z",
+  "total_fragments": 6,
+  "pass_rate": 50.0,
+  "mvp_compliant": false,
+  "average_scores": {
+    "overall": 90.58333333333333,
+    "optimization_effectiveness": 95.625,
+    "besitos_integration": 93.33333333333333,
+    "narrative_progression": 80.0
+  },
+  "trait_averages": {
+    "mysterious": 25.0,
+    "seductive": 20.166666666666668,
+    "emotional": 23.25,
+    "intellectual": 22.166666666666668
+  },
+  "fragment_results": [
+    {
+      "id": "fragment_diana_welcome_enhanced",
+      "score": 89.0,
+      "passes": false,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 25.0,
+        "emotional": 18.0,
+        "intellectual": 21.0
+      },
+      "optimization": 97.5
+    },
+    {
+      "id": "fragment_lucien_seductive_challenge",
+      "score": 79.5,
+      "passes": false,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 12.0,
+        "emotional": 21.5,
+        "intellectual": 21.0
+      },
+      "optimization": 90.0
+    },
+    {
+      "id": "fragment_diana_authentic_response",
+      "score": 96.0,
+      "passes": true,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 25.0,
+        "emotional": 25.0,
+        "intellectual": 21.0
+      },
+      "optimization": 100.0
+    },
+    {
+      "id": "fragment_diana_emotional_confession",
+      "score": 83.0,
+      "passes": false,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 9.0,
+        "emotional": 25.0,
+        "intellectual": 24.0
+      },
+      "optimization": 86.25
+    },
+    {
+      "id": "fragment_diana_vip_seduction_mastery",
+      "score": 100.0,
+      "passes": true,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 25.0,
+        "emotional": 25.0,
+        "intellectual": 25.0
+      },
+      "optimization": 100.0
+    },
+    {
+      "id": "fragment_diana_ultimate_seductive_truth",
+      "score": 96.0,
+      "passes": true,
+      "traits": {
+        "mysterious": 25.0,
+        "seductive": 25.0,
+        "emotional": 25.0,
+        "intellectual": 21.0
+      },
+      "optimization": 100.0
+    }
+  ]
+}

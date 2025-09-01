@@ -16,12 +16,12 @@ from utils.messages import BOT_MESSAGES
 class TestPointsGamificationProtection:
     """Tests críticos para el sistema de puntos y gamificación."""
 
-    async def test_award_message_nuevo_usuario(self, session, mock_bot):
+    async def test_award_message_nuevo_usuario(self, session, point_service, mock_bot):
         """
         CRITICAL: Test que protege el otorgamiento de puntos por mensajes a usuarios nuevos.
         Los nuevos usuarios deben recibir puntos correctamente.
         """
-        service = PointService(session)
+        service = point_service
         user_id = 999888777
         
         with patch.object(service, '_get_or_create_progress') as mock_get_progress, \
@@ -60,12 +60,12 @@ class TestPointsGamificationProtection:
                     user_id, 1, bot=mock_bot
                 )
 
-    async def test_award_message_rate_limiting(self, session, mock_bot):
+    async def test_award_message_rate_limiting(self, session, point_service, mock_bot):
         """
         CRITICAL: Test que protege el rate limiting de puntos por mensajes.
         Los usuarios NO deben recibir puntos por mensajes muy frecuentes.
         """
-        service = PointService(session)
+        service = point_service
         user_id = 123456789
         
         # Create progress with recent activity (less than 30 seconds ago)
@@ -82,12 +82,12 @@ class TestPointsGamificationProtection:
             # Critical assertions - rate limiting must prevent point abuse
             assert result is None, "Recent activity must prevent point award"
 
-    async def test_award_reaction_rate_limiting(self, session, test_user, mock_bot):
+    async def test_award_reaction_rate_limiting(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el rate limiting de puntos por reacciones.
         Las reacciones muy frecuentes NO deben otorgar puntos múltiples.
         """
-        service = PointService(session)
+        service = point_service
         
         # Create progress with very recent reaction (less than 5 seconds ago)
         recent_time = datetime.datetime.utcnow() - datetime.timedelta(seconds=2)
@@ -102,12 +102,12 @@ class TestPointsGamificationProtection:
             # Critical assertions - reaction rate limiting must work
             assert result is None, "Recent reactions must be rate limited"
 
-    async def test_award_reaction_success(self, session, test_user, mock_bot):
+    async def test_award_reaction_success(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el otorgamiento exitoso de puntos por reacciones.
         Las reacciones válidas DEBEN otorgar puntos.
         """
-        service = PointService(session)
+        service = point_service
         
         # Create progress without recent reaction
         old_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=5)
@@ -138,12 +138,12 @@ class TestPointsGamificationProtection:
                 # Verify session commit was called to save reaction time
                 assert hasattr(result, 'last_reaction_at'), "Reaction time must be tracked"
 
-    async def test_daily_checkin_success(self, session, test_user, mock_bot):
+    async def test_daily_checkin_success(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el daily check-in exitoso.
         Los usuarios deben poder hacer check-in diario y recibir puntos.
         """
-        service = PointService(session)
+        service = point_service
         
         # Create progress without recent check-in
         yesterday = datetime.datetime.utcnow() - datetime.timedelta(days=1, hours=2)
@@ -180,12 +180,12 @@ class TestPointsGamificationProtection:
                     test_user.id, 3, bot=mock_bot
                 )
 
-    async def test_daily_checkin_rate_limiting(self, session, test_user, mock_bot):
+    async def test_daily_checkin_rate_limiting(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el rate limiting del daily check-in.
         Los usuarios NO deben poder hacer múltiples check-ins el mismo día.
         """
-        service = PointService(session)
+        service = point_service
         
         # Create progress with recent check-in (less than 24 hours ago)
         recent_time = datetime.datetime.utcnow() - datetime.timedelta(hours=12)
@@ -202,12 +202,12 @@ class TestPointsGamificationProtection:
             assert success is False, "Same-day check-in must be prevented"
             assert result.checkin_streak == 5, "Streak must not change for failed check-in"
 
-    async def test_daily_checkin_streak_broken(self, session, test_user, mock_bot):
+    async def test_daily_checkin_streak_broken(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el reset de streaks cuando se rompen.
         Las streaks deben resetearse si el usuario no hace check-in consecutivo.
         """
-        service = PointService(session)
+        service = point_service
         
         # Create progress with old check-in (more than 1 day gap)
         old_time = datetime.datetime.utcnow() - datetime.timedelta(days=3)
@@ -239,12 +239,12 @@ class TestPointsGamificationProtection:
                 assert success is True, "Check-in must still succeed"
                 assert result.checkin_streak == 1, "Broken streak must reset to 1"
 
-    async def test_award_poll_basic_functionality(self, session, test_user, mock_bot):
+    async def test_award_poll_basic_functionality(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el otorgamiento de puntos por responder polls.
         Las respuestas a polls deben otorgar puntos correctamente.
         """
-        service = PointService(session)
+        service = point_service
         
         with patch('services.point_service.AchievementService') as mock_achievement_service:
             mock_ach_service = AsyncMock()
@@ -263,12 +263,12 @@ class TestPointsGamificationProtection:
                 # Verify add_points was called with correct amount (2 points for polls)
                 service.add_points.assert_called_once_with(test_user.id, 2, bot=mock_bot)
 
-    async def test_get_or_create_progress_new_user(self, session):
+    async def test_get_or_create_progress_new_user(self, session, point_service):
         """
         CRITICAL: Test que protege la creación de progreso para usuarios nuevos.
         Los usuarios nuevos deben tener progreso creado automáticamente.
         """
-        service = PointService(session)
+        service = point_service
         new_user_id = 777888999
         
         # Ensure user doesn't exist
@@ -286,12 +286,12 @@ class TestPointsGamificationProtection:
         assert progress.messages_sent == 0, "New progress must start with 0 messages"
         assert progress.checkin_streak == 0, "New progress must start with 0 streak"
 
-    async def test_get_or_create_progress_existing_user(self, session, user_progress):
+    async def test_get_or_create_progress_existing_user(self, session, point_service, user_progress):
         """
         CRITICAL: Test que protege la recuperación de progreso existente.
         Los usuarios existentes deben recuperar su progreso sin duplicación.
         """
-        service = PointService(session)
+        service = point_service
         
         # Call the method for existing user
         progress = await service._get_or_create_progress(user_progress.user_id)
@@ -301,12 +301,12 @@ class TestPointsGamificationProtection:
         assert progress.user_id == user_progress.user_id, "Correct progress must be retrieved"
         assert progress.checkin_streak == user_progress.checkin_streak, "Existing data must be preserved"
 
-    async def test_achievement_integration_message_badges(self, session, test_user, mock_bot):
+    async def test_achievement_integration_message_badges(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege la integración con el sistema de achievements.
         Los logros deben verificarse y otorgarse correctamente al ganar puntos.
         """
-        service = PointService(session)
+        service = point_service
         
         progress = UserStats(
             user_id=test_user.id,
@@ -350,12 +350,12 @@ class TestPointsGamificationProtection:
                     "🏅 Has obtenido la insignia 💌 Primer Mensaje!"
                 )
 
-    async def test_point_service_error_handling(self, session, test_user, mock_bot):
+    async def test_point_service_error_handling(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege el manejo de errores en el servicio de puntos.
         Los errores NO deben romper el flujo del otorgamiento de puntos.
         """
-        service = PointService(session)
+        service = point_service
         
         # Mock _get_or_create_progress to raise exception
         with patch.object(service, '_get_or_create_progress', side_effect=Exception("Database error")):
@@ -365,12 +365,12 @@ class TestPointsGamificationProtection:
             with pytest.raises(Exception, match="Database error"):
                 await service.award_message(test_user.id, mock_bot)
 
-    async def test_multiple_badges_notification(self, session, test_user, mock_bot):
+    async def test_multiple_badges_notification(self, session, point_service, test_user, mock_bot):
         """
         CRITICAL: Test que protege las notificaciones de múltiples badges.
         Si se ganan múltiples badges, todos deben ser notificados.
         """
-        service = PointService(session)
+        service = point_service
         
         progress = UserStats(user_id=test_user.id, last_reaction_at=None)
         

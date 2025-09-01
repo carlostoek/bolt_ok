@@ -11,7 +11,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func, and_, or_
 
 from database.models import User, Badge, UserBadge
-from database.narrative_models import UserNarrativeState
+from database.narrative_unified import UserNarrativeState
 from services.point_service import PointService
 from services.user_service import UserService
 from services.narrative_service import NarrativeService
@@ -63,7 +63,14 @@ class ReconciliationService:
             session: Database session for performing reconciliation operations
         """
         self.session = session
-        self.point_service = PointService(session)
+        
+        # Initialize dependent services with proper dependency injection
+        from services.level_service import LevelService
+        from services.achievement_service import AchievementService
+        
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         self.user_service = UserService(session)
         self.narrative_service = NarrativeService(session)
         self.badge_service = BadgeService(session)

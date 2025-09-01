@@ -1,4 +1,4 @@
-#!/home/carlostoek/repos/bolt_ok/mybot/venv/bin/python3
+#!/home/azureuser/repos/bolt_ok/mybot/venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys

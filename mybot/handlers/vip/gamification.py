@@ -13,6 +13,7 @@ from utils.menu_manager import menu_manager
 from utils.menu_factory import menu_factory
 from utils.user_roles import get_user_role
 from services.point_service import PointService
+from services.level_service import LevelService
 from services.achievement_service import AchievementService
 from services.mission_service import MissionService
 from services.reward_service import RewardSystem as RewardService
@@ -256,7 +257,9 @@ async def handle_daily_checkin(message: Message, session: AsyncSession, bot: Bot
         return
     
     try:
-        service = PointService(session)
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        service = PointService(session, level_service, achievement_service)
         success, progress = await service.daily_checkin(user_id, bot)
         
         if success:

@@ -19,6 +19,7 @@ from datetime import datetime, timedelta
 from ..coordinador_central import CoordinadorCentral, AccionUsuario
 from ..event_bus import get_event_bus, EventType, Event
 from ..point_service import PointService
+from ..level_service import LevelService
 from ..mission_service import MissionService
 from ..narrative_service import NarrativeService
 from ..achievement_service import AchievementService
@@ -71,10 +72,11 @@ class CrossModuleRewards:
         
         # Core services
         self.coordinador = CoordinadorCentral(session)
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         self.mission_service = MissionService(session)
         self.narrative_service = NarrativeService(session)
-        self.achievement_service = AchievementService(session)
         self.user_service = UserService(session)
         
         # Event system integration

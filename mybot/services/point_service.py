@@ -9,9 +9,8 @@ from services.interfaces import IPointService, INotificationService
 from services.level_service import LevelService
 from services.achievement_service import AchievementService
 from services.event_service import EventService
-import datetime
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +72,7 @@ class PointService(IPointService):
             Optional[UserStats]: Progreso actualizado o None si no se otorgaron puntos
         """
         progress = await self._get_or_create_progress(user_id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         if progress.last_activity_at and (now - progress.last_activity_at).total_seconds() < 30:
             return None
         
@@ -129,7 +128,7 @@ class PointService(IPointService):
         """
         # First check if we already processed this reaction
         progress = await self._get_or_create_progress(user.id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         
         if progress.last_reaction_at and (now - progress.last_reaction_at).total_seconds() < 5:
             return None  # Skip if same reaction within 5 seconds
@@ -225,7 +224,7 @@ class PointService(IPointService):
             Tuple[bool, UserStats]: (Éxito, Progreso actualizado)
         """
         progress = await self._get_or_create_progress(user_id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         if progress.last_checkin_at and (now - progress.last_checkin_at).total_seconds() < 86400:
             return False, progress
             

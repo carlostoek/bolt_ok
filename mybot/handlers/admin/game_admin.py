@@ -37,6 +37,7 @@ from services.level_service import LevelService
 from database.models import User, Mission, LorePiece
 from services.lore_piece_service import LorePieceService
 from services.point_service import PointService
+from services.achievement_service import AchievementService
 from services.config_service import ConfigService
 from services.badge_service import BadgeService
 from utils.messages import BOT_MESSAGES
@@ -140,7 +141,9 @@ async def process_points_amount(message: Message, state: FSMContext, session: As
         return
     user_id = data.get("target_user")
     op = data.get("points_operation")
-    service = PointService(session)
+    level_service = LevelService(session)
+    achievement_service = AchievementService(session)
+    service = PointService(session, level_service, achievement_service)
     if op == "add":
         await service.add_points(user_id, amount)
         await message.answer(f"Se han sumado {amount} puntos a {user_id}.")

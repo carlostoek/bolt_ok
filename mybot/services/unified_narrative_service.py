@@ -8,7 +8,7 @@ from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from database.models import User
-from database.narrative_models import UserNarrativeState, StoryFragment, NarrativeChoice
+from database.narrative_unified import UserNarrativeState
 from database.narrative_unified import NarrativeFragment as UnifiedNarrativeFragment
 from services.narrative_fragment_service import NarrativeFragmentService
 from services.point_service import PointService

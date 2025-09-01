@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from database.models import User
-from database.narrative_models import NarrativeFragment, NarrativeDecision, UserNarrativeState, UserDecisionLog
+from database.narrative_unified import NarrativeFragment, UserNarrativeState, UserDecisionLog
 
 class NarrativeService:
     def __init__(self, session: AsyncSession, user_service=None, point_service=None, backpack_service=None):
@@ -14,58 +14,72 @@ class NarrativeService:
         """
         Gets the current story fragment for a user.
         If they haven't started, returns the initial fragment.
+        Updated for unified narrative system.
         """
         user_state = await self.session.execute(
             select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
         )
         user_state = user_state.scalar_one_or_none()
 
-        fragment_key = 'start'
-        if user_state and user_state.current_fragment_key:
-            fragment_key = user_state.current_fragment_key
+        fragment_id = None
+        if user_state and user_state.current_fragment_id:
+            fragment_id = user_state.current_fragment_id
         
-        fragment = await self.session.execute(
-            select(NarrativeFragment).where(NarrativeFragment.key == fragment_key)
-        )
-        fragment = fragment.scalar_one_or_none()
-
-        if not fragment: # Fallback if fragment key in state is invalid
-            fragment_key = 'start'
+        if fragment_id:
             fragment = await self.session.execute(
-                select(NarrativeFragment).where(NarrativeFragment.key == fragment_key)
+                select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
             )
             fragment = fragment.scalar_one_or_none()
+        else:
+            fragment = None
 
-        if not user_state:
-            user_state = UserNarrativeState(user_id=user_id, current_fragment_key=fragment_key)
+        # Fallback: get first active fragment if no current fragment
+        if not fragment:
+            fragment = await self.session.execute(
+                select(NarrativeFragment).where(
+                    NarrativeFragment.is_active == True
+                ).order_by(NarrativeFragment.created_at).limit(1)
+            )
+            fragment = fragment.scalar_one_or_none()
+            fragment_id = fragment.id if fragment else None
+
+        if not user_state and fragment_id:
+            user_state = UserNarrativeState(user_id=user_id, current_fragment_id=fragment_id)
             self.session.add(user_state)
             await self.session.commit()
             await self.session.refresh(user_state)
-        elif user_state.current_fragment_key != fragment_key:
-            user_state.current_fragment_key = fragment_key
+        elif user_state and user_state.current_fragment_id != fragment_id:
+            user_state.current_fragment_id = fragment_id
             await self.session.commit()
             await self.session.refresh(user_state)
             
         return fragment
 
-    async def process_user_decision(self, user_id: int, decision_id: int):
+    # TODO: Update for unified narrative system - decisions are now stored in fragment choices JSON
+    async def process_user_choice(self, user_id: int, fragment_id: str, choice_index: int):
         """
-        Processes a decision, checks conditions, and advances the story.
+        Processes a choice from a fragment's choices JSON, checks conditions, and advances the story.
+        Updated for unified narrative system.
         """
-        decision = await self.session.execute(
-            select(NarrativeDecision).where(NarrativeDecision.id == decision_id)
+        # Get the fragment
+        fragment = await self.session.execute(
+            select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
         )
-        decision = decision.scalar_one_or_none()
+        fragment = fragment.scalar_one_or_none()
 
-        if not decision:
-            return None # Decision not found
+        if not fragment or choice_index >= len(fragment.choices):
+            return None  # Fragment not found or invalid choice
 
-        # Check conditions (placeholder for now)
-        # if not await self.check_conditions(user_id, decision):
-        #     return None # Conditions not met
-
-        # Log the decision
-        user_decision_log = UserDecisionLog(user_id=user_id, decision_id=decision.id)
+        choice = fragment.choices[choice_index]
+        
+        # Log the decision with unified approach
+        user_decision_log = UserDecisionLog(
+            user_id=user_id, 
+            fragment_id=fragment_id,
+            decision_choice=choice.get('text', f'Choice {choice_index}'),
+            points_awarded=choice.get('points', 0),
+            clues_unlocked=choice.get('unlocks_clues', [])
+        )
         self.session.add(user_decision_log)
 
         # Update user's narrative state
@@ -74,25 +88,57 @@ class NarrativeService:
         )
         user_state = user_state.scalar_one_or_none()
 
+        next_fragment_id = choice.get('next_fragment_id')
         if user_state:
-            user_state.current_fragment_key = decision.next_fragment_key
+            user_state.current_fragment_id = next_fragment_id
+            if fragment_id not in user_state.visited_fragments:
+                user_state.visited_fragments.append(fragment_id)
+            if fragment_id not in user_state.completed_fragments:
+                user_state.completed_fragments.append(fragment_id)
+            # Add unlocked clues
+            for clue in choice.get('unlocks_clues', []):
+                if clue not in user_state.unlocked_clues:
+                    user_state.unlocked_clues.append(clue)
         else:
-            user_state = UserNarrativeState(user_id=user_id, current_fragment_key=decision.next_fragment_key)
+            user_state = UserNarrativeState(
+                user_id=user_id, 
+                current_fragment_id=next_fragment_id,
+                visited_fragments=[fragment_id],
+                completed_fragments=[fragment_id],
+                unlocked_clues=choice.get('unlocks_clues', [])
+            )
             self.session.add(user_state)
         
         await self.session.commit()
         await self.session.refresh(user_state)
 
-        # Fetch and return the new fragment
-        new_fragment = await self.session.execute(
-            select(NarrativeFragment).where(NarrativeFragment.key == decision.next_fragment_key)
-        )
-        return new_fragment.scalar_one_or_none()
+        # Fetch and return the new fragment if specified
+        if next_fragment_id:
+            new_fragment = await self.session.execute(
+                select(NarrativeFragment).where(NarrativeFragment.id == next_fragment_id)
+            )
+            return new_fragment.scalar_one_or_none()
+        return None
 
-    async def check_conditions(self, user_id: int, decision: NarrativeDecision) -> bool:
+    async def check_fragment_requirements(self, user_id: int, fragment: NarrativeFragment) -> bool:
         """
-        Helper function to check all conditions for a decision.
-        This will need access to other services (user, points, backpack).
+        Helper function to check if user meets requirements for accessing a fragment.
+        Checks required clues in the unified system.
         """
-        # For now, always return True. Implement actual condition checking later.
-        return True
+        if not fragment.required_clues:
+            return True  # No requirements
+            
+        # Get user's narrative state
+        user_state = await self.session.execute(
+            select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+        )
+        user_state = user_state.scalar_one_or_none()
+        
+        if not user_state:
+            return False  # User hasn't started narrative
+            
+        # Check if user has all required clues
+        user_clues = set(user_state.unlocked_clues)
+        required_clues = set(fragment.required_clues)
+        
+        return required_clues.issubset(user_clues)

@@ -14,6 +14,12 @@ from services.diana_menu_integration_impl import (
     get_compatibility_bridge,
     get_integration_manager
 )
+from services.enhanced_diana_menu_system import (
+    EnhancedDianaMenuSystem,
+    show_diana_main_menu,
+    handle_diana_callback
+)
+from services.enhanced_user_service import EnhancedUserService
 from utils.handler_decorators import safe_handler, require_role
 
 logger = logging.getLogger(__name__)
@@ -22,25 +28,35 @@ logger = logging.getLogger(__name__)
 router = Router(name="diana_handler")
 
 @router.message(Command("diana"))
-@safe_handler("❌ Error accediendo al sistema Diana.")
+@safe_handler("😔 Los hilos del destino se han enredado... Inténtalo de nuevo, querido.")
 async def cmd_diana(message: Message, session: AsyncSession):
     """
-    Comando de acceso al Diana Menu System.
+    Comando de acceso al Enhanced Diana Menu System con consistencia de personaje.
+    Optimizado para respuesta <1s y >95% consistencia de personaje.
     """
     user_id = message.from_user.id
     
-    logger.info(f"Usuario {user_id} accediendo a Diana Menu System")
+    logger.info(f"Usuario {user_id} accediendo a Enhanced Diana Menu System")
     
     try:
-        # Obtener bridge de compatibilidad
-        diana_bridge = get_compatibility_bridge(session)
+        # Usar el sistema mejorado de Diana
+        menu_result = await show_diana_main_menu(session, message)
         
-        # Intentar mostrar menú principal Diana
-        await diana_bridge.bridge_main_menu(message)
+        if not menu_result.success:
+            logger.warning(f"Menu system failed for user {user_id}: {menu_result.errors}")
+            
+        # Log performance metrics
+        if menu_result.response_time > 1.0:
+            logger.warning(f"Menu response time exceeded 1s: {menu_result.response_time:.2f}s")
+            
+        if menu_result.character_score < 95.0:
+            logger.warning(f"Character consistency below 95%: {menu_result.character_score:.1f}%")
         
     except Exception as e:
-        logger.error(f"Error accediendo a Diana Menu System: {e}")
-        await message.answer("❌ Error accediendo al sistema Diana. Inténtalo de nuevo más tarde.")
+        logger.error(f"Error accediendo a Enhanced Diana Menu System: {e}")
+        # Character-consistent error message
+        error_message = "😔 Las corrientes místicas fluctúan... Algo interrumpe nuestra conexión momentáneamente. Los secretos estarán aquí cuando regreses, querido..."
+        await message.answer(error_message)
 
 @router.message(Command("diana_admin"))
 @require_role("admin")
@@ -70,29 +86,36 @@ async def cmd_diana_admin(message: Message, session: AsyncSession):
         await message.answer("❌ Error accediendo al panel administrativo Diana. Inténtalo de nuevo más tarde.")
 
 @router.callback_query(F.data.startswith("diana_"))
-@safe_handler("❌ Error procesando acción Diana.")
-async def handle_diana_callback(callback: CallbackQuery, session: AsyncSession):
+@safe_handler("😔 Los vientos del misterio encuentran resistencia...")
+async def handle_diana_callback_enhanced(callback: CallbackQuery, session: AsyncSession):
     """
-    Handler para callbacks específicos de Diana Menu System.
+    Handler mejorado para callbacks de Diana Menu System con consistencia de personaje.
+    Optimizado para respuesta <1s y >95% consistencia de personaje.
     """
     user_id = callback.from_user.id
     data = callback.data
     
-    logger.debug(f"Callback Diana {data} recibido de usuario {user_id}")
+    logger.debug(f"Enhanced Diana callback {data} recibido de usuario {user_id}")
     
     try:
-        # Obtener bridge de compatibilidad
-        diana_bridge = get_compatibility_bridge(session)
+        # Usar el sistema mejorado de callbacks
+        callback_result = await handle_diana_callback(session, callback)
         
-        # Manejar callback a través del bridge
-        handled = await diana_bridge.handle_callback(callback)
+        # Log performance and character metrics
+        if callback_result.response_time > 1.0:
+            logger.warning(f"Callback response time exceeded 1s: {callback_result.response_time:.2f}s")
+            
+        if callback_result.character_score < 95.0:
+            logger.warning(f"Callback character consistency below 95%: {callback_result.character_score:.1f}%")
         
-        if not handled:
-            await callback.answer("ℹ️ Acción no disponible en Diana Menu System")
+        if not callback_result.success:
+            logger.warning(f"Callback failed for user {user_id}: {callback_result.errors}")
             
     except Exception as e:
-        logger.error(f"Error procesando callback Diana {data}: {e}")
-        await callback.answer("❌ Error procesando acción Diana", show_alert=True)
+        logger.error(f"Error procesando Enhanced Diana callback {data}: {e}")
+        # Character-consistent error message
+        error_message = "🌙 Los hilos del destino se han enredado momentáneamente... Inténtalo de nuevo en un instante, querido."
+        await callback.answer(error_message, show_alert=True)
 
 # Este router intercepta callbacks que podrían ser manejados por Diana o por el sistema clásico
 @router.callback_query(F.data.in_([

@@ -5,38 +5,29 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.narrative_models import NarrativeChoice
+from database.narrative_unified import NarrativeFragment
 
 async def get_narrative_keyboard(fragment, session: AsyncSession) -> InlineKeyboardMarkup:
     """Crea el teclado de decisiones para un fragmento narrativo."""
     builder = InlineKeyboardBuilder()
     
-    # Obtener las opciones de decisión para este fragmento
-    stmt = select(NarrativeChoice).where(
-        NarrativeChoice.source_fragment_id == fragment.id
-    ).order_by(NarrativeChoice.id)
-    result = await session.execute(stmt)
-    choices = result.scalars().all()
+    # En el modelo unificado, las opciones están en el campo JSON 'choices'
+    choices = fragment.choices or []
     
     # Agregar botones para cada decisión
     for index, choice in enumerate(choices):
         builder.button(
-            text=choice.text,
+            text=choice.get('text', f'Opción {index + 1}'),
             callback_data=f"narrative_choice:{index}"
         )
     
-    # Si no hay decisiones, verificar si hay continuación automática
+    # Si no hay decisiones, mostrar botón de continuar o ver historia
     if not choices:
-        if fragment.auto_next_fragment_key:
-            builder.button(
-                text="➡️ Continuar",
-                callback_data="narrative_auto_continue"
-            )
-        else:
-            builder.button(
-                text="📖 Ver Mi Historia",
-                callback_data="narrative_stats"
-            )
+        # En el modelo unificado, la continuación se puede manejar de diferentes formas
+        builder.button(
+            text="📖 Ver Mi Historia",
+            callback_data="narrative_stats"
+        )
     
     # Botones de navegación adicionales
     builder.button(

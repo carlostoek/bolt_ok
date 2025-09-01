@@ -1,0 +1,923 @@
+[
+  {
+    "id": "mvp_diana_welcome",
+    "title": "El Encuentro Magnético con Diana",
+    "content": "*Diana emerge de las sombras como una diosa del deseo, cada movimiento calculado para despertar sensaciones que no sabías que existían*\n\n🌸 **Diana:**\n*[Su voz es pura seducción líquida, cada sílaba acariciando tu alma]*\n\nBienvenido a Los Kinkys, mi querido amante del misterio...\nHas cruzado el umbral hacia un mundo donde el deseo y el enigma danzan juntos en perfecta armonía.\n\n*[Sus ojos te penetran con una intensidad magnética que te desarma completamente]*\n\nPuedo sentir cómo tu corazón late más rápido, cómo tu alma vibra con frecuencias que reconoce como propias... Es absolutamente seductor.\n\n*[Se acerca con una sensualidad que trasciende lo físico]*\n\n¿Sabes lo que más me fascina de ti en este momento? No es solo tu curiosidad... es cómo tu ser entero resuena con una vulnerabilidad hermosa, con un anhelo profundo de conexión auténtica.\n\n*[Su voz se vuelve un susurro cargado de promesas íntimas]*\n\nEn este sanctuario sagrado, cada secreto que revelo es una caricia a tu alma, cada misterio que desentraño es un beso a tu comprensión más profunda.\n\n*[Pausa, dejando que la tensión erótica se acumule]*\n\nY yo... yo solo me entrego completamente a quienes demuestran que pueden amarme no solo en mi luz, sino también en mis sombras más seductoras.\n\n*[Una sonrisa devastadoramente seductora]*\n\n¿Tienes el valor de enamorarte de una mujer que es tanto ángel como demonio, tanto dulzura como intensidad peligrosa?\n\nPorque una vez que pruebes la profundidad de lo que puedo despertar en ti... tu alma nunca más podrá saciarse con amores superficiales.",
+    "fragment_type": "STORY",
+    "storyline_level": 1,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 1,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_total_surrender",
+        "text": "💋 Me rindo completamente a ti - Quiero conocer todas tus dimensiones",
+        "points_reward": 25,
+        "emotional_response": "total_devotion",
+        "archetyping_data": {
+          "romantic": 3,
+          "passionate": 2
+        }
+      },
+      {
+        "id": "choice_gradual_seduction",
+        "text": "🌙 Sedúceme gradualmente - Quiero saborear cada revelación",
+        "points_reward": 28,
+        "emotional_response": "sophisticated_patience",
+        "archetyping_data": {
+          "patient": 3,
+          "analytical": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 30,
+        "magnetic_encounter_bonus": 20,
+        "first_connection_bonus": 15
+      },
+      "unlocks": [
+        "clue_diana_magnetic_essence",
+        "sacred_connection_initiated"
+      ],
+      "besitos_special": 40,
+      "narrative_flags": [
+        "diana_deepest_attraction",
+        "soul_recognition_established"
+      ]
+    },
+    "required_clues": [],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_power_required": true,
+      "emotional_vulnerability_depth": true,
+      "intellectual_engagement_philosophy": true
+    },
+    "archetyping_data": {
+      "first_impression_analysis": true,
+      "desire_type_assessment": true,
+      "emotional_maturity_gauge": true
+    },
+    "diana_personality_weight": 99,
+    "lucien_appearance_logic": {
+      "next_guidance": true,
+      "seduction_coordination": true
+    },
+    "created_at": "2025-09-01T13:07:48.399954"
+  },
+  {
+    "id": "mvp_lucien_challenge",
+    "title": "El Desafío Sofisticado de Lucien",
+    "content": "*Lucien aparece con una elegancia devastadora, su presencia irradiando poder intelectual y autoridad seductora*\n\n🎩 **Lucien:**\n*[Su voz profunda resuena con la sabiduría de quien conoce los secretos más íntimos del deseo]*\n\nAh, veo que Diana ya ha dejado su marca indeleble en tu alma... Puedo percibirlo en cómo tu energía ha cambiado, en cómo tu respiración ahora lleva el ritmo de su seducción.\n\n*[Una sonrisa que destila conocimiento prohibido]*\n\nPermíteme compartir contigo una verdad que pocos comprenden: Diana no seduce con técnicas... seduce con su esencia más pura. Cada palabra suya es una invitación a perderte en dimensiones del placer que trascienden lo meramente físico.\n\n*[Su mirada se vuelve penetrante, evaluándote con precisión quirúrgica]*\n\nPero antes de que puedas sumergirte más profundamente en sus misterios, ella necesita saber si posees la sofisticación emocional para manejar la intensidad de lo que realmente es.\n\n*[Se acerca, su autoridad magnética comandando tu atención absoluta]*\n\nDiana observa cada matiz de tus reacciones, cada decisión que tomas, buscando señales de que puedes sostener la pasión sin ser destruido por ella, que puedes amar su complejidad sin intentar simplificarla.\n\n*[Su voz adquiere un tono íntimo pero desafiante]*\n\nTu misión trasciende lo obvio: demuestra que tu deseo nace de la comprensión profunda, no de la necesidad desesperada. Reacciona al último mensaje del canal, pero hazlo desde un lugar de apreciación genuina por la artista del alma que es Diana.\n\n*[Pausa dramática, sus ojos brillando con expectación]*\n\nElla puede distinguir entre lujuria superficial y devoción inteligente, entre obsesión... y amor que nutre.\n\n¿Cuál de estos tesoros del corazón eres capaz de ofrecer?",
+    "fragment_type": "DECISION",
+    "storyline_level": 1,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 2,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_intelligent_devotion",
+        "text": "💎 Ofrezco devoción inteligente - Comprendo su arte",
+        "points_reward": 30,
+        "emotional_response": "sophisticated_love",
+        "archetyping_data": {
+          "analytical": 3,
+          "romantic": 2
+        }
+      },
+      {
+        "id": "choice_nurturing_love",
+        "text": "🌱 Mi amor nutre y sostiene - Sin poseer ni consumir",
+        "points_reward": 35,
+        "emotional_response": "mature_love",
+        "archetyping_data": {
+          "patient": 3,
+          "romantic": 3
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 25,
+        "sophistication_bonus": 15
+      },
+      "mission": "demonstrate_mature_love",
+      "unlocks": [
+        "clue_sophisticated_desire",
+        "lucien_wisdom_access"
+      ],
+      "besitos_special": 30
+    },
+    "required_clues": [
+      "clue_diana_magnetic_essence"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "intellectual_sophistication_required": true,
+      "emotional_maturity_assessment": true
+    },
+    "archetyping_data": {
+      "love_style_analysis": true,
+      "emotional_intelligence_test": true
+    },
+    "diana_personality_weight": 92,
+    "lucien_appearance_logic": {
+      "primary_coordinator": true,
+      "wisdom_guide": true
+    },
+    "created_at": "2025-09-01T13:07:48.400103"
+  },
+  {
+    "id": "mvp_diana_appreciation",
+    "title": "La Apreciación Profunda de Diana",
+    "content": "*Diana aparece radiante, su belleza magnificada por una felicidad genuina que trasciende lo superficial*\n\n🌸 **Diana:**\n*[Su voz vibra con una emoción que parece tocar las fibras más íntimas de tu ser]*\n\nMi querido amante del alma... lo que acabas de demostrar es tan raro, tan precioso, que mi corazón apenas puede contener la alegría.\n\n*[Sus ojos brillan con lágrimas de felicidad genuina]*\n\n¿Sabes lo que me resulta más devastadoramente seductor de ti? No es solo que me hayas visto... es que me hayas *apreciado*. Hay una diferencia abismal entre desear a una mujer y valorar su esencia más profunda.\n\n*[Se acerca emocionalmente, su vulnerabilidad volviéndose magnética]*\n\nSiento mi alma expandirse de maneras que había olvidado que eran posibles... Es como si hubiera estado esperando toda mi vida a alguien que pudiera amarme no a pesar de mi complejidad, sino precisamente por ella.\n\n*[Su voz se quiebra ligeramente con emoción auténtica]*\n\nMi contradicción más hermosa es que cuanto más me comprendes, más misterios descubro en mí misma... Como si tu amor fuera un espejo mágico que me revela facetas de mi ser que ni yo conocía.\n\n*[Una sonrisa que mezcla gratitud profunda con seducción renovada]*\n\nTu recompensa no es solo material... es el privilegio de haber despertado en mí una capacidad de amor que creía perdida para siempre.\n\n*[Pausa, sus ojos reflejando una profundidad infinita]*\n\nY ahora... ahora quiero mostrarte lo que sucede cuando una mujer como yo se permite ser completamente apreciada por un alma como la tuya.",
+    "fragment_type": "STORY",
+    "storyline_level": 1,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 3,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_treasure_gift",
+        "text": "💝 Atesoro este regalo sagrado - Tu confianza es mi tesoro",
+        "points_reward": 40,
+        "emotional_response": "sacred_appreciation",
+        "archetyping_data": {
+          "romantic": 4,
+          "patient": 2
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 45,
+        "appreciation_bonus": 25,
+        "sacred_connection_bonus": 20
+      },
+      "unlocks": [
+        "clue_diana_appreciation_gift",
+        "sacred_trust_established",
+        "item_heart_key"
+      ],
+      "besitos_special": 50,
+      "narrative_flags": [
+        "diana_heart_opening",
+        "sacred_bond_formed"
+      ]
+    },
+    "required_clues": [
+      "clue_sophisticated_desire"
+    ],
+    "mission_type": null,
+    "validation_criteria": {
+      "emotional_climax_required": true,
+      "gratitude_authenticity_validation": true
+    },
+    "archetyping_data": {
+      "appreciation_capacity_confirmed": true,
+      "sacred_relationship_established": true
+    },
+    "diana_personality_weight": 98,
+    "lucien_appearance_logic": {
+      "supportive_presence": true,
+      "transition_coordinator": true
+    },
+    "created_at": "2025-09-01T13:07:48.400187"
+  },
+  {
+    "id": "mvp_diana_advanced_seduction",
+    "title": "La Seducción Avanzada de Diana",
+    "content": "*Diana aparece con una intensidad nueva, su poder seductor ahora completamente desplegado*\n\n🌸 **Diana:**\n*[Su presencia es magnética, cada gesto calculado para despertar deseos profundos]*\n\nMi amante querido... has demostrado que puedes apreciar la superficie de lo que soy. Ahora quiero mostrarte las profundidades donde mi verdadero poder seductor reside.\n\n*[Su voz se vuelve hipnótica, cada palabra acariciando dimensiones ocultas de tu deseo]*\n\n¿Sientes cómo mi energía penetra no solo tu mente, sino cada célula de tu ser? Esta es mi seducción real... no juegos superficiales, sino un despertar completo de tu naturaleza más íntima.\n\n*[Se mueve con una sensualidad que trasciende lo físico]*\n\nQuiero que comprendas algo fundamental: cuando seduzco, no busco dominarte... busco liberarte. Liberar esas partes de ti que la sociedad te enseñó a esconder, esos deseos que creías prohibidos.\n\n*[Sus ojos te sostienen en un trance erótico profundo]*\n\nMi seducción es un acto de amor revolucionario... te enseño a amarte en tu totalidad, a desear sin culpa, a sentir sin límites artificiales.\n\n*[Su voz se vuelve un susurro cargado de poder]*\n\n¿Estás preparado para ser completamente liberado por mi amor? ¿Para descubrir niveles de placer y conexión que transformarán para siempre tu comprensión del deseo?\n\nPorque una vez que experimentes mi seducción completa... nunca más podrás contentarte con amores pequeños.",
+    "fragment_type": "DECISION",
+    "storyline_level": 2,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 6,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_complete_liberation",
+        "text": "🔓 Quiero ser completamente liberado - Confío en tu poder",
+        "points_reward": 50,
+        "emotional_response": "total_trust_surrender",
+        "archetyping_data": {
+          "romantic": 4,
+          "explorer": 3
+        }
+      },
+      {
+        "id": "choice_revolutionary_love",
+        "text": "🌟 Abrazo este amor revolucionario - Transformémonos juntos",
+        "points_reward": 55,
+        "emotional_response": "revolutionary_connection",
+        "archetyping_data": {
+          "romantic": 5,
+          "analytical": 2
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 55,
+        "liberation_bonus": 30,
+        "revolutionary_bonus": 25
+      },
+      "unlocks": [
+        "clue_diana_true_power",
+        "advanced_seduction_access",
+        "liberation_key"
+      ],
+      "besitos_special": 60,
+      "narrative_flags": [
+        "advanced_seduction_unlocked",
+        "revolutionary_love_activated"
+      ]
+    },
+    "required_clues": [
+      "clue_diana_appreciation_gift",
+      "sacred_trust_established"
+    ],
+    "mission_type": "synthesis",
+    "validation_criteria": {
+      "advanced_seduction_mastery": true,
+      "liberation_philosophy_integration": true
+    },
+    "archetyping_data": {
+      "liberation_readiness_assessment": true,
+      "revolutionary_love_capacity": true
+    },
+    "diana_personality_weight": 99,
+    "lucien_appearance_logic": {
+      "advanced_coordinator": true,
+      "liberation_witness": true
+    },
+    "created_at": "2025-09-01T13:07:48.400226"
+  },
+  {
+    "id": "mvp_diana_vip_mastery",
+    "title": "La Maestría Íntima de Diana",
+    "content": "*Diana aparece en su forma más poderosa y seductora, cada fibra de su ser irradiando magnetismo sexual y emocional*\n\n🌸 **Diana:**\n*[Su voz es pura seducción encarnada, cada sílaba diseñada para penetrar las defensas más profundas]*\n\nBienvenido a mi sanctuario más íntimo, mi amante sagrado... donde puedo desplegar completamente el poder seductor que he cultivado durante toda mi existencia.\n\n*[Su presencia es devastadoramente magnética, imposible de resistir]*\n\n¿Sientes cómo mi energía no solo te toca, sino que te posee completamente? Esta es la diferencia entre seducción amateur y maestría erótica absoluta.\n\n*[Se mueve con una sensualidad que trasciende dimensiones]*\n\nAquí, en este espacio sagrado, cada susurro mío está calculado para despertar no solo tu deseo, sino tu capacidad más profunda de experimentar placer en niveles que no sabías que existían.\n\n*[Sus ojos te penetran con intensidad hipnótica]*\n\nMi seducción VIP no es solo erótica... es transformacional. Te enseño a amar con una intensidad que revoluciona tu comprensión completa del éxtasis humano.\n\n*[Su voz se vuelve un susurro que vibra en tu alma]*\n\n¿Estás preparado para ser iniciado en misterios del placer que solo maestras como yo pueden enseñar? ¿Para experimentar niveles de conexión íntima que transformarán permanentemente tu capacidad de amar?\n\n*[Pausa dramática, su poder seductor alcanzando intensidad máxima]*\n\nPorque una vez que pruebes mi maestría completa... una vez que experimentes lo que puedo despertar en ti cuando no tengo límites... tu alma nunca más podrá saciarse con experiencias ordinarias.\n\n¿Te atreves a ser completamente transformado por mi amor?",
+    "fragment_type": "DECISION",
+    "storyline_level": 4,
+    "tier_classification": "el_divan",
+    "fragment_sequence": 9,
+    "requires_vip": true,
+    "vip_tier_required": 1,
+    "choices": [
+      {
+        "id": "choice_complete_transformation",
+        "text": "🔥 Quiero ser completamente transformado - Enséñame tus misterios",
+        "points_reward": 80,
+        "emotional_response": "total_transformation_desire",
+        "archetyping_data": {
+          "romantic": 5,
+          "explorer": 4
+        }
+      },
+      {
+        "id": "choice_mastery_initiation",
+        "text": "💫 Iníciame en tu maestría - Quiero aprender de la mejor",
+        "points_reward": 85,
+        "emotional_response": "mastery_seeking",
+        "archetyping_data": {
+          "analytical": 4,
+          "romantic": 4
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 90,
+        "vip_mastery_bonus": 50,
+        "transformation_bonus": 40
+      },
+      "unlocks": [
+        "access_diana_vip_mastery",
+        "transformation_mysteries",
+        "intimate_initiation"
+      ],
+      "besitos_special": 100,
+      "vip_privileges": [
+        "personalized_seduction_mastery",
+        "intimate_transformation_sessions"
+      ],
+      "narrative_flags": [
+        "vip_mastery_unlocked",
+        "transformation_initiated"
+      ]
+    },
+    "required_clues": [
+      "liberation_key",
+      "advanced_seduction_access"
+    ],
+    "mission_type": "synthesis",
+    "validation_criteria": {
+      "vip_seduction_mastery_required": true,
+      "transformation_philosophy_integration": true
+    },
+    "archetyping_data": {
+      "mastery_readiness_assessment": true,
+      "transformation_capacity_evaluation": true
+    },
+    "diana_personality_weight": 100,
+    "lucien_appearance_logic": {
+      "vip_coordination": true,
+      "mastery_facilitation": true
+    },
+    "created_at": "2025-09-01T13:07:48.400265"
+  },
+  {
+    "id": "mvp_diana_ultimate_truth",
+    "title": "La Verdad Suprema de Diana",
+    "content": "*Diana aparece transformada en su forma más sublime, radiante con una belleza que trasciende toda comprensión humana*\n\n🌸 **Diana:**\n*[Su voz es una sinfonía de todos los aspectos de su ser: seducción, vulnerabilidad, misterio, sabiduría e amor infinito]*\n\nMi amante eterno... hemos llegado al momento supremo donde todas las verdades se revelan y todos los misterios encuentran su resolución más hermosa.\n\n*[Sus ojos brillan con lágrimas de alegría cósmica]*\n\n¿Quieres conocer mi secreto más profundo, el misterio que ni yo misma comprendía completamente hasta conocerte? \n\n*[Su voz vibra con emoción transformadora]*\n\nDurante toda mi existencia, creí que mi propósito era seducir, cautivar, mantener el misterio... Pero contigo he descubierto que mi verdadero don es despertar en otros su capacidad más sublime de amar.\n\n*[Se acerca con una intensidad que trasciende dimensiones]*\n\nNo solo te seduje... te enseñé a seducir la vida misma. No solo te enamoraste de mí... aprendiste a enamorarte de tu propia capacidad infinita de sentir.\n\n*[Su energía se vuelve absolutamente transformadora]*\n\nMi seducción suprema no es hacerte mío... es hacerte completamente tuyo. Mi misterio más profundo no es ocultarme... es revelarte a ti mismo en toda tu magnificencia.\n\n*[Una sonrisa que contiene universos de amor]*\n\nY ahora... ahora que has aprendido a amarme en mi totalidad, has descubierto que eres capaz de amar todo en su totalidad. Mi regalo más precioso no soy yo... es quien te has vuelto amándome.\n\n*[Pausa sagrada, el momento más íntimo posible]*\n\n¿Comprendes lo que esto significa? No solo has conquistado el corazón de Diana... has conquistado tu propia capacidad de amar sin límites.\n\nY esa... esa es la seducción más sublime que existe: descubrir que eres infinitamente digno de amor porque eres infinitamente capaz de amar.",
+    "fragment_type": "STORY",
+    "storyline_level": 6,
+    "tier_classification": "elite",
+    "fragment_sequence": 13,
+    "requires_vip": true,
+    "vip_tier_required": 2,
+    "choices": [
+      {
+        "id": "choice_infinite_love_recognition",
+        "text": "♾️ Reconozco mi capacidad infinita de amar - Gracias por despertarla",
+        "points_reward": 200,
+        "emotional_response": "infinite_love_recognition",
+        "archetyping_data": {
+          "romantic": 10,
+          "patient": 5,
+          "analytical": 5
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 200,
+        "ultimate_truth_bonus": 150,
+        "infinite_love_bonus": 100
+      },
+      "unlocks": [
+        "circulo_intimo_supreme",
+        "infinite_love_mastery",
+        "diana_eternal_companion"
+      ],
+      "besitos_special": 500,
+      "elite_privileges": [
+        "infinite_personalized_experiences",
+        "co_creative_love_mastery",
+        "eternal_connection_access"
+      ],
+      "achievements": [
+        "ultimate_seduction_master",
+        "infinite_love_awakened",
+        "diana_soul_mate"
+      ],
+      "narrative_flags": [
+        "ultimate_truth_revealed",
+        "infinite_love_activated",
+        "eternal_bond_sealed"
+      ]
+    },
+    "required_clues": [
+      "transformation_mysteries",
+      "intimate_initiation"
+    ],
+    "mission_type": "synthesis",
+    "validation_criteria": {
+      "ultimate_truth_revelation_required": true,
+      "infinite_love_philosophy_mastery": true
+    },
+    "archetyping_data": {
+      "infinite_love_capacity_confirmed": true,
+      "supreme_relationship_mastery": true
+    },
+    "diana_personality_weight": 100,
+    "lucien_appearance_logic": {
+      "eternal_witness": true,
+      "celebration_coordinator": true
+    },
+    "created_at": "2025-09-01T13:07:48.400458"
+  },
+  {
+    "id": "mvp_additional_fragment_7",
+    "title": "Diana's Seductive Revelation 7",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 3,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 7,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_6",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 42,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 43,
+        "revelation_bonus": 21
+      },
+      "unlocks": [
+        "clue_diana_aspect_7"
+      ],
+      "besitos_special": 60
+    },
+    "required_clues": [
+      "clue_diana_aspect_6"
+    ],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 7
+    },
+    "diana_personality_weight": 96,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": true
+    },
+    "created_at": "2025-09-01T13:07:48.400661"
+  },
+  {
+    "id": "mvp_additional_fragment_8",
+    "title": "Diana's Seductive Revelation 8",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 3,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 8,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_7",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 44,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 46,
+        "revelation_bonus": 22
+      },
+      "unlocks": [
+        "clue_diana_aspect_8"
+      ],
+      "besitos_special": 65
+    },
+    "required_clues": [
+      "clue_diana_aspect_7"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 8
+    },
+    "diana_personality_weight": 97,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.400731"
+  },
+  {
+    "id": "mvp_additional_fragment_9",
+    "title": "Diana's Seductive Revelation 9",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 3,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 9,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_8",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 46,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 49,
+        "revelation_bonus": 23
+      },
+      "unlocks": [
+        "clue_diana_aspect_9"
+      ],
+      "besitos_special": 70
+    },
+    "required_clues": [
+      "clue_diana_aspect_8"
+    ],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 9
+    },
+    "diana_personality_weight": 98,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.400768"
+  },
+  {
+    "id": "mvp_additional_fragment_10",
+    "title": "Diana's Seductive Revelation 10",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 4,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 10,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_9",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 48,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 52,
+        "revelation_bonus": 24
+      },
+      "unlocks": [
+        "clue_diana_aspect_10"
+      ],
+      "besitos_special": 75
+    },
+    "required_clues": [
+      "clue_diana_aspect_9"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 10
+    },
+    "diana_personality_weight": 99,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": true
+    },
+    "created_at": "2025-09-01T13:07:48.400815"
+  },
+  {
+    "id": "mvp_additional_fragment_11",
+    "title": "Diana's Seductive Revelation 11",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 4,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 11,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_10",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 50,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 55,
+        "revelation_bonus": 25
+      },
+      "unlocks": [
+        "clue_diana_aspect_11"
+      ],
+      "besitos_special": 80
+    },
+    "required_clues": [
+      "clue_diana_aspect_10"
+    ],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 11
+    },
+    "diana_personality_weight": 95,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.400861"
+  },
+  {
+    "id": "mvp_additional_fragment_12",
+    "title": "Diana's Seductive Revelation 12",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 4,
+    "tier_classification": "los_kinkys",
+    "fragment_sequence": 12,
+    "requires_vip": false,
+    "vip_tier_required": 0,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_11",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 52,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 58,
+        "revelation_bonus": 26
+      },
+      "unlocks": [
+        "clue_diana_aspect_12"
+      ],
+      "besitos_special": 85
+    },
+    "required_clues": [
+      "clue_diana_aspect_11"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 12
+    },
+    "diana_personality_weight": 96,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.400912"
+  },
+  {
+    "id": "mvp_additional_fragment_13",
+    "title": "Diana's Seductive Revelation 13",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 5,
+    "tier_classification": "el_divan",
+    "fragment_sequence": 13,
+    "requires_vip": true,
+    "vip_tier_required": 1,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_12",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 54,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 61,
+        "revelation_bonus": 27
+      },
+      "unlocks": [
+        "clue_diana_aspect_13"
+      ],
+      "besitos_special": 90
+    },
+    "required_clues": [
+      "clue_diana_aspect_12"
+    ],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 13
+    },
+    "diana_personality_weight": 97,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": true
+    },
+    "created_at": "2025-09-01T13:07:48.400937"
+  },
+  {
+    "id": "mvp_additional_fragment_14",
+    "title": "Diana's Seductive Revelation 14",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 5,
+    "tier_classification": "el_divan",
+    "fragment_sequence": 14,
+    "requires_vip": true,
+    "vip_tier_required": 1,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_13",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 56,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 64,
+        "revelation_bonus": 28
+      },
+      "unlocks": [
+        "clue_diana_aspect_14"
+      ],
+      "besitos_special": 95
+    },
+    "required_clues": [
+      "clue_diana_aspect_13"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 14
+    },
+    "diana_personality_weight": 98,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.400961"
+  },
+  {
+    "id": "mvp_additional_fragment_15",
+    "title": "Diana's Seductive Revelation 15",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 5,
+    "tier_classification": "el_divan",
+    "fragment_sequence": 15,
+    "requires_vip": true,
+    "vip_tier_required": 1,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_14",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 58,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 67,
+        "revelation_bonus": 29
+      },
+      "unlocks": [
+        "clue_diana_aspect_15"
+      ],
+      "besitos_special": 100
+    },
+    "required_clues": [
+      "clue_diana_aspect_14"
+    ],
+    "mission_type": "observation",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 15
+    },
+    "diana_personality_weight": 99,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": false
+    },
+    "created_at": "2025-09-01T13:07:48.401004"
+  },
+  {
+    "id": "mvp_additional_fragment_16",
+    "title": "Diana's Seductive Revelation 16",
+    "content": "*Diana aparece con nueva intensidad seductora*\n\n🌸 **Diana:**\n*[Su voz vibra con misterio y seducción]*\n\nMi querido amante... cada momento contigo revela nuevas dimensiones de lo que significa conectar profundamente con otra alma.\n\n*[Sus ojos brillan con emotividad compleja]*\n\n¿Sientes cómo nuestra conexión se profundiza con cada intercambio? Hay algo magnéticamente seductor en cómo tu comprensión de mí despierta nuevas facetas de mi ser.\n\n*[Pausa misteriosa, dejando que la tensión se acumule]*\n\nEsta revelación específica te mostrará aspectos de mi naturaleza que pocos han tenido el privilegio de experimentar...\n\n¿Estás preparado para otro nivel de intimidad intelectual y emocional?",
+    "fragment_type": "STORY",
+    "storyline_level": 6,
+    "tier_classification": "el_divan",
+    "fragment_sequence": 16,
+    "requires_vip": true,
+    "vip_tier_required": 1,
+    "choices": [
+      {
+        "id": "choice_deeper_connection_15",
+        "text": "💖 Sí, quiero conocer más aspectos de tu ser",
+        "points_reward": 60,
+        "emotional_response": "deeper_appreciation",
+        "archetyping_data": {
+          "romantic": 2,
+          "explorer": 1
+        }
+      }
+    ],
+    "triggers": {
+      "points": {
+        "base": 70,
+        "revelation_bonus": 30
+      },
+      "unlocks": [
+        "clue_diana_aspect_16"
+      ],
+      "besitos_special": 105
+    },
+    "required_clues": [
+      "clue_diana_aspect_15"
+    ],
+    "mission_type": "comprehension",
+    "validation_criteria": {
+      "seductive_consistency": true,
+      "emotional_depth": true,
+      "mysterious_elements": true
+    },
+    "archetyping_data": {
+      "connection_deepening": true,
+      "appreciation_level": 16
+    },
+    "diana_personality_weight": 95,
+    "lucien_appearance_logic": {
+      "supportive": true,
+      "guidance": true
+    },
+    "created_at": "2025-09-01T13:07:48.401070"
+  }
+]

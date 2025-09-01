@@ -294,3 +294,12 @@ async def session(session_factory):
 - [Guía del Sistema Administrativo de Narrativa](docs/guia_sistema_administrativo_narrativa.md)
 - [Configuración del Entorno de Desarrollo](README_SETUP.md)
 - [Solución de Problemas](TROUBLESHOOTING.md)
+- Nunca crees archivos nuevos que no existan ya.
+
+-Nunca inventes cosas que no sean parte de mi proyecto real.
+
+-Nunca omitas o ignores mi sistema existente.
+
+-Solo trabaja con los archivos y la estructura que ya existen.
+
+-Sé preciso y respetuoso con la base de código actual.

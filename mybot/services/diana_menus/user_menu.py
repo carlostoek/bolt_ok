@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from ..coordinador_central import CoordinadorCentral, AccionUsuario
 from ..point_service import PointService
+from ..level_service import LevelService
 from ..narrative_service import NarrativeService
 from ..mission_service import MissionService
 from ..achievement_service import AchievementService
@@ -28,10 +29,11 @@ class DianaUserMenu:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.coordinador = CoordinadorCentral(session)
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         self.narrative_service = NarrativeService(session)
         self.mission_service = MissionService(session)
-        self.achievement_service = AchievementService(session)
         self.user_service = UserService(session)
     
     async def show_main_user_menu(self, callback: CallbackQuery) -> None:

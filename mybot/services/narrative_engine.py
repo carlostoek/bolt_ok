@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from database.models import User
-from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
+from database.narrative_unified import NarrativeFragment, UserNarrativeState
 from services.point_service import PointService
 from datetime import datetime
 
@@ -21,7 +21,7 @@ class NarrativeEngine:
         self.bot = bot
         self.point_service = PointService(session) if session else None
     
-    async def get_user_current_fragment(self, user_id: int) -> Optional[StoryFragment]:
+    async def get_user_current_fragment(self, user_id: int) -> Optional[NarrativeFragment]:
         """Obtiene el fragmento actual del usuario o inicia la narrativa."""
         # Obtener o crear estado narrativo del usuario
         user_state = await self._get_or_create_user_state(user_id)
@@ -41,7 +41,7 @@ class NarrativeEngine:
         fragment = await self._get_fragment_by_key(user_state.current_fragment_key)
         return fragment
     
-    async def start_narrative(self, user_id: int) -> Optional[StoryFragment]:
+    async def start_narrative(self, user_id: int) -> Optional[NarrativeFragment]:
         """Inicia la narrativa para un usuario nuevo."""
         user_state = await self._get_or_create_user_state(user_id)
         
@@ -72,7 +72,7 @@ class NarrativeEngine:
         self, 
         user_id: int, 
         choice_index: int
-    ) -> Optional[StoryFragment]:
+    ) -> Optional[NarrativeFragment]:
         """Procesa una decisión del usuario y avanza la narrativa."""
         current_fragment = await self.get_user_current_fragment(user_id)
         if not current_fragment:
@@ -164,21 +164,17 @@ class NarrativeEngine:
         
         return user_state
     
-    async def _get_fragment_by_key(self, key: str) -> Optional[StoryFragment]:
+    async def _get_fragment_by_key(self, key: str) -> Optional[NarrativeFragment]:
         """Obtiene un fragmento por su clave única."""
-        stmt = select(StoryFragment).where(StoryFragment.key == key)
+        stmt = select(NarrativeFragment).where(NarrativeFragment.id == key)
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
     
-    async def _get_fragment_choices(self, fragment_id: int) -> List[NarrativeChoice]:
-        """Obtiene las opciones de decisión para un fragmento."""
-        stmt = select(NarrativeChoice).where(
-            NarrativeChoice.source_fragment_id == fragment_id
-        ).order_by(NarrativeChoice.id)
-        result = await self.session.execute(stmt)
-        return result.scalars().all()
+    async def _get_fragment_choices(self, fragment: NarrativeFragment) -> List[Dict[str, Any]]:
+        """Obtiene las opciones de decisión para un fragmento del campo JSON."""
+        return fragment.choices or []
     
-    async def _check_access_conditions(self, user_id: int, fragment: StoryFragment) -> bool:
+    async def _check_access_conditions(self, user_id: int, fragment: NarrativeFragment) -> bool:
         """Verifica si el usuario puede acceder a un fragmento."""
         if not fragment:
             return False
@@ -198,7 +194,7 @@ class NarrativeEngine:
         
         return True
     
-    async def _process_fragment_rewards(self, user_id: int, fragment: StoryFragment):
+    async def _process_fragment_rewards(self, user_id: int, fragment: NarrativeFragment):
         """Procesa las recompensas de un fragmento."""
         if fragment.reward_besitos > 0 and self.point_service and self.bot:
             await self.point_service.add_points(
@@ -227,13 +223,13 @@ class NarrativeEngine:
         user_besitos = user.points if user else 0
         
         # Contar fragmentos accesibles según rol y besitos
-        stmt = select(StoryFragment)
+        stmt = select(NarrativeFragment)
         if user_role != "admin":
-            conditions = [StoryFragment.min_besitos <= user_besitos]
+            conditions = [NarrativeFragment.min_besitos <= user_besitos]
             if user_role != "vip":
                 conditions.append(
-                    (StoryFragment.required_role.is_(None)) | 
-                    (StoryFragment.required_role != "vip")
+                    (NarrativeFragment.required_role.is_(None)) | 
+                    (NarrativeFragment.required_role != "vip")
                 )
             stmt = stmt.where(and_(*conditions))
         

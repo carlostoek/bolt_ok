@@ -71,6 +71,7 @@ from handlers.unified_narrative_handler import router as unified_narrative_route
 from handlers.user_narrative_handler import router as user_narrative_router
 from handlers.unified_mission_handler import router as unified_mission_router
 from handlers.reward_test_handler import router as reward_test_router
+from handlers.diana_handler import router as diana_handler_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -189,6 +190,7 @@ async def main() -> None:
         logger.info("Registrando handlers...")
         routers = [
             ("setup", setup_handlers.router),
+            ("diana_handler", diana_handler_router),
             ("admin", admin_router),
             ("auction_admin", auction_admin_router),
             ("start_token", start_token),

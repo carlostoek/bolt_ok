@@ -209,7 +209,7 @@ class UserNarrativeState(Base):
 
 # Enhanced narrative system for advanced features and integration testing
 
-class NarrativeFragment(Base):
+class NarrativeFragmentDeprecated(Base):
     """Enhanced narrative fragments with engagement and milestone tracking.
     
     This model extends the basic StoryFragment with additional features for
