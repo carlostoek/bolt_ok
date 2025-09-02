@@ -323,6 +323,9 @@ class EnhancedDianaMenuSystem:
             elif callback_data == "diana_close":
                 return await self._handle_close_menu(callback)
             
+            elif callback_data.startswith("narrative_"):
+                return await self._handle_narrative_callbacks(callback)
+            
             else:
                 # Unknown callback - delegate to base system
                 return await self._delegate_to_base_system(callback)
@@ -469,6 +472,216 @@ class EnhancedDianaMenuSystem:
             logger.error(f"Error closing menu: {e}")
             return MenuResponse(False, 0.0, 0.5, True, False, [str(e)])
     
+    async def _handle_narrative_callbacks(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle narrative-specific callbacks."""
+        start_time = time.time()
+        callback_data = callback.data
+        
+        try:
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            
+            user_id = callback.from_user.id
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            
+            if callback_data.startswith("narrative_choice_"):
+                # Handle choice selection
+                choice_index = int(callback_data.split("_")[-1])
+                
+                # Process choice with performance tracking
+                import time as time_module
+                choice_start = time_module.time()
+                
+                choice_result = await narrative_service.process_user_choice_advanced(
+                    user_id, 
+                    choice_index,
+                    response_time_ms=None,  # Could track from user interaction
+                    additional_context={'menu_source': 'diana_menu'}
+                )
+                
+                if choice_result['success']:
+                    # Show result with next fragment
+                    next_fragment = choice_result['current_fragment']
+                    
+                    if next_fragment and next_fragment.is_decision:
+                        # Continue with decision fragment
+                        return await self._handle_narrative_menu(callback)
+                    else:
+                        # Show completion message for story fragment
+                        completion_text = await self._build_choice_completion_text(choice_result)
+                        
+                        keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                            [InlineKeyboardButton("📖 Continuar", callback_data="narrative_continue")],
+                            [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                        ])
+                        
+                        await safe_edit(callback, completion_text, reply_markup=keyboard)
+                        await callback.answer(f"¡Excelente elección! +{choice_result['points_awarded']} puntos")
+                else:
+                    await callback.answer(f"Error: {choice_result['error']}", show_alert=True)
+                    
+                return MenuResponse(
+                    success=choice_result['success'],
+                    character_score=95.0,
+                    response_time=time.time() - start_time,
+                    meets_performance_requirement=choice_result.get('meets_performance_target', True),
+                    message_sent=True,
+                    errors=[]
+                )
+            
+            elif callback_data == "narrative_continue":
+                # Continue to next part of story
+                return await self._handle_narrative_menu(callback)
+            
+            elif callback_data == "narrative_progress":
+                return await self._handle_narrative_progress(callback)
+                
+            elif callback_data == "narrative_profile":
+                return await self._handle_narrative_profile(callback)
+            
+            else:
+                # Unknown narrative callback
+                await callback.answer("Opción no reconocida", show_alert=True)
+                return MenuResponse(False, 0.0, time.time() - start_time, True, True, ["Unknown callback"])
+                
+        except Exception as e:
+            logger.error(f"Error handling narrative callback {callback_data}: {e}")
+            await callback.answer("Error procesando acción narrativa", show_alert=True)
+            return MenuResponse(False, 0.0, time.time() - start_time, False, True, [str(e)])
+    
+    async def _build_choice_completion_text(self, choice_result: Dict[str, Any]) -> str:
+        """Build text for choice completion display."""
+        try:
+            points_awarded = choice_result.get('points_awarded', 0)
+            level_progression = choice_result.get('level_progression', {})
+            next_fragment = choice_result.get('current_fragment')
+            
+            text = "✨ **Elección Realizada**\n\n"
+            
+            if points_awarded > 0:
+                text += f"💰 Has ganado {points_awarded} besitos por tu sabia elección.\n\n"
+            
+            if level_progression.get('progressed', False):
+                new_level = level_progression['to_level']
+                new_tier = level_progression.get('new_tier', '')
+                text += f"🚀 **¡Nivel Ascendido!** Ahora eres Nivel {new_level}\n"
+                text += f"👑 Bienvenido a: {new_tier.replace('_', ' ').title()}\n\n"
+            
+            if next_fragment:
+                text += f"📖 **Siguiente:** {next_fragment.title}\n"
+                text += f"🌟 {next_fragment.content[:100]}...\n\n"
+            
+            text += "💋 *Diana sonríe con aprobación por tu decisión...*"
+            
+            return text
+            
+        except Exception as e:
+            logger.error(f"Error building choice completion text: {e}")
+            return "✨ Tu elección ha sido registrada. Diana te observa con interés..."
+    
+    async def _handle_narrative_progress(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle narrative progress display."""
+        try:
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            progress = await narrative_service.get_comprehensive_progress(callback.from_user.id)
+            
+            # Build progress text
+            progress_text = "📊 **Tu Progreso en los Misterios de Diana**\n\n"
+            progress_text += f"📍 **Nivel Actual:** {progress['current_level']} - {progress.get('current_tier_name', 'Los Kinkys')}\n"
+            progress_text += f"📈 **Progreso MVP:** {progress.get('mvp_completion_percentage', 0):.1f}%\n"
+            progress_text += f"📚 **Fragmentos Completados:** {progress['fragments_completed']}/{progress['total_mvp_fragments']}\n\n"
+            
+            archetype_profile = progress.get('archetype_profile', {})
+            if archetype_profile.get('dominant_archetype'):
+                progress_text += f"🎭 **Tu Esencia Dominante:** {archetype_profile['dominant_archetype'].title()}\n"
+            
+            interaction_patterns = progress.get('interaction_patterns', {})
+            if interaction_patterns.get('engagement_depth'):
+                progress_text += f"💫 **Nivel de Compromiso:** {interaction_patterns['engagement_depth'].replace('_', ' ').title()}\n"
+            
+            progress_text += f"\n🌟 Continúa explorando para desbloquear más secretos..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver a Narrativa", callback_data="diana_narrative")],
+                [InlineKeyboardButton("🏠 Menú Principal", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, progress_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing narrative progress: {e}")
+            await callback.answer("Error cargando progreso", show_alert=True)
+            return MenuResponse(False, 0.0, 0.5, True, True, [str(e)])
+    
+    async def _handle_narrative_profile(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle narrative profile display with archetype details."""
+        try:
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            progress = await narrative_service.get_comprehensive_progress(callback.from_user.id)
+            
+            archetype_profile = progress.get('archetype_profile', {})
+            dominant_archetype = archetype_profile.get('dominant_archetype', 'explorer')
+            distribution = archetype_profile.get('distribution', {})
+            
+            # Build profile text
+            profile_text = f"🎭 **Perfil del Alma - {dominant_archetype.title()}**\n\n"
+            
+            archetype_descriptions = {
+                'explorer': "🔍 Buscas secretos en cada rincón, impulsado por curiosidad insaciable.",
+                'direct': "🎯 Vas directo al corazón de los misterios sin rodeos.",
+                'romantic': "💕 Encuentras belleza y poesía en cada revelación.",
+                'analytical': "📚 Diseccionas cada secreto con precisión intelectual.",
+                'persistent': "💪 Jamás te rindes ante los obstáculos del conocimiento.",
+                'patient': "🧘 Permites que los misterios se revelen a su tiempo natural."
+            }
+            
+            description = archetype_descriptions.get(dominant_archetype, "✨ Tu esencia es única y especial.")
+            profile_text += f"{description}\n\n"
+            
+            # Show distribution if available
+            if distribution:
+                profile_text += "🌈 **Composición de tu Alma:**\n"
+                for archetype, percentage in distribution.items():
+                    if percentage > 10:  # Only show significant percentages
+                        profile_text += f"• {archetype.title()}: {percentage}%\n"
+                profile_text += "\n"
+            
+            # Add behavioral insights
+            interaction_patterns = progress.get('interaction_patterns', {})
+            if interaction_patterns:
+                profile_text += "💫 **Patrones de Interacción:**\n"
+                if interaction_patterns.get('avg_response_time_ms'):
+                    avg_time_sec = interaction_patterns['avg_response_time_ms'] // 1000
+                    if avg_time_sec > 30:
+                        profile_text += "• Contemplativo: Te tomas tiempo para reflexionar\n"
+                    elif avg_time_sec < 10:
+                        profile_text += "• Intuitivo: Respondes con rapidez natural\n"
+                    else:
+                        profile_text += "• Equilibrado: Balanceas reflexión e intuición\n"
+            
+            profile_text += f"\n🌟 Diana aprecia cada faceta de tu ser único..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver a Narrativa", callback_data="diana_narrative")],
+                [InlineKeyboardButton("🏠 Menú Principal", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, profile_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 96.0, 0.4, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing narrative profile: {e}")
+            await callback.answer("Error cargando perfil", show_alert=True)
+            return MenuResponse(False, 0.0, 0.5, True, True, [str(e)])
+    
     # Helper methods
     async def _get_user_role_cached(self, user_id: int) -> str:
         """Get user role with caching for performance."""
@@ -511,12 +724,156 @@ class EnhancedDianaMenuSystem:
         }
         return descriptions.get(role, "Alma Misteriosa 🌙")
     
-    # Placeholder methods for delegation to existing systems
+    async def _build_narrative_menu_text(self, fragment: Any, progress_summary: Dict[str, Any]) -> str:
+        """Build character-consistent narrative menu text."""
+        try:
+            current_level = progress_summary.get('current_level', 1)
+            current_tier_name = progress_summary.get('current_tier_name', 'Los Kinkys')
+            progress_percentage = progress_summary.get('progress_percentage', 0)
+            archetype_profile = progress_summary.get('archetype_profile', {})
+            dominant_archetype = archetype_profile.get('dominant_archetype', 'explorer')
+            
+            # Level-specific greetings
+            level_greetings = {
+                1: "💋 **Los Kinkys - Tu Despertar**\n\nAh, querido... Siento tu curiosidad pulsando como un corazón ardiente.",
+                2: "👁️ **Los Observadores - Tu Evolución**\n\nMagníficamente transformado... Ahora ves lo que otros no pueden percibir.",
+                3: "🧠 **Los Comprensores - Tu Ascensión**\n\nExquisito... Has alcanzado las alturas donde pocos se atreven a caminar."
+            }
+            
+            greeting = level_greetings.get(current_level, level_greetings[1])
+            
+            # Archetype-specific personalization
+            archetype_touches = {
+                'explorer': "Tu espíritu explorador resuena en cada rincón de mis dominios...",
+                'direct': "Tu enfoque directo corta como espada a través de los misterios...",
+                'romantic': "Tu alma romántica danza con la poesía de los secretos...",
+                'analytical': "Tu mente analítica desentraña los patrones más complejos...",
+                'persistent': "Tu determinación inquebrantable me fascina profundamente...",
+                'patient': "Tu paciencia contemplativa revela tesoros ocultos..."
+            }
+            
+            archetype_touch = archetype_touches.get(dominant_archetype, archetype_touches['explorer'])
+            
+            # Build complete text
+            narrative_text = f"{greeting}\n\n"
+            narrative_text += f"✨ **Tu Progreso Actual:**\n"
+            narrative_text += f"📍 Nivel: {current_level} - {current_tier_name}\n"
+            narrative_text += f"📊 Avance: {progress_percentage:.1f}% del camino recorrido\n"
+            narrative_text += f"🎭 Esencia: {dominant_archetype.title()}\n\n"
+            narrative_text += f"💫 {archetype_touch}\n\n"
+            
+            # Add current fragment info
+            if fragment and fragment.is_decision:
+                narrative_text += f"🌟 **Fragmento Actual:** {fragment.title}\n"
+                narrative_text += f"⚡ Una decisión importante aguarda tu elección..."
+            elif fragment:
+                narrative_text += f"📖 **Continuando:** {fragment.title}\n"
+                narrative_text += f"🌙 La historia se despliega ante ti..."
+            else:
+                narrative_text += f"🚀 **¡Comencemos tu viaje!**\n"
+                narrative_text += f"💋 Los misterios te esperan, querido..."
+            
+            return narrative_text
+            
+        except Exception as e:
+            logger.error(f"Error building narrative menu text: {e}")
+            return "💋 **Diana te espera...**\n\nLos secretos aguardan tu llegada, querido."
+    
+    async def _create_narrative_keyboard(self, fragment: Any, progress_summary: Dict[str, Any]) -> InlineKeyboardMarkup:
+        """Create narrative-specific keyboard based on current state."""
+        try:
+            keyboard = []
+            
+            if fragment and fragment.is_decision:
+                # Show choice buttons for decision fragments
+                for i, choice in enumerate(fragment.choices[:3]):  # Limit to 3 choices for display
+                    keyboard.append([InlineKeyboardButton(
+                        text=f"{i+1}. {choice['text'][:35]}..." if len(choice['text']) > 35 else f"{i+1}. {choice['text']}",
+                        callback_data=f"narrative_choice_{i}"
+                    )])
+            else:
+                # Show continue button for story fragments
+                keyboard.append([InlineKeyboardButton(
+                    text="📖 Continuar Historia", 
+                    callback_data="narrative_continue"
+                )])
+            
+            # Progress and status buttons
+            keyboard.append([
+                InlineKeyboardButton("📊 Mi Progreso", callback_data="narrative_progress"),
+                InlineKeyboardButton("🎭 Mi Perfil", callback_data="narrative_profile")
+            ])
+            
+            # Navigation
+            keyboard.append([
+                InlineKeyboardButton("🔙 Menú Principal", callback_data="diana_main_menu")
+            ])
+            
+            return InlineKeyboardMarkup(inline_keyboard=keyboard)
+            
+        except Exception as e:
+            logger.error(f"Error creating narrative keyboard: {e}")
+            # Fallback keyboard
+            return InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("📖 Continuar", callback_data="narrative_continue")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+    
+    # MVP Narrative Integration
     async def _handle_narrative_menu(self, callback: CallbackQuery) -> MenuResponse:
-        """Handle narrative menu - delegates to existing narrative system."""
-        # This would integrate with the existing narrative system
-        await callback.answer("Accediendo a narrativas...", show_alert=True)
-        return MenuResponse(True, 90.0, 0.5, True, True, [])
+        """Handle narrative menu with MVP narrative system integration."""
+        start_time = time.time()
+        
+        try:
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            
+            user_id = callback.from_user.id
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            
+            # Get user's current narrative state
+            current_fragment = await narrative_service.fragment_service.get_user_current_fragment(user_id)
+            progress_summary = await narrative_service.get_comprehensive_progress(user_id)
+            
+            if not current_fragment:
+                # Start new narrative
+                start_result = await narrative_service.start_user_narrative(user_id)
+                if start_result['success']:
+                    current_fragment = start_result['fragment']
+                else:
+                    await callback.answer("Error iniciando narrativa", show_alert=True)
+                    return MenuResponse(False, 0.0, time.time() - start_time, False, True, [start_result['error']])
+            
+            # Build narrative menu text
+            narrative_text = await self._build_narrative_menu_text(current_fragment, progress_summary)
+            
+            # Create narrative keyboard
+            keyboard = await self._create_narrative_keyboard(current_fragment, progress_summary)
+            
+            # Validate character consistency
+            validation_result = await self.character_validator.validate_text(
+                narrative_text,
+                context="narrative_menu"
+            )
+            
+            # Send menu
+            await safe_edit(callback, narrative_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            response_time = time.time() - start_time
+            
+            return MenuResponse(
+                success=True,
+                character_score=validation_result.overall_score,
+                response_time=response_time,
+                meets_performance_requirement=response_time < 1.0,
+                message_sent=True,
+                errors=[]
+            )
+            
+        except Exception as e:
+            logger.error(f"Error handling narrative menu: {e}")
+            await callback.answer("Error accediendo a narrativa", show_alert=True)
+            return MenuResponse(False, 0.0, time.time() - start_time, False, True, [str(e)])
     
     async def _handle_games_menu(self, callback: CallbackQuery) -> MenuResponse:
         """Handle games menu - delegates to existing game system."""
