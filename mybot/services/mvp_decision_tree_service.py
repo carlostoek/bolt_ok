@@ -18,7 +18,6 @@ from database.narrative_unified import (
     UserArchetype
 )
 from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
-from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
 from services.diana_character_validator import DianaCharacterValidator
 from services.achievement_service import AchievementService
 from services.point_service import PointService
@@ -50,7 +49,6 @@ class MVPDecisionTreeService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.fragment_service = MVPNarrativeFragmentService(session)
-        self.progression_service = MVPNarrativeProgressionService(session)
         self.character_validator = DianaCharacterValidator(session)
         self.achievement_service = AchievementService(session)
         self.point_service = PointService(session)
@@ -325,7 +323,7 @@ class MVPDecisionTreeService:
             )
             
             # Get personalized recovery message
-            archetype_data = await self.progression_service._get_user_archetype_summary(user_id)
+            archetype_data = await self._get_user_archetype_summary(user_id)
             recovery_message = await self._generate_recovery_message(
                 user_state, archetype_data, interrupted_decision
             )
@@ -383,7 +381,7 @@ class MVPDecisionTreeService:
             
             selected_choice = fragment.choices[choice_index]
             user_state = await self.fragment_service._get_or_create_user_state(user_id)
-            archetype_data = await self.progression_service._get_user_archetype_summary(user_id)
+            archetype_data = await self._get_user_archetype_summary(user_id)
             
             # Preview immediate consequences
             immediate_preview = {
@@ -972,3 +970,30 @@ class MVPDecisionTreeService:
         """Check for pattern-based achievements."""
         # This would analyze decision patterns and trigger achievements
         return {'pattern_achievements': []}
+    
+    async def _get_user_archetype_summary(self, user_id: int) -> Dict[str, Any]:
+        """Get user archetype summary."""
+        try:
+            stmt = select(UserArchetype).where(UserArchetype.user_id == user_id)
+            result = await self.session.execute(stmt)
+            archetype = result.scalar_one_or_none()
+            
+            if archetype:
+                return {
+                    'dominant_archetype': archetype.dominant_archetype or 'explorer',
+                    'secondary_traits': archetype.secondary_traits or {},
+                    'development_stage': archetype.development_stage or 'beginner'
+                }
+            else:
+                return {
+                    'dominant_archetype': 'explorer',
+                    'secondary_traits': {},
+                    'development_stage': 'beginner'
+                }
+        except Exception as e:
+            logger.error(f"Error getting archetype summary for user {user_id}: {e}")
+            return {
+                'dominant_archetype': 'explorer',
+                'secondary_traits': {},
+                'development_stage': 'beginner'
+            }

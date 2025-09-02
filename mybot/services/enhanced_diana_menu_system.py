@@ -311,6 +311,9 @@ class EnhancedDianaMenuSystem:
             elif callback_data == "diana_narrative":
                 return await self._handle_narrative_menu(callback)
             
+            elif callback_data == "diana_vip_narrative":
+                return await self._handle_vip_narrative_menu(callback)
+            
             elif callback_data == "diana_games":
                 return await self._handle_games_menu(callback)
             
@@ -320,11 +323,32 @@ class EnhancedDianaMenuSystem:
             elif callback_data == "diana_admin_panel":
                 return await self._handle_admin_panel(callback)
             
+            elif callback_data == "diana_besitos":
+                return await self._handle_besitos_menu(callback)
+            
+            elif callback_data == "diana_missions":
+                return await self._handle_missions_menu(callback)
+            
+            elif callback_data == "diana_achievements":
+                return await self._handle_achievements_menu(callback)
+            
+            elif callback_data == "diana_settings":
+                return await self._handle_settings_menu(callback)
+            
+            elif callback_data == "diana_vip_status":
+                return await self._handle_vip_status_menu(callback)
+            
             elif callback_data == "diana_close":
                 return await self._handle_close_menu(callback)
             
             elif callback_data.startswith("narrative_"):
                 return await self._handle_narrative_callbacks(callback)
+            
+            elif callback_data.startswith("settings_"):
+                return await self._handle_settings_callbacks(callback)
+            
+            elif callback_data.startswith("admin_"):
+                return await self._handle_admin_callbacks(callback)
             
             else:
                 # Unknown callback - delegate to base system
@@ -451,6 +475,231 @@ class EnhancedDianaMenuSystem:
             logger.error(f"Error showing profile menu: {e}")
             return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
     
+    async def _handle_besitos_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle besitos (points) menu with character-consistent presentation."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data:
+                await callback.answer("Error cargando información", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["User not found"])
+            
+            user = user_data["user"]
+            points = user.points if user else 0
+            level = user.level if user else 1
+            
+            # Character-consistent besitos display
+            besitos_text = f"💰 **Tesoro de Besitos de Diana**\n\n"
+            besitos_text += f"✨ Tus besitos acumulados: **{points:.1f}** 💋\n"
+            besitos_text += f"🌟 Nivel actual: **{level}**\n\n"
+            
+            if points > 1000:
+                besitos_text += "👑 ¡Qué generoso coleccionista de mis afectos! Tu devoción es admirable..."
+            elif points > 500:
+                besitos_text += "💎 Cada besito que has ganado refleja tu dedicación a nuestros misterios..."
+            elif points > 100:
+                besitos_text += "🌹 Tus besitos crecen como flores en mi jardín secreto..."
+            else:
+                besitos_text += "🌱 Cada nuevo besito es una semilla de nuestra conexión creciente..."
+            
+            besitos_text += f"\n\n💫 Continúa explorando para ganar más de mis preciosos besitos..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🎯 Ver Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton("🏆 Mis Logros", callback_data="diana_achievements")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, besitos_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing besitos menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_missions_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle missions menu with character-consistent presentation."""
+        try:
+            from services.mission_service import MissionService
+            
+            user_id = callback.from_user.id
+            mission_service = MissionService(self.session)
+            
+            # Get user missions
+            active_missions = await mission_service.get_user_active_missions(user_id)
+            completed_missions = await mission_service.get_user_completed_missions(user_id)
+            
+            missions_text = f"🎯 **Desafíos Místicos de Diana**\n\n"
+            
+            if active_missions:
+                missions_text += f"⚡ **Misiones Activas:**\n"
+                for mission in active_missions[:3]:  # Show top 3 active missions
+                    progress = getattr(mission, 'progress', 0)
+                    target = getattr(mission, 'target', 1)
+                    missions_text += f"• {mission.name}: {progress}/{target}\n"
+                missions_text += "\n"
+            
+            missions_text += f"🏆 **Misiones Completadas:** {len(completed_missions)}\n\n"
+            
+            if not active_missions:
+                missions_text += "🌙 No hay misiones activas en este momento, querido...\n"
+                missions_text += "Explora mis dominios y pronto aparecerán nuevos desafíos para ti."
+            else:
+                missions_text += "💫 Cada misión completada te acerca más a mis secretos más profundos..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton("💰 Ver Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, missions_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.4, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing missions menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_achievements_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle achievements menu with character-consistent presentation."""
+        try:
+            from services.achievement_service import AchievementService
+            
+            user_id = callback.from_user.id
+            achievement_service = AchievementService(self.session)
+            
+            # Get user achievements
+            user_achievements = await achievement_service.get_user_achievements(user_id)
+            
+            achievements_text = f"🏆 **Galería de Triunfos**\n\n"
+            
+            if user_achievements:
+                achievements_text += f"✨ **Logros Desbloqueados:** {len(user_achievements)}\n\n"
+                
+                # Show recent achievements
+                for achievement in user_achievements[-5:]:  # Show last 5 achievements
+                    name = getattr(achievement, 'name', 'Logro Misterioso')
+                    achievements_text += f"🎖️ **{name}**\n"
+                
+                achievements_text += f"\n💎 Cada logro es un testimonio de tu dedicación a nuestros misterios..."
+            else:
+                achievements_text += f"🌟 Tu galería de triunfos espera ser llenada...\n\n"
+                achievements_text += f"💫 Explora, participa y desvela secretos para desbloquear tus primeros logros."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🎯 Ver Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, achievements_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.4, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing achievements menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_settings_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle settings menu with character-consistent presentation."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data:
+                await callback.answer("Error cargando configuración", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["User not found"])
+            
+            role = user_data["role"]
+            user = user_data["user"]
+            
+            settings_text = f"⚙️ **Configuración de tu Experiencia**\n\n"
+            settings_text += f"👤 **Tu Estado:** {self._get_role_description(role)}\n"
+            
+            if hasattr(user, 'language') and user.language:
+                settings_text += f"🌐 **Idioma:** {user.language}\n"
+            
+            if hasattr(user, 'timezone') and user.timezone:
+                settings_text += f"🕐 **Zona Horaria:** {user.timezone}\n"
+            
+            settings_text += f"\n🌙 Personaliza tu experiencia conmigo para que cada momento sea perfecto..."
+            
+            # Settings options
+            keyboard_buttons = []
+            
+            if role == "free":
+                keyboard_buttons.append([InlineKeyboardButton("👑 Ascender a VIP", callback_data="diana_vip_preview")])
+            elif role == "vip":
+                keyboard_buttons.append([InlineKeyboardButton("💎 Estado VIP", callback_data="diana_vip_status")])
+            
+            keyboard_buttons.extend([
+                [InlineKeyboardButton("🔔 Notificaciones", callback_data="settings_notifications")],
+                [InlineKeyboardButton("🌐 Idioma", callback_data="settings_language")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
+            
+            await safe_edit(callback, settings_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing settings menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_vip_status_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle VIP status menu with character-consistent presentation."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data or user_data["role"] != "vip":
+                await callback.answer("Acceso VIP requerido", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["VIP access required"])
+            
+            user = user_data["user"]
+            character_score = user_data["character_score"]
+            
+            vip_text = f"👑 **Tu Reino VIP**\n\n"
+            vip_text += f"✨ **Estado:** Miembro del Círculo Íntimo\n"
+            vip_text += f"💎 **Afinidad con Diana:** {character_score:.1f}%\n"
+            
+            if hasattr(user, 'vip_since') and user.vip_since:
+                vip_text += f"🌟 **Miembro desde:** {user.vip_since.strftime('%d/%m/%Y')}\n"
+            
+            if hasattr(user, 'vip_expires_at') and user.vip_expires_at:
+                vip_text += f"⏰ **Vigente hasta:** {user.vip_expires_at.strftime('%d/%m/%Y')}\n"
+            
+            vip_text += f"\n💋 Como miembro de mi círculo íntimo, tienes acceso a:\n"
+            vip_text += f"🔮 Narrativas exclusivas y profundas\n"
+            vip_text += f"🎭 Experiencias personalizadas\n"
+            vip_text += f"👑 Contenido premium sin restricciones\n"
+            vip_text += f"💫 Atención prioritaria en mis dominios\n\n"
+            vip_text += f"🌙 Tu presencia especial ilumina mis misterios más profundos..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("📖 Narrativa VIP", callback_data="diana_vip_narrative")],
+                [InlineKeyboardButton("💰 Mis Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, vip_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 96.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing VIP status menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+
     async def _handle_close_menu(self, callback: CallbackQuery) -> MenuResponse:
         """Handle menu close with character-consistent farewell."""
         try:
@@ -682,6 +931,177 @@ class EnhancedDianaMenuSystem:
             await callback.answer("Error cargando perfil", show_alert=True)
             return MenuResponse(False, 0.0, 0.5, True, True, [str(e)])
     
+    async def _handle_settings_callbacks(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle settings-related callbacks."""
+        callback_data = callback.data
+        
+        try:
+            if callback_data == "settings_notifications":
+                return await self._handle_notifications_settings(callback)
+            
+            elif callback_data == "settings_language":
+                return await self._handle_language_settings(callback)
+            
+            else:
+                await callback.answer("Configuración no disponible", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["Unknown settings callback"])
+                
+        except Exception as e:
+            logger.error(f"Error handling settings callback {callback_data}: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_notifications_settings(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle notifications settings."""
+        try:
+            notifications_text = f"🔔 **Configuración de Notificaciones**\n\n"
+            notifications_text += f"Personaliza cómo y cuándo deseas recibir mis susurros...\n\n"
+            notifications_text += f"🌙 Esta función estará disponible pronto, querido."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver a Configuración", callback_data="diana_settings")]
+            ])
+            
+            await safe_edit(callback, notifications_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 94.0, 0.2, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing notifications settings: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_language_settings(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle language settings."""
+        try:
+            language_text = f"🌐 **Configuración de Idioma**\n\n"
+            language_text += f"Actualmente hablo contigo en español...\n\n"
+            language_text += f"🌙 Más idiomas estarán disponibles pronto en mis dominios."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver a Configuración", callback_data="diana_settings")]
+            ])
+            
+            await safe_edit(callback, language_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 94.0, 0.2, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing language settings: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_admin_callbacks(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle admin-related callbacks."""
+        callback_data = callback.data
+        
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data or user_data["role"] != "admin":
+                await callback.answer("Acceso de administrador requerido", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["Admin access required"])
+            
+            if callback_data == "admin_stats":
+                return await self._handle_admin_stats(callback)
+            
+            elif callback_data == "admin_users":
+                return await self._handle_admin_users(callback)
+            
+            elif callback_data == "admin_narrative":
+                return await self._handle_admin_narrative(callback)
+            
+            elif callback_data == "admin_gamification":
+                return await self._handle_admin_gamification(callback)
+            
+            else:
+                await callback.answer("Función administrativa no disponible", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["Unknown admin callback"])
+                
+        except Exception as e:
+            logger.error(f"Error handling admin callback {callback_data}: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_admin_stats(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle admin statistics view."""
+        try:
+            stats_text = f"📊 **Estadísticas del Sistema**\n\n"
+            stats_text += f"🔄 Cargando métricas del sistema...\n\n"
+            stats_text += f"🌙 Panel de estadísticas completo disponible próximamente."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+            ])
+            
+            await safe_edit(callback, stats_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing admin stats: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_admin_users(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle admin user management."""
+        try:
+            users_text = f"👥 **Gestión de Usuarios**\n\n"
+            users_text += f"⚡ Herramientas de gestión de usuarios...\n\n"
+            users_text += f"🔧 Sistema de gestión completo disponible próximamente."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+            ])
+            
+            await safe_edit(callback, users_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing admin users: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_admin_narrative(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle admin narrative management."""
+        try:
+            narrative_text = f"📖 **Gestión de Narrativa**\n\n"
+            narrative_text += f"🎭 Herramientas de gestión narrativa...\n\n"
+            narrative_text += f"📝 Sistema de gestión narrativa completo disponible próximamente."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+            ])
+            
+            await safe_edit(callback, narrative_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing admin narrative: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
+    async def _handle_admin_gamification(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle admin gamification management."""
+        try:
+            gamification_text = f"🎮 **Gestión de Gamificación**\n\n"
+            gamification_text += f"🏆 Herramientas de gestión de gamificación...\n\n"
+            gamification_text += f"🎯 Sistema de gestión completo disponible próximamente."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+            ])
+            
+            await safe_edit(callback, gamification_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error showing admin gamification: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
     # Helper methods
     async def _get_user_role_cached(self, user_id: int) -> str:
         """Get user role with caching for performance."""
@@ -875,20 +1295,104 @@ class EnhancedDianaMenuSystem:
             await callback.answer("Error accediendo a narrativa", show_alert=True)
             return MenuResponse(False, 0.0, time.time() - start_time, False, True, [str(e)])
     
+    async def _handle_vip_narrative_menu(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle VIP narrative menu with exclusive content."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data or user_data["role"] != "vip":
+                await callback.answer("Acceso VIP requerido para contenido exclusivo", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["VIP access required"])
+            
+            # Use the same narrative handling but with VIP context
+            return await self._handle_narrative_menu(callback)
+            
+        except Exception as e:
+            logger.error(f"Error handling VIP narrative menu: {e}")
+            return MenuResponse(False, 0.0, 1.0, False, False, [str(e)])
+    
     async def _handle_games_menu(self, callback: CallbackQuery) -> MenuResponse:
-        """Handle games menu - delegates to existing game system."""
-        await callback.answer("Accediendo a juegos...", show_alert=True)
-        return MenuResponse(True, 90.0, 0.5, True, True, [])
+        """Handle games menu - redirect to gamification system."""
+        try:
+            # Redirect to gamification menu which includes games
+            return await self._handle_gamification_menu(callback)
+            
+        except Exception as e:
+            logger.error(f"Error handling games menu: {e}")
+            await callback.answer("Error accediendo a juegos", show_alert=True)
+            return MenuResponse(False, 0.0, 0.5, True, True, [str(e)])
     
     async def _handle_gamification_menu(self, callback: CallbackQuery) -> MenuResponse:
-        """Handle gamification menu - delegates to existing gamification system."""
-        await callback.answer("Accediendo a puntos y logros...", show_alert=True)
-        return MenuResponse(True, 90.0, 0.5, True, True, [])
+        """Handle gamification menu - show comprehensive gamification interface."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data:
+                await callback.answer("Error cargando datos de usuario", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["User not found"])
+            
+            user = user_data["user"]
+            points = user.points if user else 0
+            level = user.level if user else 1
+            
+            # Build gamification overview
+            gamification_text = f"🎮 **Centro de Gamificación Diana**\n\n"
+            gamification_text += f"💰 **Besitos:** {points:.1f} 💋\n"
+            gamification_text += f"🌟 **Nivel:** {level}\n\n"
+            gamification_text += f"🎯 Explora todas las formas de ganar besitos y desbloquear logros en mis dominios...\n\n"
+            gamification_text += f"💫 Cada actividad te acerca más a los secretos más profundos..."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("🎯 Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton("🏆 Logros", callback_data="diana_achievements")],
+                [InlineKeyboardButton("💰 Mis Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, gamification_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 94.0, 0.4, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error handling gamification menu: {e}")
+            await callback.answer("Error accediendo al sistema de gamificación", show_alert=True)
+            return MenuResponse(False, 0.0, 1.0, False, True, [str(e)])
     
     async def _handle_admin_panel(self, callback: CallbackQuery) -> MenuResponse:
-        """Handle admin panel - delegates to existing admin system."""
-        await callback.answer("Accediendo al panel administrativo...", show_alert=True)
-        return MenuResponse(True, 90.0, 0.5, True, True, [])
+        """Handle admin panel - show admin interface."""
+        try:
+            user_id = callback.from_user.id
+            user_data = await self.user_service.get_user_with_character_score(user_id)
+            
+            if not user_data or user_data["role"] != "admin":
+                await callback.answer("Acceso de administrador requerido", show_alert=True)
+                return MenuResponse(False, 0.0, 0.5, True, True, ["Admin access required"])
+            
+            admin_text = f"🎭 **Panel de Administración Diana**\n\n"
+            admin_text += f"⚡ Desde aquí puedes gestionar todos los aspectos de mis dominios...\n\n"
+            admin_text += f"🔧 Las herramientas del poder creativo están a tu disposición."
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton("📊 Estadísticas", callback_data="admin_stats")],
+                [InlineKeyboardButton("👥 Usuarios", callback_data="admin_users")],
+                [InlineKeyboardButton("📖 Narrativa", callback_data="admin_narrative")],
+                [InlineKeyboardButton("🎮 Gamificación", callback_data="admin_gamification")],
+                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+            ])
+            
+            await safe_edit(callback, admin_text, reply_markup=keyboard)
+            await callback.answer()
+            
+            return MenuResponse(True, 95.0, 0.3, True, True, [])
+            
+        except Exception as e:
+            logger.error(f"Error handling admin panel: {e}")
+            await callback.answer("Error accediendo al panel administrativo", show_alert=True)
+            return MenuResponse(False, 0.0, 1.0, False, True, [str(e)])
     
     async def _delegate_to_base_system(self, callback: CallbackQuery) -> MenuResponse:
         """Delegate unknown callbacks to base menu system."""

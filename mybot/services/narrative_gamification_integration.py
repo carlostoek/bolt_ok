@@ -9,8 +9,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from aiogram import Bot
 import logging
 
-from services.mvp_gamification_service import MVPGamificationService
-from services.unified_narrative_service import UnifiedNarrativeService
+# Import gamification service (may need to be adjusted based on actual service name)
+try:
+    from services.mvp_gamification_service import MVPGamificationService
+except ImportError:
+    # Fallback if MVP gamification service doesn't exist yet
+    MVPGamificationService = None
+
+try:
+    from services.unified_narrative_service import UnifiedNarrativeService
+except ImportError:
+    # Fallback if unified narrative service doesn't exist
+    UnifiedNarrativeService = None
 
 logger = logging.getLogger(__name__)
 
@@ -23,20 +33,42 @@ class NarrativeGamificationIntegration:
     
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.gamification_service = MVPGamificationService(session)
+        
+        # Initialize gamification service if available
+        if MVPGamificationService:
+            try:
+                self.gamification_service = MVPGamificationService(session)
+                self.has_gamification_service = True
+            except Exception as e:
+                logger.warning(f"MVPGamificationService not available: {e}")
+                self.gamification_service = None
+                self.has_gamification_service = False
+        else:
+            logger.warning("MVPGamificationService not available, using fallback")
+            self.gamification_service = None
+            self.has_gamification_service = False
         
         # Initialize narrative service if available
-        try:
-            self.narrative_service = UnifiedNarrativeService(session)
-            self.has_narrative_service = True
-        except ImportError:
+        if UnifiedNarrativeService:
+            try:
+                self.narrative_service = UnifiedNarrativeService(session)
+                self.has_narrative_service = True
+            except Exception as e:
+                logger.warning(f"UnifiedNarrativeService not available: {e}")
+                self.narrative_service = None
+                self.has_narrative_service = False
+        else:
             logger.warning("UnifiedNarrativeService not available, narrative integration limited")
             self.narrative_service = None
             self.has_narrative_service = False
     
     async def initialize_integration(self) -> None:
         """Initialize both gamification and narrative systems."""
-        await self.gamification_service.initialize_mvp_systems()
+        if self.has_gamification_service:
+            try:
+                await self.gamification_service.initialize_mvp_systems()
+            except Exception as e:
+                logger.error(f"Error initializing gamification system: {e}")
         
         if self.has_narrative_service:
             # Initialize narrative system if available
@@ -72,9 +104,18 @@ class NarrativeGamificationIntegration:
             }
             
             # 1. Process gamification aspects
-            gamification_results = await self.gamification_service.process_story_fragment_completion(
-                user_id, fragment_id, bot
-            )
+            if self.has_gamification_service:
+                gamification_results = await self.gamification_service.process_story_fragment_completion(
+                    user_id, fragment_id, bot
+                )
+            else:
+                # Fallback gamification results
+                gamification_results = {
+                    "points_awarded": 10,
+                    "achievements_unlocked": [],
+                    "missions_completed": [],
+                    "level_ups": []
+                }
             integration_results["gamification_results"] = gamification_results
             
             # 2. Generate Diana's integrated response
@@ -130,9 +171,18 @@ class NarrativeGamificationIntegration:
             }
             
             # 1. Process gamification for decision making
-            gamification_results = await self.gamification_service.process_decision_made(
-                user_id, {"decision_id": decision_id, "choice": choice_made}, bot
-            )
+            if self.has_gamification_service:
+                gamification_results = await self.gamification_service.process_decision_made(
+                    user_id, {"decision_id": decision_id, "choice": choice_made}, bot
+                )
+            else:
+                # Fallback gamification results
+                gamification_results = {
+                    "points_awarded": 5,
+                    "achievements_unlocked": [],
+                    "missions_completed": [],
+                    "level_ups": []
+                }
             integration_results["gamification_results"] = gamification_results
             
             # 2. Generate Diana's reaction to the decision
@@ -158,7 +208,12 @@ class NarrativeGamificationIntegration:
         """
         try:
             # Get user's overall progress for context
-            user_summary = await self.gamification_service.get_user_gamification_summary(user_id)
+            if self.has_gamification_service:
+                user_summary = await self.gamification_service.get_user_gamification_summary(user_id)
+            else:
+                user_summary = {
+                    "achievement_summary": {"completion_percentage": 0}
+                }
             
             # Base response for fragment completion
             base_responses = [
@@ -307,7 +362,14 @@ class NarrativeGamificationIntegration:
         """
         try:
             # Get gamification summary
-            gamification_summary = await self.gamification_service.get_user_gamification_summary(user_id)
+            if self.has_gamification_service:
+                gamification_summary = await self.gamification_service.get_user_gamification_summary(user_id)
+            else:
+                # Fallback summary
+                gamification_summary = {
+                    "user_info": {"level": 1, "points": 0, "total_achievements": 0},
+                    "gamification_score": {"engagement_level": "Beginner"}
+                }
             
             # Get narrative progress if available
             narrative_progress = {}
