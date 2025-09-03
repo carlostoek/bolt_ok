@@ -249,23 +249,22 @@ class EnhancedUserService:
             previous_role = user.role
             
             # Create role transition record
-            async with self.session.begin():
-                transition = RoleTransition(
-                    user_id=user_id,
-                    previous_role=previous_role,
-                    new_role=new_role,
-                    transition_reason=reason or f"Role change from {previous_role} to {new_role}",
-                    transition_type="manual" if performed_by else "automatic",
-                    performed_by=performed_by,
-                    transition_metadata={"timestamp": datetime.now().isoformat()}
-                )
-                self.session.add(transition)
-                
-                # Update user role
-                user.role = new_role
-                await self.session.flush()
-                transition_id = transition.id
-                await self.session.commit()
+            transition = RoleTransition(
+                user_id=user_id,
+                previous_role=previous_role,
+                new_role=new_role,
+                transition_reason=reason or f"Role change from {previous_role} to {new_role}",
+                transition_type="manual" if performed_by else "automatic",
+                performed_by=performed_by,
+                transition_metadata={"timestamp": datetime.now().isoformat()}
+            )
+            self.session.add(transition)
+            
+            # Update user role
+            user.role = new_role
+            await self.session.flush()
+            transition_id = transition.id
+            await self.session.commit()
             
             # Generate character-consistent role change message
             message_key = f"to_{new_role}" if new_role in ["vip", "admin"] else "from_vip"
