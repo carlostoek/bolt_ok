@@ -233,7 +233,7 @@ class EnhancedDianaMenuSystem:
             response_time = time.time() - start_time
             return MenuResponse(
                 success=False,
-                character_score=character_score,
+                character_score=0.0,
                 response_time=response_time,
                 meets_performance_requirement=False,
                 message_sent=message_sent,
