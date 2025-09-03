@@ -9,10 +9,12 @@ from .event_admin import router as event_admin_router
 from .admin_config import router as admin_config_router
 from .trivia_admin import router as trivia_admin_router
 from .unified_mission_admin import router as unified_mission_admin_router
+from .admin_narrative_handler import router as admin_narrative_handler_router
 
 # Asegúrate de incluir todos los routers al registrar routers:
 admin_router.include_router(trivia_admin_router)
 admin_router.include_router(unified_mission_admin_router)
+admin_router.include_router(admin_narrative_handler_router)
 
 __all__ = [
     "admin_router",
@@ -25,4 +27,5 @@ __all__ = [
     "event_admin_router",
     "admin_config_router",
     "unified_mission_admin_router",
+    "admin_narrative_handler_router",
 ]
