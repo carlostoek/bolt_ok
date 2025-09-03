@@ -185,7 +185,6 @@ class UserNarrativeState(Base):
 
     user = relationship(
         "User", 
-        back_populates="narrative_state",
         lazy="joined",
         single_parent=True
     )

@@ -53,11 +53,10 @@ class User(Base):
     session_data = Column(JSON, default={})  # Enhanced session data for Diana menu system
 
     @declared_attr
-    def narrative_state(cls):
+    def narrative_state_unified(cls):
         from .narrative_unified import UserNarrativeState
         return relationship(
             UserNarrativeState,
-            back_populates="user",
             uselist=False,
             lazy="selectin"
         )

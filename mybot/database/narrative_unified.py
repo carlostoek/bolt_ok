@@ -170,7 +170,7 @@ class UserNarrativeState(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
     # Relaciones
-    user = relationship("User", backref="narrative_state_unified", uselist=False)
+    user = relationship("User", uselist=False, overlaps="narrative_state_unified")
     current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id])
     
     async def get_progress_percentage(self, session):

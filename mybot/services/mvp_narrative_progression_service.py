@@ -19,6 +19,8 @@ from database.narrative_unified import (
 )
 from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +39,11 @@ class MVPNarrativeProgressionService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.fragment_service = MVPNarrativeFragmentService(session)
-        self.point_service = PointService(session)
+        
+        # Initialize dependency services for PointService
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        self.point_service = PointService(session, level_service, achievement_service)
         
         # Performance optimization
         self._progression_cache = {}

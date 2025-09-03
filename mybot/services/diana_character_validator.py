@@ -125,25 +125,41 @@ class DianaCharacterValidator:
     def __init__(self, session: AsyncSession):
         self.session = session
         
-        # Initialize shared patterns cache once
-        if not self.__class__._shared_patterns_cache:
-            self.__class__._shared_patterns_cache = {
-                "mysterious": self._load_mysterious_patterns(),
-                "seductive": self._load_seductive_patterns(),
-                "emotional": self._load_emotional_patterns(),
-                "intellectual": self._load_intellectual_patterns(),
-                "violation": self._load_violation_patterns()
-            }
-            # Pre-compile regex patterns for performance
-            self.__class__._shared_compiled_patterns = self._compile_patterns()
-        
-        # Use shared patterns
-        self.mysterious_patterns = self.__class__._shared_patterns_cache["mysterious"]
-        self.seductive_patterns = self.__class__._shared_patterns_cache["seductive"]
-        self.emotional_patterns = self.__class__._shared_patterns_cache["emotional"]
-        self.intellectual_patterns = self.__class__._shared_patterns_cache["intellectual"]
-        self.violation_patterns = self.__class__._shared_patterns_cache["violation"]
-        self.compiled_patterns = self.__class__._shared_compiled_patterns
+        # Initialize patterns with error handling
+        # Fixed: Set instance attributes before calling _compile_patterns() to avoid AttributeError
+        try:
+            # Initialize shared patterns cache once
+            if not self.__class__._shared_patterns_cache:
+                self.__class__._shared_patterns_cache = {
+                    "mysterious": self._load_mysterious_patterns(),
+                    "seductive": self._load_seductive_patterns(),
+                    "emotional": self._load_emotional_patterns(),
+                    "intellectual": self._load_intellectual_patterns(),
+                    "violation": self._load_violation_patterns()
+                }
+            
+            # Use shared patterns
+            self.mysterious_patterns = self.__class__._shared_patterns_cache["mysterious"]
+            self.seductive_patterns = self.__class__._shared_patterns_cache["seductive"]
+            self.emotional_patterns = self.__class__._shared_patterns_cache["emotional"]
+            self.intellectual_patterns = self.__class__._shared_patterns_cache["intellectual"]
+            self.violation_patterns = self.__class__._shared_patterns_cache["violation"]
+            
+            # Pre-compile regex patterns for performance (after instance patterns are set)
+            if not self.__class__._shared_compiled_patterns:
+                self.__class__._shared_compiled_patterns = self._compile_patterns()
+            self.compiled_patterns = self.__class__._shared_compiled_patterns
+            
+        except Exception as e:
+            logger.error(f"Error initializing DianaCharacterValidator patterns: {e}")
+            # Fallback to direct loading if shared cache fails
+            self.mysterious_patterns = self._load_mysterious_patterns()
+            self.seductive_patterns = self._load_seductive_patterns()
+            self.emotional_patterns = self._load_emotional_patterns()
+            self.intellectual_patterns = self._load_intellectual_patterns()
+            self.violation_patterns = self._load_violation_patterns()
+            # Use simplified compiled patterns (after patterns are loaded)
+            self.compiled_patterns = self._compile_patterns()
         
         # Instance-specific cache for validation results
         self.validation_cache = {}
