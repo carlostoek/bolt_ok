@@ -99,12 +99,11 @@ class Achievement(Base):
     reward_text = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
 
-    story_fragments = relationship(
-        "StoryFragment",
-        foreign_keys="StoryFragment.unlocks_achievement_id",
-        back_populates="achievement_link",
-        lazy="selectin"  # Añadido para evitar problemas de carga
-    )
+    # This relationship is deprecated as achievement unlocking is now handled
+    # by the 'triggers' field in the NarrativeFragment model.
+    # Keeping the class definition for now to avoid breaking other tests,
+    # but the relationship is removed.
+
 
 
 class UserAchievement(Base):
