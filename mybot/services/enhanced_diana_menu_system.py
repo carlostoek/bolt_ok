@@ -1592,11 +1592,26 @@ class EnhancedDianaMenuSystem:
             
             if fragment and fragment.is_decision:
                 # Show choice buttons for decision fragments
-                for i, choice in enumerate(fragment.choices[:3]):  # Limit to 3 choices for display
-                    keyboard.append([InlineKeyboardButton(
-                        text=f"{i+1}. {choice['text'][:35]}..." if len(choice['text']) > 35 else f"{i+1}. {choice['text']}",
-                        callback_data=f"narrative_choice_{i}"
-                    )])
+                valid_choice_index = 0
+                for choice in fragment.choices:
+                    try:
+                        # Defensive coding: ensure choice is a dict and text is a string
+                        if isinstance(choice, dict) and 'text' in choice and isinstance(choice['text'], str):
+                            text_content = choice['text']
+                            logger.debug(f"Button [{valid_choice_index}] text: '{text_content}' (type: {type(text_content)})")
+                            
+                            button_text = f"{valid_choice_index+1}. {text_content[:35]}..." if len(text_content) > 35 else f"{valid_choice_index+1}. {text_content}"
+                            
+                            keyboard.append([InlineKeyboardButton(
+                                text=button_text,
+                                callback_data=f"narrative_choice_{valid_choice_index}"
+                            )])
+                            valid_choice_index += 1
+                        else:
+                            logger.warning(f"Skipping invalid choice format: {choice}")
+                    except Exception as e:
+                        logger.error(f"Error processing choice {choice}: {e}")
+
             else:
                 # Show continue button for story fragments
                 keyboard.append([InlineKeyboardButton(
@@ -1606,23 +1621,23 @@ class EnhancedDianaMenuSystem:
             
             # Progress and status buttons
             keyboard.append([
-                InlineKeyboardButton("📊 Mi Progreso", callback_data="narrative_progress"),
-                InlineKeyboardButton("🎭 Mi Perfil", callback_data="narrative_profile")
+                InlineKeyboardButton(text="📊 Mi Progreso", callback_data="narrative_progress"),
+                InlineKeyboardButton(text="🎭 Mi Perfil", callback_data="narrative_profile")
             ])
             
             # Navigation
             keyboard.append([
-                InlineKeyboardButton("🔙 Menú Principal", callback_data="diana_main_menu")
+                InlineKeyboardButton(text="🔙 Menú Principal", callback_data="diana_main_menu")
             ])
             
             return InlineKeyboardMarkup(inline_keyboard=keyboard)
             
         except Exception as e:
-            logger.error(f"Error creating narrative keyboard: {e}")
+            logger.error(f"Error creating narrative keyboard: {e}", exc_info=True)
             # Fallback keyboard
             return InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("📖 Continuar", callback_data="narrative_continue")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="📖 Continuar", callback_data="narrative_continue")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
     
     # MVP Narrative Integration
