@@ -117,6 +117,42 @@ async def handle_diana_callback_enhanced(callback: CallbackQuery, session: Async
         error_message = "🌙 Los hilos del destino se han enredado momentáneamente... Inténtalo de nuevo en un instante, querido."
         await callback.answer(error_message, show_alert=True)
 
+# Handler for narrative-specific callbacks from Enhanced Diana Menu System
+@router.callback_query(F.data.in_([
+    "narrative_continue", "narrative_progress", "narrative_profile"
+]) | F.data.startswith("narrative_choice_"))
+@safe_handler("😔 Los vientos del misterio encuentran resistencia...")
+async def handle_narrative_callbacks(callback: CallbackQuery, session: AsyncSession):
+    """
+    Handler específico para callbacks de narrativa generados por el Enhanced Diana Menu System.
+    Maneja narrative_continue, narrative_progress, narrative_profile y narrative_choice_ patterns.
+    """
+    user_id = callback.from_user.id
+    data = callback.data
+    
+    logger.debug(f"Narrative callback {data} recibido de usuario {user_id}")
+    
+    try:
+        # Use enhanced Diana system to handle narrative callbacks
+        menu_system = EnhancedDianaMenuSystem(session)
+        callback_result = await menu_system.handle_narrative_callback(callback)
+        
+        # Log performance and character metrics
+        if callback_result.response_time > 1.0:
+            logger.warning(f"Narrative callback response time exceeded 1s: {callback_result.response_time:.2f}s")
+            
+        if callback_result.character_score < 95.0:
+            logger.warning(f"Narrative callback character consistency below 95%: {callback_result.character_score:.1f}%")
+        
+        if not callback_result.success:
+            logger.warning(f"Narrative callback failed for user {user_id}: {callback_result.errors}")
+            
+    except Exception as e:
+        logger.error(f"Error procesando narrative callback {data}: {e}")
+        # Character-consistent error message
+        error_message = "🌙 Las corrientes narrativas fluctúan... Inténtalo de nuevo en un instante, querido."
+        await callback.answer(error_message, show_alert=True)
+
 # Este router intercepta callbacks que podrían ser manejados por Diana o por el sistema clásico
 @router.callback_query(F.data.in_([
     "admin_menu", "user_menu", "admin_refresh", "user_refresh",
