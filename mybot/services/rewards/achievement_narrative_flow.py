@@ -16,6 +16,7 @@ from datetime import datetime
 from ..achievement_service import AchievementService
 from ..narrative_service import NarrativeService
 from ..user_service import UserService
+from ..level_service import LevelService
 from ..point_service import PointService
 from ..event_bus import get_event_bus, EventType
 from ..diana_menu_system import get_diana_menu_system
@@ -78,7 +79,8 @@ class AchievementNarrativeFlow:
         self.achievement_service = AchievementService(session)
         self.narrative_service = NarrativeService(session)
         self.user_service = UserService(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        self.point_service = PointService(session, level_service, self.achievement_service)
         
         # Event system integration
         self.event_bus = get_event_bus()

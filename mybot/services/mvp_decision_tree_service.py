@@ -20,6 +20,7 @@ from database.narrative_unified import (
 from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
 from services.diana_character_validator import DianaCharacterValidator
 from services.achievement_service import AchievementService
+from services.level_service import LevelService
 from services.point_service import PointService
 from services.vip_tier_management_service import VIPTierManagementService, AccessDecisionReason
 
@@ -51,7 +52,8 @@ class MVPDecisionTreeService:
         self.fragment_service = MVPNarrativeFragmentService(session)
         self.character_validator = DianaCharacterValidator(session)
         self.achievement_service = AchievementService(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        self.point_service = PointService(session, level_service, self.achievement_service)
         self.vip_service = VIPTierManagementService(session)
         
         # Performance optimization

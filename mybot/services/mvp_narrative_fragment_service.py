@@ -17,6 +17,8 @@ from database.narrative_unified import (
     UserMissionProgress
 )
 from services.diana_character_validator import DianaCharacterValidator
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 
 logger = logging.getLogger(__name__)
 
@@ -842,9 +844,11 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
             choice_points = selected_choice.get('points', 0)
             if choice_points > 0:
                 try:
-                    # Use existing point service integration
+                    # Use existing point service integration with proper dependencies
                     from services.point_service import PointService
-                    point_service = PointService(self.session)
+                    level_service = LevelService(self.session)
+                    achievement_service = AchievementService(self.session)
+                    point_service = PointService(self.session, level_service, achievement_service)
                     await point_service.add_points(user_id, choice_points, "narrative_choice")
                     rewards_processed['points_awarded'] += choice_points
                 except Exception as e:
@@ -857,7 +861,9 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
                 if trigger_points > 0:
                     try:
                         from services.point_service import PointService
-                        point_service = PointService(self.session)
+                        level_service = LevelService(self.session)
+                        achievement_service = AchievementService(self.session)
+                        point_service = PointService(self.session, level_service, achievement_service)
                         await point_service.add_points(user_id, trigger_points, "narrative_fragment")
                         rewards_processed['points_awarded'] += trigger_points
                     except Exception as e:

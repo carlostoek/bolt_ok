@@ -20,6 +20,7 @@ from database.narrative_unified import (
     UserArchetype
 )
 from services.achievement_service import AchievementService
+from services.level_service import LevelService
 from services.point_service import PointService
 from services.diana_character_validator import DianaCharacterValidator
 
@@ -74,7 +75,8 @@ class DecisionConsequenceTracker:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.achievement_service = AchievementService(session)
-        self.point_service = PointService(session)
+        level_service = LevelService(session)
+        self.point_service = PointService(session, level_service, self.achievement_service)
         self.character_validator = DianaCharacterValidator(session)
         
         # Consequence processors registry

@@ -53,11 +53,10 @@ class User(Base):
     session_data = Column(JSON, default={})  # Enhanced session data for Diana menu system
 
     @declared_attr
-    def narrative_state(cls):
-        from .narrative_models import UserNarrativeState
+    def narrative_state_unified(cls):
+        from .narrative_unified import UserNarrativeState
         return relationship(
             UserNarrativeState,
-            back_populates="user",
             uselist=False,
             lazy="selectin"
         )
@@ -100,12 +99,11 @@ class Achievement(Base):
     reward_text = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
 
-    story_fragments = relationship(
-        "StoryFragment",
-        foreign_keys="StoryFragment.unlocks_achievement_id",
-        back_populates="achievement_link",
-        lazy="selectin"  # Añadido para evitar problemas de carga
-    )
+    # This relationship is deprecated as achievement unlocking is now handled
+    # by the 'triggers' field in the NarrativeFragment model.
+    # Keeping the class definition for now to avoid breaking other tests,
+    # but the relationship is removed.
+
 
 
 class UserAchievement(Base):

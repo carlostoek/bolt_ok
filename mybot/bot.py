@@ -43,6 +43,8 @@ class DBSessionMiddleware(BaseMiddleware):
 
 # Imports
 from database.setup import init_db, get_session_factory
+from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
+from create_missing_tables import create_missing_tables_sync
 from utils.message_safety import patch_message_methods
 from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 
@@ -150,7 +152,15 @@ async def main() -> None:
     try:
         # Inicialización
         logger.info("Inicializando base de datos...")
+        create_missing_tables_sync() # Ensure tables exist before init_db
         await init_db()
+
+        # Inicializar fragmentos narrativos MVP
+        logger.info("Inicializando fragmentos narrativos MVP...")
+        session_factory = get_session_factory() # Get session factory here to pass to service
+        async with session_factory() as session:
+            mvp_fragment_service = MVPNarrativeFragmentService(session)
+            await mvp_fragment_service.initialize_mvp_fragments()
         
         logger.info("Aplicando parches de seguridad...")
         patch_message_methods()

@@ -50,12 +50,12 @@ class StoryFragment(Base):
         lazy="selectin"
     )
 
-    achievement_link = relationship(
-        "Achievement",
-        foreign_keys=[unlocks_achievement_id],
-        back_populates="story_fragments",
-        lazy="joined"
-    )
+    # achievement_link = relationship(
+    #     "Achievement",
+    #     foreign_keys=[unlocks_achievement_id],
+    #     back_populates="story_fragments",
+    #     lazy="joined"
+    # )
 
     @validates('key')
     def validate_key(self, key, value):
@@ -185,7 +185,6 @@ class UserNarrativeState(Base):
 
     user = relationship(
         "User", 
-        back_populates="narrative_state",
         lazy="joined",
         single_parent=True
     )
