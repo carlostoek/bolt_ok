@@ -14,6 +14,14 @@ from aiogram.exceptions import TelegramAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from dataclasses import dataclass
 
+# Import BaseModel debugging infrastructure
+from services.diana_basemodel_debugger import (
+    get_global_debugger, 
+    safe_menu_response, 
+    enable_basemodel_debug,
+    temporary_debug_mode
+)
+
 from services.diana_menu_system import DianaMenuSystem
 from services.enhanced_user_service import EnhancedUserService
 from services.diana_character_validator import DianaCharacterValidator, CharacterValidationResult
@@ -32,6 +40,17 @@ class MenuResponse:
     meets_performance_requirement: bool
     message_sent: bool
     errors: List[str]
+    
+    def __post_init__(self):
+        """Post-initialization debugging hook."""
+        debugger = get_global_debugger()
+        if debugger.debug_enabled:
+            logger.debug(f"MenuResponse created: success={self.success}, "
+                        f"character_score={self.character_score}, "
+                        f"response_time={self.response_time}, "
+                        f"meets_performance_requirement={self.meets_performance_requirement}, "
+                        f"message_sent={self.message_sent}, "
+                        f"errors={len(self.errors)}")
 
 class EnhancedDianaMenuSystem:
     """
@@ -53,6 +72,11 @@ class EnhancedDianaMenuSystem:
     def __init__(self, session: AsyncSession):
         self.session = session
         
+        # Initialize BaseModel debugging
+        self.debugger = get_global_debugger()
+        if self.debugger.debug_enabled:
+            logger.info("🔧 Enhanced Diana Menu System initialized with BaseModel debugging enabled")
+        
         # Lazy-loaded services (initialized only when needed)
         self._base_menu_system = None
         self._user_service = None
@@ -69,6 +93,9 @@ class EnhancedDianaMenuSystem:
         # Individual cache for dynamic content
         self.menu_cache = {}
         self.cache_ttl = 300  # 5 minutes
+        
+        # Debug mode toggle for this instance
+        self.local_debug_enabled = True
         
         # Pre-validated character scores for static content
         self.static_content_scores = {
@@ -205,7 +232,7 @@ class EnhancedDianaMenuSystem:
                 f"(meets requirement: {meets_requirement}) - Character score: {character_score:.1f}"
             )
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=character_score,
                 response_time=response_time,
@@ -231,7 +258,7 @@ class EnhancedDianaMenuSystem:
                 errors.append(f"Error sending error message: {send_error}")
             
             response_time = time.time() - start_time
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=response_time,
@@ -277,7 +304,7 @@ class EnhancedDianaMenuSystem:
             
             response_time = time.time() - start_time
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=validation_result.overall_score,
                 response_time=response_time,
@@ -289,7 +316,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error showing VIP upgrade menu: {e}")
             response_time = time.time() - start_time
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=response_time,
@@ -373,7 +400,7 @@ class EnhancedDianaMenuSystem:
             await callback.answer(error_message, show_alert=True)
             
             response_time = time.time() - start_time
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=response_time,
@@ -381,6 +408,15 @@ class EnhancedDianaMenuSystem:
                 message_sent=True,
                 errors=[str(e)]
             )
+    
+    async def handle_narrative_callback(self, callback: CallbackQuery) -> MenuResponse:
+        """
+        Public wrapper for handling narrative callbacks specifically.
+        This method provides a direct interface for narrative-specific callbacks
+        while maintaining character consistency and performance optimization.
+        """
+        # Delegate to the existing private method that handles narrative callbacks
+        return await self._handle_narrative_callbacks(callback)
     
     # Specialized menu handlers
     async def _handle_vip_upgrade(self, callback: CallbackQuery) -> MenuResponse:
@@ -409,8 +445,8 @@ class EnhancedDianaMenuSystem:
                     callback,
                     vip_welcome,
                     kb=InlineKeyboardMarkup(inline_keyboard=[
-                        [InlineKeyboardButton("👑 Explorar VIP", callback_data="diana_main_menu")],
-                        [InlineKeyboardButton("🎭 Mi Nuevo Estado", callback_data="diana_vip_status")]
+                        [InlineKeyboardButton(text="👑 Explorar VIP", callback_data="diana_main_menu")],
+                        [InlineKeyboardButton(text="🎭 Mi Nuevo Estado", callback_data="diana_vip_status")]
                     ])
                 )
                 await callback.answer("¡Bienvenido al círculo íntimo! 👑")
@@ -423,7 +459,7 @@ class EnhancedDianaMenuSystem:
                 )
                 await callback.answer(error_msg, show_alert=True)
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=transition_result.success,
                 character_score=95.0,  # Pre-validated message
                 response_time=0.5,
@@ -435,7 +471,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling VIP upgrade: {e}")
             await callback.answer("Error en el proceso de ascensión VIP", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -451,7 +487,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data:
                 await callback.answer("Error cargando perfil", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=1.0,
@@ -480,15 +516,15 @@ class EnhancedDianaMenuSystem:
                     profile_text += f"\n💎 Vigente hasta: {user.vip_expires_at.strftime('%d/%m/%Y')}"
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("💰 Mis Logros", callback_data="diana_achievements")],
-                [InlineKeyboardButton("🎯 Misiones", callback_data="diana_missions")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="💰 Mis Logros", callback_data="diana_achievements")],
+                [InlineKeyboardButton(text="🎯 Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, profile_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -499,7 +535,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing profile menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -516,7 +552,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data:
                 await callback.answer("Error cargando información", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -546,15 +582,15 @@ class EnhancedDianaMenuSystem:
             besitos_text += f"\n\n💫 Continúa explorando para ganar más de mis preciosos besitos..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🎯 Ver Misiones", callback_data="diana_missions")],
-                [InlineKeyboardButton("🏆 Mis Logros", callback_data="diana_achievements")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton(text="🏆 Mis Logros", callback_data="diana_achievements")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, besitos_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -565,7 +601,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing besitos menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -605,15 +641,15 @@ class EnhancedDianaMenuSystem:
                 missions_text += "💫 Cada misión completada te acerca más a mis secretos más profundos..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
-                [InlineKeyboardButton("💰 Ver Besitos", callback_data="diana_besitos")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton(text="💰 Ver Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, missions_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.4,
@@ -624,7 +660,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing missions menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -660,15 +696,15 @@ class EnhancedDianaMenuSystem:
                 achievements_text += f"💫 Explora, participa y desvela secretos para desbloquear tus primeros logros."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🎯 Ver Misiones", callback_data="diana_missions")],
-                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton(text="📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, achievements_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.4,
@@ -679,7 +715,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing achievements menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -696,7 +732,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data:
                 await callback.answer("Error cargando configuración", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -723,14 +759,14 @@ class EnhancedDianaMenuSystem:
             keyboard_buttons = []
             
             if role == "free":
-                keyboard_buttons.append([InlineKeyboardButton("👑 Ascender a VIP", callback_data="diana_vip_preview")])
+                keyboard_buttons.append([InlineKeyboardButton(text="👑 Ascender a VIP", callback_data="diana_vip_preview")])
             elif role == "vip":
-                keyboard_buttons.append([InlineKeyboardButton("💎 Estado VIP", callback_data="diana_vip_status")])
+                keyboard_buttons.append([InlineKeyboardButton(text="💎 Estado VIP", callback_data="diana_vip_status")])
             
             keyboard_buttons.extend([
-                [InlineKeyboardButton("🔔 Notificaciones", callback_data="settings_notifications")],
-                [InlineKeyboardButton("🌐 Idioma", callback_data="settings_language")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🔔 Notificaciones", callback_data="settings_notifications")],
+                [InlineKeyboardButton(text="🌐 Idioma", callback_data="settings_language")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
@@ -738,7 +774,7 @@ class EnhancedDianaMenuSystem:
             await safe_edit(callback, settings_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -749,7 +785,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing settings menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -766,7 +802,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data or user_data["role"] != "vip":
                 await callback.answer("Acceso VIP requerido", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -796,15 +832,15 @@ class EnhancedDianaMenuSystem:
             vip_text += f"🌙 Tu presencia especial ilumina mis misterios más profundos..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("📖 Narrativa VIP", callback_data="diana_vip_narrative")],
-                [InlineKeyboardButton("💰 Mis Besitos", callback_data="diana_besitos")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="📖 Narrativa VIP", callback_data="diana_vip_narrative")],
+                [InlineKeyboardButton(text="💰 Mis Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, vip_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=96.0,
                 response_time=0.3,
@@ -815,7 +851,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing VIP status menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -839,7 +875,7 @@ class EnhancedDianaMenuSystem:
             await callback.message.delete()
             await callback.answer(farewell)
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.1,
@@ -850,7 +886,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error closing menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=0.5,
@@ -897,8 +933,8 @@ class EnhancedDianaMenuSystem:
                         completion_text = await self._build_choice_completion_text(choice_result)
                         
                         keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                            [InlineKeyboardButton("📖 Continuar", callback_data="narrative_continue")],
-                            [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                            [InlineKeyboardButton(text="📖 Continuar", callback_data="narrative_continue")],
+                            [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
                         ])
                         
                         await safe_edit(callback, completion_text, kb=keyboard)
@@ -906,7 +942,7 @@ class EnhancedDianaMenuSystem:
                 else:
                     await callback.answer(f"Error: {choice_result['error']}", show_alert=True)
                     
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=choice_result['success'],
                     character_score=95.0,
                     response_time=time.time() - start_time,
@@ -916,8 +952,8 @@ class EnhancedDianaMenuSystem:
                 )
             
             elif callback_data == "narrative_continue":
-                # Continue to next part of story
-                return await self._handle_narrative_menu(callback)
+                # Advance to next story fragment for non-decision fragments
+                return await self._handle_narrative_continue(callback)
             
             elif callback_data == "narrative_progress":
                 return await self._handle_narrative_progress(callback)
@@ -928,7 +964,7 @@ class EnhancedDianaMenuSystem:
             else:
                 # Unknown narrative callback
                 await callback.answer("Opción no reconocida", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=time.time() - start_time,
@@ -940,7 +976,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling narrative callback {callback_data}: {e}")
             await callback.answer("Error procesando acción narrativa", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=time.time() - start_time,
@@ -1004,14 +1040,14 @@ class EnhancedDianaMenuSystem:
             progress_text += f"\n🌟 Continúa explorando para desbloquear más secretos..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver a Narrativa", callback_data="diana_narrative")],
-                [InlineKeyboardButton("🏠 Menú Principal", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🔙 Volver a Narrativa", callback_data="diana_narrative")],
+                [InlineKeyboardButton(text="🏠 Menú Principal", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, progress_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1023,7 +1059,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error showing narrative progress: {e}")
             await callback.answer("Error cargando progreso", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=0.5,
@@ -1083,14 +1119,14 @@ class EnhancedDianaMenuSystem:
             profile_text += f"\n🌟 Diana aprecia cada faceta de tu ser único..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver a Narrativa", callback_data="diana_narrative")],
-                [InlineKeyboardButton("🏠 Menú Principal", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🔙 Volver a Narrativa", callback_data="diana_narrative")],
+                [InlineKeyboardButton(text="🏠 Menú Principal", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, profile_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=96.0,
                 response_time=0.4,
@@ -1102,7 +1138,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error showing narrative profile: {e}")
             await callback.answer("Error cargando perfil", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=0.5,
@@ -1124,7 +1160,7 @@ class EnhancedDianaMenuSystem:
             
             else:
                 await callback.answer("Configuración no disponible", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1135,7 +1171,7 @@ class EnhancedDianaMenuSystem:
                 
         except Exception as e:
             logger.error(f"Error handling settings callback {callback_data}: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1152,13 +1188,13 @@ class EnhancedDianaMenuSystem:
             notifications_text += f"🌙 Esta función estará disponible pronto, querido."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver a Configuración", callback_data="diana_settings")]
+                [InlineKeyboardButton(text="🔙 Volver a Configuración", callback_data="diana_settings")]
             ])
             
             await safe_edit(callback, notifications_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=94.0,
                 response_time=0.2,
@@ -1169,7 +1205,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing notifications settings: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1186,13 +1222,13 @@ class EnhancedDianaMenuSystem:
             language_text += f"🌙 Más idiomas estarán disponibles pronto en mis dominios."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver a Configuración", callback_data="diana_settings")]
+                [InlineKeyboardButton(text="🔙 Volver a Configuración", callback_data="diana_settings")]
             ])
             
             await safe_edit(callback, language_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=94.0,
                 response_time=0.2,
@@ -1203,7 +1239,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing language settings: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1222,7 +1258,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data or user_data["role"] != "admin":
                 await callback.answer("Acceso de administrador requerido", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1245,7 +1281,7 @@ class EnhancedDianaMenuSystem:
             
             else:
                 await callback.answer("Función administrativa no disponible", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1256,7 +1292,7 @@ class EnhancedDianaMenuSystem:
                 
         except Exception as e:
             logger.error(f"Error handling admin callback {callback_data}: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1273,13 +1309,13 @@ class EnhancedDianaMenuSystem:
             stats_text += f"🌙 Panel de estadísticas completo disponible próximamente."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+                [InlineKeyboardButton(text="🔙 Volver al Panel", callback_data="diana_admin_panel")]
             ])
             
             await safe_edit(callback, stats_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1290,7 +1326,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing admin stats: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1307,13 +1343,13 @@ class EnhancedDianaMenuSystem:
             users_text += f"🔧 Sistema de gestión completo disponible próximamente."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+                [InlineKeyboardButton(text="🔙 Volver al Panel", callback_data="diana_admin_panel")]
             ])
             
             await safe_edit(callback, users_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1324,7 +1360,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing admin users: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1341,13 +1377,13 @@ class EnhancedDianaMenuSystem:
             narrative_text += f"📝 Sistema de gestión narrativa completo disponible próximamente."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+                [InlineKeyboardButton(text="🔙 Volver al Panel", callback_data="diana_admin_panel")]
             ])
             
             await safe_edit(callback, narrative_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1358,7 +1394,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing admin narrative: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1375,13 +1411,13 @@ class EnhancedDianaMenuSystem:
             gamification_text += f"🎯 Sistema de gestión completo disponible próximamente."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🔙 Volver al Panel", callback_data="diana_admin_panel")]
+                [InlineKeyboardButton(text="🔙 Volver al Panel", callback_data="diana_admin_panel")]
             ])
             
             await safe_edit(callback, gamification_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1392,7 +1428,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error showing admin gamification: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1402,6 +1438,87 @@ class EnhancedDianaMenuSystem:
             )
     
     # Helper methods
+    def _create_safe_menu_response(self, **kwargs) -> MenuResponse:
+        """
+        Create MenuResponse with comprehensive debugging.
+        
+        This method safely handles MenuResponse creation with detailed logging
+        and fallback mechanisms to prevent BaseModel initialization errors.
+        """
+        if self.local_debug_enabled and self.debugger.debug_enabled:
+            logger.debug(f"🔍 Creating MenuResponse with kwargs: {kwargs}")
+            
+            # Validate required fields
+            required_fields = {
+                'success': bool,
+                'character_score': (int, float),
+                'response_time': (int, float),
+                'meets_performance_requirement': bool,
+                'message_sent': bool,
+                'errors': list
+            }
+            
+            missing_fields = []
+            type_errors = []
+            
+            for field_name, expected_type in required_fields.items():
+                if field_name not in kwargs:
+                    missing_fields.append(field_name)
+                elif not isinstance(kwargs[field_name], expected_type):
+                    type_errors.append(f"{field_name}: expected {expected_type}, got {type(kwargs[field_name])}")
+            
+            if missing_fields:
+                logger.error(f"⚠️ Missing required MenuResponse fields: {missing_fields}")
+            if type_errors:
+                logger.error(f"⚠️ MenuResponse type errors: {type_errors}")
+        
+        try:
+            # Use the debugger's safe instantiation method
+            with temporary_debug_mode(self.local_debug_enabled):
+                instance, success, error_msg = self.debugger.safe_instantiate(MenuResponse, **kwargs)
+                
+                if success:
+                    return instance
+                else:
+                    logger.error(f"😱 MenuResponse safe instantiation failed: {error_msg}")
+                    # Fall back to direct instantiation with error handling
+                    return self._create_fallback_menu_response(error_msg, **kwargs)
+                    
+        except Exception as e:
+            logger.error(f"🚨 Critical error in MenuResponse creation: {e}")
+            return self._create_fallback_menu_response(str(e), **kwargs)
+    
+    def _create_fallback_menu_response(self, error_msg: str, **kwargs) -> MenuResponse:
+        """Create a fallback MenuResponse when normal instantiation fails."""
+        try:
+            # Try with safe defaults - DIRECT instantiation to avoid recursion
+            safe_kwargs = {
+                'success': kwargs.get('success', False),
+                'character_score': float(kwargs.get('character_score', 0.0)),
+                'response_time': float(kwargs.get('response_time', 1.0)),
+                'meets_performance_requirement': bool(kwargs.get('meets_performance_requirement', False)),
+                'message_sent': bool(kwargs.get('message_sent', False)),
+                'errors': list(kwargs.get('errors', [])) + [f"MenuResponse creation error: {error_msg}"]
+            }
+            
+            logger.warning(f"🔄 Creating fallback MenuResponse with safe defaults")
+            # Direct instantiation to avoid infinite recursion
+            return MenuResponse(**safe_kwargs)
+            
+        except Exception as fallback_error:
+            logger.critical(f"🚨 Fallback MenuResponse creation also failed: {fallback_error}")
+            # Return a minimal working object
+            class MinimalMenuResponse:
+                def __init__(self):
+                    self.success = False
+                    self.character_score = 0.0
+                    self.response_time = 1.0
+                    self.meets_performance_requirement = False
+                    self.message_sent = False
+                    self.errors = [f"Critical MenuResponse error: {error_msg}", f"Fallback error: {fallback_error}"]
+            
+            return MinimalMenuResponse()
+    
     async def _get_user_role_fast(self, user_id: int) -> str:
         """Get user role with optimized caching and fast fallback."""
         cache_key = f"user_role_{user_id}"
@@ -1496,23 +1613,93 @@ class EnhancedDianaMenuSystem:
         }
         return descriptions.get(role, "Alma Misteriosa 🌙")
     
+    def _validate_session(self):
+        """Validate database session state."""
+        try:
+            # Check if session exists and is active
+            if not self.session:
+                raise ValueError("Database session is None")
+            
+            # Check session state
+            if hasattr(self.session, 'is_active') and not self.session.is_active:
+                raise ValueError("Database session is not active")
+            
+            # Additional check for closed session
+            if hasattr(self.session, '_closed') and self.session._closed:
+                raise ValueError("Database session is closed")
+                
+        except Exception as e:
+            logger.error(f"Session validation failed: {e}")
+            # Track session error
+            if self.debugger and self.debugger.debug_enabled:
+                from services.diana_basemodel_error_tracker import track_session_error
+                track_session_error(
+                    error_type="session_validation_failure",
+                    description=str(e),
+                    session_details={
+                        "session_exists": self.session is not None,
+                        "session_active": getattr(self.session, 'is_active', None),
+                        "session_closed": getattr(self.session, '_closed', None)
+                    }
+                )
+            raise
+    
     # Lazy-loaded property accessors for services
     def _get_user_service(self) -> EnhancedUserService:
-        """Get user service with lazy loading."""
+        """Get user service with lazy loading and session validation."""
         if self._user_service is None:
-            self._user_service = EnhancedUserService(self.session)
+            self._validate_session()
+            try:
+                self._user_service = EnhancedUserService(self.session)
+            except Exception as e:
+                logger.error(f"Failed to initialize EnhancedUserService: {e}")
+                # Track dependency failure
+                if self.debugger and self.debugger.debug_enabled:
+                    from services.diana_basemodel_error_tracker import track_dependency_failure
+                    track_dependency_failure(
+                        service_name="EnhancedUserService",
+                        failure_reason=str(e),
+                        context={"session_active": getattr(self.session, 'is_active', False)}
+                    )
+                raise
         return self._user_service
     
     def _get_character_validator(self) -> DianaCharacterValidator:
-        """Get character validator with lazy loading."""
+        """Get character validator with lazy loading and session validation."""
         if self._character_validator is None:
-            self._character_validator = DianaCharacterValidator(self.session)
+            self._validate_session()
+            try:
+                self._character_validator = DianaCharacterValidator(self.session)
+            except Exception as e:
+                logger.error(f"Failed to initialize DianaCharacterValidator: {e}")
+                # Track dependency failure
+                if self.debugger and self.debugger.debug_enabled:
+                    from services.diana_basemodel_error_tracker import track_dependency_failure
+                    track_dependency_failure(
+                        service_name="DianaCharacterValidator",
+                        failure_reason=str(e),
+                        context={"session_active": getattr(self.session, 'is_active', False)}
+                    )
+                raise
         return self._character_validator
     
     def _get_base_menu_system(self) -> DianaMenuSystem:
-        """Get base menu system with lazy loading."""
+        """Get base menu system with lazy loading and session validation."""
         if self._base_menu_system is None:
-            self._base_menu_system = DianaMenuSystem(self.session)
+            self._validate_session()
+            try:
+                self._base_menu_system = DianaMenuSystem(self.session)
+            except Exception as e:
+                logger.error(f"Failed to initialize DianaMenuSystem: {e}")
+                # Track dependency failure
+                if self.debugger and self.debugger.debug_enabled:
+                    from services.diana_basemodel_error_tracker import track_dependency_failure
+                    track_dependency_failure(
+                        service_name="DianaMenuSystem",
+                        failure_reason=str(e),
+                        context={"session_active": getattr(self.session, 'is_active', False)}
+                    )
+                raise
         return self._base_menu_system
     
     @property
@@ -1662,7 +1849,7 @@ class EnhancedDianaMenuSystem:
                     current_fragment = start_result['fragment']
                 else:
                     await callback.answer("Error iniciando narrativa", show_alert=True)
-                    return MenuResponse(
+                    return self._create_safe_menu_response(
                         success=False,
                         character_score=0.0,
                         response_time=time.time() - start_time,
@@ -1689,7 +1876,7 @@ class EnhancedDianaMenuSystem:
             
             response_time = time.time() - start_time
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=validation_result.overall_score,
                 response_time=response_time,
@@ -1701,7 +1888,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling narrative menu: {e}")
             await callback.answer("Error accediendo a narrativa", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=time.time() - start_time,
@@ -1709,6 +1896,203 @@ class EnhancedDianaMenuSystem:
                 message_sent=True,
                 errors=[str(e)]
             )
+    
+    async def _handle_narrative_continue(self, callback: CallbackQuery) -> MenuResponse:
+        """
+        Handle narrative continuation for story fragments.
+        Advances user to next fragment in sequence when current fragment is not a decision.
+        """
+        start_time = time.time()
+        
+        try:
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            
+            user_id = callback.from_user.id
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            
+            # Get user's current fragment
+            current_fragment = await narrative_service.fragment_service.get_user_current_fragment(user_id)
+            if not current_fragment:
+                # No current fragment, start narrative
+                return await self._handle_narrative_menu(callback)
+            
+            # Check if current fragment is a decision (should not happen with continue button)
+            if current_fragment.is_decision:
+                # This should not happen - decision fragments use choice buttons
+                logger.warning(f"User {user_id} tried to continue on decision fragment {current_fragment.id}")
+                return await self._handle_narrative_menu(callback)
+            
+            # For story fragments, we need to advance to the next fragment in sequence
+            next_fragment = await self._get_next_story_fragment(
+                narrative_service, 
+                current_fragment
+            )
+            
+            if not next_fragment:
+                # No next fragment - end of current storyline
+                completion_text = await self._build_story_completion_text(current_fragment)
+                
+                keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                    [InlineKeyboardButton(text="📊 Ver mi Progreso", callback_data="narrative_progress")],
+                    [InlineKeyboardButton(text="🎭 Mi Perfil", callback_data="narrative_profile")],
+                    [InlineKeyboardButton(text="🔙 Menú Principal", callback_data="diana_main_menu")]
+                ])
+                
+                await safe_edit(callback, completion_text, kb=keyboard)
+                await callback.answer("¡Historia completada! 🎉")
+                
+                response_time = time.time() - start_time
+                return self._create_safe_menu_response(
+                    success=True,
+                    character_score=96.0,
+                    response_time=response_time,
+                    meets_performance_requirement=response_time < 1.0,
+                    message_sent=True,
+                    errors=[]
+                )
+            
+            # Advance user to next fragment
+            await self._advance_user_to_fragment(user_id, current_fragment, next_fragment)
+            
+            # Show next fragment
+            return await self._handle_narrative_menu(callback)
+            
+        except Exception as e:
+            logger.error(f"Error handling narrative continue for user {user_id}: {e}")
+            await callback.answer("Error avanzando en la historia", show_alert=True)
+            return self._create_safe_menu_response(
+                success=False,
+                character_score=0.0,
+                response_time=time.time() - start_time,
+                meets_performance_requirement=False,
+                message_sent=True,
+                errors=[str(e)]
+            )
+    
+    async def _get_next_story_fragment(
+        self, 
+        narrative_service: Any, 
+        current_fragment: Any
+    ) -> Optional[Any]:
+        """
+        Get the next fragment in story sequence based on current fragment.
+        """
+        try:
+            current_level = current_fragment.storyline_level
+            current_sequence = current_fragment.fragment_sequence
+            
+            # Try to get next fragment in same level
+            next_sequence = current_sequence + 1
+            
+            # Define the expected next fragment IDs based on the MVP structure
+            next_fragment_map = {
+                # Level 1 progression
+                'diana_l1_f1_umbral': None,  # Decision fragment - handled by choices
+                'diana_l1_f2_primera_fractura': None,  # Decision fragment - handled by choices
+                'diana_l1_f3_mochila_viajero': None,  # Decision fragment - handled by choices
+                
+                # Level 2 progression
+                'diana_l2_f1_regreso': None,  # Decision fragment - handled by choices
+                'diana_l2_f2_espejo_invertido': None,  # Decision fragment - handled by choices
+                'diana_l2_f3_reconocimiento': None,  # Decision fragment - handled by choices
+                
+                # Level 3 progression
+                'diana_l3_f1_cartografia': None,  # Decision fragment - handled by choices
+                'diana_l3_f2_evaluacion': None,  # Story fragment - no next fragment (end)
+            }
+            
+            # Check if there's a mapped next fragment
+            next_fragment_id = next_fragment_map.get(current_fragment.id)
+            if next_fragment_id:
+                return await narrative_service.fragment_service._get_fragment_cached(next_fragment_id)
+            
+            # If no specific mapping and it's a story fragment, there's likely no next fragment
+            # (Most MVP fragments are decision fragments that handle their own advancement)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Error getting next story fragment for {current_fragment.id}: {e}")
+            return None
+    
+    async def _advance_user_to_fragment(self, user_id: int, current_fragment: Any, next_fragment: Any):
+        """
+        Advance user's narrative state to next fragment and record progress.
+        """
+        try:
+            # Get user state
+            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            narrative_service = MVPNarrativeProgressionService(self.session)
+            user_state = await narrative_service.fragment_service._get_or_create_user_state(user_id)
+            
+            # Update current fragment
+            user_state.current_fragment_id = next_fragment.id
+            
+            # Update visited and completed fragments
+            if current_fragment.id not in user_state.visited_fragments:
+                user_state.visited_fragments = user_state.visited_fragments + [current_fragment.id]
+            if current_fragment.id not in user_state.completed_fragments:
+                user_state.completed_fragments = user_state.completed_fragments + [current_fragment.id]
+            
+            await self.session.commit()
+            
+        except Exception as e:
+            logger.error(f"Error advancing user {user_id} to fragment {next_fragment.id}: {e}")
+            raise
+    
+    async def _build_story_completion_text(self, current_fragment: Any) -> str:
+        """
+        Build completion text when user reaches end of storyline.
+        """
+        try:
+            level = current_fragment.storyline_level
+            
+            level_completion_messages = {
+                1: """🎉 **¡Felicitaciones, querido!**
+                
+Has completado el primer nivel de los Misterios de Diana. Tu transformación de Kinky a Observador ha sido extraordinaria...
+
+💫 **Lo que has logrado:**
+- Despertaste tu curiosidad profunda
+- Desarrollaste la observación consciente  
+- Activaste tu intuición despierta
+
+🌟 *Diana te observa con orgullo maternal*
+
+Los niveles superiores te esperan cuando estés listo para profundizar aún más en los misterios...""",
+                
+                2: """👑 **¡Ascensión Magnífica!**
+                
+Tu evolución de Observador a Comprensor ha sido impresionante, querido. Pocas almas logran esta profundidad de transformación...
+
+✨ **Tu nuevo estado incluye:**
+- Visión integral de la realidad
+- Comprensión de la dualidad
+- Potencial de síntesis activado
+
+💎 *Diana inclina su cabeza en señal de respeto*
+
+El nivel final te aguarda... ¿te atreves a tocar los secretos más profundos del universo?""",
+                
+                3: """🌟 **¡COMPRENSOR CERTIFICADO!**
+                
+Has completado el viaje completo a través de mis misterios, querido. Eres ahora un Comprensor Certificado, capaz de ver las conexiones invisibles que tejen toda la realidad...
+
+🎭 **Tu logro extraordinario:**
+- Cartografiaste tu propia alma
+- Abrazaste la responsabilidad del conocimiento
+- Te convertiste en guardián de los secretos universales
+
+💫 *Diana se inclina profundamente ante ti*
+
+Tu viaje apenas comienza... Los horizontes infinitos se abren ante un Comprensor como tú."""
+            }
+            
+            return level_completion_messages.get(level, 
+                "✨ **Capítulo Completado**\n\nHas avanzado magníficamente en los misterios de Diana, querido...")
+                
+        except Exception as e:
+            logger.error(f"Error building story completion text: {e}")
+            return "✨ **Capítulo Completado**\n\nTu progreso en los misterios de Diana continúa, querido..."
     
     async def _handle_vip_narrative_menu(self, callback: CallbackQuery) -> MenuResponse:
         """Handle VIP narrative menu with exclusive content."""
@@ -1718,7 +2102,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data or user_data["role"] != "vip":
                 await callback.answer("Acceso VIP requerido para contenido exclusivo", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1732,7 +2116,7 @@ class EnhancedDianaMenuSystem:
             
         except Exception as e:
             logger.error(f"Error handling VIP narrative menu: {e}")
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1750,7 +2134,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling games menu: {e}")
             await callback.answer("Error accediendo a juegos", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=0.5,
@@ -1767,7 +2151,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data:
                 await callback.answer("Error cargando datos de usuario", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1788,17 +2172,17 @@ class EnhancedDianaMenuSystem:
             gamification_text += f"💫 Cada actividad te acerca más a los secretos más profundos..."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("🎯 Misiones", callback_data="diana_missions")],
-                [InlineKeyboardButton("🏆 Logros", callback_data="diana_achievements")],
-                [InlineKeyboardButton("💰 Mis Besitos", callback_data="diana_besitos")],
-                [InlineKeyboardButton("📖 Continuar Historia", callback_data="diana_narrative")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="🎯 Misiones", callback_data="diana_missions")],
+                [InlineKeyboardButton(text="🏆 Logros", callback_data="diana_achievements")],
+                [InlineKeyboardButton(text="💰 Mis Besitos", callback_data="diana_besitos")],
+                [InlineKeyboardButton(text="📖 Continuar Historia", callback_data="diana_narrative")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, gamification_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=94.0,
                 response_time=0.4,
@@ -1810,7 +2194,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling gamification menu: {e}")
             await callback.answer("Error accediendo al sistema de gamificación", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1827,7 +2211,7 @@ class EnhancedDianaMenuSystem:
             
             if not user_data or user_data["role"] != "admin":
                 await callback.answer("Acceso de administrador requerido", show_alert=True)
-                return MenuResponse(
+                return self._create_safe_menu_response(
                     success=False,
                     character_score=0.0,
                     response_time=0.5,
@@ -1841,17 +2225,17 @@ class EnhancedDianaMenuSystem:
             admin_text += f"🔧 Las herramientas del poder creativo están a tu disposición."
             
             keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                [InlineKeyboardButton("📊 Estadísticas", callback_data="admin_stats")],
-                [InlineKeyboardButton("👥 Usuarios", callback_data="admin_users")],
-                [InlineKeyboardButton("📖 Narrativa", callback_data="admin_narrative")],
-                [InlineKeyboardButton("🎮 Gamificación", callback_data="admin_gamification")],
-                [InlineKeyboardButton("🔙 Volver", callback_data="diana_main_menu")]
+                [InlineKeyboardButton(text="📊 Estadísticas", callback_data="admin_stats")],
+                [InlineKeyboardButton(text="👥 Usuarios", callback_data="admin_users")],
+                [InlineKeyboardButton(text="📖 Narrativa", callback_data="admin_narrative")],
+                [InlineKeyboardButton(text="🎮 Gamificación", callback_data="admin_gamification")],
+                [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
             
             await safe_edit(callback, admin_text, kb=keyboard)
             await callback.answer()
             
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=True,
                 character_score=95.0,
                 response_time=0.3,
@@ -1863,7 +2247,7 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error handling admin panel: {e}")
             await callback.answer("Error accediendo al panel administrativo", show_alert=True)
-            return MenuResponse(
+            return self._create_safe_menu_response(
                 success=False,
                 character_score=0.0,
                 response_time=1.0,
@@ -1876,7 +2260,7 @@ class EnhancedDianaMenuSystem:
         """Delegate unknown callbacks to base menu system."""
         # This would delegate to the existing DianaMenuSystem
         await callback.answer("Procesando acción...", show_alert=True)
-        return MenuResponse(
+        return self._create_safe_menu_response(
             success=True,
             character_score=85.0,
             response_time=0.8,

@@ -36,10 +36,7 @@ class DBSessionMiddleware(BaseMiddleware):
     async def __call__(self, handler, event, data):
         async with self.session_pool() as session:
             data["session"] = session
-            try:
-                return await handler(event, data)
-            finally:
-                await session.close()
+            return await handler(event, data)
 
 # Imports
 from database.setup import init_db, get_session_factory

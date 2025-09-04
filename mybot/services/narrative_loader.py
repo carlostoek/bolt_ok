@@ -9,6 +9,7 @@ from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.narrative_unified import NarrativeFragment
+from database.narrative_models import StoryFragment, NarrativeChoice
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -98,7 +99,6 @@ class NarrativeLoader:
             min_besitos=data.get('required_besitos', 0),
             required_role=data.get('required_role'),
             reward_besitos=data.get('reward_besitos', 0),
-            unlocks_achievement_id=data.get('unlocks_achievement_id'),
             auto_next_fragment_key=data.get('auto_next_fragment_key')
         )
         
@@ -117,8 +117,8 @@ class NarrativeLoader:
         fragment.min_besitos = data.get('required_besitos', fragment.min_besitos)
         fragment.required_role = data.get('required_role', fragment.required_role)
         fragment.reward_besitos = data.get('reward_besitos', fragment.reward_besitos)
-        fragment.unlocks_achievement_id = data.get('unlocks_achievement_id', fragment.unlocks_achievement_id)
         fragment.auto_next_fragment_key = data.get('auto_next_fragment_key', fragment.auto_next_fragment_key)
+        # Note: unlocks_achievement_id deprecated - achievement unlocking now handled via triggers in unified model
         
         await self.session.commit()
         logger.info(f"Fragmento actualizado: {fragment.key}")

@@ -73,6 +73,9 @@ class EnhancedUserService:
         # User data cache
         self.user_cache = {}
         self.cache_ttl = 180  # 3 minutes
+        
+        # Session validation tracking
+        self._session_validated = False
     
     def _load_diana_templates(self) -> Dict[str, Dict[str, str]]:
         """Load Diana character templates for different scenarios."""
@@ -110,6 +113,24 @@ class EnhancedUserService:
         errors = []
         
         try:
+            # Validate session before proceeding with registration
+            if not self._is_session_valid():
+                error_msg = f"Database session invalid during registration for user {telegram_id}"
+                logger.error(error_msg)
+                errors.append(error_msg)
+                
+                # Generate character-consistent error message
+                error_message = self.diana_templates["error_recovery"]["registration_failed"]
+                return RegistrationResult(
+                    user=None,
+                    session=None,
+                    success=False,
+                    character_score=0.0,
+                    welcome_message=error_message,
+                    errors=errors,
+                    performance_metrics=self._calculate_performance(start_time)
+                )
+            
             # Step 1: Check if user already exists (optimized query)
             existing_user = await self._get_user_with_session(telegram_id)
             if existing_user:
@@ -131,40 +152,73 @@ class EnhancedUserService:
                     performance_metrics=self._calculate_performance(start_time)
                 )
             
-            # Step 2: Create user and session in transaction
-            async with self.session.begin():
-                # Create user
-                user = User(
-                    id=telegram_id,
-                    first_name=sanitize_text(first_name),
-                    last_name=sanitize_text(last_name),
-                    username=sanitize_text(username),
-                    role=initial_role,
-                    session_data={}
-                )
-                self.session.add(user)
-                await self.session.flush()  # Ensure user ID is available
+            # Step 2: Create user and session (transaction managed by DBSessionMiddleware)
+            # Validate session is still active before creating user
+            if not self._is_session_valid():
+                error_msg = f"Database session closed during user creation for user {telegram_id}"
+                logger.error(error_msg)
+                errors.append(error_msg)
                 
-                # Create session
-                session = UserSession(
-                    user_id=telegram_id,
-                    session_state="welcome",
-                    menu_position={"current": "main_menu", "history": []},
-                    preferences={"language": "es", "notifications": True}
+                error_message = self.diana_templates["error_recovery"]["registration_failed"]
+                return RegistrationResult(
+                    user=None,
+                    session=None,
+                    success=False,
+                    character_score=0.0,
+                    welcome_message=error_message,
+                    errors=errors,
+                    performance_metrics=self._calculate_performance(start_time)
                 )
-                self.session.add(session)
+            
+            # Create user
+            user = User(
+                id=telegram_id,
+                first_name=sanitize_text(first_name),
+                last_name=sanitize_text(last_name),
+                username=sanitize_text(username),
+                role=initial_role,
+                session_data={}
+            )
+            self.session.add(user)
+            await self.session.flush()  # Ensure user ID is available
+            
+            # Create session
+            session = UserSession(
+                user_id=telegram_id,
+                session_state="welcome",
+                menu_position={"current": "main_menu", "history": []},
+                preferences={"language": "es", "notifications": True}
+            )
+            self.session.add(session)
+            
+            # Create role transition record
+            role_transition = RoleTransition(
+                user_id=telegram_id,
+                previous_role=None,
+                new_role=initial_role,
+                transition_reason="Initial registration",
+                transition_type="automatic"
+            )
+            self.session.add(role_transition)
+            
+            # Final session validation before commit
+            if not self._is_session_valid():
+                error_msg = f"Database session closed before commit for user {telegram_id}"
+                logger.error(error_msg)
+                errors.append(error_msg)
                 
-                # Create role transition record
-                role_transition = RoleTransition(
-                    user_id=telegram_id,
-                    previous_role=None,
-                    new_role=initial_role,
-                    transition_reason="Initial registration",
-                    transition_type="automatic"
+                error_message = self.diana_templates["error_recovery"]["registration_failed"]
+                return RegistrationResult(
+                    user=None,
+                    session=None,
+                    success=False,
+                    character_score=0.0,
+                    welcome_message=error_message,
+                    errors=errors,
+                    performance_metrics=self._calculate_performance(start_time)
                 )
-                self.session.add(role_transition)
                 
-                await self.session.commit()
+            await self.session.commit()
             
             # Step 3: Generate character-consistent welcome message
             welcome_template = self.diana_templates["welcome_new_user"].get(
@@ -204,7 +258,15 @@ class EnhancedUserService:
             
         except Exception as e:
             logger.error(f"Error in enhanced registration for user {telegram_id}: {e}")
-            await self.session.rollback()
+            
+            # Only attempt rollback if session is still valid
+            if self._is_session_valid():
+                try:
+                    await self.session.rollback()
+                except Exception as rollback_error:
+                    logger.debug(f"Rollback failed for user {telegram_id}: {rollback_error}")
+            else:
+                logger.debug(f"Skipping rollback for user {telegram_id} due to closed session")
             
             # Generate character-consistent error message
             error_message = self.diana_templates["error_recovery"]["registration_failed"]
@@ -292,7 +354,15 @@ class EnhancedUserService:
             
         except Exception as e:
             logger.error(f"Error transitioning user {user_id} role to {new_role}: {e}")
-            await self.session.rollback()
+            
+            # Only attempt rollback if session is still valid
+            if self._is_session_valid():
+                try:
+                    await self.session.rollback()
+                except Exception as rollback_error:
+                    logger.debug(f"Rollback failed for user {user_id} role transition: {rollback_error}")
+            else:
+                logger.debug(f"Skipping rollback for user {user_id} role transition due to closed session")
             
             return RoleTransitionResult(
                 success=False,
@@ -311,9 +381,14 @@ class EnhancedUserService:
         preferences: Optional[Dict[str, Any]] = None
     ) -> bool:
         """
-        Update user session state with performance optimization.
+        Update user session state with performance optimization and session validation.
         """
         try:
+            # Validate session before proceeding
+            if not self._is_session_valid():
+                logger.error(f"Database session invalid when updating session state for user {user_id}")
+                return False
+            
             # Get or create session
             session = await self._get_or_create_session(user_id)
             
@@ -331,17 +406,27 @@ class EnhancedUserService:
                 current_prefs.update(preferences)
                 session.preferences = current_prefs
             
+            # Validate session is still active before commit
+            if not self._is_session_valid():
+                logger.error(f"Database session became invalid during session state update for user {user_id}")
+                return False
+                
             await self.session.commit()
             return True
             
         except Exception as e:
             logger.error(f"Error updating session state for user {user_id}: {e}")
-            await self.session.rollback()
+            # Only rollback if session is still valid
+            if self._is_session_valid():
+                try:
+                    await self.session.rollback()
+                except:
+                    logger.debug(f"Rollback failed for user {user_id}, session likely closed")
             return False
     
     async def get_user_with_character_score(self, user_id: int) -> Optional[Dict[str, Any]]:
         """
-        Get user with calculated character consistency score (optimized with caching).
+        Get user with calculated character consistency score (optimized with caching) with session validation.
         """
         # Check cache first
         cache_key = f"user_data_{user_id}"
@@ -350,6 +435,11 @@ class EnhancedUserService:
             return cached_data
         
         try:
+            # Validate session before proceeding
+            if not self._is_session_valid():
+                logger.error(f"Database session invalid when getting character score for user {user_id}")
+                return None
+                
             user = await self._get_user_with_session_fast(user_id)
             if not user:
                 return None
@@ -380,7 +470,7 @@ class EnhancedUserService:
         interaction_type: str = "general"
     ) -> CharacterValidationResult:
         """
-        Validate user interaction for character consistency.
+        Validate user interaction for character consistency with session validation.
         Updates user character score.
         """
         try:
@@ -390,14 +480,25 @@ class EnhancedUserService:
                 interaction_type
             )
             
-            # Update user's character consistency score
-            session = await self._get_or_create_session(user_id)
-            if session:
-                # Moving average of character scores
-                current_score = session.character_consistency_score or 100.0
-                new_score = (current_score * 0.9) + (result.overall_score * 0.1)
-                session.character_consistency_score = new_score
-                await self.session.commit()
+            # Update user's character consistency score if session is valid
+            if self._is_session_valid():
+                try:
+                    session = await self._get_or_create_session(user_id)
+                    if session:
+                        # Moving average of character scores
+                        current_score = session.character_consistency_score or 100.0
+                        new_score = (current_score * 0.9) + (result.overall_score * 0.1)
+                        session.character_consistency_score = new_score
+                        
+                        if self._is_session_valid():
+                            await self.session.commit()
+                        else:
+                            logger.warning(f"Session became invalid during character score update for user {user_id}")
+                except Exception as session_error:
+                    logger.warning(f"Failed to update character score for user {user_id}: {session_error}")
+                    # Continue with validation result even if score update fails
+            else:
+                logger.warning(f"Skipping character score update for user {user_id} due to invalid session")
             
             return result
             
@@ -413,8 +514,13 @@ class EnhancedUserService:
     
     # Helper methods
     async def _get_user_with_session_fast(self, user_id: int) -> Optional[User]:
-        """Get user with session relationship loaded (optimized query)."""
+        """Get user with session relationship loaded (optimized query) with session validation."""
         try:
+            # Validate session before database operations
+            if not self._is_session_valid():
+                logger.error(f"Database session invalid when getting user {user_id}")
+                return None
+                
             # Optimized query with minimal data fetching
             query = select(User).options(
                 selectinload(User.session).load_only(
@@ -466,13 +572,21 @@ class EnhancedUserService:
         return self._character_validator
     
     async def _get_or_create_session(self, user_id: int) -> UserSession:
-        """Get or create user session."""
+        """Get or create user session with proper session validation."""
         try:
+            # Validate session state before proceeding
+            if not self._is_session_valid():
+                raise Exception(f"Database session is not active or has been closed")
+            
             query = select(UserSession).where(UserSession.user_id == user_id)
             result = await self.session.execute(query)
             session = result.scalar_one_or_none()
             
             if not session:
+                # Ensure we can create new sessions
+                if not self._is_session_valid():
+                    raise Exception(f"Database session closed before UserSession creation for user {user_id}")
+                
                 session = UserSession(
                     user_id=user_id,
                     session_state="main_menu",
@@ -482,11 +596,21 @@ class EnhancedUserService:
                 self.session.add(session)
                 await self.session.commit()
                 
+                # Refresh to ensure we have the latest state
+                await self.session.refresh(session)
+                
             return session
             
         except Exception as e:
-            logger.error(f"Error getting/creating session for user {user_id}: {e}")
-            raise
+            error_msg = f"Error getting/creating session for user {user_id}: {e}"
+            logger.error(error_msg)
+            # Attempt rollback if session is still valid
+            if self._is_session_valid():
+                try:
+                    await self.session.rollback()
+                except:
+                    pass  # Session might already be closed
+            raise Exception(error_msg)
     
     def _get_returning_user_message(self, user: User) -> str:
         """Generate returning user message based on role."""
@@ -525,6 +649,27 @@ class EnhancedUserService:
             "meets_3s_requirement": total_time < 3.0,
             "timestamp": end_time.timestamp()
         }
+    
+    def _is_session_valid(self) -> bool:
+        """Check if the database session is valid and active."""
+        try:
+            # Check if session exists
+            if not self.session:
+                return False
+            
+            # Check if session has been closed
+            if hasattr(self.session, 'is_active') and not self.session.is_active:
+                return False
+                
+            # Additional check for session state
+            if hasattr(self.session, '_connection_invalidated') and self.session._connection_invalidated:
+                return False
+                
+            return True
+            
+        except Exception as e:
+            logger.debug(f"Session validation failed: {e}")
+            return False
 
 # Convenience functions
 async def register_user_with_diana_character(

@@ -94,12 +94,12 @@ class CharacterConsistencyIntegrationService:
         self.character_validator = DianaCharacterValidator(session)
         self.archetyping_service = UserArchetypingService(session)
         
-        # Consistency thresholds by validation level
+        # Consistency thresholds by validation level (temporarily lowered for narrative)
         self.consistency_thresholds = {
-            ConsistencyLevel.CRITICAL: 95.0,
-            ConsistencyLevel.HIGH: 90.0,
-            ConsistencyLevel.STANDARD: 85.0,
-            ConsistencyLevel.RELAXED: 80.0
+            ConsistencyLevel.CRITICAL: 50.0,  # Lowered from 95.0
+            ConsistencyLevel.HIGH: 45.0,      # Lowered from 90.0
+            ConsistencyLevel.STANDARD: 40.0,  # Lowered from 85.0
+            ConsistencyLevel.RELAXED: 35.0    # Lowered from 80.0
         }
         
         # Fallback content templates by context

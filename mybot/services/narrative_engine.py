@@ -204,13 +204,8 @@ class NarrativeEngine:
             )
             logger.info(f"Usuario {user_id} recibió {fragment.reward_besitos} besitos del fragmento {fragment.key}")
         
-        # Procesar logros desbloqueados
-        if fragment.unlocks_achievement_id:
-            from services.achievement_service import AchievementService
-            ach_service = AchievementService(self.session)
-            achievement = await self.session.get(Achievement, fragment.unlocks_achievement_id)
-            if achievement:
-                await ach_service._grant(user_id, achievement, bot=self.bot)
+        # Achievement unlocking now handled via triggers system in unified narrative model
+        # Legacy achievement unlocking removed to avoid conflicts
     
     async def _count_accessible_fragments(self, user_id: int) -> int:
         """Cuenta los fragmentos accesibles para el usuario."""

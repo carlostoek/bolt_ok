@@ -849,7 +849,7 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
                     level_service = LevelService(self.session)
                     achievement_service = AchievementService(self.session)
                     point_service = PointService(self.session, level_service, achievement_service)
-                    await point_service.add_points(user_id, choice_points, "narrative_choice")
+                    await point_service.add_points(user_id, choice_points, source="narrative_choice")
                     rewards_processed['points_awarded'] += choice_points
                 except Exception as e:
                     logger.error(f"Error awarding choice points to user {user_id}: {e}")
@@ -864,7 +864,7 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
                         level_service = LevelService(self.session)
                         achievement_service = AchievementService(self.session)
                         point_service = PointService(self.session, level_service, achievement_service)
-                        await point_service.add_points(user_id, trigger_points, "narrative_fragment")
+                        await point_service.add_points(user_id, trigger_points, source="narrative_fragment")
                         rewards_processed['points_awarded'] += trigger_points
                     except Exception as e:
                         logger.error(f"Error awarding fragment points to user {user_id}: {e}")
