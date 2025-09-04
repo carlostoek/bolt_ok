@@ -105,7 +105,28 @@ def create_missing_tables_sync():
         
         print("✅ Created performance indexes")
         
-        # Create other missing tables if needed
+        # Create user_decision_log_unified table
+        create_decision_log_table = """
+        CREATE TABLE IF NOT EXISTS user_decision_log_unified (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id BIGINT NOT NULL,
+            fragment_id VARCHAR(255) NOT NULL,
+            decision_choice VARCHAR(100) NOT NULL,
+            points_awarded INTEGER DEFAULT 0 NOT NULL,
+            clues_unlocked JSON DEFAULT '[]' NOT NULL,
+            made_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+            FOREIGN KEY (fragment_id) REFERENCES narrative_fragments_unified (id) ON DELETE CASCADE
+        )
+        """
+        
+        cursor.execute(create_decision_log_table)
+        print("✅ Created/verified user_decision_log_unified table")
+        
+        # Create indexes for user_decision_log_unified
+        cursor.execute("CREATE INDEX IF NOT EXISTS ix_user_decision_log_unified_user ON user_decision_log_unified (user_id)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS ix_user_decision_log_unified_time ON user_decision_log_unified (made_at)")
+        cursor.execute("CREATE INDEX IF NOT EXISTS ix_user_decision_log_unified_fragment ON user_decision_log_unified (fragment_id)")
         
         # Create user_narrative_states_unified table
         create_narrative_states_table = """
@@ -181,6 +202,7 @@ def create_missing_tables_sync():
         test_tables = [
             'user_mission_progress_unified',
             'user_archetypes_unified',
+            'user_decision_log_unified',
             'user_narrative_states_unified',
             'narrative_fragments_unified'
         ]
