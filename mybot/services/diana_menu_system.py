@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .coordinador_central import CoordinadorCentral, AccionUsuario
 from .user_service import UserService
 from .point_service import PointService
+from .level_service import LevelService
 from .narrative_service import NarrativeService
 from .narrative_compatibility_layer import get_narrative_compatibility
 from .mission_service import MissionService
@@ -53,11 +54,12 @@ class DianaMenuSystem:
         # Core coordination and services
         self.coordinador = CoordinadorCentral(session)
         self.user_service = UserService(session)
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         self.narrative_service = NarrativeService(session)
         self.narrative_compatibility = get_narrative_compatibility(session)
         self.mission_service = MissionService(session)
-        self.achievement_service = AchievementService(session)
         self.admin_service = AdminService(session)
         
         # Specialized menu modules

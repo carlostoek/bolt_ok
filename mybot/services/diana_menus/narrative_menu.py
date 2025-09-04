@@ -11,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..coordinador_central import CoordinadorCentral, AccionUsuario
 from ..narrative_service import NarrativeService
 from ..point_service import PointService
+from ..level_service import LevelService
+from ..achievement_service import AchievementService
 from utils.message_safety import safe_edit
 from utils.user_roles import get_user_role
 
@@ -26,7 +28,9 @@ class DianaNarrativeMenu:
         self.session = session
         self.coordinador = CoordinadorCentral(session)
         self.narrative_service = NarrativeService(session)
-        self.point_service = PointService(session)
+        self.level_service = LevelService(session)
+        self.achievement_service = AchievementService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         
         # Character-specific styling
         self.character_themes = {

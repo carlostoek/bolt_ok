@@ -50,12 +50,12 @@ class StoryFragment(Base):
         lazy="selectin"
     )
 
-    achievement_link = relationship(
-        "Achievement",
-        foreign_keys=[unlocks_achievement_id],
-        back_populates="story_fragments",
-        lazy="joined"
-    )
+    # achievement_link = relationship(
+    #     "Achievement",
+    #     foreign_keys=[unlocks_achievement_id],
+    #     back_populates="story_fragments",
+    #     lazy="joined"
+    # )
 
     @validates('key')
     def validate_key(self, key, value):
@@ -185,7 +185,6 @@ class UserNarrativeState(Base):
 
     user = relationship(
         "User", 
-        back_populates="narrative_state",
         lazy="joined",
         single_parent=True
     )
@@ -209,7 +208,7 @@ class UserNarrativeState(Base):
 
 # Enhanced narrative system for advanced features and integration testing
 
-class NarrativeFragment(Base):
+class NarrativeFragmentDeprecated(Base):
     """Enhanced narrative fragments with engagement and milestone tracking.
     
     This model extends the basic StoryFragment with additional features for

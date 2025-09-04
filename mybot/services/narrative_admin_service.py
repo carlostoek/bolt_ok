@@ -375,17 +375,21 @@ class NarrativeAdminService:
             await self.session.commit()
             await self.session.refresh(fragment)
             
-            # Emitir evento de creación
-            await self.event_bus.publish(
-                EventType.CONSISTENCY_CHECK,
-                0,  # ID del sistema
-                {
-                    "action": "fragment_created",
-                    "fragment_id": fragment.id,
-                    "fragment_type": fragment.fragment_type
-                },
-                source="narrative_admin_service"
-            )
+            # Emitir evento de creación (con graceful degradation)
+            try:
+                await self.event_bus.publish(
+                    EventType.CONSISTENCY_CHECK,
+                    0,  # ID del sistema
+                    {
+                        "action": "fragment_created",
+                        "fragment_id": fragment.id,
+                        "fragment_type": fragment.fragment_type
+                    },
+                    "narrative_admin_service"  # source as positional argument
+                )
+            except Exception as e:
+                logger.warning(f"EventBus publication failed for fragment creation, continuing: {e}")
+                # Continue operation even if EventBus fails - graceful degradation
             
             # Devolver datos del fragmento creado
             return {

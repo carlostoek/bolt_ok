@@ -27,10 +27,10 @@ class DianaGamificationMenu:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.coordinador = CoordinadorCentral(session)
-        self.point_service = PointService(session)
         self.mission_service = MissionService(session)
         self.achievement_service = AchievementService(session)
         self.level_service = LevelService(session)
+        self.point_service = PointService(session, self.level_service, self.achievement_service)
         
         # Diana-themed gamification elements
         self.gamification_themes = {

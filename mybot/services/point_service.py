@@ -9,11 +9,49 @@ from services.interfaces import IPointService, INotificationService
 from services.level_service import LevelService
 from services.achievement_service import AchievementService
 from services.event_service import EventService
-import datetime
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
+
+# MVP Economic Rules Configuration
+POINTS_CONFIG = {
+    'story_fragment_completion': 10,
+    'decision_made': 5,
+    'daily_login': 15,
+    'mission_completed': 25,
+    'achievement_unlocked': 50,
+    'channel_reaction': 2,
+    'vip_bonus_multiplier': 1.5,
+    'message_sent': 1,
+    'poll_participation': 2,
+    'checkin_daily': 10,
+    'reaction_processed': 0.5
+}
+
+# Diana's character-consistent reward messages in Spanish
+DIANA_REWARD_MESSAGES = {
+    'besitos_earned': [
+        "Mmm... has ganado {points} besitos más, cariño. Ya tienes {total} en total. ¿Te gusta coleccionarlos para mí? 💋",
+        "Qué dulce... {points} besitos nuevos han llegado a ti. Con {total} besitos, te acercas más a mis secretos... 😘",
+        "Has conseguido {points} besitos, mi querido. {total} besitos en total... cada uno es como un susurro mío. 💫"
+    ],
+    'level_up': [
+        "¡Oh, mi amor! Has alcanzado el nivel {level}... Me impresionas cada día más. ¿Qué harás con este nuevo poder? 💎",
+        "Nivel {level}... Interesante. Cada nivel que subes me permite mostrarte algo más de quien soy realmente... 🌹",
+        "Has llegado al nivel {level}, cariño. Mis secretos se revelan solo a quienes demuestran tal dedicación... 🔮"
+    ],
+    'mission_completed': [
+        "Excelente trabajo en esa misión, amor. {points} besitos como recompensa... y quizás algo más especial después. 🎯",
+        "Has completado la misión perfectamente. {points} besitos son tuyos, y mi admiración también. ¿Qué viene después? ✨",
+        "Misión cumplida... {points} besitos te esperan. Me gusta cuando demuestras tanta determinación por mí. 💋"
+    ],
+    'achievement_unlocked': [
+        "¡Un logro desbloqueado! {points} besitos especiales... Cada logro tuyo es un paso más cerca de mi corazón. 🏆",
+        "Has desbloqueado algo muy especial... {points} besitos y mi sonrisa. ¿Sientes cómo nos conectamos más? 💫",
+        "Logro conseguido, mi querido. {points} besitos... y una pequeña parte de mis misterios se revelan. 🗝️"
+    ]
+}
 
 
 class PointService(IPointService):
@@ -73,12 +111,16 @@ class PointService(IPointService):
             Optional[UserStats]: Progreso actualizado o None si no se otorgaron puntos
         """
         progress = await self._get_or_create_progress(user_id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         if progress.last_activity_at and (now - progress.last_activity_at).total_seconds() < 30:
             return None
         
+        # Use MVP economic rules
+        base_points = POINTS_CONFIG['message_sent']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
         # Omitir notificación ya que la información se enviará a través del sistema unificado
-        progress = await self.add_points(user_id, 1, bot=bot, skip_notification=True)
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="message_sent")
         progress.messages_sent += 1
         
         # Solo hacer commit si no estamos en una transacción externa
@@ -129,7 +171,7 @@ class PointService(IPointService):
         """
         # First check if we already processed this reaction
         progress = await self._get_or_create_progress(user.id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         
         if progress.last_reaction_at and (now - progress.last_reaction_at).total_seconds() < 5:
             return None  # Skip if same reaction within 5 seconds
@@ -140,8 +182,12 @@ class PointService(IPointService):
         if not self.session.in_transaction():
             await self.session.commit()
         
+        # Use MVP economic rules with VIP multiplier
+        base_points = POINTS_CONFIG['channel_reaction']
+        points = await self._apply_vip_multiplier(user.id, base_points)
+        
         # Only then award points - Omitir notificación para usar sistema unificado
-        progress = await self.add_points(user.id, 0.5, bot=bot, skip_notification=True)
+        progress = await self.add_points(user.id, points, bot=bot, skip_notification=True, source="channel_reaction")
         
         new_badges = await self.achievement_service.check_user_badges(user.id)
         
@@ -182,8 +228,12 @@ class PointService(IPointService):
         Returns:
             UserStats: Progreso actualizado
         """
+        # Use MVP economic rules with VIP multiplier
+        base_points = POINTS_CONFIG['poll_participation']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
         # Omitir notificación ya que la información se enviará a través del sistema unificado
-        progress = await self.add_points(user_id, 2, bot=bot, skip_notification=True)
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="poll_participation")
         
         new_badges = await self.achievement_service.check_user_badges(user_id)
         
@@ -225,12 +275,16 @@ class PointService(IPointService):
             Tuple[bool, UserStats]: (Éxito, Progreso actualizado)
         """
         progress = await self._get_or_create_progress(user_id)
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         if progress.last_checkin_at and (now - progress.last_checkin_at).total_seconds() < 86400:
             return False, progress
             
+        # Use MVP economic rules with VIP multiplier
+        base_points = POINTS_CONFIG['daily_login']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
         # Omitir notificación ya que la información se enviará a través del sistema unificado
-        progress = await self.add_points(user_id, 10, bot=bot, skip_notification=True)
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="daily_checkin")
         
         if progress.last_checkin_at and (now.date() - progress.last_checkin_at.date()).days == 1:
             progress.checkin_streak += 1
@@ -287,6 +341,156 @@ class PointService(IPointService):
                         f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
                     )
         return True, progress
+    
+    async def _apply_vip_multiplier(self, user_id: int, base_points: float) -> float:
+        """
+        Apply VIP multiplier to base points if user has VIP status.
+        
+        Args:
+            user_id (int): ID del usuario
+            base_points (float): Puntos base
+            
+        Returns:
+            float: Puntos con multiplicador VIP aplicado
+        """
+        try:
+            user = await self.session.get(User, user_id)
+            if user and user.role == "vip" and user.vip_expires_at and user.vip_expires_at > datetime.utcnow():
+                return base_points * POINTS_CONFIG['vip_bonus_multiplier']
+        except Exception as e:
+            logger.error(f"Error checking VIP status for user {user_id}: {e}")
+        
+        return base_points
+    
+    async def award_story_fragment_completion(self, user_id: int, bot: Optional[Bot] = None) -> UserStats:
+        """
+        Awards points for completing a story fragment with Diana's personality.
+        
+        Args:
+            user_id (int): ID del usuario
+            bot (Optional[Bot]): Instancia del bot
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
+        base_points = POINTS_CONFIG['story_fragment_completion']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="story_fragment_completion")
+        
+        # Send Diana's character-consistent notification
+        if bot and self.notification_service:
+            try:
+                import random
+                message = random.choice(DIANA_REWARD_MESSAGES['besitos_earned'])
+                total_points = await self.get_balance(user_id)
+                await self.notification_service.add_notification(
+                    user_id,
+                    "story_progress",
+                    {
+                        "message": message.format(points=int(points), total=int(total_points)),
+                        "points": points,
+                        "source": "story_fragment"
+                    },
+                    priority=2  # MEDIUM
+                )
+                logger.debug(f"Sent Diana story completion notification to user {user_id}")
+            except Exception as e:
+                logger.error(f"Error sending story completion notification: {e}")
+        
+        return progress
+    
+    async def award_decision_made(self, user_id: int, bot: Optional[Bot] = None) -> UserStats:
+        """
+        Awards points for making a narrative decision with Diana's personality.
+        
+        Args:
+            user_id (int): ID del usuario
+            bot (Optional[Bot]): Instancia del bot
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
+        base_points = POINTS_CONFIG['decision_made']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
+        return await self.add_points(user_id, points, bot=bot, skip_notification=True, source="decision_made")
+    
+    async def award_mission_completion(self, user_id: int, mission_name: str, bot: Optional[Bot] = None) -> UserStats:
+        """
+        Awards points for mission completion with Diana's personality.
+        
+        Args:
+            user_id (int): ID del usuario
+            mission_name (str): Nombre de la misión
+            bot (Optional[Bot]): Instancia del bot
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
+        base_points = POINTS_CONFIG['mission_completed']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="mission_completed")
+        
+        # Send Diana's character-consistent notification
+        if bot and self.notification_service:
+            try:
+                import random
+                message = random.choice(DIANA_REWARD_MESSAGES['mission_completed'])
+                await self.notification_service.add_notification(
+                    user_id,
+                    "mission_complete",
+                    {
+                        "message": message.format(points=int(points)),
+                        "mission_name": mission_name,
+                        "points": points
+                    },
+                    priority=2  # MEDIUM
+                )
+                logger.debug(f"Sent Diana mission completion notification to user {user_id}")
+            except Exception as e:
+                logger.error(f"Error sending mission completion notification: {e}")
+        
+        return progress
+    
+    async def award_achievement_unlock(self, user_id: int, achievement_name: str, bot: Optional[Bot] = None) -> UserStats:
+        """
+        Awards points for achievement unlock with Diana's personality.
+        
+        Args:
+            user_id (int): ID del usuario
+            achievement_name (str): Nombre del logro
+            bot (Optional[Bot]): Instancia del bot
+            
+        Returns:
+            UserStats: Progreso actualizado
+        """
+        base_points = POINTS_CONFIG['achievement_unlocked']
+        points = await self._apply_vip_multiplier(user_id, base_points)
+        
+        progress = await self.add_points(user_id, points, bot=bot, skip_notification=True, source="achievement_unlocked")
+        
+        # Send Diana's character-consistent notification
+        if bot and self.notification_service:
+            try:
+                import random
+                message = random.choice(DIANA_REWARD_MESSAGES['achievement_unlocked'])
+                await self.notification_service.add_notification(
+                    user_id,
+                    "achievement_unlocked",
+                    {
+                        "message": message.format(points=int(points)),
+                        "achievement_name": achievement_name,
+                        "points": points
+                    },
+                    priority=1  # HIGH
+                )
+                logger.debug(f"Sent Diana achievement notification to user {user_id}")
+            except Exception as e:
+                logger.error(f"Error sending achievement notification: {e}")
+        
+        return progress
 
     async def add_points(self, user_id: int, points: float, *, bot: Optional[Bot] = None, 
                          skip_notification: bool = False, source: str = "unknown") -> UserStats:

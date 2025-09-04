@@ -11,7 +11,7 @@ from sqlalchemy.future import select
 
 from .narrative_service import NarrativeService
 from database.models import User
-from database.narrative_models import UserNarrativeState, StoryFragment, NarrativeFragment
+from database.narrative_unified import UserNarrativeState, NarrativeFragment
 
 logger = logging.getLogger(__name__)
 
@@ -185,7 +185,7 @@ class NarrativeCompatibilityLayer:
             Número total de fragmentos
         """
         try:
-            result = await self.session.execute(select(StoryFragment).with_only_columns(StoryFragment.id))
+            result = await self.session.execute(select(NarrativeFragment).with_only_columns(NarrativeFragment.id))
             return len(result.scalars().all())
             
         except Exception as e:

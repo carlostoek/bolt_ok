@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from database.models.narrative import NarrativeFragment, UserStoryState
+from database.models.narrative import NarrativeFragmentOld as NarrativeFragment, UserStoryState
 from sqlalchemy.future import select
 from sqlalchemy.exc import NoResultFound
 import logging

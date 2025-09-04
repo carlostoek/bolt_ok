@@ -7,6 +7,8 @@ except ImportError:  # Fallback for older aiogram
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import User
 from services.point_service import PointService
+from services.level_service import LevelService
+from services.achievement_service import AchievementService
 from utils.messages import BOT_MESSAGES
 import logging
 import datetime
@@ -27,7 +29,11 @@ class PointsMiddleware(BaseMiddleware):
             if await is_admin(event.from_user.id, session):
                 return await handler(event, data)
 
-        service = PointService(session)
+        # Create required service dependencies
+        level_service = LevelService(session)
+        achievement_service = AchievementService(session)
+        service = PointService(session, level_service, achievement_service)
+        
         from services.mission_service import MissionService
         mission_service = MissionService(session)
 

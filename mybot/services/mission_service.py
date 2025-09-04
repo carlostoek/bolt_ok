@@ -1,5 +1,4 @@
 # services/mission_service.py
-import datetime
 import random
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update
@@ -46,7 +45,7 @@ class MissionService:
             user = await self.session.get(User, user_id)
             if user:
                 filtered_missions = []
-                now = datetime.datetime.now()
+                now = datetime.now()
 
                 for mission in missions:
                     is_completed_for_period, _ = await self.check_mission_completion_status(user, mission)
@@ -75,13 +74,13 @@ class MissionService:
                 return True, "already_completed"
         elif mission.type == "daily":
             if mission_completion_record:
-                last_completed = datetime.datetime.fromisoformat(mission_completion_record)
-                if (datetime.datetime.now() - last_completed) < datetime.timedelta(days=1):
+                last_completed = datetime.fromisoformat(mission_completion_record)
+                if (datetime.now() - last_completed) < timedelta(days=1):
                     return True, "daily_limit_reached"
         elif mission.type == "weekly":
             if mission_completion_record:
-                last_completed = datetime.datetime.fromisoformat(mission_completion_record)
-                if (datetime.datetime.now() - last_completed) < datetime.timedelta(weeks=1):
+                last_completed = datetime.fromisoformat(mission_completion_record)
+                if (datetime.now() - last_completed) < timedelta(weeks=1):
                     return True, "weekly_limit_reached"
         elif mission.type == "reaction":
             # For reaction missions, check if already completed once
@@ -140,9 +139,9 @@ class MissionService:
 
         # Update last reset timestamps for daily/weekly missions
         if mission.type == "daily":
-            user.last_daily_mission_reset = datetime.datetime.now()
+            user.last_daily_mission_reset = datetime.now()
         elif mission.type == "weekly":
-            user.last_weekly_mission_reset = datetime.datetime.now()
+            user.last_weekly_mission_reset = datetime.now()
 
         # Desbloqueo de pistas de lore vinculadas a la misión
         unlock_code = getattr(mission, "unlocks_lore_piece_code", None)
@@ -330,7 +329,7 @@ class MissionService:
         return False
 
     async def get_active_challenges(self, challenge_type: str | None = None) -> list[Challenge]:
-        now = datetime.datetime.utcnow()
+        now = datetime.utcnow()
         stmt = select(Challenge).where(Challenge.start_date <= now, Challenge.end_date >= now)
         if challenge_type:
             stmt = stmt.where(Challenge.type == challenge_type)
@@ -354,8 +353,25 @@ class MissionService:
             prog.current_value += increment
             if prog.current_value >= challenge.goal_value:
                 prog.completed = True
-                prog.completed_at = datetime.datetime.utcnow()
+                prog.completed_at = datetime.utcnow()
                 completed.append(challenge)
                 await self.point_service.add_points(user_id, 100, bot=bot)
         await self.session.commit()
         return completed
+
+    async def get_user_active_missions(self, user_id: int) -> list[Mission]:
+        """Get active missions for a specific user."""
+        return await self.get_active_missions(user_id=user_id)
+
+    async def get_user_completed_missions(self, user_id: int) -> list[UserMissionEntry]:
+        """Get completed missions for a specific user."""
+        stmt = (
+            select(UserMissionEntry)
+            .where(
+                UserMissionEntry.user_id == user_id,
+                UserMissionEntry.completed == True
+            )
+            .order_by(UserMissionEntry.completed_at.desc())
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

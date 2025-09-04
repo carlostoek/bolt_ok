@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from database import Base
 
-class NarrativeFragment(Base):
+class NarrativeFragmentOld(Base):
     __tablename__ = 'narrative_fragments'
     
     id = Column(Integer, primary_key=True, index=True)

@@ -43,6 +43,8 @@ class DBSessionMiddleware(BaseMiddleware):
 
 # Imports
 from database.setup import init_db, get_session_factory
+from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
+from create_missing_tables import create_missing_tables_sync
 from utils.message_safety import patch_message_methods
 from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 
@@ -71,6 +73,7 @@ from handlers.unified_narrative_handler import router as unified_narrative_route
 from handlers.user_narrative_handler import router as user_narrative_router
 from handlers.unified_mission_handler import router as unified_mission_router
 from handlers.reward_test_handler import router as reward_test_router
+from handlers.diana_handler import router as diana_handler_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -149,7 +152,15 @@ async def main() -> None:
     try:
         # Inicialización
         logger.info("Inicializando base de datos...")
+        create_missing_tables_sync() # Ensure tables exist before init_db
         await init_db()
+
+        # Inicializar fragmentos narrativos MVP
+        logger.info("Inicializando fragmentos narrativos MVP...")
+        session_factory = get_session_factory() # Get session factory here to pass to service
+        async with session_factory() as session:
+            mvp_fragment_service = MVPNarrativeFragmentService(session)
+            await mvp_fragment_service.initialize_mvp_fragments()
         
         logger.info("Aplicando parches de seguridad...")
         patch_message_methods()
@@ -189,6 +200,7 @@ async def main() -> None:
         logger.info("Registrando handlers...")
         routers = [
             ("setup", setup_handlers.router),
+            ("diana_handler", diana_handler_router),
             ("admin", admin_router),
             ("auction_admin", auction_admin_router),
             ("start_token", start_token),

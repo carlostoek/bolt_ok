@@ -176,6 +176,16 @@ class AchievementService:
         await self.session.commit()
         return True
 
+    async def get_user_achievements(self, user_id: int) -> list[Achievement]:
+        """Get all achievements unlocked by a user."""
+        stmt = (
+            select(Achievement)
+            .join(UserAchievement, UserAchievement.achievement_id == Achievement.id)
+            .where(UserAchievement.user_id == user_id)
+        )
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     async def get_user_badges(self, user_id: int) -> list[Badge]:
         stmt = (
             select(Badge)

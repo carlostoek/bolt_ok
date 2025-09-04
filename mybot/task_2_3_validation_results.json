@@ -1,0 +1,68 @@
+{
+  "validation_timestamp": "2025-09-01T13:01:35.873438",
+  "summary": {
+    "total_fragments": 2,
+    "average_score": 43.0,
+    "passing_count": 0,
+    "pass_rate": 0.0,
+    "meets_mvp": false
+  },
+  "trait_averages": {
+    "mysterious": 25.0,
+    "seductive": 6.25,
+    "emotional": 8.75,
+    "intellectual": 3.0
+  },
+  "integration_analysis": {
+    "besitos_integration_rate": 100.0,
+    "vip_content_percentage": 50.0,
+    "levels_represented": [
+      1,
+      5
+    ],
+    "tiers_represented": [
+      "el_divan",
+      "los_kinkys"
+    ]
+  },
+  "fragment_results": [
+    {
+      "fragment_id": "fragment_diana_welcome",
+      "overall_score": 35.0,
+      "mysterious_score": 25.0,
+      "seductive_score": 5.5,
+      "emotional_score": 3.5,
+      "intellectual_score": 1.0,
+      "meets_threshold": false,
+      "violations": [
+        "Insufficient seductive charm (5.5/25)",
+        "Insufficient emotional depth (3.5/25)",
+        "Insufficient intellectual engagement (1.0/25)"
+      ],
+      "recommendations": [
+        "Include subtle charm and intimate language",
+        "Add emotional complexity and vulnerability",
+        "Pose questions and invite deeper reflection"
+      ]
+    },
+    {
+      "fragment_id": "fragment_diana_vip_intimacy",
+      "overall_score": 51.0,
+      "mysterious_score": 25.0,
+      "seductive_score": 7.0,
+      "emotional_score": 14.0,
+      "intellectual_score": 5.0,
+      "meets_threshold": false,
+      "violations": [
+        "Insufficient seductive charm (7.0/25)",
+        "Insufficient emotional depth (14.0/25)",
+        "Insufficient intellectual engagement (5.0/25)"
+      ],
+      "recommendations": [
+        "Include subtle charm and intimate language",
+        "Add emotional complexity and vulnerability",
+        "Pose questions and invite deeper reflection"
+      ]
+    }
+  ]
+}

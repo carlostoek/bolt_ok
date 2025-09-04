@@ -50,16 +50,19 @@ class User(Base):
     last_reminder_sent_at = Column(DateTime, nullable=True)
     menu_state = Column(String, default="root")
     is_admin = Column(Boolean, default=False) # New column for admin status
+    session_data = Column(JSON, default={})  # Enhanced session data for Diana menu system
 
     @declared_attr
-    def narrative_state(cls):
-        from .narrative_models import UserNarrativeState
+    def narrative_state_unified(cls):
+        from .narrative_unified import UserNarrativeState
         return relationship(
             UserNarrativeState,
-            back_populates="user",
             uselist=False,
             lazy="selectin"
         )
+    
+    # Enhanced session relationship
+    session = relationship("UserSession", back_populates="user", uselist=False, lazy="selectin")
 
 
 class Reward(Base):
@@ -96,12 +99,11 @@ class Achievement(Base):
     reward_text = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
 
-    story_fragments = relationship(
-        "StoryFragment",
-        foreign_keys="StoryFragment.unlocks_achievement_id",
-        back_populates="achievement_link",
-        lazy="selectin"  # Añadido para evitar problemas de carga
-    )
+    # This relationship is deprecated as achievement unlocking is now handled
+    # by the 'triggers' field in the NarrativeFragment model.
+    # Keeping the class definition for now to avoid breaking other tests,
+    # but the relationship is removed.
+
 
 
 class UserAchievement(Base):
@@ -546,3 +548,57 @@ class UserRewardHistory(Base):
     __table_args__ = (
         UniqueConstraint("user_id", "fragment_key", name="uix_user_reward_history"),
     )
+
+
+class UserSession(Base):
+    """Enhanced user session management for Diana menu system."""
+    
+    __tablename__ = "user_sessions"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False, unique=True)
+    session_state = Column(String, default="main_menu")
+    menu_position = Column(JSON, default={})
+    preferences = Column(JSON, default={})
+    last_interaction = Column(DateTime, default=func.now())
+    session_started = Column(DateTime, default=func.now())
+    character_consistency_score = Column(Float, default=100.0)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Relationship to user
+    user = relationship("User", back_populates="session")
+
+
+class RoleTransition(Base):
+    """Audit trail for user role changes."""
+    
+    __tablename__ = "role_transitions"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    previous_role = Column(String, nullable=True)
+    new_role = Column(String, nullable=False)
+    transition_reason = Column(String, nullable=True)
+    transition_type = Column(String, default="automatic")  # automatic, manual, system
+    performed_by = Column(BigInteger, ForeignKey("users.id"), nullable=True)  # Admin user ID if manual
+    transition_metadata = Column(JSON, default={})  # Renamed to avoid SQLAlchemy conflict
+    created_at = Column(DateTime, default=func.now())
+    
+    # Relationship to user
+    user = relationship("User", foreign_keys=[user_id])
+    admin_user = relationship("User", foreign_keys=[performed_by])
+
+
+class InteractionLog(Base):
+    """Log de interacciones de usuario para análisis y seguimiento."""
+    
+    __tablename__ = "interaction_logs"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    interaction_type = Column(String, nullable=False)
+    interaction_data = Column(JSON, nullable=True)
+    timestamp = Column(DateTime, default=func.now())
+    session_id = Column(String, nullable=True)
+    source = Column(String, nullable=True)  # handler, service, etc.

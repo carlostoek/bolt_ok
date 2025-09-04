@@ -5,6 +5,12 @@ from sqlalchemy.pool import NullPool
 from .base import Base
 from utils.config import Config
 
+# Import all models to ensure they are registered in metadata
+from . import models  # Main models including UserSession, RoleTransition, etc.
+from . import narrative_models  # Narrative models
+from . import narrative_unified  # Unified narrative models
+from . import transaction_models  # Transaction models
+
 logger = logging.getLogger(__name__)
 
 _engine = None
@@ -12,6 +18,9 @@ _sessionmaker = None
 
 TABLES_ORDER = [
     'users',
+    'user_sessions',
+    'role_transitions',
+    'interaction_logs',
     'achievements',
     'story_fragments',
     'narrative_choices', 
@@ -51,6 +60,9 @@ TABLES_ORDER = [
     'trivia_user_answers',
     'point_transactions',
     'vip_transactions',
+    'narrative_rewards',
+    'user_reward_history',
+    'reward_logs',
 ]
 
 async def init_db():

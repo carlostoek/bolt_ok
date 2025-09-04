@@ -1,0 +1,69 @@
+{
+  "timestamp": "2025-09-03T03:57:33.330726",
+  "tests": [
+    {
+      "name": "Database Initialization",
+      "success": true,
+      "message": "Database initialized successfully in 0.19s",
+      "timestamp": "2025-09-03T03:57:33.518791"
+    },
+    {
+      "name": "Diana Menu System",
+      "success": true,
+      "message": "Diana menu system files and imports working in 3.10s",
+      "timestamp": "2025-09-03T03:57:36.622286"
+    },
+    {
+      "name": "Narrative System",
+      "success": false,
+      "message": "Narrative system failed: cannot import name 'NarrativeFragmentUnified' from 'database.narrative_unified' (/home/azureuser/repos/bolt_ok/mybot/database/narrative_unified.py)",
+      "timestamp": "2025-09-03T03:57:36.622449"
+    },
+    {
+      "name": "Gamification System",
+      "success": true,
+      "message": "Gamification validated - 2 missions, 0 achievements in 0.02s",
+      "timestamp": "2025-09-03T03:57:36.641442"
+    },
+    {
+      "name": "End-to-End User Flow",
+      "success": true,
+      "message": "User flow validation completed in 0.03s",
+      "timestamp": "2025-09-03T03:57:36.673872"
+    },
+    {
+      "name": "Cross-System Integration",
+      "success": true,
+      "message": "Integration services available - 3 integration files in 0.01s",
+      "timestamp": "2025-09-03T03:57:36.684502"
+    },
+    {
+      "name": "Handler Registration",
+      "success": false,
+      "message": "Missing handlers: ['handlers/admin/admin_narrative_handler.py', 'handlers/user/gamification_handler.py']",
+      "timestamp": "2025-09-03T03:57:36.684744"
+    },
+    {
+      "name": "Performance Validation",
+      "success": false,
+      "message": "Performance issues: ['diana_menu_response_time: 3.10s > 2.0s']",
+      "timestamp": "2025-09-03T03:57:36.684827"
+    },
+    {
+      "name": "Character Consistency",
+      "success": true,
+      "message": "Character consistency framework present (score: 130/100)",
+      "timestamp": "2025-09-03T03:57:36.686577"
+    },
+    {
+      "name": "Critical Paths",
+      "success": true,
+      "message": "Critical paths validated: 3 checks passed",
+      "timestamp": "2025-09-03T03:57:36.719887"
+    }
+  ],
+  "performance_metrics": {},
+  "critical_issues": [],
+  "warnings": [],
+  "phase_4_ready": false
+}

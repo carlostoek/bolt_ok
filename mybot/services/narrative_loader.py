@@ -8,7 +8,7 @@ import logging
 from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from database.narrative_models import StoryFragment, NarrativeChoice
+from database.narrative_unified import NarrativeFragment
 from datetime import datetime
 
 logger = logging.getLogger(__name__)

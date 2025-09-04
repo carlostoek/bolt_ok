@@ -14,6 +14,9 @@ from .integration.narrative_access_service import NarrativeAccessService
 from .integration.event_coordinator import EventCoordinator
 from .narrative_service import NarrativeService
 from .point_service import PointService
+from .level_service import LevelService
+from .achievement_service import AchievementService
+from .user_service import UserService
 from .reconciliation_service import ReconciliationService
 from .event_bus import get_event_bus, EventType, Event
 from .notification_service import NotificationService
@@ -25,6 +28,7 @@ class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
     REACCIONAR_PUBLICACION_NATIVA = "reaccionar_publicacion_nativa"
     REACCIONAR_PUBLICACION_INLINE = "reaccionar_publicacion_inline"
+    REACCIONAR_PUBLICACION = "reaccionar_publicacion"  # Alias for backward compatibility
     ACCEDER_NARRATIVA_VIP = "acceder_narrativa_vip"
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
@@ -53,6 +57,7 @@ class CoordinadorCentral:
         self.event_coordinator = EventCoordinator(session)
         # Servicios base
         self.narrative_service = NarrativeService(session)
+        self.user_service = UserService(session)
         
         # Inyectar dependencias para PointService
         level_service = LevelService(session)
@@ -84,7 +89,7 @@ class CoordinadorCentral:
                 notification_service = NotificationService(self.session, bot)
             
             # Seleccionar el flujo adecuado según la acción
-            if accion in [AccionUsuario.REACCIONAR_PUBLICACION_NATIVA, AccionUsuario.REACCIONAR_PUBLICACION_INLINE]:
+            if accion in [AccionUsuario.REACCIONAR_PUBLICACION_NATIVA, AccionUsuario.REACCIONAR_PUBLICACION_INLINE, AccionUsuario.REACCIONAR_PUBLICACION]:
                 result = await self._flujo_reaccion_publicacion(user_id, **kwargs)
                 # Enviar notificaciones unificadas si está habilitado
                 if notification_service and result.get("success") and not kwargs.get("skip_unified_notifications"):
