@@ -8,6 +8,8 @@ from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
+import asyncio
+import time
 import logging
 
 from services.diana_menu_integration_impl import (
@@ -20,6 +22,11 @@ from services.enhanced_diana_menu_system import (
     handle_diana_callback
 )
 from services.enhanced_user_service import EnhancedUserService
+from services.diana_service_registry import (
+    get_service_registry,
+    initialize_diana_service_registry,
+    get_service_performance_report
+)
 from utils.handler_decorators import safe_handler, require_role
 
 logger = logging.getLogger(__name__)
@@ -32,25 +39,42 @@ router = Router(name="diana_handler")
 async def cmd_diana(message: Message, session: AsyncSession):
     """
     Comando de acceso al Enhanced Diana Menu System con consistencia de personaje.
-    Optimizado para respuesta <1s y >95% consistencia de personaje.
+    OPTIMIZADO: Respuesta <1s y >95% consistencia con service registry y caching.
     """
     user_id = message.from_user.id
+    start_time = time.time()
     
-    logger.info(f"Usuario {user_id} accediendo a Enhanced Diana Menu System")
+    logger.info(f"Usuario {user_id} accediendo a Enhanced Diana Menu System (OPTIMIZADO)")
     
     try:
-        # Usar el sistema mejorado de Diana
-        menu_result = await show_diana_main_menu(session, message)
+        # Initialize service registry if needed (async optimization)
+        registry_task = asyncio.create_task(initialize_diana_service_registry())
+        
+        # Create optimized Diana menu system with service registry
+        diana_menu = EnhancedDianaMenuSystem(session)
+        
+        # Show main menu using optimized path
+        menu_result = await diana_menu.show_main_menu(message)
+        
+        # Wait for registry initialization (non-blocking)
+        await registry_task
+        
+        # Performance analytics
+        total_time = time.time() - start_time
         
         if not menu_result.success:
             logger.warning(f"Menu system failed for user {user_id}: {menu_result.errors}")
             
-        # Log performance metrics
+        # Enhanced performance logging
         if menu_result.response_time > 1.0:
-            logger.warning(f"Menu response time exceeded 1s: {menu_result.response_time:.2f}s")
+            logger.warning(f"⚠️ Menu response time exceeded 1s: {menu_result.response_time:.2f}s (total: {total_time:.2f}s)")
             
         if menu_result.character_score < 95.0:
-            logger.warning(f"Character consistency below 95%: {menu_result.character_score:.1f}%")
+            logger.warning(f"⚠️ Character consistency below 95%: {menu_result.character_score:.1f}%")
+        
+        # Log success metrics
+        if menu_result.success and menu_result.meets_performance_requirement:
+            logger.info(f"✅ Diana menu served optimally: {menu_result.response_time:.2f}s, character: {menu_result.character_score:.1f}%")
         
     except Exception as e:
         logger.error(f"Error accediendo a Enhanced Diana Menu System: {e}")
@@ -85,31 +109,102 @@ async def cmd_diana_admin(message: Message, session: AsyncSession):
         logger.error(f"Error accediendo al panel administrativo Diana: {e}")
         await message.answer("❌ Error accediendo al panel administrativo Diana. Inténtalo de nuevo más tarde.")
 
+@router.message(Command("diana_performance"))
+@require_role("admin")
+@safe_handler("❌ Error obteniendo métricas de rendimiento.")
+async def cmd_diana_performance(message: Message, session: AsyncSession):
+    """
+    Comando administrativo para obtener métricas de rendimiento del sistema Diana.
+    Solo disponible para administradores.
+    """
+    user_id = message.from_user.id
+    
+    logger.info(f"Administrador {user_id} solicitando métricas de rendimiento Diana")
+    
+    try:
+        # Get comprehensive performance report
+        performance_report = get_service_performance_report()
+        
+        # Get service registry cache stats
+        registry = get_service_registry()
+        cache_stats = registry.get_cache_stats()
+        
+        # Format performance report
+        report_text = "📊 **Métricas de Rendimiento Diana**\n\n"
+        
+        # Service registry stats
+        report_text += f"🔧 **Service Registry**\n"
+        report_text += f"• Instancias cacheadas: {cache_stats['total_cached_instances']}\n"
+        report_text += f"• Sesiones activas: {cache_stats['active_sessions']}\n"
+        
+        # Cache efficiency
+        report_text += f"\n⚡ **Eficiencia de Cache**\n"
+        for service_name, efficiency in cache_stats['cache_efficiency'].items():
+            report_text += f"• {service_name}: {efficiency:.1f}%\n"
+        
+        # Performance summary
+        summary = performance_report['performance_summary']
+        report_text += f"\n✨ **Resumen de Rendimiento**\n"
+        report_text += f"• Tiempo ahorrado: {summary['total_instantiation_overhead_saved']:.3f}s\n"
+        report_text += f"• Hit rate promedio: {summary['cache_hit_rate_average']:.1f}%\n"
+        
+        # Service metrics
+        report_text += f"\n📈 **Métricas por Servicio**\n"
+        for service_name, metrics in cache_stats['metrics'].items():
+            if metrics['instantiation_count'] > 0:
+                report_text += f"• {service_name}:\n"
+                report_text += f"  - Instanciaciones: {metrics['instantiation_count']}\n"
+                report_text += f"  - Tiempo promedio: {metrics['avg_instantiation_time']:.3f}s\n"
+                report_text += f"  - Cache hits: {metrics['cache_hits']}\n"
+        
+        report_text += f"\n🕐 Generado: {performance_report['timestamp']}"
+        
+        await message.answer(report_text, parse_mode="Markdown")
+        
+    except Exception as e:
+        logger.error(f"Error obteniendo métricas de rendimiento Diana: {e}")
+        await message.answer("❌ Error obteniendo métricas de rendimiento. Inténtalo de nuevo más tarde.")
+
 @router.callback_query(F.data.startswith("diana_"))
 @safe_handler("😔 Los vientos del misterio encuentran resistencia...")
 async def handle_diana_callback_enhanced(callback: CallbackQuery, session: AsyncSession):
     """
     Handler mejorado para callbacks de Diana Menu System con consistencia de personaje.
-    Optimizado para respuesta <1s y >95% consistencia de personaje.
+    ULTRA-OPTIMIZADO: <500ms response time target with service registry caching.
     """
     user_id = callback.from_user.id
     data = callback.data
+    start_time = time.time()
     
-    logger.debug(f"Enhanced Diana callback {data} recibido de usuario {user_id}")
+    logger.debug(f"Enhanced Diana callback {data} recibido de usuario {user_id} (ULTRA-OPTIMIZADO)")
     
     try:
-        # Usar el sistema mejorado de callbacks
-        callback_result = await handle_diana_callback(session, callback)
+        # Use optimized Diana menu system with service registry
+        diana_menu = EnhancedDianaMenuSystem(session)
         
-        # Log performance and character metrics
-        if callback_result.response_time > 1.0:
-            logger.warning(f"Callback response time exceeded 1s: {callback_result.response_time:.2f}s")
+        # Handle callback with performance optimization
+        if hasattr(diana_menu, 'handle_callback_optimized'):
+            callback_result = await diana_menu.handle_callback_optimized(callback)
+        else:
+            # Fallback to existing method
+            callback_result = await handle_diana_callback(session, callback)
+        
+        # Performance analytics
+        total_time = time.time() - start_time
+        
+        # Enhanced performance logging with targets
+        if callback_result.response_time > 0.5:
+            logger.warning(f"⚠️ Callback response time exceeded 500ms: {callback_result.response_time:.2f}s (total: {total_time:.2f}s)")
+        elif callback_result.response_time > 1.0:
+            logger.error(f"❌ Callback response time exceeded 1s: {callback_result.response_time:.2f}s (total: {total_time:.2f}s)")
             
         if callback_result.character_score < 95.0:
-            logger.warning(f"Callback character consistency below 95%: {callback_result.character_score:.1f}%")
+            logger.warning(f"⚠️ Callback character consistency below 95%: {callback_result.character_score:.1f}%")
         
         if not callback_result.success:
             logger.warning(f"Callback failed for user {user_id}: {callback_result.errors}")
+        elif callback_result.meets_performance_requirement and callback_result.response_time < 0.5:
+            logger.info(f"✅ Diana callback served ultra-fast: {callback_result.response_time:.2f}s, character: {callback_result.character_score:.1f}%")
             
     except Exception as e:
         logger.error(f"Error procesando Enhanced Diana callback {data}: {e}")

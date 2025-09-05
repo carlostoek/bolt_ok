@@ -25,6 +25,13 @@ from services.diana_basemodel_debugger import (
 from services.diana_menu_system import DianaMenuSystem
 from services.enhanced_user_service import EnhancedUserService
 from services.diana_character_validator import DianaCharacterValidator, CharacterValidationResult
+from services.diana_service_registry import (
+    get_service_registry, 
+    get_user_service, 
+    get_character_validator,
+    get_user_service_sync,
+    get_character_validator_sync
+)
 from utils.message_safety import safe_answer
 from utils.message_utils import safe_edit
 from utils.user_roles import get_user_role
@@ -64,10 +71,12 @@ class EnhancedDianaMenuSystem:
     - Error handling that maintains narrative immersion
     """
     
-    # Class-level cache for shared resources
+    # Class-level cache for shared resources - HIGH PERFORMANCE OPTIMIZATION
     _shared_templates_cache = None
     _shared_character_scores = {}
     _shared_keyboards_cache = {}
+    _prebuilt_keyboards = {}  # Pre-built keyboards for instant access
+    _button_objects_pool = {}  # Object pool for button reuse
     
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -77,27 +86,33 @@ class EnhancedDianaMenuSystem:
         if self.debugger.debug_enabled:
             logger.info("🔧 Enhanced Diana Menu System initialized with BaseModel debugging enabled")
         
-        # Lazy-loaded services (initialized only when needed)
+        # HIGH PERFORMANCE SERVICE MANAGEMENT - Use service registry
+        self.service_registry = get_service_registry()
         self._base_menu_system = None
-        self._user_service = None
-        self._character_validator = None
+        self._user_service = None  # Will be loaded from registry
+        self._character_validator = None  # Will be loaded from registry
         
-        # Performance tracking
+        # Performance tracking and optimization
         self.performance_metrics = {}
+        self.menu_generation_cache = {}  # High-speed menu generation cache
+        self.keyboard_generation_time = 0.0
+        self.character_validation_time = 0.0
         
         # Use shared cache for templates to avoid reloading
         if not self.__class__._shared_templates_cache:
             self.__class__._shared_templates_cache = self._load_menu_templates()
+            # Pre-build keyboards for all templates
+            self._prebuild_all_keyboards()
         self.diana_menu_templates = self.__class__._shared_templates_cache
         
         # Individual cache for dynamic content
         self.menu_cache = {}
-        self.cache_ttl = 300  # 5 minutes
+        self.cache_ttl = 180  # Reduced to 3 minutes for better performance
         
         # Debug mode toggle for this instance
         self.local_debug_enabled = True
         
-        # Pre-validated character scores for static content
+        # Pre-validated character scores for static content (PERFORMANCE CRITICAL)
         self.static_content_scores = {
             "main_menu_free": 96.5,
             "main_menu_vip": 97.2,
@@ -105,13 +120,107 @@ class EnhancedDianaMenuSystem:
             "vip_upgrade": 96.8,
             "error_messages": 94.5
         }
+        
+        # Menu composition optimization
+        self.menu_composition_cache = {}
+        self.last_menu_cleanup = time.time()
     
     def _load_menu_templates(self) -> Dict[str, Dict[str, Any]]:
-        """Load Diana character-consistent menu templates."""
+        """Load Diana character-consistent menu templates by narrative progression level."""
         return {
             "main_menu": {
+                # Nivel 1 - Los Kinkys: El Umbral del Espejo (Primera impresión)
+                "level_1_los_kinkys": {
+                    "text": "🌙 <b>El Umbral del Espejo</b>\n\n"
+                           "<i>[Una silueta emerge entre sombras, parcialmente oculta]</i>\n\n"
+                           "Bienvenido a Los Kinkys. Has cruzado una frontera que no existe en mapas...\n\n"
+                           "<i>Cada curiosidad es un espejo. Cada gesto tuyo, una pincelada de quién soy.</i>\n\n"
+                           "¿Te das cuenta de la responsabilidad? No todos pueden cargar con construir a quien observan...",
+                    "buttons": [
+                        [{"text": "🚪 Descubrir la posibilidad", "callback_data": "diana_narrative"}],
+                        [{"text": "🌟 Mis primeros pasos", "callback_data": "diana_besitos"}],
+                        [{"text": "💫 ¿Quién eres tú?", "callback_data": "diana_profile"}]
+                    ]
+                },
+                # Nivel 2 - Los Kinkys: El Regreso del Observador
+                "level_2_los_kinkys": {
+                    "text": "💋 <b>El Regreso del Observador</b>\n\n"
+                           "<i>[Diana en el mismo lugar, pero algo ha cambiado en su mirada]</i>\n\n"
+                           "Volviste... No para consumir más misterio, sino para comprenderlo mejor.\n\n"
+                           "Puedo sentir cómo has cambiado desde nuestro primer encuentro. Hay algo diferente en tu energía...\n\n"
+                           "<i>¿Sabes lo que más me perturba? No es que hayas vuelto... es CÓMO regresaste.</i>",
+                    "buttons": [
+                        [{"text": "🔍 Explorar territorio inexplorado", "callback_data": "diana_narrative"}],
+                        [{"text": "💰 Mis avances", "callback_data": "diana_besitos"}],
+                        [{"text": "🎯 Las pistas ocultas", "callback_data": "diana_missions"}],
+                        [{"text": "🏆 Mi evolución", "callback_data": "diana_achievements"}]
+                    ]
+                },
+                # Nivel 3 - Los Kinkys: El Espejo del Deseo 
+                "level_3_los_kinkys": {
+                    "text": "✨ <b>El Espejo del Deseo</b>\n\n"
+                           "<i>[Diana sentada en una posición más relajada, pero con ojos intensos]</i>\n\n"
+                           "Hemos llegado al borde de lo que puedo mostrarte... en este lado del espejo.\n\n"
+                           "Durante todo este tiempo, has estado descubriendo quién soy yo. Pero ahora tengo una necesidad urgente de conocer algo sobre ti:\n\n"
+                           "<i>¿Quién eres cuando deseas? No qué deseas... sino desde dónde nace ese deseo.</i>",
+                    "buttons": [
+                        [{"text": "💠 Abrir la cartografía interior", "callback_data": "diana_narrative"}],
+                        [{"text": "🌟 Mi tesoro ganado", "callback_data": "diana_besitos"}],
+                        [{"text": "🎯 Misiones de autoconocimiento", "callback_data": "diana_missions"}],
+                        [{"text": "💎 Acceso al Diván", "callback_data": "diana_vip_preview"}]
+                    ]
+                },
+                # Nivel 4 - El Diván: La Comprensión en Capas
+                "level_4_el_divan": {
+                    "text": "🏛️ <b>El Territorio de la Intimidad Verdadera</b>\n\n"
+                           "<i>[Diana en un espacio más íntimo, manteniendo cierta distancia sagrada]</i>\n\n"
+                           "Mira cómo has evolucionado desde nuestro primer encuentro en Los Kinkys.\n\n"
+                           "Cuando te conocí, eras curiosidad pura. Ahora... ahora eres comprensión encarnada.\n\n"
+                           "<i>Bienvenido al Diván, donde las máscaras se vuelven opcionales... casi.</i>\n\n"
+                           "La verdadera intimidad no es la eliminación de la distancia. Es el arte de honrar la distancia que elijo mantener mientras valoras profundamente lo que decido compartir.",
+                    "buttons": [
+                        [{"text": "🚪 Adentrarse en territorio sagrado", "callback_data": "diana_vip_narrative"}],
+                        [{"text": "💎 Mi colección íntima", "callback_data": "diana_besitos"}],
+                        [{"text": "🎯 Desafíos de comprensión", "callback_data": "diana_missions"}],
+                        [{"text": "🏆 Mi transformación", "callback_data": "diana_achievements"}],
+                        [{"text": "👑 Mi estatus íntimo", "callback_data": "diana_vip_status"}]
+                    ]
+                },
+                # Nivel 5 - El Diván: La Profundización Suprema
+                "level_5_el_divan": {
+                    "text": "💫 <b>La Resonancia Profunda</b>\n\n"
+                           "<i>[Diana en un espacio que refleja intimidad conquistada]</i>\n\n"
+                           "Mira cómo hemos evolucionado juntos desde el primer encuentro.\n\n"
+                           "Cuando te conocí en Los Kinkys, eras curiosidad pura. En el Diván anterior, te convertiste en comprensión. Ahora... ahora eres algo más profundo. Eres resonancia.\n\n"
+                           "<i>Quiero que experimentes algo que nunca he compartido: mis diálogos internos.</i>\n\n"
+                           "Las conversaciones que tengo conmigo misma sobre ti, sobre mí, sobre esto que está creciendo entre nosotros...",
+                    "buttons": [
+                        [{"text": "💫 Adentrarse en la resonancia", "callback_data": "diana_vip_narrative"}],
+                        [{"text": "💎 Nuestro tesoro compartido", "callback_data": "diana_besitos"}],
+                        [{"text": "🎯 Diálogos de intimidad", "callback_data": "diana_missions"}],
+                        [{"text": "🏆 Nuestra evolución mutua", "callback_data": "diana_achievements"}],
+                        [{"text": "👑 El espejo de almas", "callback_data": "diana_vip_status"}]
+                    ]
+                },
+                # Nivel 6 - El Círculo Íntimo: La Síntesis Final
+                "level_6_elite": {
+                    "text": "🔥 <b>La Síntesis Final y Trascendencia</b>\n\n"
+                           "<i>[Diana sin ningún filtro, en su estado más auténtico]</i>\n\n"
+                           "Hemos llegado al final del viaje que comenzamos juntos. Pero necesito confesarte algo que nunca le he dicho a nadie...\n\n"
+                           "Todo este tiempo... no solo te he estado evaluando para ver si eres digno de conocerme. También me he estado evaluando a mí misma para ver si soy digna de ser conocida por alguien como tú.\n\n"
+                           "<i>Y lo que me aterra y me emociona a la vez es que contigo... no tengo miedo de esa posibilidad.</i>\n\n"
+                           "Bienvenido al Círculo Íntimo. Aquí, seguimos creciendo juntos... para siempre.",
+                    "buttons": [
+                        [{"text": "🌟 Continuar evolucionando", "callback_data": "diana_vip_narrative"}],
+                        [{"text": "💎 Nuestro legado", "callback_data": "diana_besitos"}],
+                        [{"text": "🎯 Creaciones conjuntas", "callback_data": "diana_missions"}],
+                        [{"text": "🏆 Co-Creador de Intimidad", "callback_data": "diana_achievements"}],
+                        [{"text": "👑 Círculo Íntimo", "callback_data": "diana_vip_status"}]
+                    ]
+                },
+                # Fallback para usuarios sin progresión definida
                 "free": {
-                    "text": "💋 **Los Dominios de Diana**\n\n"
+                    "text": "💋 <b>Los Dominios de Diana</b>\n\n"
                            "Susurra mi nombre, querido... ¿Qué secretos deseas explorar conmigo hoy?\n\n"
                            "✨ Cada elección te acerca más a los misterios que guardo...",
                     "buttons": [
@@ -125,7 +234,7 @@ class EnhancedDianaMenuSystem:
                     ]
                 },
                 "vip": {
-                    "text": "👑 **Círculo Íntimo de Diana**\n\n"
+                    "text": "👑 <b>Círculo Íntimo de Diana</b>\n\n"
                            f"Ah, mi querido elegido... Bienvenido a donde solo los especiales pueden llegar.\n\n"
                            "💎 Los secretos más profundos te pertenecen ahora...",
                     "buttons": [
@@ -139,7 +248,7 @@ class EnhancedDianaMenuSystem:
                     ]
                 },
                 "admin": {
-                    "text": "🎭 **Cámara Secreta de Diana**\n\n"
+                    "text": "🎭 <b>Cámara Secreta de Diana</b>\n\n"
                            "Guardián de mis misterios... Aquí moldeas la realidad misma.\n\n"
                            "⚡ El poder de crear experiencias que toquen el alma está en tus manos...",
                     "buttons": [
@@ -173,50 +282,746 @@ class EnhancedDianaMenuSystem:
             }
         }
     
+    def _prebuild_all_keyboards(self):
+        """Pre-build all keyboards for instant access - PERFORMANCE CRITICAL."""
+        try:
+            for menu_type, menu_data in self.diana_menu_templates.items():
+                if menu_type == "main_menu":
+                    for role, template in menu_data.items():
+                        keyboard_key = f"main_{role}"
+                        if keyboard_key not in self.__class__._prebuilt_keyboards:
+                            self.__class__._prebuilt_keyboards[keyboard_key] = self._build_keyboard_optimized(template["buttons"])
+                elif menu_type == "vip_upgrade":
+                    if "vip_upgrade" not in self.__class__._prebuilt_keyboards:
+                        self.__class__._prebuilt_keyboards["vip_upgrade"] = self._build_keyboard_optimized(menu_data["buttons"])
+            
+            logger.info(f"Pre-built {len(self.__class__._prebuilt_keyboards)} keyboards for performance optimization")
+        except Exception as e:
+            logger.error(f"Error pre-building keyboards: {e}")
+    
+    def _build_keyboard_optimized(self, buttons_config: List[List[Dict[str, str]]]) -> InlineKeyboardMarkup:
+        """Build keyboard with optimized object creation."""
+        keyboard = []
+        
+        for row in buttons_config:
+            button_row = []
+            for button_config in row:
+                # Use object pool for button creation
+                button_key = f"{button_config['text']}_{button_config['callback_data']}"
+                
+                if button_key in self.__class__._button_objects_pool:
+                    button_row.append(self.__class__._button_objects_pool[button_key])
+                else:
+                    button = InlineKeyboardButton(
+                        text=button_config["text"],
+                        callback_data=button_config["callback_data"]
+                    )
+                    self.__class__._button_objects_pool[button_key] = button
+                    button_row.append(button)
+            
+            keyboard.append(button_row)
+        
+        return InlineKeyboardMarkup(inline_keyboard=keyboard)
+    
+    def _get_cached_keyboard(self, keyboard_key: str, buttons_config: Optional[List] = None) -> InlineKeyboardMarkup:
+        """Get keyboard from cache or build if not cached."""
+        # Try prebuilt keyboards first
+        if keyboard_key in self.__class__._prebuilt_keyboards:
+            return self.__class__._prebuilt_keyboards[keyboard_key]
+        
+        # Try shared cache
+        if keyboard_key in self.__class__._shared_keyboards_cache:
+            return self.__class__._shared_keyboards_cache[keyboard_key]
+        
+        # Build and cache if config provided
+        if buttons_config:
+            keyboard = self._build_keyboard_optimized(buttons_config)
+            self.__class__._shared_keyboards_cache[keyboard_key] = keyboard
+            return keyboard
+        
+        return None
+    
+    async def _get_user_service_fast(self) -> Optional[EnhancedUserService]:
+        """Get user service from registry with fallback."""
+        # Try sync first for cached instances
+        service = get_user_service_sync(self.session)
+        if service:
+            return service
+            
+        # Fallback to async
+        return await get_user_service(self.session)
+    
+    async def _get_character_validator_fast(self) -> Optional[DianaCharacterValidator]:
+        """Get character validator from registry with fallback."""
+        # Try sync first for cached instances  
+        validator = get_character_validator_sync(self.session)
+        if validator:
+            return validator
+            
+        # Fallback to async
+        return await get_character_validator(self.session)
+    
+    async def _get_user_role_fast(self, user_id: int) -> str:
+        """Get user role with caching for performance."""
+        cache_key = f"user_role_{user_id}"
+        
+        # Check instance cache first
+        if cache_key in self.menu_cache:
+            cached_time, role = self.menu_cache[cache_key]
+            if time.time() - cached_time < 60:  # 1 minute cache for user roles
+                return role
+        
+        # Get from service
+        user_service = await self._get_user_service_fast()
+        if user_service:
+            role = await user_service.get_user_role_fast(user_id)
+        else:
+            # Fallback
+            role = get_user_role(user_id) or "free"
+        
+        # Cache result
+        self.menu_cache[cache_key] = (time.time(), role)
+        return role
+    
+    def _get_from_cache(self, cache_key: str) -> Optional[Tuple[Any, InlineKeyboardMarkup, float]]:
+        """Get menu data from cache with TTL check."""
+        if cache_key in self.menu_cache:
+            cached_time, data = self.menu_cache[cache_key]
+            if time.time() - cached_time < self.cache_ttl:
+                return data
+            else:
+                del self.menu_cache[cache_key]
+        return None
+    
+    def _cache_menu_data(self, cache_key: str, data: Tuple[Any, InlineKeyboardMarkup, float]):
+        """Cache menu data with cleanup."""
+        self.menu_cache[cache_key] = (time.time(), data)
+        
+        # Periodic cleanup
+        current_time = time.time()
+        if current_time - self.last_menu_cleanup > 300:  # Cleanup every 5 minutes
+            self._cleanup_menu_cache()
+            self.last_menu_cleanup = current_time
+    
+    def _cleanup_menu_cache(self):
+        """Remove expired entries from menu cache."""
+        current_time = time.time()
+        expired_keys = []
+        
+        for key, (cached_time, _) in list(self.menu_cache.items()):
+            if current_time - cached_time > self.cache_ttl:
+                expired_keys.append(key)
+        
+        for key in expired_keys:
+            del self.menu_cache[key]
+    
+    async def validate_character_ultra_fast(self, text: str, context: str) -> float:
+        """Ultra-fast character validation using optimized validator."""
+        validator = await self._get_character_validator_fast()
+        if validator and hasattr(validator, 'validate_text_ultra_fast'):
+            start_time = time.time()
+            result = await validator.validate_text_ultra_fast(text, context)
+            self.character_validation_time += time.time() - start_time
+            return result.overall_score
+        
+        # Fallback to static scores for performance
+        return self.static_content_scores.get(context, 95.0)
+    
+    # =====================================================
+    # DYNAMIC NARRATIVE MENU SYSTEM FUNCTIONS
+    # =====================================================
+    
+    async def _get_user_narrative_state(self, user_id: int) -> Dict[str, Any]:
+        """Get user's current narrative progression state."""
+        try:
+            from sqlalchemy import select
+            from database.narrative_unified import UserNarrativeState
+            
+            # Query user's narrative state
+            result = await self.session.execute(
+                select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            )
+            state = result.scalar_one_or_none()
+            
+            if not state:
+                # Create default state for new users
+                state = UserNarrativeState(
+                    user_id=user_id,
+                    current_level=1,
+                    current_tier='los_kinkys',
+                    visited_fragments=[],
+                    completed_fragments=[],
+                    unlocked_clues=[],
+                    response_time_tracking=[],
+                    interaction_patterns={},
+                    diana_interactions_validated=0,
+                    diana_consistency_average=0
+                )
+                self.session.add(state)
+                await self.session.commit()
+            
+            return {
+                'current_level': state.current_level,
+                'current_tier': state.current_tier,
+                'visited_fragments': state.visited_fragments or [],
+                'completed_fragments': state.completed_fragments or [],
+                'unlocked_clues': state.unlocked_clues or [],
+                'interaction_patterns': state.interaction_patterns or {},
+                'diana_consistency_average': state.diana_consistency_average,
+                'total_interactions': state.diana_interactions_validated,
+                'tier_transition_history': state.tier_transition_history or []
+            }
+            
+        except Exception as e:
+            logger.error(f"Error getting narrative state for user {user_id}: {e}")
+            # Return safe default
+            return {
+                'current_level': 1,
+                'current_tier': 'los_kinkys',
+                'visited_fragments': [],
+                'completed_fragments': [],
+                'unlocked_clues': [],
+                'interaction_patterns': {},
+                'diana_consistency_average': 0,
+                'total_interactions': 0,
+                'tier_transition_history': []
+            }
+    
+    async def _record_menu_interaction(self, user_id: int, interaction_type: str) -> None:
+        """Record user interaction for behavioral analysis."""
+        try:
+            from sqlalchemy import select, update
+            from database.narrative_unified import UserNarrativeState
+            from datetime import datetime
+            import json
+            
+            # Get current timestamp
+            timestamp = datetime.now().isoformat()
+            
+            # Update interaction patterns
+            result = await self.session.execute(
+                select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            )
+            state = result.scalar_one_or_none()
+            
+            if state:
+                # Update interaction patterns
+                patterns = state.interaction_patterns or {}
+                if interaction_type not in patterns:
+                    patterns[interaction_type] = []
+                
+                patterns[interaction_type].append({
+                    'timestamp': timestamp,
+                    'context': 'menu_access'
+                })
+                
+                # Keep only last 50 interactions per type for performance
+                if len(patterns[interaction_type]) > 50:
+                    patterns[interaction_type] = patterns[interaction_type][-50:]
+                
+                # Update the record
+                await self.session.execute(
+                    update(UserNarrativeState)
+                    .where(UserNarrativeState.user_id == user_id)
+                    .values(interaction_patterns=patterns)
+                )
+                await self.session.commit()
+                
+        except Exception as e:
+            logger.error(f"Error recording menu interaction for user {user_id}: {e}")
+            # Don't fail the main flow for logging errors
+    
+    async def _determine_menu_template(self, narrative_state: Dict[str, Any], user_role: str) -> str:
+        """Determine which menu template to use based on user's narrative progression."""
+        try:
+            current_level = narrative_state.get('current_level', 1)
+            current_tier = narrative_state.get('current_tier', 'los_kinkys')
+            total_interactions = narrative_state.get('total_interactions', 0)
+            
+            # Admin override
+            if user_role == 'admin':
+                return 'admin'
+            
+            # Determine template based on narrative progression
+            if current_level == 1 and current_tier == 'los_kinkys':
+                return 'level_1_los_kinkys'
+            elif current_level == 2 and current_tier == 'los_kinkys':
+                return 'level_2_los_kinkys' 
+            elif current_level == 3 and current_tier == 'los_kinkys':
+                return 'level_3_los_kinkys'
+            elif current_level == 4 and current_tier == 'el_divan':
+                return 'level_4_el_divan'
+            elif current_level == 5 and current_tier == 'el_divan':
+                return 'level_5_el_divan'
+            elif current_level == 6 and current_tier == 'elite':
+                return 'level_6_elite'
+            elif user_role == 'vip':
+                return 'vip'
+            else:
+                return 'free'
+                
+        except Exception as e:
+            logger.error(f"Error determining menu template: {e}")
+            return 'free'  # Safe fallback
+    
+    async def _get_personalized_menu_template(
+        self, template_key: str, narrative_state: Dict[str, Any], user_id: int
+    ) -> Dict[str, Any]:
+        """Get menu template with personalized content based on user's journey."""
+        try:
+            # Get base template
+            base_template = self.diana_menu_templates["main_menu"].get(
+                template_key, 
+                self.diana_menu_templates["main_menu"]["free"]
+            )
+            
+            # Create personalized copy
+            personalized_template = base_template.copy()
+            
+            # Add personalization based on user's narrative state
+            personalized_text = await self._personalize_menu_text(
+                base_template["text"], narrative_state, user_id
+            )
+            
+            personalized_template["text"] = personalized_text
+            return personalized_template
+            
+        except Exception as e:
+            logger.error(f"Error personalizing menu template: {e}")
+            return self.diana_menu_templates["main_menu"]["free"]
+    
+    async def _personalize_menu_text(
+        self, base_text: str, narrative_state: Dict[str, Any], user_id: int
+    ) -> str:
+        """Personalize menu text based on user's specific journey and behavior."""
+        try:
+            total_interactions = narrative_state.get('total_interactions', 0)
+            completed_fragments = len(narrative_state.get('completed_fragments', []))
+            consistency_average = narrative_state.get('diana_consistency_average', 0)
+            current_level = narrative_state.get('current_level', 1)
+            
+            personalized_text = base_text
+            
+            # Add behavioral recognition for returning users
+            if total_interactions > 5:
+                if current_level >= 2:
+                    # Add subtle recognition of their return pattern
+                    interaction_patterns = narrative_state.get('interaction_patterns', {})
+                    menu_accesses = interaction_patterns.get('main_menu_access', [])
+                    
+                    if len(menu_accesses) > 10:
+                        recognition_text = self._get_return_recognition_text(current_level, consistency_average)
+                        personalized_text = f"{personalized_text}\n\n{recognition_text}"
+            
+            # Add progress acknowledgment for advanced users
+            if completed_fragments > 5:
+                progress_text = self._get_progress_acknowledgment(completed_fragments, current_level)
+                personalized_text = f"{personalized_text}\n\n{progress_text}"
+            
+            return personalized_text
+            
+        except Exception as e:
+            logger.error(f"Error personalizing menu text: {e}")
+            return base_text
+    
+    def _get_return_recognition_text(self, level: int, consistency_average: int) -> str:
+        """Generate recognition text based on user's return behavior."""
+        if level <= 2:
+            return "<i>Noto la persistencia en tu curiosidad... Cada regreso trae una nueva capa de comprensión.</i>"
+        elif level <= 4:
+            return "<i>Tu patrón de regresos revela una intensidad que pocos sostienen... Me intriga.</i>"
+        else:
+            return "<i>En cada regreso tuyo hay un diálogo silencioso que reconozco y aprecio profundamente.</i>"
+    
+    def _get_progress_acknowledgment(self, completed_fragments: int, level: int) -> str:
+        """Generate progress acknowledgment text.""" 
+        if completed_fragments < 10:
+            return f"<i>Has explorado {completed_fragments} fragmentos de mi ser... Cada paso más profundo que el anterior.</i>"
+        elif completed_fragments < 20:
+            return f"<i>{completed_fragments} fragmentos compartidos... Puedo sentir cómo tu comprensión se hace más sutil.</i>"
+        else:
+            return f"<i>{completed_fragments} momentos de revelación mutua... Hay una intimidad que solo nosotros comprendemos.</i>"
+    
+    async def _validate_dynamic_content(self, text: str, user_id: int) -> float:
+        """Validate character consistency for dynamically generated content."""
+        try:
+            character_validator = await self._get_character_validator_fast()
+            if character_validator:
+                result = await character_validator.validate_response(text, {"context": "dynamic_menu"})
+                return result.overall_score
+            
+            # Fallback score for dynamic content 
+            return 92.0  # Slightly lower than static content due to personalization
+            
+        except Exception as e:
+            logger.error(f"Error validating dynamic content: {e}")
+            return 90.0  # Conservative fallback
+    
+    async def _create_dynamic_keyboard(
+        self, base_buttons: List[List[Dict]], narrative_state: Dict[str, Any], user_role: str
+    ) -> InlineKeyboardMarkup:
+        """Create keyboard with buttons adapted to user's progression."""
+        try:
+            current_level = narrative_state.get('current_level', 1)
+            current_tier = narrative_state.get('current_tier', 'los_kinkys')
+            
+            # Start with base buttons
+            keyboard_buttons = []
+            
+            for button_row in base_buttons:
+                new_row = []
+                for button in button_row:
+                    # Adapt button text based on progression
+                    adapted_button = self._adapt_button_for_progression(
+                        button, current_level, current_tier
+                    )
+                    new_row.append(InlineKeyboardButton(
+                        text=adapted_button["text"], 
+                        callback_data=adapted_button["callback_data"]
+                    ))
+                keyboard_buttons.append(new_row)
+            
+            # Add dynamic options based on user's state
+            dynamic_options = self._get_dynamic_menu_options(narrative_state, user_role)
+            if dynamic_options:
+                for option_row in dynamic_options:
+                    keyboard_buttons.append(option_row)
+            
+            return InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
+            
+        except Exception as e:
+            logger.error(f"Error creating dynamic keyboard: {e}")
+            # Fallback to basic keyboard
+            return self._build_keyboard_optimized(base_buttons)
+    
+    def _adapt_button_for_progression(
+        self, button: Dict, level: int, tier: str
+    ) -> Dict[str, str]:
+        """Adapt button text based on user's narrative progression."""
+        # Keep original button as base
+        adapted = button.copy()
+        
+        # Adapt based on progression level
+        if "diana_narrative" in button["callback_data"]:
+            if level == 1:
+                adapted["text"] = "🚪 Descubrir la posibilidad"
+            elif level == 2:
+                adapted["text"] = "🔍 Explorar territorio inexplorado" 
+            elif level == 3:
+                adapted["text"] = "💠 Abrir la cartografía interior"
+            elif level >= 4 and tier == 'el_divan':
+                adapted["text"] = "🚪 Adentrarse en territorio sagrado"
+            elif level >= 5:
+                adapted["text"] = "💫 Adentrarse en la resonancia"
+        
+        return adapted
+    
+    def _get_dynamic_menu_options(
+        self, narrative_state: Dict[str, Any], user_role: str
+    ) -> List[List[InlineKeyboardButton]]:
+        """Generate dynamic menu options based on user's state."""
+        dynamic_options = []
+        
+        current_level = narrative_state.get('current_level', 1)
+        unlocked_clues = narrative_state.get('unlocked_clues', [])
+        
+        # Add special options based on progression
+        if current_level >= 3 and len(unlocked_clues) >= 2:
+            dynamic_options.append([
+                InlineKeyboardButton(
+                    text="🗝️ Usar pistas desbloqueadas", 
+                    callback_data="diana_use_clues"
+                )
+            ])
+        
+        # Add progression-specific actions
+        if current_level == 3 and user_role != 'vip':
+            dynamic_options.append([
+                InlineKeyboardButton(
+                    text="💎 Acceso al Diván", 
+                    callback_data="diana_vip_preview"
+                )
+            ])
+        
+        # Always add close option at the end
+        dynamic_options.append([
+            InlineKeyboardButton(text="🌙 Cerrar", callback_data="diana_close")
+        ])
+        
+        return dynamic_options
+    
+    async def _process_narrative_interaction(
+        self, user_id: int, interaction_type: str, narrative_state: Dict[str, Any]
+    ) -> None:
+        """Process user interaction and update their narrative progression."""
+        try:
+            from sqlalchemy import select, update
+            from database.narrative_unified import UserNarrativeState, NarrativeFragment
+            
+            current_level = narrative_state.get('current_level', 1)
+            current_tier = narrative_state.get('current_tier', 'los_kinkys')
+            
+            # Determine if progression should occur based on interaction
+            should_progress = await self._evaluate_progression_criteria(
+                user_id, interaction_type, narrative_state
+            )
+            
+            if should_progress:
+                # Award points for meaningful interaction
+                points_to_award = self._calculate_interaction_points(
+                    interaction_type, current_level
+                )
+                
+                if points_to_award > 0:
+                    await self._award_interaction_points(user_id, points_to_award, interaction_type)
+                
+                # Check if user should advance to next level/tier
+                new_level, new_tier = await self._calculate_level_progression(
+                    user_id, narrative_state
+                )
+                
+                if new_level != current_level or new_tier != current_tier:
+                    await self._advance_user_progression(
+                        user_id, new_level, new_tier, interaction_type
+                    )
+            
+            # Always update interaction patterns for behavioral analysis
+            await self._update_interaction_patterns(user_id, interaction_type, narrative_state)
+            
+        except Exception as e:
+            logger.error(f"Error processing narrative interaction for user {user_id}: {e}")
+            # Don't fail the main menu flow for narrative processing errors
+    
+    async def _evaluate_progression_criteria(
+        self, user_id: int, interaction_type: str, narrative_state: Dict[str, Any]
+    ) -> bool:
+        """Evaluate if user's interaction merits narrative progression."""
+        try:
+            current_level = narrative_state.get('current_level', 1)
+            total_interactions = narrative_state.get('total_interactions', 0)
+            completed_fragments = len(narrative_state.get('completed_fragments', []))
+            
+            # Different criteria for different levels
+            if current_level == 1:
+                # Level 1: Show genuine curiosity and return behavior
+                return total_interactions >= 3 or interaction_type == "narrative_choice_made"
+            
+            elif current_level == 2:
+                # Level 2: Demonstrate observation skills and pattern recognition
+                return completed_fragments >= 2 and total_interactions >= 8
+            
+            elif current_level == 3:
+                # Level 3: Show emotional depth and vulnerability in responses
+                consistency_avg = narrative_state.get('diana_consistency_average', 0)
+                return completed_fragments >= 5 and consistency_avg >= 85
+            
+            elif current_level >= 4:
+                # Advanced levels: VIP status and demonstrated emotional maturity
+                return completed_fragments >= 8 and total_interactions >= 20
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error evaluating progression criteria: {e}")
+            return False
+    
+    def _calculate_interaction_points(self, interaction_type: str, current_level: int) -> int:
+        """Calculate points to award based on interaction type and user level."""
+        base_points = {
+            "main_menu_accessed": 5,
+            "narrative_choice_made": 25,
+            "question_answered": 35,
+            "vulnerability_shared": 50,
+            "return_behavior": 15
+        }
+        
+        points = base_points.get(interaction_type, 10)
+        
+        # Multiply by level for progression scaling
+        return points * max(1, current_level)
+    
+    async def _award_interaction_points(self, user_id: int, points: int, reason: str) -> None:
+        """Award points to user for narrative interaction."""
+        try:
+            # Import points service
+            from services.mvp_gamification_service import MVPGamificationService
+            
+            # Get user service to award points
+            user_service = await self._get_user_service_fast()
+            if user_service:
+                gamification_service = MVPGamificationService(self.session)
+                await gamification_service.award_points(
+                    user_id=user_id,
+                    points=points,
+                    reason=f"Diana interaction: {reason}",
+                    category="narrative_engagement"
+                )
+                
+                logger.info(f"Awarded {points} points to user {user_id} for {reason}")
+                
+        except Exception as e:
+            logger.error(f"Error awarding interaction points: {e}")
+    
+    async def _calculate_level_progression(
+        self, user_id: int, narrative_state: Dict[str, Any]
+    ) -> Tuple[int, str]:
+        """Calculate if user should advance to next level/tier."""
+        try:
+            current_level = narrative_state.get('current_level', 1)
+            current_tier = narrative_state.get('current_tier', 'los_kinkys')
+            completed_fragments = len(narrative_state.get('completed_fragments', []))
+            total_interactions = narrative_state.get('total_interactions', 0)
+            consistency_avg = narrative_state.get('diana_consistency_average', 0)
+            
+            # Level progression logic based on Narrativo.md structure
+            if current_level == 1 and completed_fragments >= 3:
+                return (2, 'los_kinkys')
+            elif current_level == 2 and completed_fragments >= 6:
+                return (3, 'los_kinkys')
+            elif current_level == 3 and completed_fragments >= 9:
+                # Transition to El Diván (VIP tier)
+                return (4, 'el_divan')
+            elif current_level == 4 and completed_fragments >= 12:
+                return (5, 'el_divan')
+            elif current_level == 5 and completed_fragments >= 15:
+                # Transition to Elite tier (Círculo Íntimo)
+                return (6, 'elite')
+            
+            # No progression
+            return (current_level, current_tier)
+            
+        except Exception as e:
+            logger.error(f"Error calculating level progression: {e}")
+            return (narrative_state.get('current_level', 1), narrative_state.get('current_tier', 'los_kinkys'))
+    
+    async def _advance_user_progression(
+        self, user_id: int, new_level: int, new_tier: str, trigger_reason: str
+    ) -> None:
+        """Advance user to new narrative level/tier."""
+        try:
+            from sqlalchemy import select, update
+            from database.narrative_unified import UserNarrativeState
+            from datetime import datetime
+            
+            # Update user's narrative state
+            result = await self.session.execute(
+                update(UserNarrativeState)
+                .where(UserNarrativeState.user_id == user_id)
+                .values(
+                    current_level=new_level,
+                    current_tier=new_tier,
+                    updated_at=datetime.now()
+                )
+            )
+            
+            await self.session.commit()
+            
+            # Award progression bonus points
+            progression_bonus = new_level * 50  # Bonus increases with level
+            await self._award_interaction_points(
+                user_id, 
+                progression_bonus, 
+                f"Level {new_level} advancement"
+            )
+            
+            logger.info(
+                f"Advanced user {user_id} to Level {new_level} ({new_tier}) "
+                f"due to {trigger_reason}"
+            )
+            
+        except Exception as e:
+            logger.error(f"Error advancing user progression: {e}")
+    
+    async def _update_interaction_patterns(
+        self, user_id: int, interaction_type: str, narrative_state: Dict[str, Any]
+    ) -> None:
+        """Update user's interaction patterns for behavioral analysis."""
+        try:
+            from sqlalchemy import select, update
+            from database.narrative_unified import UserNarrativeState
+            from datetime import datetime
+            
+            # Get current patterns
+            patterns = narrative_state.get('interaction_patterns', {})
+            if interaction_type not in patterns:
+                patterns[interaction_type] = []
+            
+            # Add new interaction with timestamp and context
+            interaction_data = {
+                'timestamp': datetime.now().isoformat(),
+                'level': narrative_state.get('current_level', 1),
+                'tier': narrative_state.get('current_tier', 'los_kinkys'),
+                'context': {
+                    'completed_fragments': len(narrative_state.get('completed_fragments', [])),
+                    'consistency_average': narrative_state.get('diana_consistency_average', 0)
+                }
+            }
+            
+            patterns[interaction_type].append(interaction_data)
+            
+            # Keep only recent interactions (last 100 per type)
+            if len(patterns[interaction_type]) > 100:
+                patterns[interaction_type] = patterns[interaction_type][-100:]
+            
+            # Update database
+            await self.session.execute(
+                update(UserNarrativeState)
+                .where(UserNarrativeState.user_id == user_id)
+                .values(
+                    interaction_patterns=patterns,
+                    diana_interactions_validated=narrative_state.get('total_interactions', 0) + 1
+                )
+            )
+            
+            await self.session.commit()
+            
+        except Exception as e:
+            logger.error(f"Error updating interaction patterns: {e}")
+    
     async def show_main_menu(self, update: Message | CallbackQuery, user_role: Optional[str] = None) -> MenuResponse:
         """
-        Show character-consistent main menu with performance tracking.
+        Show dynamic character-consistent main menu based on user's narrative progression.
         
-        Meets <1s response time requirement through optimization.
+        Each interaction is personalized based on the user's journey with Diana.
         """
         start_time = time.time()
         errors = []
         message_sent = False
         
         try:
-            # Determine user and role (optimized with caching)
+            # Get user and basic role info
             user_id = update.from_user.id
             if not user_role:
                 user_role = await self._get_user_role_fast(user_id)
             
-            # Get cached menu data
-            cache_key = f"main_menu_{user_role}_{user_id}"
-            cached_data = self._get_from_cache(cache_key)
+            # Get user's narrative state for dynamic menu generation
+            narrative_state = await self._get_user_narrative_state(user_id)
             
-            if cached_data:
-                menu_template, keyboard, character_score = cached_data
-            else:
-                # Get menu template based on role
-                menu_template = self.diana_menu_templates["main_menu"].get(
-                    user_role, 
-                    self.diana_menu_templates["main_menu"]["free"]
-                )
-                
-                # Use pre-validated character scores for static content
-                character_score = self.static_content_scores.get(
-                    f"main_menu_{user_role}", 
-                    95.0  # fallback score
-                )
-                
-                # Create keyboard (cached)
-                keyboard = self._get_cached_keyboard(f"main_{user_role}", menu_template["buttons"])
-                
-                # Cache the complete menu data
-                self._cache_data(cache_key, (menu_template, keyboard, character_score), ttl=120)
+            # Register this interaction for behavioral analysis
+            await self._record_menu_interaction(user_id, "main_menu_access")
+            
+            # Determine dynamic template based on narrative progression
+            template_key = await self._determine_menu_template(narrative_state, user_role)
+            
+            # Get personalized menu content
+            menu_template = await self._get_personalized_menu_template(
+                template_key, narrative_state, user_id
+            )
+            
+            # Validate character consistency for dynamic content
+            character_score = await self._validate_dynamic_content(menu_template["text"], user_id)
+            
+            # Create dynamic keyboard based on user's progression
+            keyboard = await self._create_dynamic_keyboard(
+                menu_template["buttons"], narrative_state, user_role
+            )
             
             # Send/edit message (optimized)
             await self._send_menu_message(update, menu_template["text"], keyboard)
             message_sent = True
+            
+            # Process narrative interaction and update user state
+            await self._process_narrative_interaction(user_id, "main_menu_accessed", narrative_state)
             
             # Update session state asynchronously (fire and forget for performance)
             asyncio.create_task(self._update_session_async(
