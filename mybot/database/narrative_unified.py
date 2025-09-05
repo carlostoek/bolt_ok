@@ -143,6 +143,10 @@ class UserNarrativeState(Base):
     """
     
     __tablename__ = 'user_narrative_states_unified'
+    __table_args__ = (
+        Index('ix_user_narrative_states_unified_current_fragment', 'current_fragment_id'),
+        Index('ix_user_narrative_states_unified_level_tier', 'current_level', 'current_tier'),
+    )
     
     user_id = Column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
     current_fragment_id = Column(String, ForeignKey('narrative_fragments_unified.id'), nullable=True)
@@ -170,8 +174,8 @@ class UserNarrativeState(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
     # Relaciones
-    user = relationship("User", uselist=False, overlaps="narrative_state_unified")
-    current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id])
+    user = relationship("User", uselist=False, overlaps="narrative_state_unified", lazy="selectin")
+    current_fragment = relationship("NarrativeFragment", foreign_keys=[current_fragment_id], lazy="selectin")
     
     async def get_progress_percentage(self, session):
         """Calcula el porcentaje de progreso del usuario.
@@ -241,6 +245,7 @@ class UserDecisionLog(Base):
         Index('ix_user_decision_log_unified_user', 'user_id'),
         Index('ix_user_decision_log_unified_time', 'made_at'),
         Index('ix_user_decision_log_unified_fragment', 'fragment_id'),
+        Index('ix_user_decision_log_unified_user_time', 'user_id', 'made_at'),
     )
     
     id = Column(Integer, primary_key=True)
@@ -252,8 +257,8 @@ class UserDecisionLog(Base):
     made_at = Column(DateTime, default=func.now(), nullable=False)
     
     # Relaciones
-    user = relationship("User", lazy="selectin")
-    fragment = relationship("NarrativeFragment", lazy="selectin")
+    user = relationship("User", lazy="selectin", back_populates=None)
+    fragment = relationship("NarrativeFragment", lazy="selectin", back_populates=None)
 
     def __repr__(self):
         return f"<UserDecisionLog(id={self.id}, user_id={self.user_id}, fragment_id='{self.fragment_id}', choice='{self.decision_choice}')>"
@@ -302,7 +307,7 @@ class UserArchetype(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
     # Relations
-    user = relationship("User", backref="archetype_unified", uselist=False)
+    user = relationship("User", backref="archetype_unified", uselist=False, lazy="selectin")
     
     def calculate_dominant_archetype(self):
         """Calculate and update the dominant archetype based on scores."""
@@ -352,6 +357,7 @@ class UserMissionProgress(Base):
         Index('ix_user_mission_progress_unified_user', 'user_id'),
         Index('ix_user_mission_progress_unified_level', 'current_level'),
         Index('ix_user_mission_progress_unified_tier', 'current_tier'),
+        Index('ix_user_mission_progress_unified_level_tier', 'current_level', 'current_tier'),
     )
     
     user_id = Column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
@@ -396,7 +402,7 @@ class UserMissionProgress(Base):
     level_progression_history = Column(JSON, default=list, nullable=False)  # Track progression timeline
     
     # Relations
-    user = relationship("User", backref="mission_progress_unified", uselist=False)
+    user = relationship("User", backref="mission_progress_unified", uselist=False, lazy="selectin")
     
     def get_overall_progress_percentage(self):
         """Calculate overall progress through the master storyline."""
@@ -496,7 +502,7 @@ class NarrativeCharacterValidation(Base):
     validated_at = Column(DateTime, default=func.now(), nullable=False)
     
     # Relations
-    fragment = relationship("NarrativeFragment", backref="character_validations")
+    fragment = relationship("NarrativeFragment", backref="character_validations", lazy="selectin")
     user = relationship("User", lazy="selectin")
     
     def get_validation_summary(self):
@@ -562,7 +568,7 @@ class LucienCoordination(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
     
     # Relations
-    user = relationship("User", backref="lucien_coordination_unified", uselist=False)
+    user = relationship("User", backref="lucien_coordination_unified", uselist=False, lazy="selectin")
     
     def should_appear(self, context: str, user_state: dict) -> bool:
         """Determine if Lucien should appear based on current context and user state."""

@@ -78,7 +78,7 @@ class FreeChannelService:
     async def handle_join_request(self, join_request: ChatJoinRequest) -> bool:
         """
         Procesar solicitud de unión al canal gratuito.
-        Registra la solicitud para aprobación automática posterior y envía mensaje de redes sociales.
+        Registra la solicitud para aprobación automática posterior y envía mensaje inicial de Lucien.
         """
         free_channel_id = await self.get_free_channel_id()
         if not free_channel_id or join_request.chat.id != free_channel_id:
@@ -99,11 +99,14 @@ class FreeChannelService:
             
             if existing_request:
                 logger.info(f"User {user_id} already has pending request for channel {join_request.chat.id}")
-                # Si no se ha enviado el mensaje de redes sociales, enviarlo ahora
+                # Si no se ha enviado el mensaje inicial de Lucien, enviarlo ahora
                 if not existing_request.social_media_message_sent:
-                    await self._send_social_media_message(user_id, user_name)
+                    await self._send_lucien_initial_message(user_id, user_name)
                     existing_request.social_media_message_sent = True
                     await self.session.commit()
+                    
+                    # Programar mensajes progresivos
+                    await self._schedule_progressive_messages(user_id, user_name)
                 return True
             
             # Crear nueva solicitud pendiente
@@ -119,48 +122,14 @@ class FreeChannelService:
             self.session.add(pending_request)
             await self.session.commit()
             
-            # 1. ENVIAR MENSAJE DE REDES SOCIALES INMEDIATAMENTE
-            social_sent = await self._send_social_media_message(user_id, user_name)
+            # 1. ENVIAR MENSAJE INICIAL DE LUCIEN CON IMAGEN
+            social_sent = await self._send_lucien_initial_message(user_id, user_name)
             if social_sent:
                 pending_request.social_media_message_sent = True
                 await self.session.commit()
-            
-            # 2. ENVIAR NOTIFICACIÓN SOBRE EL TIEMPO DE ESPERA
-            wait_minutes = await self.get_wait_time_minutes()
-            
-            if wait_minutes > 0:
-                wait_text = f"{wait_minutes} minutos"
-                if wait_minutes >= 60:
-                    hours = wait_minutes // 60
-                    remaining_minutes = wait_minutes % 60
-                    if remaining_minutes > 0:
-                        wait_text = f"{hours} horas y {remaining_minutes} minutos"
-                    else:
-                        wait_text = f"{hours} horas"
                 
-                notification_message = (
-                    f"📋 **Solicitud Recibida**\n\n"
-                    f"Tu solicitud para unirte al canal gratuito ha sido registrada.\n\n"
-                    f"⏰ **Tiempo de espera**: {wait_text}\n"
-                    f"✅ Serás aprobado automáticamente una vez transcurrido este tiempo.\n\n"
-                    f"¡Gracias por tu paciencia!"
-                )
-            else:
-                notification_message = (
-                    f"📋 **Solicitud Recibida**\n\n"
-                    f"Tu solicitud para unirte al canal gratuito ha sido registrada.\n\n"
-                    f"✅ Serás aprobado inmediatamente.\n\n"
-                    f"¡Bienvenido!"
-                )
-            
-            try:
-                await self.bot.send_message(
-                    user_id,
-                    notification_message,
-                    parse_mode="Markdown"
-                )
-            except Exception as e:
-                logger.warning(f"Could not notify user {user_id} about join request: {e}")
+                # 2. PROGRAMAR MENSAJES PROGRESIVOS CADA 5 MINUTOS
+                await self._schedule_progressive_messages(user_id, user_name)
             
             logger.info(f"Join request registered for user {user_id} in channel {join_request.chat.id}")
             return True
@@ -268,7 +237,7 @@ class FreeChannelService:
     
     async def _get_welcome_message(self) -> str:
         """
-        Obtener mensaje de bienvenida configurado o usar mensaje por defecto.
+        Obtener mensaje de bienvenida configurado o usar mensaje por defecto con transición a Diana.
         """
         try:
             config = await self.session.get(BotConfig, 1)
@@ -277,14 +246,17 @@ class FreeChannelService:
         except Exception as e:
             logger.warning(f"Error getting welcome message from config: {e}")
         
-        # Mensaje por defecto
+        # Mensaje por defecto con transición a Diana
         return (
-            "🎉 **¡Bienvenido al Canal Gratuito!**\n\n"
-            "✅ Tu solicitud ha sido aprobada exitosamente.\n"
-            "🎯 Ya puedes acceder a todo el contenido gratuito disponible.\n\n"
-            "📱 Explora nuestro contenido y participa en las actividades.\n"
-            "🎮 ¡No olvides usar los comandos del bot para ganar puntos!\n\n"
-            "¡Disfruta de la experiencia! 🚀"
+            "🎉 <b>¡Felicitaciones! Diana ha aprobado tu acceso.</b>\n\n"
+            "✅ <i>Tu solicitud ha sido procesada exitosamente.</i>\n"
+            "🎯 Ya puedes acceder a todo el contenido gratuito del canal.\n\n"
+            "🌟 <b>Pero hay algo más...</b>\n\n"
+            "<i>Diana quiere conocerte personalmente.</i>\n\n"
+            "💫 <b>Escríbeme aquí en privado con cualquier mensaje para comenzar tu experiencia única y personal con ella.</b>\n\n"
+            "🎭 <i>Te aseguro que será una experiencia que no olvidarás...</i>\n\n"
+            "<b>Te espero.</b> ✨\n\n"
+            "<i>- Lucien</i>"
         )
     
     async def set_welcome_message(self, message: str) -> bool:
@@ -307,6 +279,144 @@ class FreeChannelService:
             logger.error(f"Error setting welcome message: {e}")
             return False
     
+    async def _send_lucien_initial_message(self, user_id: int, user_name: str) -> bool:
+        """
+        Enviar mensaje inicial de Lucien con imagen de presentación.
+        """
+        try:
+            # Obtener imagen de Lucien (configurada en BotConfig)
+            lucien_image = await self._get_lucien_image()
+            
+            # Mensaje inicial de Lucien
+            initial_message = (
+                f"🎭 **¡Hola {user_name}!**\n\n"
+                f"Soy <b>Lucien</b>, asistente personal de Diana.\n\n"
+                f"🔍 <i>He recibido tu solicitud para unirte a nuestro canal gratuito...</i>\n\n"
+                f"⏰ <b>El proceso de evaluación toma aproximadamente 15 minutos.</b>\n\n"
+                f"🌟 <i>Tip: Los usuarios que siguen a Diana en sus redes sociales suelen ser aprobados más rápido...</i>\n\n"
+                f"📱 <b>Síguenos mientras esperas:</b>\n"
+                f"• Instagram: @diana_oficial\n"
+                f"• TikTok: @diana_content\n"
+                f"• Twitter: @diana_updates\n\n"
+                f"<i>Te mantendré informado del progreso...</i> 💫"
+            )
+            
+            if lucien_image:
+                # Enviar con imagen
+                await self.bot.send_photo(
+                    user_id,
+                    photo=lucien_image,
+                    caption=initial_message,
+                    parse_mode="HTML"
+                )
+            else:
+                # Enviar solo texto si no hay imagen
+                await self.bot.send_message(
+                    user_id,
+                    initial_message,
+                    parse_mode="HTML"
+                )
+            
+            logger.info(f"Lucien initial message sent to user {user_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Error sending Lucien initial message to user {user_id}: {e}")
+            return False
+    
+    async def _schedule_progressive_messages(self, user_id: int, user_name: str) -> None:
+        """
+        Programar mensajes progresivos de Lucien durante el período de espera.
+        """
+        try:
+            wait_minutes = await self.get_wait_time_minutes()
+            if wait_minutes < 5:  # Si el tiempo de espera es muy corto, no programar
+                return
+            
+            # Programar mensajes a los 5 y 10 minutos
+            import asyncio
+            
+            # Mensaje a los 5 minutos
+            asyncio.create_task(self._send_delayed_message(
+                user_id, user_name, 5, "progress_update"
+            ))
+            
+            # Mensaje a los 10 minutos (solo si el tiempo de espera es >10 min)
+            if wait_minutes > 10:
+                asyncio.create_task(self._send_delayed_message(
+                    user_id, user_name, 10, "final_update"
+                ))
+            
+        except Exception as e:
+            logger.error(f"Error scheduling progressive messages for user {user_id}: {e}")
+    
+    async def _send_delayed_message(self, user_id: int, user_name: str, delay_minutes: int, message_type: str) -> None:
+        """
+        Enviar mensaje programado después del delay especificado.
+        """
+        try:
+            # Esperar el tiempo especificado
+            await asyncio.sleep(delay_minutes * 60)
+            
+            # Verificar si el usuario ya fue aprobado
+            if await self._is_user_already_approved(user_id):
+                return
+            
+            if message_type == "progress_update":
+                message = (
+                    f"🔍 <b>Actualización de proceso, {user_name}</b>\n\n"
+                    f"<i>Diana está revisando otras solicitudes en este momento...</i>\n\n"
+                    f"⏰ <b>Tiempo restante aproximado:</b> {await self.get_wait_time_minutes() - delay_minutes} minutos\n\n"
+                    f"💡 <i>¿Ya seguiste a Diana en sus redes? Los usuarios que interactúan con su contenido suelen llamar más su atención...</i>\n\n"
+                    f"📱 No olvides activar las notificaciones para no perderte nada. 🔔"
+                )
+            
+            elif message_type == "final_update":
+                message = (
+                    f"✨ <b>Última actualización, {user_name}</b>\n\n"
+                    f"<i>Diana está finalizando la revisión de solicitudes...</i>\n\n"
+                    f"🎯 <b>Tu acceso será confirmado muy pronto.</b>\n\n"
+                    f"🌟 <i>Una vez aprobado, te invitaré personalmente a conocer a Diana en una experiencia única...</i>\n\n"
+                    f"<b>Prepárate para algo especial.</b> 💫"
+                )
+            
+            await self.bot.send_message(
+                user_id,
+                message,
+                parse_mode="HTML"
+            )
+            
+            logger.info(f"Delayed message ({message_type}) sent to user {user_id}")
+            
+        except Exception as e:
+            logger.error(f"Error sending delayed message to user {user_id}: {e}")
+    
+    async def _is_user_already_approved(self, user_id: int) -> bool:
+        """
+        Verificar si el usuario ya fue aprobado.
+        """
+        try:
+            stmt = select(PendingChannelRequest).where(
+                PendingChannelRequest.user_id == user_id,
+                PendingChannelRequest.approved == True
+            )
+            result = await self.session.execute(stmt)
+            approved_request = result.scalar_one_or_none()
+            return approved_request is not None
+        except Exception:
+            return False
+    
+    async def _get_lucien_image(self) -> Optional[str]:
+        """
+        Obtener imagen de Lucien desde la configuración.
+        """
+        try:
+            config = await self.session.get(BotConfig, 1)
+            return config.lucien_image_file_id if config else None
+        except Exception as e:
+            logger.warning(f"Error getting Lucien image from config: {e}")
+            return None
+
     async def _send_social_media_message(self, user_id: int, user_name: str) -> bool:
         """
         Enviar mensaje de invitación a seguir en redes sociales inmediatamente después de la solicitud.

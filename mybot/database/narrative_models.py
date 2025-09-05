@@ -27,12 +27,7 @@ class StoryFragment(Base):
     min_besitos = Column(Integer, default=0, nullable=False)
     required_role = Column(String(20), nullable=True, index=True)
     reward_besitos = Column(Integer, default=0, nullable=False)
-    unlocks_achievement_id = Column(
-        String(100), 
-        ForeignKey('achievements.id', ondelete='SET NULL'), 
-        nullable=True,
-        index=True
-    )
+    # Achievement unlocking now handled via triggers JSON field in unified narrative model
     
     # Auto-next for fragments without decisions
     auto_next_fragment_key = Column(String(100), nullable=True)
@@ -50,12 +45,8 @@ class StoryFragment(Base):
         lazy="selectin"
     )
 
-    # achievement_link = relationship(
-    #     "Achievement",
-    #     foreign_keys=[unlocks_achievement_id],
-    #     back_populates="story_fragments",
-    #     lazy="joined"
-    # )
+    # Deprecated: achievement relationship removed as achievement unlocking 
+    # is now handled via triggers JSON field in unified narrative model
 
     @validates('key')
     def validate_key(self, key, value):
