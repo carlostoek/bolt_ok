@@ -40,7 +40,7 @@ class TestNarrativeRewards:
         reward_fragment.text = "This fragment awards points."
         reward_fragment.character = "Lucien"
         reward_fragment.reward_besitos = 25
-        reward_fragment.unlocks_achievement_id = None
+        # Achievement unlocking now handled via triggers system
         
         # Mock point service
         point_service_mock = MagicMock(spec=PointService)

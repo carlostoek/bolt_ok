@@ -88,7 +88,9 @@ class NarrativeMigrationAdapter:
             triggers = {}
             if legacy_fragment.reward_besitos > 0:
                 triggers['besitos_reward'] = legacy_fragment.reward_besitos
-            if legacy_fragment.unlocks_achievement_id:
+            # Legacy achievement unlocking field removed - achievement unlocking now handled 
+            # via triggers system in unified narrative model
+            if hasattr(legacy_fragment, 'unlocks_achievement_id') and legacy_fragment.unlocks_achievement_id:
                 triggers['unlock_achievement'] = legacy_fragment.unlocks_achievement_id
             if hasattr(legacy_fragment, 'character'):
                 triggers['character'] = legacy_fragment.character

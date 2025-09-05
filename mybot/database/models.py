@@ -285,6 +285,8 @@ class BotConfig(Base):
     welcome_message_template = Column(Text, nullable=True)
     token_welcome_message = Column(Text, nullable=True)
     auto_approval_enabled = Column(Boolean, default=True)
+    # Imagen de Lucien para mensajes de onboarding
+    lucien_image_file_id = Column(String(200), nullable=True)
 
 
 class Channel(Base):

@@ -171,36 +171,3 @@ class EmotionalContext:
     current_emotional_state: Optional[EmotionalState] = None
     environmental_factors: Dict[str, Any] = field(default_factory=dict)
 
-
-class IEmotionalStateManager(ABC):
-    """
-    Interfaz para el gestor de estados emocionales.
-    Define las operaciones necesarias para analizar y gestionar estados emocionales de usuarios.
-    """
-    
-    @abstractmethod
-    async def analyze_emotional_state(self, context: EmotionalContext) -> EmotionalState:
-        """
-        Analiza el estado emocional actual del usuario.
-        
-        Args:
-            context (EmotionalContext): Contexto del usuario y sesión
-            
-        Returns:
-            EmotionalState: Estado emocional analizado
-        """
-        pass
-    
-    @abstractmethod
-    async def update_emotional_profile(self, user_id: int, emotional_state: EmotionalState) -> EmotionalProfile:
-        """
-        Actualiza el perfil emocional del usuario.
-        
-        Args:
-            user_id (int): ID del usuario
-            emotional_state (EmotionalState): Nuevo estado emocional
-            
-        Returns:
-            EmotionalProfile: Perfil emocional actualizado
-        """
-        pass
