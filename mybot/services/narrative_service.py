@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload, joinedload
 from database.models import User
 from database.narrative_unified import NarrativeFragment, UserNarrativeState, UserDecisionLog
 
@@ -12,12 +13,17 @@ class NarrativeService:
 
     async def get_user_current_fragment(self, user_id: int):
         """
-        Gets the current story fragment for a user.
+        Gets the current story fragment for a user with optimized loading.
         If they haven't started, returns the initial fragment.
-        Updated for unified narrative system.
+        Updated for unified narrative system with performance optimizations.
         """
         user_state = await self.session.execute(
-            select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            select(UserNarrativeState)
+            .options(
+                selectinload(UserNarrativeState.user),
+                selectinload(UserNarrativeState.current_fragment)
+            )
+            .where(UserNarrativeState.user_id == user_id)
         )
         user_state = user_state.scalar_one_or_none()
 
@@ -26,10 +32,14 @@ class NarrativeService:
             fragment_id = user_state.current_fragment_id
         
         if fragment_id:
-            fragment = await self.session.execute(
-                select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
-            )
-            fragment = fragment.scalar_one_or_none()
+            # Use already loaded fragment from user_state if available
+            if user_state and user_state.current_fragment:
+                fragment = user_state.current_fragment
+            else:
+                fragment = await self.session.execute(
+                    select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
+                )
+                fragment = fragment.scalar_one_or_none()
         else:
             fragment = None
 
@@ -59,9 +69,9 @@ class NarrativeService:
     async def process_user_choice(self, user_id: int, fragment_id: str, choice_index: int):
         """
         Processes a choice from a fragment's choices JSON, checks conditions, and advances the story.
-        Updated for unified narrative system.
+        Updated for unified narrative system with performance optimizations.
         """
-        # Get the fragment
+        # Get the fragment (optimized query)
         fragment = await self.session.execute(
             select(NarrativeFragment).where(NarrativeFragment.id == fragment_id)
         )
@@ -82,9 +92,11 @@ class NarrativeService:
         )
         self.session.add(user_decision_log)
 
-        # Update user's narrative state
+        # Update user's narrative state (optimized query)
         user_state = await self.session.execute(
-            select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            select(UserNarrativeState)
+            .options(selectinload(UserNarrativeState.user))
+            .where(UserNarrativeState.user_id == user_id)
         )
         user_state = user_state.scalar_one_or_none()
 

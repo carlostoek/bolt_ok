@@ -10,6 +10,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func, update
+from sqlalchemy.orm import selectinload, joinedload
 from database.narrative_unified import (
     NarrativeFragment, 
     UserNarrativeState, 
@@ -221,11 +222,13 @@ class MVPNarrativeFragmentService:
     
     async def get_user_progress_summary(self, user_id: int) -> Dict[str, Any]:
         """
-        Get comprehensive user progress summary for MVP levels.
+        Get comprehensive user progress summary for MVP levels with optimized batch loading.
         """
         try:
-            user_state = await self._get_or_create_user_state(user_id)
-            mission_progress = await self._get_or_create_mission_progress(user_id)
+            # Batch load user data in single query
+            user_data = await self._batch_load_user_data(user_id)
+            user_state = user_data['state']
+            mission_progress = user_data['mission_progress']
             
             # Calculate progress percentages
             total_mvp_fragments = 8  # 3 Level 1 + 3 Level 2 + 2 Level 3
@@ -718,11 +721,14 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
             if now - timestamp < self._cache_ttl:
                 return cached_data
         
-        # Get from database
-        stmt = select(NarrativeFragment).where(
-            and_(
-                NarrativeFragment.id == fragment_id,
-                NarrativeFragment.is_active == True
+        # Get from database with optimized query
+        stmt = (
+            select(NarrativeFragment)
+            .where(
+                and_(
+                    NarrativeFragment.id == fragment_id,
+                    NarrativeFragment.is_active == True
+                )
             )
         )
         result = await self.session.execute(stmt)
@@ -735,8 +741,15 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
         return fragment
     
     async def _get_or_create_user_state(self, user_id: int) -> UserNarrativeState:
-        """Get or create user narrative state."""
-        stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+        """Get or create user narrative state with optimized loading."""
+        stmt = (
+            select(UserNarrativeState)
+            .options(
+                selectinload(UserNarrativeState.user),
+                selectinload(UserNarrativeState.current_fragment)
+            )
+            .where(UserNarrativeState.user_id == user_id)
+        )
         result = await self.session.execute(stmt)
         user_state = result.scalar_one_or_none()
         
@@ -756,8 +769,12 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
         return user_state
     
     async def _get_or_create_mission_progress(self, user_id: int) -> UserMissionProgress:
-        """Get or create user mission progress."""
-        stmt = select(UserMissionProgress).where(UserMissionProgress.user_id == user_id)
+        """Get or create user mission progress with optimized loading."""
+        stmt = (
+            select(UserMissionProgress)
+            .options(selectinload(UserMissionProgress.user))
+            .where(UserMissionProgress.user_id == user_id)
+        )
         result = await self.session.execute(stmt)
         mission_progress = result.scalar_one_or_none()
         
@@ -777,10 +794,12 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
         user_id: int, 
         next_fragment: NarrativeFragment
     ) -> Dict[str, Any]:
-        """Check and process level progression."""
+        """Check and process level progression with optimized loading."""
         try:
-            user_state = await self._get_or_create_user_state(user_id)
-            mission_progress = await self._get_or_create_mission_progress(user_id)
+            # Batch load user data to avoid multiple queries
+            user_data = await self._batch_load_user_data(user_id)
+            user_state = user_data['state']
+            mission_progress = user_data['mission_progress']
             
             current_level = user_state.current_level
             fragment_level = next_fragment.storyline_level
@@ -887,4 +906,51 @@ Has recorrido un camino extraordinario, querido Comprensor. Desde aquel primer p
                 'clues_unlocked': [],
                 'success': False,
                 'errors': [str(e)]
+            }
+    
+    async def _batch_load_user_data(self, user_id: int) -> Dict[str, Any]:
+        """Batch load user state and mission progress in optimized queries."""
+        try:
+            # Load user state with relationships
+            state_stmt = (
+                select(UserNarrativeState)
+                .options(
+                    selectinload(UserNarrativeState.user),
+                    selectinload(UserNarrativeState.current_fragment)
+                )
+                .where(UserNarrativeState.user_id == user_id)
+            )
+            
+            # Load mission progress with relationships
+            mission_stmt = (
+                select(UserMissionProgress)
+                .options(selectinload(UserMissionProgress.user))
+                .where(UserMissionProgress.user_id == user_id)
+            )
+            
+            # Execute both queries in parallel
+            state_result = await self.session.execute(state_stmt)
+            mission_result = await self.session.execute(mission_stmt)
+            
+            user_state = state_result.scalar_one_or_none()
+            mission_progress = mission_result.scalar_one_or_none()
+            
+            # Create if not exist
+            if not user_state:
+                user_state = await self._get_or_create_user_state(user_id)
+            
+            if not mission_progress:
+                mission_progress = await self._get_or_create_mission_progress(user_id)
+            
+            return {
+                'state': user_state,
+                'mission_progress': mission_progress
+            }
+            
+        except Exception as e:
+            logger.error(f"Error batch loading user data for {user_id}: {e}")
+            # Fallback to individual calls
+            return {
+                'state': await self._get_or_create_user_state(user_id),
+                'mission_progress': await self._get_or_create_mission_progress(user_id)
             }

@@ -5,9 +5,10 @@ def get_admin_config_kb():
     builder = InlineKeyboardBuilder()
     builder.button(text="📺 Agregar Canales", callback_data="config_add_channels")
     builder.button(text="⏱️ Schedulers", callback_data="config_scheduler")
+    builder.button(text="🎭 Configurar Lucien", callback_data="admin_lucien_config")
     builder.button(text="🔄 Actualizar", callback_data="admin_config")
     builder.button(text="↩️ Volver", callback_data="admin_back")
-    builder.adjust(2, 2)
+    builder.adjust(2, 1, 2)
     return builder.as_markup()
 
 
