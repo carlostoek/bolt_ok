@@ -1,0 +1,221 @@
+name: 🛡️ Diana Bot Protection Tests
+
+on:
+  push:
+    branches: [ main, develop, esta_viva ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_suite:
+        description: 'Test suite to run'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - quick
+        - mvp
+        - cinema
+        - journey
+        - performance
+      coverage:
+        description: 'Generate coverage report'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.10'
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+  POSTGRES_DB: diana_test
+
+jobs:
+  protection-tests:
+    name: 🛡️ Protection Test Suite
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: ${{ env.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ env.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ env.POSTGRES_DB }}
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: 🔄 Checkout Code
+      uses: actions/checkout@v4
+
+    - name: 🐍 Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+
+    - name: 📦 Install System Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpq-dev
+
+    - name: 📋 Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-asyncio pytest-cov pytest-timeout psutil
+        # Install additional test dependencies
+        pip install coverage[toml] pytest-mock pytest-benchmark
+
+    - name: 🔧 Setup Test Environment
+      run: |
+        # Create necessary directories
+        mkdir -p logs test_reports
+        
+        # Set up environment variables
+        echo "DATABASE_URL=postgresql://${{ env.POSTGRES_USER }}:${{ env.POSTGRES_PASSWORD }}@localhost:5432/${{ env.POSTGRES_DB }}" >> $GITHUB_ENV
+        echo "TEST_MODE=true" >> $GITHUB_ENV
+        echo "LOG_LEVEL=WARNING" >> $GITHUB_ENV
+
+    - name: 🔍 Environment Verification
+      run: |
+        echo "Python version: $(python --version)"
+        echo "Pytest version: $(pytest --version)"
+        echo "Database connection test..."
+        python -c "
+        import psycopg2
+        conn = psycopg2.connect(
+            host='localhost',
+            port=5432,
+            user='${{ env.POSTGRES_USER }}',
+            password='${{ env.POSTGRES_PASSWORD }}',
+            database='${{ env.POSTGRES_DB }}'
+        )
+        conn.close()
+        print('✅ Database connection successful')
+        "
+
+    - name: 🚀 Quick Smoke Test
+      run: |
+        echo "🚀 Running quick smoke test to verify environment..."
+        python scripts/run_protection_tests.py --quick
+      timeout-minutes: 5
+
+    - name: 🛡️ MVP Baseline Protection Tests
+      if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'mvp' || github.event.inputs.test_suite == '' }}
+      run: |
+        echo "🛡️ Running MVP Baseline Protection Tests..."
+        python scripts/run_protection_tests.py --suite MVP_Baseline_Protection
+      timeout-minutes: 15
+
+    - name: 🎬 Cinema Architecture Integration Tests
+      if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'cinema' || github.event.inputs.test_suite == '' }}
+      run: |
+        echo "🎬 Running Cinema Architecture Integration Tests..."
+        python scripts/run_protection_tests.py --suite Cinema_Architecture_Integration
+      timeout-minutes: 20
+
+    - name: 🎭 User Journey & Archetype Tests
+      if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'journey' || github.event.inputs.test_suite == '' }}
+      run: |
+        echo "🎭 Running User Journey & Archetype Tests..."
+        python scripts/run_protection_tests.py --suite User_Journey_Archetypes
+      timeout-minutes: 25
+
+    - name: ⚡ Performance & Scalability Tests
+      if: ${{ github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == 'performance' || github.event.inputs.test_suite == '' }}
+      run: |
+        echo "⚡ Running Performance & Scalability Tests..."
+        python scripts/run_protection_tests.py --suite Performance_Scalability
+      timeout-minutes: 35
+
+    - name: 📊 Complete Test Suite with Coverage
+      if: ${{ github.event.inputs.coverage == 'true' || github.event.inputs.test_suite == 'all' || github.event.inputs.test_suite == '' }}
+      run: |
+        echo "📊 Running complete test suite with coverage..."
+        python scripts/run_protection_tests.py --coverage
+      timeout-minutes: 45
+
+    - name: 📄 Upload Test Reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: protection-test-reports
+        path: |
+          test_reports/
+          logs/
+        retention-days: 30
+
+    - name: 📊 Upload Coverage Reports
+      uses: codecov/codecov-action@v3
+      if: ${{ github.event.inputs.coverage == 'true' }}
+      with:
+        file: ./coverage.xml
+        flags: protection-tests
+        name: diana-bot-protection-coverage
+
+    - name: 🔔 Test Results Summary
+      if: always()
+      run: |
+        echo "# 🛡️ Diana Bot Protection Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f "test_reports/latest_protection_report.json" ]; then
+          echo "## 📊 Test Summary" >> $GITHUB_STEP_SUMMARY
+          python -c "
+        import json
+        with open('test_reports/latest_protection_report.json') as f:
+            report = json.load(f)
+        
+        summary = report['summary']
+        protection = report['protection_status']
+        
+        print(f\"- **Total Tests:** {summary['total_tests']}\")
+        print(f\"- **Passed:** {summary['passed']} ✅\")
+        print(f\"- **Failed:** {summary['failed']} ❌\")
+        print(f\"- **Errors:** {summary['errors']} 🚨\")
+        print(f\"- **Success Rate:** {summary['success_rate']}%\")
+        print(f\"- **Critical Success Rate:** {summary['critical_success_rate']}%\")
+        print()
+        print('## 🛡️ Protection Status')
+        print(f\"- **MVP Baseline:** {'🛡️ PROTECTED' if protection['mvp_baseline_protected'] else '🚨 VULNERABLE'}\")
+        print(f\"- **Cinema Architecture:** {'🎬 PROTECTED' if protection['cinema_architecture_protected'] else '🚨 VULNERABLE'}\")
+        print(f\"- **User Journeys:** {'🎭 PROTECTED' if protection['user_journeys_protected'] else '🚨 VULNERABLE'}\")
+        print(f\"- **Performance:** {'⚡ GUARANTEED' if protection['performance_guaranteed'] else '🚨 AT RISK'}\")
+        
+        overall_status = '🛡️ SYSTEM PROTECTED' if summary['critical_success_rate'] >= 75 else '🚨 PROTECTION COMPROMISED'
+        print(f\"\\n## 🎯 Overall Status: {overall_status}\")
+          " >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⚠️ Test report not found" >> $GITHUB_STEP_SUMMARY
+        fi
+
+  notification:
+    name: 📱 Test Notifications
+    needs: protection-tests
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+    - name: 🔔 Success Notification
+      if: ${{ needs.protection-tests.result == 'success' }}
+      run: |
+        echo "🎉 Diana Bot Protection Tests: ALL SYSTEMS PROTECTED!"
+        echo "✅ All critical protection tests passed successfully."
+        
+    - name: ⚠️ Failure Notification
+      if: ${{ needs.protection-tests.result == 'failure' }}
+      run: |
+        echo "🚨 Diana Bot Protection Tests: PROTECTION COMPROMISED!"
+        echo "❌ Critical protection failures detected - immediate attention required!"
+        exit 1
