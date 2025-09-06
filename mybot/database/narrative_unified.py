@@ -168,6 +168,15 @@ class UserNarrativeState(Base):
     diana_interactions_validated = Column(Integer, default=0, nullable=False)
     diana_consistency_average = Column(Integer, default=0, nullable=False)  # Running average score
     character_validation_history = Column(JSON, default=list, nullable=False)
+
+    # Emotional Crescendo tracking
+    emotional_level = Column(Integer, default=1, nullable=False)
+    attachment_score = Column(Integer, default=0, nullable=False)
+    vulnerability_exchange_level = Column(Integer, default=0, nullable=False)
+    last_emotional_milestone = Column(String(50), nullable=True)
+    anticipation_triggers = Column(JSON, default=list, nullable=False)
+    memory_callbacks = Column(JSON, default=list, nullable=False)
+    between_session_thoughts = Column(JSON, default=list, nullable=False)
     
     # Timestamps
     created_at = Column(DateTime, default=func.now(), nullable=False)
@@ -231,6 +240,61 @@ class UserNarrativeState(Base):
             bool: True si el fragmento ha sido completado, False en caso contrario
         """
         return fragment_id in self.completed_fragments
+
+
+class UserEmotionalJourney(Base):
+    """Emotional journey tracking for the 6-Level Emotional Crescendo.
+    
+    This table logs key emotional milestones, vulnerability exchanges, and
+    attachment indicators to provide a detailed history of the user's
+    emotional progression with Diana.
+    """
+    
+    __tablename__ = 'user_emotional_journey'
+    __table_args__ = (
+        Index('ix_user_emotional_journey_user', 'user_id'),
+        Index('ix_user_emotional_journey_level', 'current_emotional_level'),
+    )
+
+    user_id = Column(BigInteger, ForeignKey('users.id', ondelete='CASCADE'), primary_key=True)
+    current_emotional_level = Column(Integer, default=1, nullable=False)
+    progression_timestamps = Column(JSON, default=list, nullable=False)
+    attachment_milestones = Column(JSON, default=list, nullable=False)
+    vulnerability_exchanges = Column(JSON, default=list, nullable=False)
+    memorable_interactions = Column(JSON, default=list, nullable=False)
+    anticipation_building = Column(JSON, default=list, nullable=False)
+    transformation_indicators = Column(JSON, default=list, nullable=False)
+    
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+
+    user = relationship("User", backref="emotional_journey", uselist=False, lazy="selectin")
+
+    def record_milestone(self, milestone: str, level: int, details: dict = None):
+        """Record a new emotional milestone."""
+        if not self.attachment_milestones:
+            self.attachment_milestones = []
+        
+        self.attachment_milestones.append({
+            'milestone': milestone,
+            'level': level,
+            'timestamp': datetime.utcnow().isoformat(),
+            'details': details or {}
+        })
+        self.updated_at = datetime.utcnow()
+
+    def record_vulnerability_exchange(self, diana_level: int, user_level: int, success: bool):
+        """Record a vulnerability exchange."""
+        if not self.vulnerability_exchanges:
+            self.vulnerability_exchanges = []
+            
+        self.vulnerability_exchanges.append({
+            'diana_vulnerability_level': diana_level,
+            'user_reciprocation_level': user_level,
+            'successful_exchange': success,
+            'timestamp': datetime.utcnow().isoformat()
+        })
+        self.updated_at = datetime.utcnow()
 
 
 class UserDecisionLog(Base):

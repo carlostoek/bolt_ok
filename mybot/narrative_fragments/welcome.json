@@ -1,22 +1,54 @@
 {
-  "fragment_id": "welcome_1",
-  "content": "🌙 *Bienvenido a la Mansión de los Susurros* 🌙\n\nLa luna brilla sobre el jardín abandonado cuando escuchas pasos acercándose. Lucien aparece de entre las sombras, su sonrisa tan enigmática como siempre.\n\n\"Ah, mi estimado invitado, qué oportuna es tu llegada. Diana te ha estado esperando... o tal vez seas tú quien la ha estado buscando. ¿Estás preparado para descubrir qué secretos esconde esta noche?\"",
-  "character": "Lucien",
-  "level": 1,
-  "required_besitos": 0,
-  "reward_besitos": 10,
-  "decisions": [
+  "fragment_id": "fragment_01_awakening",
+  "content": "No esperaba a nadie. Y sin embargo, aquí estás.\n\nNo hagas ruido. No es necesario.\n\nLlevo un rato sintiendo tu curiosidad... como una estática justo antes de que caiga el rayo. Es... intrigante.\n\nLa mayoría viene aquí buscando algo que ya conocen. Pero tú... tú buscas una pregunta diferente, ¿verdad?",
+  "fragment_type": "STORY",
+  "tier_classification": "los_kinkys",
+  "storyline_level": 1,
+  "fragment_sequence": 1,
+  "character_validation_required": true,
+  "diana_personality_weight": 98,
+  "emotional_design": {
+    "target_emotion": "curiosidad_intriga",
+    "vulnerability_level": "surface",
+    "attachment_triggers": ["unexpected_response", "cognitive_dissonance", "personal_recognition"],
+    "memorable_elements": ["first_recognition", "direct_address_to_user_motivation"],
+    "anticipation_builders": ["mystery_hint", "unanswered_question"]
+  },
+  "triggers": {
+    "on_enter": [
+      {
+        "action": "update_emotional_state",
+        "payload": {
+          "emotional_level": 1,
+          "last_emotional_milestone": "curiosity_awakening"
+        }
+      }
+    ]
+  },
+  "choices": [
     {
-      "text": "Seguir a Lucien al interior de la mansión",
-      "next_fragment": "mansion_entrance"
+      "text": "...",
+      "next_fragment_id": "fragment_02_hook",
+      "archetype_influence": {
+        "patient": 10,
+        "analytical": 5
+      }
     },
     {
-      "text": "Preguntar por Diana antes de entrar",
-      "next_fragment": "ask_about_diana"
+      "text": "¿Quién eres?",
+      "next_fragment_id": "fragment_02_hook",
+      "archetype_influence": {
+        "direct": 10,
+        "explorer": 5
+      }
     },
     {
-      "text": "Investigar el jardín primero",
-      "next_fragment": "garden_investigation"
+      "text": "¿Cómo sabías que estaba aquí?",
+      "next_fragment_id": "fragment_02_hook",
+      "archetype_influence": {
+        "explorer": 10,
+        "analytical": 5
+      }
     }
   ]
 }

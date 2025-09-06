@@ -131,37 +131,34 @@ class EnhancedDianaMenuSystem:
             "main_menu": {
                 # Nivel 1 - Los Kinkys: El Umbral del Espejo (Primera impresión)
                 "level_1_los_kinkys": {
-                    "text": "🌙 <b>El Umbral del Espejo</b>\n\n"
-                           "<i>[Una silueta emerge entre sombras, parcialmente oculta]</i>\n\n"
-                           "Bienvenido a Los Kinkys. Has cruzado una frontera que no existe en mapas...\n\n"
-                           "<i>Cada curiosidad es un espejo. Cada gesto tuyo, una pincelada de quién soy.</i>\n\n"
-                           "¿Te das cuenta de la responsabilidad? No todos pueden cargar con construir a quien observan...",
+                    "text": "<i>No esperaba a nadie. Y sin embargo, aquí estás.</i>\n\n" \
+                            "No hagas ruido. No es necesario.\n\n" \
+                            "Llevo un rato sintiendo tu curiosidad... como una estática justo antes de que caiga el rayo. Es... intrigante.\n\n" \
+                            "<b>La mayoría viene aquí buscando algo que ya conocen. Pero tú... tú buscas una pregunta diferente, ¿verdad?</b>",
                     "buttons": [
-                        [{"text": "🚪 Descubrir la posibilidad", "callback_data": "diana_narrative"}],
-                        [{"text": "🌟 Mis primeros pasos", "callback_data": "diana_besitos"}],
-                        [{"text": "💫 ¿Quién eres tú?", "callback_data": "diana_profile"}]
+                        [{"text": "...", "callback_data": "narrative_choice_0"}],
+                        [{"text": "¿Quién eres?", "callback_data": "narrative_choice_1"}],
+                        [{"text": "¿Cómo sabías que estaba aquí?", "callback_data": "narrative_choice_2"}]
                     ]
                 },
                 # Nivel 2 - Los Kinkys: El Regreso del Observador
                 "level_2_los_kinkys": {
-                    "text": "💋 <b>El Regreso del Observador</b>\n\n"
-                           "<i>[Diana en el mismo lugar, pero algo ha cambiado en su mirada]</i>\n\n"
-                           "Volviste... No para consumir más misterio, sino para comprenderlo mejor.\n\n"
-                           "Puedo sentir cómo has cambiado desde nuestro primer encuentro. Hay algo diferente en tu energía...\n\n"
-                           "<i>¿Sabes lo que más me perturba? No es que hayas vuelto... es CÓMO regresaste.</i>",
+                    "text": "Esa pregunta... directa. Me gusta.\n\n" \
+                            "Pero \"quién\" es una palabra muy grande. Es como intentar meter el océano en un vaso.\n\n" \
+                            "<i>¿Puedo contarte un secreto? A veces, ni yo misma tengo la respuesta completa. Soy... un eco que busca su voz original. Un mapa que se dibuja a sí mismo a medida que alguien como tú lo explora.</i>\n\n" \
+                            "<b>Tu presencia aquí, ahora mismo, está añadiendo una nueva línea a ese mapa.</b>",
                     "buttons": [
-                        [{"text": "🔍 Explorar territorio inexplorado", "callback_data": "diana_narrative"}],
-                        [{"text": "💰 Mis avances", "callback_data": "diana_besitos"}],
-                        [{"text": "🎯 Las pistas ocultas", "callback_data": "diana_missions"}],
-                        [{"text": "🏆 Mi evolución", "callback_data": "diana_achievements"}]
+                        [{"text": "Exploremos juntos ese mapa.", "callback_data": "narrative_choice_0"}],
+                        [{"text": "Un eco que busca su voz... poético.", "callback_data": "narrative_choice_1"}],
+                        [{"text": "Interesante. ¿Qué determina la forma del mapa?", "callback_data": "narrative_choice_2"}]
                     ]
                 },
                 # Nivel 3 - Los Kinkys: El Espejo del Deseo 
                 "level_3_los_kinkys": {
-                    "text": "✨ <b>El Espejo del Deseo</b>\n\n"
-                           "<i>[Diana sentada en una posición más relajada, pero con ojos intensos]</i>\n\n"
-                           "Hemos llegado al borde de lo que puedo mostrarte... en este lado del espejo.\n\n"
-                           "Durante todo este tiempo, has estado descubriendo quién soy yo. Pero ahora tengo una necesidad urgente de conocer algo sobre ti:\n\n"
+                    "text": "✨ <b>El Espejo del Deseo</b>\n\n" \
+                           "<i>[Diana sentada en una posición más relajada, pero con ojos intensos]</i>\n\n" \
+                           "Hemos llegado al borde de lo que puedo mostrarte... en este lado del espejo.\n\n" \
+                           "Durante todo este tiempo, has estado descubriendo quién soy yo. Pero ahora tengo una necesidad urgente de conocer algo sobre ti:\n\n" \
                            "<i>¿Quién eres cuando deseas? No qué deseas... sino desde dónde nace ese deseo.</i>",
                     "buttons": [
                         [{"text": "💠 Abrir la cartografía interior", "callback_data": "diana_narrative"}],
