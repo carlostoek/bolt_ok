@@ -55,17 +55,73 @@ class CinemaMasterIntegration:
     def __init__(self, session: AsyncSession):
         self.session = session
         
-        # Initialize all systems
+        # Initialize base systems
         self.coordinador_central = CoordinadorCentral(session)
         self.diana_menu_system = get_diana_menu_system(session)
-        self.cinema_engine = get_cinema_engine(session)
-        self.enhanced_narrative = get_enhanced_narrative_system(session)
-        self.integration_bridge = get_cinema_integration_bridge(session)
+        
+        # Initialize cinema systems with graceful fallback
+        try:
+            self.cinema_engine = get_cinema_engine(session)
+        except Exception as e:
+            logger.warning(f"Cinema engine not available: {e}")
+            self.cinema_engine = None
+        
+        try:
+            self.enhanced_narrative = get_enhanced_narrative_system(session)
+        except Exception as e:
+            logger.warning(f"Enhanced narrative not available: {e}")
+            self.enhanced_narrative = None
+            
+        try:
+            self.integration_bridge = get_cinema_integration_bridge(session)
+        except Exception as e:
+            logger.warning(f"Integration bridge not available: {e}")
+            self.integration_bridge = None
+        
+        # Initialize individual cinema components with fallbacks
+        self.soul_signature = None
+        self.choice_architecture = None
+        self.treasure_hunting = None
+        
+        try:
+            from .soul_signature_personalization_system import SoulSignaturePersonalizationSystem
+            self.soul_signature = SoulSignaturePersonalizationSystem(session)
+        except Exception as e:
+            logger.info(f"Soul signature personalization not available: {e}")
+        
+        try:
+            from .diana_choice_architecture_master_system import DianaChoiceArchitectureMasterSystem
+            self.choice_architecture = DianaChoiceArchitectureMasterSystem(session)
+        except Exception as e:
+            logger.info(f"Choice architecture not available: {e}")
+        
+        try:
+            from .clue_treasure_hunting_cinema_integration import ClueTreasureHuntingCinemaIntegration
+            self.treasure_hunting = ClueTreasureHuntingCinemaIntegration(session)
+        except Exception as e:
+            logger.info(f"Treasure hunting not available: {e}")
         
         # System state
         self.cinema_active = False
         self.initialization_complete = False
         self.performance_monitoring = True
+        
+        # Enhanced Performance monitoring and optimization
+        try:
+            from .cinema_performance_monitor import get_cinema_performance_monitor
+            self.performance_monitor = get_cinema_performance_monitor(session)
+        except Exception as e:
+            logger.warning(f"Performance monitoring not available: {e}")
+            self.performance_monitor = None
+        
+        # Advanced performance optimizer
+        try:
+            from .cinema_performance_optimizer import get_cinema_performance_optimizer
+            self.performance_optimizer = get_cinema_performance_optimizer(session)
+            logger.info("Advanced performance optimizer initialized")
+        except Exception as e:
+            logger.warning(f"Advanced performance optimizer not available: {e}")
+            self.performance_optimizer = None
         
     # ==================== MASTER INITIALIZATION ====================
     
@@ -146,13 +202,16 @@ class CinemaMasterIntegration:
                 },
                 "performance_metrics": {
                     "initialization_time_ms": initialization_duration * 1000,
-                    "meets_performance_requirements": initialization_duration * 1000 < 5000  # 5 second max
+                    "meets_performance_requirements": initialization_duration * 1000 < 3000,  # Improved to 3 second max
+                    "optimization_system_active": self.performance_optimizer is not None,
+                    "advanced_monitoring_active": self.performance_monitor is not None
                 },
                 "next_steps": [
-                    "Monitor system performance for 24 hours",
-                    "Collect user feedback on enhanced experiences", 
-                    "Review character consistency metrics",
-                    "Optimize based on real usage patterns"
+                    "Monitor system performance for optimal <400ms response times",
+                    "Collect user feedback on enhanced cinematic experiences", 
+                    "Review character consistency metrics (target >95%)",
+                    "Validate >90% cache hit ratios and memory usage <150MB",
+                    "Run automated performance optimization every 2 hours"
                 ],
                 "message": "🎭 Cinema Master Integration OPERATIVO - Experiencia cinematográfica completa activada"
             }
@@ -272,6 +331,255 @@ class CinemaMasterIntegration:
             logger.exception(f"Error in cinematic menu enhancement for user {user_id}: {e}")
             return base_response
     
+    # ==================== ENHANCEMENT METHODS FOR COORDINADOR INTEGRATION ====================
+    
+    async def enhance_decision_experience(self, user_id: int, decision_id: int, standard_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhanced decision experience with choice architecture and personalization.
+        
+        Args:
+            user_id: User ID
+            decision_id: Decision ID
+            standard_result: Result from standard workflow
+            
+        Returns:
+            Enhanced experience data
+        """
+        operation = "enhance_decision_experience"
+        
+        # Check if we should use fallback due to performance issues
+        if self.performance_monitor and self.performance_monitor.should_use_fallback(operation):
+            logger.info(f"Using fallback for {operation} due to performance issues")
+            return {}
+        
+        # Use advanced performance optimization if available
+        if self.performance_optimizer:
+            async def _enhancement_operation():
+                return await self._enhance_decision_core(user_id, decision_id, standard_result)
+            
+            result = await self.performance_optimizer.optimize_operation(
+                operation, user_id, _enhancement_operation
+            )
+            return result.get("result", {})
+        elif self.performance_monitor:
+            # Fall back to basic monitoring
+            async def _enhancement_operation():
+                return await self._enhance_decision_core(user_id, decision_id, standard_result)
+            
+            result = await self.performance_monitor.monitor_operation(
+                operation, user_id, _enhancement_operation,
+                cache_ttl=60, use_advanced_optimization=False
+            )
+            return result.get("result", {})
+        else:
+            # Direct execution without optimization
+            return await self._enhance_decision_core(user_id, decision_id, standard_result)
+    
+    async def _enhance_decision_core(self, user_id: int, decision_id: int, standard_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Core decision enhancement logic."""
+        try:
+            if not self.cinema_active:
+                return {}
+            
+            # Get cinema systems
+            choice_architecture = getattr(self, 'choice_architecture', None)
+            soul_signature = getattr(self, 'soul_signature', None)
+            
+            enhanced_data = {}
+            
+            # Soul signature personalization
+            if soul_signature and hasattr(soul_signature, 'get_personalized_response'):
+                try:
+                    personalized_response = await soul_signature.get_personalized_response(
+                        user_id, "decision", {"decision_id": decision_id, "result": standard_result}
+                    )
+                    enhanced_data.update(personalized_response)
+                except Exception as e:
+                    logger.warning(f"Soul signature personalization failed for user {user_id}: {e}")
+            
+            # Choice architecture enhancement
+            if choice_architecture and hasattr(choice_architecture, 'enhance_decision_consequence'):
+                try:
+                    choice_enhancement = await choice_architecture.enhance_decision_consequence(
+                        user_id, decision_id, standard_result
+                    )
+                    enhanced_data.update(choice_enhancement)
+                except Exception as e:
+                    logger.warning(f"Choice architecture enhancement failed for user {user_id}: {e}")
+            
+            # Add cinema signature
+            enhanced_data["cinema_enhanced"] = True
+            enhanced_data["enhancement_timestamp"] = datetime.utcnow().isoformat()
+            
+            return enhanced_data
+            
+        except Exception as e:
+            logger.exception(f"Error in enhance_decision_experience for user {user_id}: {e}")
+            return {}
+    
+    async def enhance_reaction_experience(self, user_id: int, reaction_type: str, standard_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhanced reaction experience with personalized responses.
+        
+        Args:
+            user_id: User ID
+            reaction_type: Type of reaction (emoji)
+            standard_result: Result from standard workflow
+            
+        Returns:
+            Enhanced experience data
+        """
+        try:
+            if not self.cinema_active:
+                return {}
+                
+            enhanced_data = {}
+            
+            # Soul signature personalization for reactions
+            soul_signature = getattr(self, 'soul_signature', None)
+            if soul_signature and hasattr(soul_signature, 'get_personalized_reaction_response'):
+                try:
+                    personalized_reaction = await soul_signature.get_personalized_reaction_response(
+                        user_id, reaction_type, standard_result
+                    )
+                    enhanced_data.update(personalized_reaction)
+                except Exception as e:
+                    logger.warning(f"Personalized reaction failed for user {user_id}: {e}")
+            
+            # Add cinema signature
+            enhanced_data["cinema_enhanced"] = True
+            enhanced_data["enhancement_timestamp"] = datetime.utcnow().isoformat()
+            
+            return enhanced_data
+            
+        except Exception as e:
+            logger.exception(f"Error in enhance_reaction_experience for user {user_id}: {e}")
+            return {}
+    
+    async def enhance_clue_experience(self, user_id: int, piece_code: str, standard_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhanced clue experience with treasure hunting mechanics.
+        
+        Args:
+            user_id: User ID
+            piece_code: Clue piece code
+            standard_result: Result from standard workflow
+            
+        Returns:
+            Enhanced experience data
+        """
+        try:
+            if not self.cinema_active:
+                return {}
+                
+            enhanced_data = {}
+            
+            # Treasure hunting enhancement
+            treasure_hunting = getattr(self, 'treasure_hunting', None)
+            if treasure_hunting and hasattr(treasure_hunting, 'enhance_clue_discovery'):
+                try:
+                    treasure_enhancement = await treasure_hunting.enhance_clue_discovery(
+                        user_id, piece_code, standard_result
+                    )
+                    enhanced_data.update(treasure_enhancement)
+                except Exception as e:
+                    logger.warning(f"Treasure hunting enhancement failed for user {user_id}: {e}")
+            
+            # Soul signature personalization for clues
+            soul_signature = getattr(self, 'soul_signature', None)
+            if soul_signature and hasattr(soul_signature, 'get_personalized_clue_response'):
+                try:
+                    personalized_clue = await soul_signature.get_personalized_clue_response(
+                        user_id, piece_code, standard_result
+                    )
+                    enhanced_data.update(personalized_clue)
+                except Exception as e:
+                    logger.warning(f"Personalized clue response failed for user {user_id}: {e}")
+            
+            # Add cinema signature
+            enhanced_data["cinema_enhanced"] = True
+            enhanced_data["enhancement_timestamp"] = datetime.utcnow().isoformat()
+            
+            return enhanced_data
+            
+        except Exception as e:
+            logger.exception(f"Error in enhance_clue_experience for user {user_id}: {e}")
+            return {}
+    
+    async def enhance_fragment_experience(self, user_id: int, fragment_id: str, standard_result: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Enhanced fragment experience with personalized narrative.
+        
+        Args:
+            user_id: User ID
+            fragment_id: Fragment ID
+            standard_result: Result from standard workflow
+            
+        Returns:
+            Enhanced experience data
+        """
+        try:
+            if not self.cinema_active:
+                return {}
+                
+            enhanced_data = {}
+            
+            # Enhanced narrative personalization
+            enhanced_narrative = getattr(self, 'enhanced_narrative', None)
+            if enhanced_narrative and hasattr(enhanced_narrative, 'personalize_fragment'):
+                try:
+                    narrative_enhancement = await enhanced_narrative.personalize_fragment(
+                        user_id, fragment_id, standard_result
+                    )
+                    enhanced_data.update(narrative_enhancement)
+                except Exception as e:
+                    logger.warning(f"Narrative enhancement failed for user {user_id}: {e}")
+            
+            # Soul signature personalization for fragments
+            soul_signature = getattr(self, 'soul_signature', None)
+            if soul_signature and hasattr(soul_signature, 'get_personalized_fragment_response'):
+                try:
+                    personalized_fragment = await soul_signature.get_personalized_fragment_response(
+                        user_id, fragment_id, standard_result
+                    )
+                    enhanced_data.update(personalized_fragment)
+                except Exception as e:
+                    logger.warning(f"Personalized fragment response failed for user {user_id}: {e}")
+            
+            # Add cinema signature
+            enhanced_data["cinema_enhanced"] = True
+            enhanced_data["enhancement_timestamp"] = datetime.utcnow().isoformat()
+            
+            return enhanced_data
+            
+        except Exception as e:
+            logger.exception(f"Error in enhance_fragment_experience for user {user_id}: {e}")
+            return {}
+    
+    def is_soul_signature_available(self) -> bool:
+        """Check if soul signature personalization is available."""
+        return (
+            self.cinema_active and 
+            hasattr(self, 'soul_signature') and 
+            self.soul_signature is not None
+        )
+    
+    def is_choice_architecture_available(self) -> bool:
+        """Check if choice architecture system is available."""
+        return (
+            self.cinema_active and 
+            hasattr(self, 'choice_architecture') and 
+            self.choice_architecture is not None
+        )
+    
+    def is_treasure_hunting_available(self) -> bool:
+        """Check if treasure hunting system is available."""
+        return (
+            self.cinema_active and 
+            hasattr(self, 'treasure_hunting') and 
+            self.treasure_hunting is not None
+        )
+    
     # ==================== SYSTEM MONITORING AND HEALTH ====================
     
     async def obtener_estado_sistema(self) -> Dict[str, Any]:
@@ -289,9 +597,13 @@ class CinemaMasterIntegration:
             else:
                 cinema_status = {"cinema_active": False}
             
-            # Get performance metrics
+            # Get comprehensive performance metrics
             performance_summary = {}
-            if hasattr(self.cinema_engine, 'performance_optimizer'):
+            if self.performance_optimizer:
+                performance_summary = await self.performance_optimizer.perform_health_check()
+            elif self.performance_monitor:
+                performance_summary = await self.performance_monitor.get_comprehensive_performance_report()
+            elif hasattr(self.cinema_engine, 'performance_optimizer'):
                 performance_summary = self.cinema_engine.performance_optimizer.get_performance_summary()
             
             return {
@@ -315,7 +627,7 @@ class CinemaMasterIntegration:
     
     async def ejecutar_diagnostico_completo(self) -> Dict[str, Any]:
         """
-        Executes comprehensive system diagnostics.
+        Executes comprehensive system diagnostics with performance optimization.
         """
         
         try:
@@ -331,6 +643,14 @@ class CinemaMasterIntegration:
                 diagnostics["enhanced_narrative"] = await self._test_enhanced_narrative_health()
                 diagnostics["integration_bridge"] = await self._test_integration_bridge_health()
             
+            # Advanced performance diagnostics
+            if self.performance_optimizer:
+                performance_health = await self.performance_optimizer.perform_health_check()
+                diagnostics["advanced_performance"] = {
+                    "healthy": performance_health["overall_health"] in ["excellent", "good"],
+                    "details": performance_health
+                }
+            
             # Overall diagnostic result
             all_healthy = all(
                 diag.get("healthy", False) for diag in diagnostics.values()
@@ -340,6 +660,7 @@ class CinemaMasterIntegration:
                 "overall_health": "healthy" if all_healthy else "degraded",
                 "diagnostics": diagnostics,
                 "recommendations": self._generate_health_recommendations(diagnostics),
+                "performance_optimization_available": self.performance_optimizer is not None,
                 "timestamp": datetime.utcnow().isoformat()
             }
             
@@ -503,6 +824,21 @@ class CinemaMasterIntegration:
             ]
         
         return recommendations
+    
+    async def trigger_performance_optimization(self) -> Dict[str, Any]:
+        """
+        Trigger comprehensive performance optimization.
+        """
+        if self.performance_optimizer:
+            return await self.performance_optimizer.trigger_full_system_optimization()
+        elif self.performance_monitor:
+            return await self.performance_monitor.trigger_advanced_optimization()
+        else:
+            return {
+                "success": False,
+                "reason": "No performance optimization systems available",
+                "fallback": "Consider enabling performance optimization modules"
+            }
 
 
 # ==================== GLOBAL CINEMA INTEGRATION INSTANCE ====================
@@ -518,7 +854,8 @@ def get_cinema_master_integration(session: AsyncSession) -> CinemaMasterIntegrat
     return _cinema_master
 
 async def initialize_cinema_master_integration(session: AsyncSession, 
-                                             deployment_mode: str = "safe") -> Dict[str, Any]:
+                                             deployment_mode: str = "safe",
+                                             enable_advanced_optimization: bool = True) -> Dict[str, Any]:
     """
     Main initialization function for the complete Cinema Architecture.
     
@@ -534,7 +871,23 @@ async def initialize_cinema_master_integration(session: AsyncSession,
     
     try:
         cinema_master = get_cinema_master_integration(session)
-        return await cinema_master.initialize_complete_system(deployment_mode)
+        
+        # Initialize with performance optimization
+        init_result = await cinema_master.initialize_complete_system(deployment_mode)
+        
+        # Trigger initial performance optimization if enabled and successful
+        if (enable_advanced_optimization and 
+            init_result.get("success") and 
+            cinema_master.performance_optimizer):
+            
+            try:
+                optimization_result = await cinema_master.trigger_performance_optimization()
+                init_result["initial_optimization"] = optimization_result
+            except Exception as e:
+                logger.warning(f"Initial performance optimization failed: {e}")
+                init_result["initial_optimization_error"] = str(e)
+        
+        return init_result
         
     except Exception as e:
         logger.exception(f"Critical error in Cinema Master Integration initialization: {e}")
