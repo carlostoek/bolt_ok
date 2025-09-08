@@ -545,3 +545,202 @@ class MVPNarrativeProgressionService:
     def _calculate_performance_ms(self, start_time: datetime) -> int:
         """Calculate performance in milliseconds."""
         return int((datetime.utcnow() - start_time).total_seconds() * 1000)
+    
+    async def make_user_choice(self, user_id: int, fragment_id: str, choice_index: int) -> Dict[str, Any]:
+        """
+        Process user choice and advance to next fragment.
+        This method ensures seamless narrative flow after choice selection.
+        
+        Args:
+            user_id: User making the choice
+            fragment_id: Current fragment ID
+            choice_index: Index of selected choice
+            
+        Returns:
+            Dict with success status and current_fragment for next display
+        """
+        start_time = datetime.utcnow()
+        
+        try:
+            logger.info(f"Processing choice for user {user_id}: fragment {fragment_id}, choice {choice_index}")
+            
+            # Get current fragment to validate choice
+            current_fragment = await self.fragment_service.get_user_current_fragment(user_id)
+            
+            if not current_fragment:
+                return {
+                    'success': False,
+                    'error': 'No current fragment found',
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            # Validate that we're on the correct fragment
+            if current_fragment.id != fragment_id:
+                logger.warning(f"Fragment ID mismatch for user {user_id}: expected {fragment_id}, got {current_fragment.id}")
+                # Continue with current fragment (user might be out of sync)
+            
+            # Validate choice is available and fragment supports choices
+            if not current_fragment.is_decision:
+                return {
+                    'success': False,
+                    'error': 'Current fragment is not a decision fragment',
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            if choice_index < 0 or choice_index >= len(current_fragment.choices):
+                return {
+                    'success': False,
+                    'error': 'Invalid choice index',
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            # Process the choice using the fragment service
+            choice_result = await self.fragment_service.process_user_choice(
+                user_id, 
+                choice_index
+            )
+            
+            if not choice_result['success']:
+                return {
+                    'success': False,
+                    'error': choice_result.get('error', 'Choice processing failed'),
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            # Get the next fragment for seamless display
+            next_fragment = choice_result.get('next_fragment')
+            if not next_fragment:
+                # Try to get current fragment after choice processing
+                next_fragment = await self.fragment_service.get_user_current_fragment(user_id)
+            
+            # Update user state and track the choice
+            selected_choice = current_fragment.choices[choice_index]
+            await self._update_user_archetype(
+                user_id, 
+                selected_choice, 
+                None,  # No response time for this method
+                current_fragment
+            )
+            
+            await self.session.commit()
+            
+            performance_ms = self._calculate_performance_ms(start_time)
+            
+            logger.info(
+                f"Choice processed successfully for user {user_id}: "
+                f"{current_fragment.id} -> {next_fragment.id if next_fragment else 'None'} "
+                f"({performance_ms}ms)"
+            )
+            
+            return {
+                'success': True,
+                'current_fragment': next_fragment,
+                'choice_processed': selected_choice,
+                'points_awarded': choice_result.get('points_awarded', 0),
+                'performance_ms': performance_ms,
+                'meets_performance_target': performance_ms < 500
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in make_user_choice for user {user_id}: {e}")
+            await self.session.rollback()
+            return {
+                'success': False,
+                'error': str(e),
+                'performance_ms': self._calculate_performance_ms(start_time)
+            }
+    
+    async def continue_story(self, user_id: int, fragment_id: str) -> Dict[str, Any]:
+        """
+        Continue story to next fragment after current one.
+        Used for non-decision fragments that auto-advance.
+        
+        Args:
+            user_id: User continuing the story
+            fragment_id: Current fragment ID
+            
+        Returns:
+            Dict with success status and current_fragment for next display
+        """
+        start_time = datetime.utcnow()
+        
+        try:
+            logger.info(f"Continuing story for user {user_id} from fragment {fragment_id}")
+            
+            # Get current fragment
+            current_fragment = await self.fragment_service.get_user_current_fragment(user_id)
+            
+            if not current_fragment:
+                return {
+                    'success': False,
+                    'error': 'No current fragment found',
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            # Validate fragment ID matches (or user is slightly out of sync)
+            if current_fragment.id != fragment_id:
+                logger.warning(f"Fragment ID mismatch for user {user_id}: expected {fragment_id}, got {current_fragment.id}")
+                # Continue with current fragment
+            
+            # Check if this is a story fragment that can continue
+            if current_fragment.is_decision:
+                return {
+                    'success': False,
+                    'error': 'Current fragment requires a choice, cannot auto-continue',
+                    'performance_ms': self._calculate_performance_ms(start_time)
+                }
+            
+            # For story fragments, check if there's a natural continuation
+            # In the MVP system, most fragments are decision-based, so continuation
+            # typically means we've reached an end point or need user input
+            
+            # Check if we're at a story endpoint (Level 3 final fragment)
+            user_state = await self.fragment_service._get_or_create_user_state(user_id)
+            
+            # If we're at Level 3 and it's the final story fragment, mark completion
+            if (current_fragment.storyline_level == 3 and 
+                current_fragment.fragment_type == 'STORY' and
+                'level_completion' in current_fragment.triggers):
+                
+                performance_ms = self._calculate_performance_ms(start_time)
+                logger.info(f"Story completion reached for user {user_id} at fragment {fragment_id} ({performance_ms}ms)")
+                
+                # Award completion points if available
+                completion_points = current_fragment.triggers.get('reward_points', 0)
+                if completion_points > 0:
+                    await self.point_service.add_points(
+                        user_id, 
+                        completion_points, 
+                        f"Completado: {current_fragment.title}"
+                    )
+                
+                return {
+                    'success': False,
+                    'error': 'Story path completed',
+                    'end_of_story': True,
+                    'completion_reached': True,
+                    'points_awarded': completion_points,
+                    'performance_ms': performance_ms
+                }
+            
+            # For other cases, there's no automatic advancement - user needs to return to main flow
+            performance_ms = self._calculate_performance_ms(start_time)
+            logger.info(f"No automatic continuation available for user {user_id} at fragment {fragment_id} ({performance_ms}ms)")
+            
+            return {
+                'success': False,
+                'error': 'No automatic continuation available',
+                'end_of_story': False,
+                'requires_user_action': True,
+                'current_fragment': current_fragment,  # Return current fragment for reference
+                'performance_ms': performance_ms
+            }
+            
+        except Exception as e:
+            logger.error(f"Error in continue_story for user {user_id}: {e}")
+            await self.session.rollback()
+            return {
+                'success': False,
+                'error': str(e),
+                'performance_ms': self._calculate_performance_ms(start_time)
+            }
