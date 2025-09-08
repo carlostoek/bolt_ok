@@ -34,6 +34,17 @@ class UserNarrativeService(IUserNarrativeService):
         """
         self.session = session
         self.reward_system = reward_system
+        
+        # Optional Cinema System Integration
+        self.cinema_master = None
+        try:
+            from .cinema_master_integration import get_cinema_master_integration
+            self.cinema_master = get_cinema_master_integration(session)
+            logger.info("Cinema Master Integration available for UserNarrativeService")
+        except ImportError:
+            logger.info("Cinema Master Integration not available for UserNarrativeService")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Cinema Master Integration: {e}")
 
     async def get_or_create_user_state(self, user_id: int) -> UserNarrativeState:
         """Obtiene o crea el estado narrativo de un usuario.
@@ -288,3 +299,154 @@ class UserNarrativeService(IUserNarrativeService):
         await self.session.refresh(state)
         
         return state
+
+    # ==================== CINEMA ENHANCED METHODS ====================
+    
+    async def get_user_state_enhanced(self, user_id: int) -> Dict[str, Any]:
+        """
+        Enhanced user state retrieval with soul signature personalization.
+        Falls back to standard functionality if cinema systems unavailable.
+        
+        Args:
+            user_id: User ID
+            
+        Returns:
+            Enhanced user state data with personalization if available
+        """
+        try:
+            # Get standard user state
+            standard_state = await self.get_or_create_user_state(user_id)
+            
+            result = {
+                "user_id": user_id,
+                "current_fragment_id": standard_state.current_fragment_id,
+                "completed_fragments": standard_state.completed_fragments,
+                "unlocked_clues": standard_state.unlocked_clues,
+                "visited_fragments": standard_state.visited_fragments,
+                "enhanced": False
+            }
+            
+            # Try cinema enhancement
+            if self.cinema_master and self.cinema_master.is_soul_signature_available():
+                try:
+                    # Get soul signature personalization
+                    soul_signature = getattr(self.cinema_master, 'soul_signature', None)
+                    if soul_signature and hasattr(soul_signature, 'get_user_personalization_profile'):
+                        personalization = await soul_signature.get_user_personalization_profile(user_id)
+                        result.update({
+                            "personalization_profile": personalization,
+                            "enhanced": True,
+                            "enhancement_type": "soul_signature"
+                        })
+                except Exception as e:
+                    logger.warning(f"Soul signature enhancement failed for user {user_id}: {e}")
+            
+            return result
+            
+        except Exception as e:
+            logger.exception(f"Error in get_user_state_enhanced for user {user_id}: {e}")
+            # Fallback to standard state
+            standard_state = await self.get_or_create_user_state(user_id)
+            return {
+                "user_id": user_id,
+                "current_fragment_id": standard_state.current_fragment_id,
+                "completed_fragments": standard_state.completed_fragments,
+                "unlocked_clues": standard_state.unlocked_clues,
+                "visited_fragments": standard_state.visited_fragments,
+                "enhanced": False,
+                "fallback_used": True,
+                "error": str(e)
+            }
+    
+    async def advance_narrative_enhanced(self, user_id: int, fragment_id: str, **kwargs) -> Dict[str, Any]:
+        """
+        Enhanced narrative advancement with cinema integration.
+        
+        Args:
+            user_id: User ID
+            fragment_id: Fragment to advance to
+            **kwargs: Additional parameters for cinema enhancement
+            
+        Returns:
+            Enhanced advancement result
+        """
+        try:
+            # Execute standard advancement
+            standard_result = await self.advance_narrative(user_id, fragment_id)
+            
+            result = {
+                "success": True,
+                "user_state": standard_result,
+                "enhanced": False
+            }
+            
+            # Try cinema enhancement
+            if self.cinema_master and self.cinema_master.cinema_active:
+                try:
+                    enhanced_result = await self.cinema_master.enhance_fragment_experience(
+                        user_id, fragment_id, result
+                    )
+                    if enhanced_result:
+                        result.update(enhanced_result)
+                        result["enhanced"] = True
+                except Exception as e:
+                    logger.warning(f"Cinema enhancement failed for narrative advancement: {e}")
+            
+            return result
+            
+        except Exception as e:
+            logger.exception(f"Error in advance_narrative_enhanced for user {user_id}: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "enhanced": False,
+                "fallback_available": True
+            }
+    
+    async def get_personalized_fragments(self, user_id: int, fragment_type: str = None) -> List[Dict[str, Any]]:
+        """
+        Get fragments personalized for the user's soul signature.
+        
+        Args:
+            user_id: User ID
+            fragment_type: Optional type filter
+            
+        Returns:
+            List of personalized fragments
+        """
+        try:
+            # Get available fragments (standard functionality)
+            fragments = await self.get_available_fragments(user_id)
+            
+            # If no cinema enhancement, return standard fragments
+            if not self.cinema_master or not self.cinema_master.is_soul_signature_available():
+                return [{"fragment": f, "personalized": False} for f in fragments]
+            
+            # Apply soul signature personalization
+            personalized_fragments = []
+            soul_signature = getattr(self.cinema_master, 'soul_signature', None)
+            
+            for fragment in fragments:
+                fragment_data = {"fragment": fragment, "personalized": False}
+                
+                if soul_signature and hasattr(soul_signature, 'personalize_fragment_preview'):
+                    try:
+                        personalization = await soul_signature.personalize_fragment_preview(
+                            user_id, fragment.id, fragment_type
+                        )
+                        fragment_data.update({
+                            "personalization": personalization,
+                            "personalized": True
+                        })
+                    except Exception as e:
+                        logger.warning(f"Fragment personalization failed for fragment {fragment.id}: {e}")
+                
+                personalized_fragments.append(fragment_data)
+            
+            return personalized_fragments
+            
+        except Exception as e:
+            logger.exception(f"Error in get_personalized_fragments for user {user_id}: {e}")
+            # Fallback to standard fragments
+            fragments = await self.get_available_fragments(user_id)
+            return [{"fragment": f, "personalized": False, "error": str(e)} for f in fragments]
