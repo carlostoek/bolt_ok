@@ -271,10 +271,10 @@ class DianaChoiceEngine:
             
             # Validar consistencia de carácter
             if self.character_validator:
-                validation_result = await self.character_validator.validate_response(
-                    personalized_callback, user_id, "memory_callback"
+                validation_result = await self.character_validator.validate_text(
+                    personalized_callback, context="memory_callback"
                 )
-                if validation_result['consistency_score'] < 95:
+                if validation_result.overall_score < 95:
                     logger.warning(f"Memory callback failed character validation: {validation_result}")
                     return None
             
@@ -467,10 +467,10 @@ class DianaChoiceEngine:
         # Validar consistencia de carácter
         consistency_score = 95  # Default
         if self.character_validator:
-            validation = await self.character_validator.validate_response(
-                personalized_response, choice_context.user_id, "choice_response"
+            validation = await self.character_validator.validate_text(
+                personalized_response, context="choice_response"
             )
-            consistency_score = validation.get('consistency_score', 95)
+            consistency_score = validation.overall_score
         
         return {
             "text": personalized_response,

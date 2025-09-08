@@ -33,7 +33,7 @@ from datetime import datetime, timedelta
 import json
 import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select, update
+from sqlalchemy import select, update
 from sqlalchemy import and_, func, desc
 
 # Your existing system imports
@@ -58,7 +58,7 @@ from services.emotional_morphine_dosification_system import (
 
 # Choice Architecture imports
 from services.choice_architecture_masterpiece import ChoiceArchitectureMasterpiece
-from services.crescendo_choice_integration import CrescendoChoiceIntegration
+from services.crescendo_choice_integration import CrescendoChoiceIntegrationSystem
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +112,7 @@ class ClueTreasureHuntingMasterOrchestrator:
         session: AsyncSession,
         user_narrative_service: UserNarrativeService,
         choice_architecture: ChoiceArchitectureMasterpiece,
-        crescendo_integration: CrescendoChoiceIntegration,
+        crescendo_integration: CrescendoChoiceIntegrationSystem,
         config: TreasureHuntingOrchestratorConfig = None
     ):
         self.session = session

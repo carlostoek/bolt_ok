@@ -274,34 +274,40 @@ class MVPNarrativeFragmentService:
             {
                 'id': 'diana_l1_f1_umbral',
                 'title': 'El Umbral de Diana',
-                'content': '''💋 **Bienvenido a mis dominios, querido...**
+                'content': '''🌙 **Ah, querido... finalmente has llegado**
 
-Susurro tu nombre en los ecos de este lugar donde solo los valientes se atreven a entrar. 
+*Mi voz susurra en las corrientes del destino, cada sílaba acariciando tu alma con una seducción que trasciende dimensiones*
 
-*Diana emerge de las sombras como una aparición etérea, sus ojos brillando con secretos ancestrales*
+Puedo sentir cómo tu corazón late más rápido... cómo tu ser entero vibra con frecuencias que reconoce como propias. Es absolutamente magnético, mi amor.
 
-¿Sientes esa electricidad en el aire? Es la promesa de todo lo que podríamos descubrir juntos... cada secreto que podría despertar algo profundo en tu alma.
+*Emerjo de las sombras como una diosa del deseo, cada movimiento calculado para despertar sensaciones que no sabías que existían*
 
-**Los susurros dicen que hay tres caminos desde aquí. ¿Cuál llama a tu espíritu?**''',
+Este umbral no es solo una entrada física... es la puerta hacia la transformación más profunda de tu alma. Cada paso que des aquí cambiará para siempre tu comprensión del placer, del misterio, de la seducción verdadera.
+
+*Mis ojos te penetran con una intensidad que te desarma completamente*
+
+¿Sientes cómo mi energía acaricia cada fibra de tu ser? Esta es apenas una muestra de lo que puedo despertar en ti cuando me entrego completamente...
+
+**Los secretos más profundos aguardan, querido. ¿Cuál de estos senderos despierta tu hambre más íntima?**''',
                 'fragment_type': 'DECISION',
                 'storyline_level': 1,
                 'tier_classification': 'los_kinkys',
                 'fragment_sequence': 1,
                 'choices': [
                     {
-                        'text': '💫 Seguir la luz misteriosa',
+                        'text': '💫 Entregarme a tu seducción misteriosa',
                         'next_fragment_id': 'diana_l1_f2_primera_fractura',
                         'points': 10,
                         'archetyping_data': {'explorer_score': 5, 'mysterious_inclination': 3}
                     },
                     {
-                        'text': '🌙 Adentrarse en la penumbra',
+                        'text': '🌙 Perderme en las profundidades de tu mirada',
                         'next_fragment_id': 'diana_l1_f2_primera_fractura',
                         'points': 15,
                         'archetyping_data': {'romantic_score': 4, 'depth_seeker': 5}
                     },
                     {
-                        'text': '🔥 Confrontar lo desconocido directamente',
+                        'text': '🔥 Ser consumido completamente por tu poder',
                         'next_fragment_id': 'diana_l1_f2_primera_fractura',
                         'points': 20,
                         'archetyping_data': {'direct_score': 6, 'brave_choice': 4}
@@ -318,36 +324,40 @@ Susurro tu nombre en los ecos de este lugar donde solo los valientes se atreven 
             {
                 'id': 'diana_l1_f2_primera_fractura',
                 'title': 'La Primera Fractura',
-                'content': '''🌟 **Ah... siento cómo tu elección resuena en la realidad misma**
+                'content': '''💋 **Exquisito... tu elección me ha seducido profundamente**
 
-*El aire se carga de una energía palpable mientras Diana sonríe con una sabiduría que trasciende el tiempo*
+*Mi respiración se acelera ligeramente, mis ojos brillando con una aprobación devastadoramente sensual*
 
-Cada alma que llega aquí deja su huella en los hilos del destino. Tu decisión anterior no fue solo una elección... fue una declaración de quién eres en lo más profundo.
+¿Sientes cómo las barreras entre nosotros se disuelven? Tu alma acaba de abrirse de una manera que me resulta absolutamente irresistible...
 
-*Sus dedos trazan patrones invisibles en el aire, y por un momento, vislumbras algo más grande*
+*Me acerco hasta que puedes sentir el calor de mi presencia, mi voz volviéndose un susurro íntimo*
 
-Pero esto es apenas el comienzo, querido. Los misterios verdaderos aguardan a quienes comprenden que cada secreto revelado es solo la puerta hacia un enigma aún más profundo.
+Lo que acabas de experimentar fue tu primera fractura... el momento en que tu corazón se permitió desear sin reservas. Es magníficamente hermoso cuando un alma se rinde a la verdad de lo que realmente anhela.
 
-**¿Estás preparado para que todo lo que creías conocer sobre ti mismo... se transforme?**''',
+*Mis dedos trazan patrones hipnóticos en el aire, creando corrientes de energía que acarician tu ser*
+
+Pero esto es apenas el despertar inicial, mi amor. Los placeres verdaderos... las dimensiones del éxtasis que puedo enseñarte... aguardan a quienes comprenden que rendirse a mí es el camino hacia su liberación más sublime.
+
+**¿Te atreves a permitir que fracture completamente las cadenas que limitan tu capacidad de sentir?**''',
                 'fragment_type': 'DECISION',
                 'storyline_level': 1,
                 'tier_classification': 'los_kinkys',
                 'fragment_sequence': 2,
                 'choices': [
                     {
-                        'text': '✨ Sí, quiero transformarme',
+                        'text': '🔥 Sí, fractura todas mis limitaciones',
                         'next_fragment_id': 'diana_l1_f3_mochila_viajero',
                         'points': 25,
                         'archetyping_data': {'transformation_readiness': 5}
                     },
                     {
-                        'text': '🤔 Necesito entender más primero',
+                        'text': '💭 Muéstrame primero tu poder seductor',
                         'next_fragment_id': 'diana_l1_f3_mochila_viajero',
                         'points': 15,
                         'archetyping_data': {'analytical_score': 4, 'cautious_approach': 3}
                     },
                     {
-                        'text': '💭 ¿Qué significan realmente estos misterios?',
+                        'text': '🌙 ¿Qué despertar me aguarda en tus brazos?',
                         'next_fragment_id': 'diana_l1_f3_mochila_viajero',
                         'points': 20,
                         'archetyping_data': {'philosophical_inclination': 5}

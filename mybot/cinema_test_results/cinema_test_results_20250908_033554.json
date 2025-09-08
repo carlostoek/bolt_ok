@@ -1,0 +1,85 @@
+{
+  "execution_metadata": {
+    "start_time": "2025-09-08T03:35:37.878679",
+    "end_time": "2025-09-08T03:35:54.771576",
+    "total_execution_time": 16.892857313156128,
+    "test_environment": "cinema_architecture_validation",
+    "python_version": "3.12.3 (main, Aug 14 2025, 17:47:21) [GCC 13.3.0]"
+  },
+  "suite_results": [
+    {
+      "suite_name": "integration_tests",
+      "execution_time": 4.1621925830841064,
+      "exit_code": 4,
+      "passed": false,
+      "stdout": "",
+      "stderr": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/integration_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n"
+    },
+    {
+      "suite_name": "performance_tests",
+      "execution_time": 4.181631326675415,
+      "exit_code": 4,
+      "passed": false,
+      "stdout": "",
+      "stderr": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/performance_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n"
+    },
+    {
+      "suite_name": "regression_tests",
+      "execution_time": 4.223144292831421,
+      "exit_code": 4,
+      "passed": false,
+      "stdout": "",
+      "stderr": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/regression_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n"
+    },
+    {
+      "suite_name": "character_tests",
+      "execution_time": 4.324626684188843,
+      "exit_code": 4,
+      "passed": false,
+      "stdout": "",
+      "stderr": "ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/character_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n"
+    }
+  ],
+  "performance_metrics": {
+    "integration_tests_execution_time": 4.1621925830841064,
+    "performance_tests_execution_time": 4.181631326675415,
+    "regression_tests_execution_time": 4.223144292831421,
+    "character_tests_execution_time": 4.324626684188843
+  },
+  "overall_status": {
+    "overall_status": "FAIL",
+    "production_ready": false,
+    "suites_total": 4,
+    "suites_passed": 0,
+    "suites_failed": 4,
+    "tests_total": 0,
+    "tests_passed": 0,
+    "tests_failed": 0,
+    "tests_errors": 0,
+    "pass_rate": 0
+  },
+  "execution_log": [
+    "[03:35:37] \ud83c\udfac CINEMA ARCHITECTURE COMPREHENSIVE TEST EXECUTION STARTING",
+    "[03:35:37] ================================================================================",
+    "[03:35:37] \n\ud83d\udccb Executing Cinema Integration Testing...",
+    "[03:35:37] Starting integration_tests test suite...",
+    "[03:35:42] \u274c integration_tests test suite FAILED (4.16s)",
+    "[03:35:42] STDOUT: ",
+    "[03:35:42] STDERR: ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/integration_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n",
+    "[03:35:42] \n\ud83d\udccb Executing Performance & Scalability Validation...",
+    "[03:35:42] Starting performance_tests test suite...",
+    "[03:35:46] \u274c performance_tests test suite FAILED (4.18s)",
+    "[03:35:46] STDOUT: ",
+    "[03:35:46] STDERR: ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/performance_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n",
+    "[03:35:46] \n\ud83d\udccb Executing Regression Protection Suite...",
+    "[03:35:46] Starting regression_tests test suite...",
+    "[03:35:50] \u274c regression_tests test suite FAILED (4.22s)",
+    "[03:35:50] STDOUT: ",
+    "[03:35:50] STDERR: ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/regression_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n",
+    "[03:35:50] \n\ud83d\udccb Executing Character Consistency Validation...",
+    "[03:35:50] Starting character_tests test suite...",
+    "[03:35:54] \u274c character_tests test suite FAILED (4.32s)",
+    "[03:35:54] STDOUT: ",
+    "[03:35:54] STDERR: ERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --json-report --json-report-file=cinema_test_reports/character_tests_report.json\n  inifile: /home/azureuser/repos/bolt_ok/mybot/pytest.ini\n  rootdir: /home/azureuser/repos/bolt_ok/mybot\n\n"
+  ]
+}

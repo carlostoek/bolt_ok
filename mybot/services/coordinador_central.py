@@ -79,15 +79,23 @@ class CoordinadorCentral:
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
         
-        # Optional Cinema Master Integration
+        # Optional Cinema Master Integration - using lazy initialization to prevent recursion
         self.cinema_master = None
-        if CINEMA_AVAILABLE and CinemaMasterIntegration:
+        self._cinema_master_initialized = False
+    
+    def _get_cinema_master(self):
+        """Lazily initialize Cinema Master Integration to prevent recursion."""
+        if not self._cinema_master_initialized and CINEMA_AVAILABLE and CinemaMasterIntegration:
             try:
-                self.cinema_master = CinemaMasterIntegration(session)
+                # Pass self to prevent CinemaMasterIntegration from creating a new CoordinadorCentral
+                self.cinema_master = CinemaMasterIntegration(self.session, coordinador_central=self)
                 logger.info("Cinema Master Integration initialized successfully")
             except Exception as e:
                 logger.warning(f"Failed to initialize Cinema Master Integration: {e}. Continuing with standard functionality.")
                 self.cinema_master = None
+            finally:
+                self._cinema_master_initialized = True
+        return self.cinema_master
     
     async def ejecutar_flujo(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
         """
@@ -527,7 +535,8 @@ class CoordinadorCentral:
             Dict con los resultados del flujo y mensajes para el usuario
         """
         # Try cinema-enhanced workflow first
-        if self.cinema_master:
+        cinema_master = self._get_cinema_master()
+        if cinema_master:
             try:
                 cinema_result = await self._execute_cinema_enhanced_workflow(user_id, accion, **kwargs)
                 if cinema_result and cinema_result.get("success") is not False:
@@ -555,7 +564,8 @@ class CoordinadorCentral:
             Enhanced workflow result or None if cinema enhancement not applicable
         """
         try:
-            if not self.cinema_master:
+            cinema_master = self._get_cinema_master()
+            if not cinema_master:
                 return None
             
             # Route to appropriate cinema enhancement based on action
@@ -585,11 +595,15 @@ class CoordinadorCentral:
                 return standard_result
             
             # Enhance with cinema systems
-            enhanced_result = await self.cinema_master.enhance_decision_experience(
-                user_id, 
-                kwargs.get("decision_id"), 
-                standard_result
-            )
+            cinema_master = self._get_cinema_master()
+            if cinema_master:
+                enhanced_result = await cinema_master.enhance_decision_experience(
+                    user_id, 
+                    kwargs.get("decision_id"), 
+                    standard_result
+                )
+            else:
+                enhanced_result = {}
             
             # Merge results, preferring enhanced where available
             final_result = {**standard_result, **enhanced_result}
@@ -611,11 +625,15 @@ class CoordinadorCentral:
                 return standard_result
             
             # Enhance with cinema systems
-            enhanced_result = await self.cinema_master.enhance_reaction_experience(
-                user_id,
-                kwargs.get("reaction_type"),
-                standard_result
-            )
+            cinema_master = self._get_cinema_master()
+            if cinema_master:
+                enhanced_result = await cinema_master.enhance_reaction_experience(
+                    user_id,
+                    kwargs.get("reaction_type"),
+                    standard_result
+                )
+            else:
+                enhanced_result = {}
             
             # Merge results
             final_result = {**standard_result, **enhanced_result}
@@ -637,11 +655,15 @@ class CoordinadorCentral:
                 return standard_result
             
             # Enhance with cinema systems
-            enhanced_result = await self.cinema_master.enhance_clue_experience(
-                user_id,
-                kwargs.get("piece_code"),
-                standard_result
-            )
+            cinema_master = self._get_cinema_master()
+            if cinema_master:
+                enhanced_result = await cinema_master.enhance_clue_experience(
+                    user_id,
+                    kwargs.get("piece_code"),
+                    standard_result
+                )
+            else:
+                enhanced_result = {}
             
             # Merge results
             final_result = {**standard_result, **enhanced_result}
@@ -663,11 +685,15 @@ class CoordinadorCentral:
                 return standard_result
             
             # Enhance with cinema systems
-            enhanced_result = await self.cinema_master.enhance_fragment_experience(
-                user_id,
-                kwargs.get("fragment_id"),
-                standard_result
-            )
+            cinema_master = self._get_cinema_master()
+            if cinema_master:
+                enhanced_result = await cinema_master.enhance_fragment_experience(
+                    user_id,
+                    kwargs.get("fragment_id"),
+                    standard_result
+                )
+            else:
+                enhanced_result = {}
             
             # Merge results
             final_result = {**standard_result, **enhanced_result}
@@ -681,18 +707,20 @@ class CoordinadorCentral:
     
     def is_cinema_available(self) -> bool:
         """Check if cinema systems are available and initialized."""
-        return self.cinema_master is not None
+        cinema_master = self._get_cinema_master()
+        return cinema_master is not None
     
     def get_cinema_status(self) -> Dict[str, Any]:
         """Get status of cinema integration systems."""
+        cinema_master = self._get_cinema_master()
         return {
             "cinema_available": CINEMA_AVAILABLE,
-            "cinema_master_initialized": self.cinema_master is not None,
+            "cinema_master_initialized": cinema_master is not None,
             "cinema_components": {
-                "soul_signature": self.cinema_master.is_soul_signature_available() if self.cinema_master else False,
-                "choice_architecture": self.cinema_master.is_choice_architecture_available() if self.cinema_master else False,
-                "treasure_hunting": self.cinema_master.is_treasure_hunting_available() if self.cinema_master else False
-            } if self.cinema_master else {}
+                "soul_signature": cinema_master.is_soul_signature_available() if cinema_master else False,
+                "choice_architecture": cinema_master.is_choice_architecture_available() if cinema_master else False,
+                "treasure_hunting": cinema_master.is_treasure_hunting_available() if cinema_master else False
+            } if cinema_master else {}
         }
     
     async def _emit_workflow_events(self, user_id: int, accion: AccionUsuario, 

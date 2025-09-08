@@ -34,7 +34,7 @@ import math
 import random
 from statistics import mean
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select, update
+from sqlalchemy import select, update
 from sqlalchemy import and_, func, desc
 
 # Your existing system imports
@@ -46,7 +46,7 @@ from database.narrative_unified import (
 )
 from database.models import User, LorePiece, UserLorePiece
 from services.choice_architecture_masterpiece import ChoiceArchitectureMasterpiece
-from services.crescendo_choice_integration import CrescendoChoiceIntegration
+from services.crescendo_choice_integration import CrescendoChoiceIntegrationSystem
 from services.user_narrative_service import UserNarrativeService
 
 logger = logging.getLogger(__name__)
@@ -110,7 +110,7 @@ class ClueTreasureHuntingCinemaIntegration:
         session: AsyncSession,
         user_narrative_service: UserNarrativeService,
         choice_architecture: ChoiceArchitectureMasterpiece,
-        crescendo_integration: CrescendoChoiceIntegration
+        crescendo_integration: CrescendoChoiceIntegrationSystem
     ):
         self.session = session
         self.user_narrative_service = user_narrative_service

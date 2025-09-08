@@ -92,6 +92,12 @@ class EnhancedDianaMenuSystem:
         self._user_service = None  # Will be loaded from registry
         self._character_validator = None  # Will be loaded from registry
         
+        # CINEMA ARCHITECTURE INTEGRATION - Graceful fallback if unavailable
+        self._coordinador_central = None
+        self._cinema_master = None
+        self._cinema_available = False
+        self._cinema_initialized = False
+        
         # Performance tracking and optimization
         self.performance_metrics = {}
         self.menu_generation_cache = {}  # High-speed menu generation cache
@@ -602,6 +608,37 @@ class EnhancedDianaMenuSystem:
             
             personalized_text = base_text
             
+            # CINEMA ARCHITECTURE: Soul Signature Personalization Integration
+            if self.is_cinema_available():
+                cinema_master = self._get_cinema_master()
+                if cinema_master and hasattr(cinema_master, '_get_soul_signature'):
+                    try:
+                        soul_signature = cinema_master._get_soul_signature()
+                        if soul_signature and hasattr(soul_signature, 'get_personalized_response'):
+                            cinema_enhancement = await soul_signature.get_personalized_response(
+                                user_id, 
+                                "main_menu", 
+                                {
+                                    "narrative_state": narrative_state,
+                                    "base_text": base_text,
+                                    "total_interactions": total_interactions,
+                                    "completed_fragments": completed_fragments,
+                                    "current_level": current_level
+                                }
+                            )
+                            
+                            if cinema_enhancement.get("personalized_text"):
+                                personalized_text = cinema_enhancement["personalized_text"]
+                                logger.debug(f"✨ Soul Signature personalization applied for user {user_id}")
+                            elif cinema_enhancement.get("enhancement_text"):
+                                # Add enhancement as subtle addition
+                                personalized_text = f"{personalized_text}\n\n{cinema_enhancement['enhancement_text']}"
+                                logger.debug(f"✨ Soul Signature enhancement added for user {user_id}")
+                                
+                    except Exception as e:
+                        logger.warning(f"Soul Signature personalization failed for user {user_id}: {e}")
+                        # Continue with standard personalization
+            
             # Add behavioral recognition for returning users
             if total_interactions > 5:
                 if current_level >= 2:
@@ -647,7 +684,7 @@ class EnhancedDianaMenuSystem:
         try:
             character_validator = await self._get_character_validator_fast()
             if character_validator:
-                result = await character_validator.validate_response(text, {"context": "dynamic_menu"})
+                result = await character_validator.validate_text(text, context="dynamic_menu")
                 return result.overall_score
             
             # Fallback score for dynamic content 
@@ -1719,11 +1756,32 @@ class EnhancedDianaMenuSystem:
                 import time as time_module
                 choice_start = time_module.time()
                 
+                # CINEMA ARCHITECTURE: Choice Architecture Integration
+                choice_context = {'menu_source': 'diana_menu'}
+                
+                if self.is_cinema_available():
+                    cinema_master = self._get_cinema_master()
+                    if cinema_master and hasattr(cinema_master, '_get_choice_architecture'):
+                        try:
+                            choice_architecture = cinema_master._get_choice_architecture()
+                            if choice_architecture and hasattr(choice_architecture, 'enhance_choice_processing'):
+                                # Get enhanced choice context
+                                enhanced_context = await choice_architecture.enhance_choice_processing(
+                                    user_id, choice_index, choice_context
+                                )
+                                if enhanced_context:
+                                    choice_context.update(enhanced_context)
+                                    choice_context['cinema_enhanced'] = True
+                                    logger.debug(f"✨ Choice Architecture enhancement applied for user {user_id}, choice {choice_index}")
+                        except Exception as e:
+                            logger.warning(f"Choice Architecture enhancement failed for user {user_id}: {e}")
+                            # Continue with standard choice processing
+                
                 choice_result = await narrative_service.process_user_choice_advanced(
                     user_id, 
                     choice_index,
                     response_time_ms=None,  # Could track from user interaction
-                    additional_context={'menu_source': 'diana_menu'}
+                    additional_context=choice_context
                 )
                 
                 if choice_result['success']:
@@ -2507,6 +2565,51 @@ class EnhancedDianaMenuSystem:
                 raise
         return self._base_menu_system
     
+    def _get_coordinador_central(self):
+        """Get CoordinadorCentral instance with Cinema integration."""
+        if self._coordinador_central is None:
+            self._validate_session()
+            try:
+                from services.coordinador_central import CoordinadorCentral
+                self._coordinador_central = CoordinadorCentral(self.session)
+                logger.info("CoordinadorCentral initialized for Diana menu system")
+            except Exception as e:
+                logger.warning(f"Failed to initialize CoordinadorCentral: {e}")
+                self._coordinador_central = None
+        return self._coordinador_central
+    
+    def _get_cinema_master(self):
+        """Get Cinema Master Integration with graceful fallback."""
+        if not self._cinema_initialized:
+            coordinador = self._get_coordinador_central()
+            if coordinador:
+                try:
+                    # Cinema master is initialized by coordinador
+                    self._cinema_master = coordinador._get_cinema_master()
+                    self._cinema_available = coordinador.is_cinema_available()
+                    if self._cinema_available:
+                        logger.info("✨ Cinema Architecture integrated with Diana menu system")
+                    else:
+                        logger.info("Cinema Architecture not available - using standard mode")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize Cinema Architecture: {e}")
+                    self._cinema_master = None
+                    self._cinema_available = False
+            else:
+                logger.warning("CoordinadorCentral not available - Cinema Architecture disabled")
+                self._cinema_master = None
+                self._cinema_available = False
+            
+            self._cinema_initialized = True
+            
+        return self._cinema_master
+    
+    def is_cinema_available(self) -> bool:
+        """Check if Cinema Architecture is available."""
+        if not self._cinema_initialized:
+            self._get_cinema_master()
+        return self._cinema_available
+    
     @property
     def user_service(self) -> EnhancedUserService:
         """Lazy-loaded user service property."""
@@ -2558,6 +2661,37 @@ class EnhancedDianaMenuSystem:
             narrative_text += f"📍 Nivel: {current_level} - {current_tier_name}\n"
             narrative_text += f"📊 Avance: {progress_percentage:.1f}% del camino recorrido\n"
             narrative_text += f"🎭 Esencia: {dominant_archetype.title()}\n\n"
+            
+            # CINEMA ARCHITECTURE: Progressive Revelation System Integration
+            if self.is_cinema_available():
+                cinema_master = self._get_cinema_master()
+                if cinema_master and hasattr(cinema_master, '_get_enhanced_narrative'):
+                    try:
+                        enhanced_narrative = cinema_master._get_enhanced_narrative()
+                        if enhanced_narrative and hasattr(enhanced_narrative, 'enhance_narrative_revelation'):
+                            # Get enhanced narrative revelation
+                            revelation_enhancement = await enhanced_narrative.enhance_narrative_revelation(
+                                fragment.id if fragment else None,
+                                {
+                                    "progress_summary": progress_summary,
+                                    "archetype": dominant_archetype,
+                                    "current_level": current_level,
+                                    "progress_percentage": progress_percentage
+                                }
+                            )
+                            
+                            if revelation_enhancement.get("enhanced_archetype_touch"):
+                                archetype_touch = revelation_enhancement["enhanced_archetype_touch"]
+                                logger.debug(f"✨ Progressive Revelation enhanced archetype touch for fragment {fragment.id if fragment else 'None'}")
+                            elif revelation_enhancement.get("revelation_addition"):
+                                # Add revelation as additional insight
+                                archetype_touch = f"{archetype_touch}\n\n{revelation_enhancement['revelation_addition']}"
+                                logger.debug(f"✨ Progressive Revelation added insight for fragment {fragment.id if fragment else 'None'}")
+                                
+                    except Exception as e:
+                        logger.warning(f"Progressive Revelation enhancement failed: {e}")
+                        # Continue with standard text
+            
             narrative_text += f"💫 {archetype_touch}\n\n"
             
             # Add current fragment info

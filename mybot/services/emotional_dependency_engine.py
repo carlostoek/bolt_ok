@@ -35,7 +35,7 @@ import random
 import math
 from statistics import mean, median
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select, update
+from sqlalchemy import select, update
 from sqlalchemy import and_, func, desc
 
 from database.narrative_unified import (
