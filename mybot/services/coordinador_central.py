@@ -24,6 +24,16 @@ from .unified_mission_service import UnifiedMissionService
 
 logger = logging.getLogger(__name__)
 
+# Optional Cinema System Imports - Graceful fallback if unavailable
+try:
+    from .cinema_master_integration import CinemaMasterIntegration
+    CINEMA_AVAILABLE = True
+    logger.info("Cinema Master Integration successfully imported")
+except ImportError as e:
+    logger.info(f"Cinema systems not available: {e}. Operating in standard mode.")
+    CINEMA_AVAILABLE = False
+    CinemaMasterIntegration = None
+
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
     REACCIONAR_PUBLICACION_NATIVA = "reaccionar_publicacion_nativa"
@@ -68,6 +78,16 @@ class CoordinadorCentral:
         self.unified_mission_service = UnifiedMissionService(session)
         # Event bus for inter-module communication
         self.event_bus = get_event_bus()
+        
+        # Optional Cinema Master Integration
+        self.cinema_master = None
+        if CINEMA_AVAILABLE and CinemaMasterIntegration:
+            try:
+                self.cinema_master = CinemaMasterIntegration(session)
+                logger.info("Cinema Master Integration initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Cinema Master Integration: {e}. Continuing with standard functionality.")
+                self.cinema_master = None
     
     async def ejecutar_flujo(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
         """
@@ -490,6 +510,190 @@ class CoordinadorCentral:
                 processed_results.append(result)
         
         return processed_results
+    
+    # ==================== CINEMA INTEGRATION METHODS ====================
+    
+    async def ejecutar_flujo_cinematico(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
+        """
+        Enhanced workflow execution with optional cinema integration.
+        Falls back to standard workflow if cinema systems are unavailable.
+        
+        Args:
+            user_id: ID del usuario de Telegram
+            accion: Tipo de acción realizada por el usuario
+            **kwargs: Parámetros adicionales específicos de la acción
+            
+        Returns:
+            Dict con los resultados del flujo y mensajes para el usuario
+        """
+        # Try cinema-enhanced workflow first
+        if self.cinema_master:
+            try:
+                cinema_result = await self._execute_cinema_enhanced_workflow(user_id, accion, **kwargs)
+                if cinema_result and cinema_result.get("success") is not False:
+                    logger.debug(f"Cinema-enhanced workflow successful for {accion.value}")
+                    return cinema_result
+                else:
+                    logger.info(f"Cinema workflow returned failure/None for {accion.value}, falling back to standard")
+            except Exception as e:
+                logger.warning(f"Cinema workflow failed for {accion.value}: {e}. Falling back to standard workflow.")
+        
+        # Fallback to standard workflow
+        logger.debug(f"Using standard workflow for {accion.value}")
+        return await self.ejecutar_flujo(user_id, accion, **kwargs)
+    
+    async def _execute_cinema_enhanced_workflow(self, user_id: int, accion: AccionUsuario, **kwargs) -> Optional[Dict[str, Any]]:
+        """
+        Execute cinema-enhanced workflow with specific enhancements per action type.
+        
+        Args:
+            user_id: User ID
+            accion: Action type
+            **kwargs: Additional parameters
+            
+        Returns:
+            Enhanced workflow result or None if cinema enhancement not applicable
+        """
+        try:
+            if not self.cinema_master:
+                return None
+            
+            # Route to appropriate cinema enhancement based on action
+            if accion == AccionUsuario.TOMAR_DECISION:
+                return await self._cinema_enhanced_decision_workflow(user_id, **kwargs)
+            elif accion in [AccionUsuario.REACCIONAR_PUBLICACION_NATIVA, AccionUsuario.REACCIONAR_PUBLICACION_INLINE, AccionUsuario.REACCIONAR_PUBLICACION]:
+                return await self._cinema_enhanced_reaction_workflow(user_id, **kwargs)
+            elif accion == AccionUsuario.DESBLOQUEAR_PISTA:
+                return await self._cinema_enhanced_clue_workflow(user_id, **kwargs)
+            elif accion == AccionUsuario.COMPLETAR_FRAGMENTO_NARRATIVO:
+                return await self._cinema_enhanced_fragment_workflow(user_id, **kwargs)
+            else:
+                # For actions not enhanced by cinema, return None to use standard workflow
+                return None
+                
+        except Exception as e:
+            logger.exception(f"Error in cinema-enhanced workflow: {e}")
+            return None
+    
+    async def _cinema_enhanced_decision_workflow(self, user_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Enhanced decision workflow with choice architecture and personalization."""
+        try:
+            # Get standard result first
+            standard_result = await self.ejecutar_flujo(user_id, AccionUsuario.TOMAR_DECISION, **kwargs)
+            
+            if not standard_result.get("success"):
+                return standard_result
+            
+            # Enhance with cinema systems
+            enhanced_result = await self.cinema_master.enhance_decision_experience(
+                user_id, 
+                kwargs.get("decision_id"), 
+                standard_result
+            )
+            
+            # Merge results, preferring enhanced where available
+            final_result = {**standard_result, **enhanced_result}
+            final_result["cinema_enhanced"] = True
+            
+            return final_result
+            
+        except Exception as e:
+            logger.exception(f"Error in cinema-enhanced decision workflow: {e}")
+            return None
+    
+    async def _cinema_enhanced_reaction_workflow(self, user_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Enhanced reaction workflow with personalized responses."""
+        try:
+            # Get standard result first
+            standard_result = await self.ejecutar_flujo(user_id, AccionUsuario.REACCIONAR_PUBLICACION, **kwargs)
+            
+            if not standard_result.get("success"):
+                return standard_result
+            
+            # Enhance with cinema systems
+            enhanced_result = await self.cinema_master.enhance_reaction_experience(
+                user_id,
+                kwargs.get("reaction_type"),
+                standard_result
+            )
+            
+            # Merge results
+            final_result = {**standard_result, **enhanced_result}
+            final_result["cinema_enhanced"] = True
+            
+            return final_result
+            
+        except Exception as e:
+            logger.exception(f"Error in cinema-enhanced reaction workflow: {e}")
+            return None
+    
+    async def _cinema_enhanced_clue_workflow(self, user_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Enhanced clue workflow with treasure hunting experience."""
+        try:
+            # Get standard result first
+            standard_result = await self.ejecutar_flujo(user_id, AccionUsuario.DESBLOQUEAR_PISTA, **kwargs)
+            
+            if not standard_result.get("success"):
+                return standard_result
+            
+            # Enhance with cinema systems
+            enhanced_result = await self.cinema_master.enhance_clue_experience(
+                user_id,
+                kwargs.get("piece_code"),
+                standard_result
+            )
+            
+            # Merge results
+            final_result = {**standard_result, **enhanced_result}
+            final_result["cinema_enhanced"] = True
+            
+            return final_result
+            
+        except Exception as e:
+            logger.exception(f"Error in cinema-enhanced clue workflow: {e}")
+            return None
+    
+    async def _cinema_enhanced_fragment_workflow(self, user_id: int, **kwargs) -> Optional[Dict[str, Any]]:
+        """Enhanced fragment completion workflow with personalized narrative experience."""
+        try:
+            # Get standard result first
+            standard_result = await self.ejecutar_flujo(user_id, AccionUsuario.COMPLETAR_FRAGMENTO_NARRATIVO, **kwargs)
+            
+            if not standard_result.get("success"):
+                return standard_result
+            
+            # Enhance with cinema systems
+            enhanced_result = await self.cinema_master.enhance_fragment_experience(
+                user_id,
+                kwargs.get("fragment_id"),
+                standard_result
+            )
+            
+            # Merge results
+            final_result = {**standard_result, **enhanced_result}
+            final_result["cinema_enhanced"] = True
+            
+            return final_result
+            
+        except Exception as e:
+            logger.exception(f"Error in cinema-enhanced fragment workflow: {e}")
+            return None
+    
+    def is_cinema_available(self) -> bool:
+        """Check if cinema systems are available and initialized."""
+        return self.cinema_master is not None
+    
+    def get_cinema_status(self) -> Dict[str, Any]:
+        """Get status of cinema integration systems."""
+        return {
+            "cinema_available": CINEMA_AVAILABLE,
+            "cinema_master_initialized": self.cinema_master is not None,
+            "cinema_components": {
+                "soul_signature": self.cinema_master.is_soul_signature_available() if self.cinema_master else False,
+                "choice_architecture": self.cinema_master.is_choice_architecture_available() if self.cinema_master else False,
+                "treasure_hunting": self.cinema_master.is_treasure_hunting_available() if self.cinema_master else False
+            } if self.cinema_master else {}
+        }
     
     async def _emit_workflow_events(self, user_id: int, accion: AccionUsuario, 
                                    result: Dict[str, Any], correlation_id: str) -> None:

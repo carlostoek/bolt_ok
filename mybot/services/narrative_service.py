@@ -1,3 +1,4 @@
+from typing import Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload, joinedload
@@ -10,6 +11,23 @@ class NarrativeService:
         self.user_service = user_service
         self.point_service = point_service
         self.backpack_service = backpack_service
+        
+        # Optional Cinema System Integration
+        self.cinema_master = None
+        try:
+            from .cinema_master_integration import get_cinema_master_integration
+            self.cinema_master = get_cinema_master_integration(session)
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info("Cinema Master Integration available for NarrativeService")
+        except ImportError:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.info("Cinema Master Integration not available for NarrativeService")
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Failed to initialize Cinema Master Integration: {e}")
 
     async def get_user_current_fragment(self, user_id: int):
         """
@@ -154,3 +172,187 @@ class NarrativeService:
         required_clues = set(fragment.required_clues)
         
         return required_clues.issubset(user_clues)
+
+    # ==================== CINEMA ENHANCED METHODS ====================
+    
+    async def get_fragment_with_choice_architecture(self, fragment_key: str, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Enhanced fragment retrieval with choice architecture integration.
+        Falls back to standard functionality if cinema systems unavailable.
+        
+        Args:
+            fragment_key: Fragment key
+            user_id: User ID
+            **kwargs: Additional parameters for choice architecture
+            
+        Returns:
+            Enhanced fragment data with choice architecture if available
+        """
+        try:
+            # Get standard fragment
+            fragment = await self.get_fragment_by_key(fragment_key)
+            
+            result = {
+                "fragment": fragment,
+                "enhanced": False,
+                "choices_enhanced": False
+            }
+            
+            if not fragment:
+                return result
+            
+            # Try choice architecture enhancement
+            if (self.cinema_master and 
+                self.cinema_master.is_choice_architecture_available() and 
+                fragment.choices):
+                
+                try:
+                    choice_architecture = getattr(self.cinema_master, 'choice_architecture', None)
+                    if choice_architecture and hasattr(choice_architecture, 'enhance_fragment_choices'):
+                        enhanced_choices = await choice_architecture.enhance_fragment_choices(
+                            user_id, fragment, **kwargs
+                        )
+                        if enhanced_choices:
+                            result.update({
+                                "enhanced_choices": enhanced_choices,
+                                "choices_enhanced": True,
+                                "enhanced": True,
+                                "enhancement_type": "choice_architecture"
+                            })
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Choice architecture enhancement failed for fragment {fragment_key}: {e}")
+            
+            return result
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error in get_fragment_with_choice_architecture for {fragment_key}: {e}")
+            # Fallback to standard fragment
+            fragment = await self.get_fragment_by_key(fragment_key)
+            return {
+                "fragment": fragment,
+                "enhanced": False,
+                "fallback_used": True,
+                "error": str(e)
+            }
+    
+    async def process_user_choice_enhanced(self, user_id: int, fragment_id: str, choice_text: str, **kwargs) -> Dict[str, Any]:
+        """
+        Enhanced choice processing with decision consequence tracking and personalization.
+        
+        Args:
+            user_id: User ID
+            fragment_id: Current fragment ID
+            choice_text: Chosen text
+            **kwargs: Additional parameters for enhancement
+            
+        Returns:
+            Enhanced choice processing result
+        """
+        try:
+            # Execute standard choice processing
+            standard_result = await self.process_user_choice(user_id, fragment_id, choice_text)
+            
+            result = {
+                "success": bool(standard_result),
+                "next_fragment": standard_result,
+                "enhanced": False
+            }
+            
+            # Try cinema enhancements
+            if self.cinema_master and self.cinema_master.cinema_active:
+                try:
+                    # Create decision data for enhancement
+                    decision_data = {
+                        "fragment_id": fragment_id,
+                        "choice_text": choice_text,
+                        "next_fragment": standard_result,
+                        "user_id": user_id
+                    }
+                    
+                    enhanced_result = await self.cinema_master.enhance_decision_experience(
+                        user_id, fragment_id, decision_data
+                    )
+                    
+                    if enhanced_result:
+                        result.update(enhanced_result)
+                        result["enhanced"] = True
+                        
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Cinema enhancement failed for choice processing: {e}")
+            
+            return result
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error in process_user_choice_enhanced: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "enhanced": False,
+                "fallback_available": True
+            }
+    
+    async def get_narrative_recommendations(self, user_id: int, fragment_id: str = None) -> List[Dict[str, Any]]:
+        """
+        Get personalized narrative recommendations based on user's soul signature.
+        
+        Args:
+            user_id: User ID
+            fragment_id: Current fragment ID (optional)
+            
+        Returns:
+            List of recommended fragments with personalization data
+        """
+        try:
+            # Get all available fragments as base recommendations
+            available_fragments = []
+            
+            # Get fragments user can access
+            if fragment_id:
+                current_fragment = await self.get_fragment_by_key(fragment_id)
+                if current_fragment and current_fragment.choices:
+                    # Get next fragments from choices
+                    for choice in current_fragment.choices:
+                        next_fragment_id = choice.get('next_fragment')
+                        if next_fragment_id:
+                            next_fragment = await self.get_fragment_by_key(next_fragment_id)
+                            if next_fragment and await self.check_fragment_requirements(user_id, next_fragment):
+                                available_fragments.append(next_fragment)
+            
+            recommendations = []
+            
+            # If no cinema enhancement, return basic recommendations
+            if not self.cinema_master or not self.cinema_master.is_soul_signature_available():
+                return [{"fragment": f, "personalized": False, "recommendation_score": 0.5} for f in available_fragments]
+            
+            # Apply soul signature personalization to recommendations
+            soul_signature = getattr(self.cinema_master, 'soul_signature', None)
+            if soul_signature and hasattr(soul_signature, 'get_narrative_recommendations'):
+                try:
+                    personalized_recommendations = await soul_signature.get_narrative_recommendations(
+                        user_id, available_fragments, fragment_id
+                    )
+                    recommendations.extend(personalized_recommendations)
+                except Exception as e:
+                    import logging
+                    logger = logging.getLogger(__name__)
+                    logger.warning(f"Personalized recommendations failed for user {user_id}: {e}")
+                    # Fallback to basic recommendations
+                    recommendations = [{"fragment": f, "personalized": False, "recommendation_score": 0.5} for f in available_fragments]
+            else:
+                recommendations = [{"fragment": f, "personalized": False, "recommendation_score": 0.5} for f in available_fragments]
+            
+            return recommendations
+            
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error in get_narrative_recommendations for user {user_id}: {e}")
+            return []
