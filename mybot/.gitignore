@@ -47,3 +47,8 @@ coverage.xml
 
 # Specific project files
 bot.log
+
+# Test reports
+test_reports/
+
+
