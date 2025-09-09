@@ -17,10 +17,14 @@ async def main():
     print("🚀 EMERGENCY: Initializing MVP Narrative Fragments...")
     
     try:
-        from database.database import get_session
+        from database.setup import init_db, get_session
         from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
         
-        async with get_session() as session:
+        # Initialize database first
+        await init_db()
+        
+        session = await get_session()
+        try:
             fragment_service = MVPNarrativeFragmentService(session)
             
             print("📚 Creating fragment definitions...")
@@ -61,6 +65,8 @@ async def main():
             else:
                 print("⚠️ PARTIAL SUCCESS: Some fragments need character improvement but should work")
                 return True
+        finally:
+            await session.close()
                 
     except Exception as e:
         print(f"❌ CRITICAL ERROR initializing fragments: {e}")
