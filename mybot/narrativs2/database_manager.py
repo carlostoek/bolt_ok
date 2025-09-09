@@ -425,6 +425,26 @@ class DatabaseManager:
             
             return relevant_memories[:3]  # Máximo 3 memorias más relevantes
     
+    async def get_unnoticed_contradiction(self, user_id: int) -> Optional[Dict]:
+        """
+        Busca una contradicción que se le haya presentado al usuario pero que aún no haya notado.
+        
+        Esto es clave para que Diana pueda "insistir" en sus propias inconsistencias
+        y probar si el usuario está prestando atención a un nivel más profundo.
+        """
+        if not self.pool:
+            await self.initialize()
+
+        async with self.pool.acquire() as conn:
+            contradiction = await conn.fetchrow("""
+                SELECT * FROM diana_contradictions
+                WHERE user_id = $1 AND user_noticed = FALSE
+                ORDER BY created_at ASC
+                LIMIT 1
+            """, user_id)
+            
+            return dict(contradiction) if contradiction else None
+
     def _is_memory_relevant_for_state(self, memory: Dict, current_diana_state: EmotionalState) -> bool:
         """
         Determina si una memoria es relevante para el estado emocional actual de Diana.

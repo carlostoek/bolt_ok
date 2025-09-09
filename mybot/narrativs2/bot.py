@@ -239,33 +239,84 @@ Pero eso... eso está por verse."""
         total_delay = max(1.0, base_delay + emotional_complexity_delay + trust_delay + random_variation)
         return min(total_delay, 8.0)  # Máximo 8 segundos
 
+    async def _should_reveal_contradiction(self, user_profile, user_message: str) -> bool:
+        """Decide si es un buen momento para revelar una contradicción."""
+        if not user_profile:
+            return False
+
+        # Condiciones para revelar una contradicción:
+        # 1. El usuario ha alcanzado un nivel de intimidad y confianza suficiente.
+        # 2. No se revela una contradicción demasiado a menudo (aleatoriedad).
+        # 3. Existe una contradicción no notada para revelar.
+        trust_condition = user_profile.emotional_trust_score > 40 and user_profile.intimacy_circle >= 2
+        random_chance = random.random() < 0.25  # 25% de probabilidad en cada mensaje elegible
+
+        if trust_condition and random_chance:
+            contradiction = await self.db.get_unnoticed_contradiction(user_profile.user_id)
+            return contradiction is not None
+        return False
+
+    async def _generate_contradiction_reveal(self, user_profile) -> Optional[Dict]:
+        """Obtiene los datos de una contradicción de la base de datos."""
+        if not user_profile:
+            return None
+        return await self.db.get_unnoticed_contradiction(user_profile.user_id)
+
+    async def _deliver_contradiction_reveal(self, update: Update, context: ContextTypes.DEFAULT_TYPE, data: Dict):
+        """Entrega la revelación de la contradicción al usuario."""
+        statement1 = data.get('statement_1')
+        statement2 = data.get('statement_2')
+        contradiction_id = data.get('contradiction_id')
+
+        message = f"""
+        *[Diana hace una pausa, con un tono introspectivo]*
+
+        He estado pensando en nuestras conversaciones... y hay algo que no encaja. Algo que dije.
+
+        En un momento, te dije: *'{statement1}'*
+
+        Y luego, más tarde, afirmé: *'{statement2}'*
+
+        *[Te mira directamente, esperando]*
+
+        Me pregunto cuál de esas dos Dianas es la real... o si ambas lo son. ¿Tú qué piensas?
+        """
+
+        await update.message.reply_text(
+            message,
+            parse_mode=ParseMode.MARKDOWN
+        )
+
+        # Marcar la contradicción como notada para no repetirla
+        await self.db.mark_contradiction_as_noticed(contradiction_id)
+
+
     async def _check_special_content_triggers(self, user_profile, user_message: str) -> Optional[Dict]:
         """
         Verifica si debe activarse algún tipo de contenido especial.
-        
-        El contenido especial incluye momentos de verdad, revelaciones de contradicciones,
-        vulnerabilidades espontáneas, y fragmentos de memoria. Estos eventos crean
-        la sensación de que Diana tiene vida propia más allá de las respuestas programadas.
         """
         special_content = None
         
         # Verificar momento de verdad
-        if self.diana_system.emotional_engine.should_trigger_truth_moment(user_profile):
-            special_content = {
-                'type': 'truth_moment',
-                'trigger_reason': 'scheduled_authenticity_test',
-                'data': await self._generate_truth_moment_scenario(user_profile)
-            }
+        # NOTA: La lógica de should_trigger_truth_moment no está implementada en diana_brain_system.py
+        # if self.diana_system.emotional_engine.should_trigger_truth_moment(user_profile):
+        #     special_content = {
+        #         'type': 'truth_moment',
+        #         'trigger_reason': 'scheduled_authenticity_test',
+        #         'data': await self._generate_truth_moment_scenario(user_profile)
+        #     }
         
         # Verificar revelación de contradicción
-        elif await self._should_reveal_contradiction(user_profile, user_message):
-            special_content = {
-                'type': 'contradiction_reveal',
-                'data': await self._generate_contradiction_reveal(user_profile)
-            }
+        if await self._should_reveal_contradiction(user_profile, user_message):
+            contradiction_data = await self._generate_contradiction_reveal(user_profile)
+            if contradiction_data:
+                special_content = {
+                    'type': 'contradiction_reveal',
+                    'data': contradiction_data
+                }
         
         # Verificar vulnerabilidad espontánea (muy raro, alto impacto)
-        elif (user_profile.emotional_trust_score > 70 and 
+        elif (user_profile and user_profile.emotional_trust_score > 70 and 
               user_profile.intimacy_circle >= 3 and 
               random.random() < 0.05):  # 5% de probabilidad
             special_content = {
