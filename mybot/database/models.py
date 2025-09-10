@@ -250,6 +250,8 @@ class UserStats(Base):
     last_daily_gift_at = Column(DateTime, nullable=True)
     messages_sent = Column(Integer, default=0)
     checkin_streak = Column(Integer, default=0)
+    # Track daily gift streak for consecutive daily rewards
+    daily_gift_streak = Column(Integer, default=0)
     # Track last time the user used the free roulette spin
     last_roulette_at = Column(DateTime, nullable=True)
     # Additional fields for integration tests

@@ -985,6 +985,36 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error updating interaction patterns: {e}")
     
+    async def _get_daily_reward_status(self, user_id: int) -> Dict[str, Any]:
+        """Get daily reward status for user."""
+        try:
+            from services.daily_reward_service import DailyRewardService
+            from services.point_service import PointService
+            from services.level_service import LevelService
+            from services.mvp_achievement_service import MVPAchievementService
+            
+            # Initialize services
+            point_service = PointService(self.session, None, None)
+            daily_reward_service = DailyRewardService(self.session, point_service)
+            
+            # Get reward status
+            status = await daily_reward_service.get_reward_status(user_id)
+            
+            return status
+            
+        except Exception as e:
+            logger.error(f"Error getting daily reward status for user {user_id}: {e}")
+            # Return safe defaults
+            return {
+                'can_claim': False,
+                'time_remaining': None,
+                'next_reward_besitos': 50,
+                'current_streak': 0,
+                'total_besitos': 0,
+                'hours_remaining': 24,
+                'minutes_remaining': 0
+            }
+    
     async def show_main_menu(self, update: Message | CallbackQuery, user_role: Optional[str] = None) -> MenuResponse:
         """
         Show dynamic character-consistent main menu based on user's narrative progression.
@@ -1201,6 +1231,9 @@ class EnhancedDianaMenuSystem:
             elif callback_data.startswith("admin_"):
                 return await self._handle_admin_callbacks(callback)
             
+            elif callback_data.startswith("diana_daily_reward_"):
+                return await self._handle_daily_reward_callbacks(callback)
+            
             else:
                 # Unknown callback - delegate to base system
                 return await self._delegate_to_base_system(callback)
@@ -1377,10 +1410,26 @@ class EnhancedDianaMenuSystem:
             points = user.points if user else 0
             level = user.level if user else 1
             
+            # Get daily reward status
+            daily_reward_status = await self._get_daily_reward_status(user_id)
+            
             # Character-consistent besitos display
             besitos_text = f"💰 **Tesoro de Besitos de Diana**\n\n"
             besitos_text += f"✨ Tus besitos acumulados: **{points:.1f}** 💋\n"
             besitos_text += f"🌟 Nivel actual: **{level}**\n\n"
+            
+            # Add daily reward status with Diana's personality
+            if daily_reward_status["can_claim"]:
+                besitos_text += f"🎁 **Regalo Diario Disponible!**\n"
+                besitos_text += f"💋 Diana susurra: *\"Tu regalo me espera, querido... {daily_reward_status['next_reward_besitos']} besitos frescos para ti.\"*\n\n"
+            else:
+                hours = daily_reward_status["hours_remaining"]
+                minutes = daily_reward_status["minutes_remaining"]
+                besitos_text += f"⏰ **Próximo Regalo en:** {hours}h {minutes}m\n"
+                besitos_text += f"💋 Diana acaricia: *\"Paciencia, mi amor... la espera hace el regalo más dulce.\"*\n\n"
+            
+            if daily_reward_status["current_streak"] > 1:
+                besitos_text += f"🔥 **Racha actual:** {daily_reward_status['current_streak']} días consecutivos\n\n"
             
             if points > 1000:
                 besitos_text += "👑 ¡Qué generoso coleccionista de mis afectos! Tu devoción es admirable..."
@@ -1393,11 +1442,23 @@ class EnhancedDianaMenuSystem:
             
             besitos_text += f"\n\n💫 Continúa explorando para ganar más de mis preciosos besitos..."
             
-            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+            # Create keyboard with daily reward button
+            keyboard_buttons = []
+            
+            # Daily reward button
+            if daily_reward_status["can_claim"]:
+                keyboard_buttons.append([InlineKeyboardButton(text="🎁 ¡Reclamar Regalo Diario!", callback_data="diana_daily_reward_claim")])
+            else:
+                keyboard_buttons.append([InlineKeyboardButton(text="⏰ Ver Estado del Regalo", callback_data="diana_daily_reward_status")])
+            
+            # Other options
+            keyboard_buttons.extend([
                 [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="diana_missions")],
                 [InlineKeyboardButton(text="🏆 Mis Logros", callback_data="diana_achievements")],
                 [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
             ])
+            
+            keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
             
             await safe_edit(callback, besitos_text, kb=keyboard)
             await callback.answer()
@@ -1704,6 +1765,64 @@ class EnhancedDianaMenuSystem:
                 response_time=0.5,
                 meets_performance_requirement=True,
                 message_sent=False,
+                errors=[str(e)]
+            )
+    
+    async def _handle_daily_reward_callbacks(self, callback: CallbackQuery) -> MenuResponse:
+        """Handle daily reward callbacks from the enhanced Diana menu system."""
+        try:
+            from handlers.user.daily_rewards import handle_daily_reward_claim, handle_daily_reward_status
+            
+            callback_data = callback.data
+            
+            if callback_data == "diana_daily_reward_claim":
+                # Delegate to the daily rewards handler
+                await handle_daily_reward_claim(callback, self.session)
+                return self._create_safe_menu_response(
+                    success=True,
+                    character_score=95.0,
+                    response_time=0.5,
+                    meets_performance_requirement=True,
+                    message_sent=True,
+                    errors=[]
+                )
+            
+            elif callback_data == "diana_daily_reward_status":
+                # Delegate to the daily rewards handler
+                await handle_daily_reward_status(callback, self.session)
+                return self._create_safe_menu_response(
+                    success=True,
+                    character_score=95.0,
+                    response_time=0.5,
+                    meets_performance_requirement=True,
+                    message_sent=True,
+                    errors=[]
+                )
+            
+            else:
+                # Unknown daily reward callback
+                await callback.answer("Función no disponible", show_alert=True)
+                return self._create_safe_menu_response(
+                    success=False,
+                    character_score=0.0,
+                    response_time=0.2,
+                    meets_performance_requirement=True,
+                    message_sent=True,
+                    errors=[f"Unknown daily reward callback: {callback_data}"]
+                )
+                
+        except Exception as e:
+            logger.error(f"Error handling daily reward callback {callback.data}: {e}")
+            
+            error_message = "💋 Diana susurra: *\"Un pequeño obstáculo con tu regalo, amor... Dame un momento.\"*"
+            await callback.answer(error_message, show_alert=True)
+            
+            return self._create_safe_menu_response(
+                success=False,
+                character_score=0.0,
+                response_time=1.0,
+                meets_performance_requirement=False,
+                message_sent=True,
                 errors=[str(e)]
             )
     

@@ -74,6 +74,7 @@ from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 from handlers import start, free_user, daily_gift, minigames, setup as setup_handlers
 from handlers.channel_access import router as channel_access_router
 from handlers.user import start_token
+from handlers.user.daily_rewards import router as daily_rewards_router
 from handlers.vip import menu as vip, gamification
 from handlers.vip.auction_user import router as auction_user_router
 from handlers.reaction_callback import router as reaction_callback_router
@@ -238,6 +239,7 @@ async def main() -> None:
             ("reaction_callback", reaction_callback_router),
             ("native_reaction", native_reaction_router),
             ("daily_gift", daily_gift.router),
+            ("daily_rewards", daily_rewards_router),
             ("minigames", minigames.router),
             ("gamification", gamification.router),
             ("free_user", free_user.router),
