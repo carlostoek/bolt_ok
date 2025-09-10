@@ -21,7 +21,7 @@ def get_decision_keyboard(fragment) -> InlineKeyboardMarkup:
             
             builder.button(
                 text=choice_text,
-                callback_data=f"narrative_choice:{fragment.id}:{index}"
+                callback_data=f"cinema_choice_{fragment.id}_{index}"
             )
     else:
         # No choices available, add continue button
@@ -46,11 +46,11 @@ async def get_narrative_keyboard(fragment, session: AsyncSession) -> InlineKeybo
     # En el modelo unificado, las opciones están en el campo JSON 'choices'
     choices = fragment.choices or []
     
-    # Agregar botones para cada decisión
+    # Agregar botones para cada decisión - FORMATO CINEMATOGRÁFICO CORREGIDO
     for index, choice in enumerate(choices):
         builder.button(
             text=choice.get('text', f'Opción {index + 1}'),
-            callback_data=f"narrative_choice:{index}"
+            callback_data=f"cinema_choice_{fragment.id}_{index}"
         )
     
     # Si no hay decisiones, mostrar botón de continuar o ver historia
@@ -86,14 +86,14 @@ def get_narrative_stats_keyboard() -> InlineKeyboardMarkup:
     builder.adjust(1)
     return builder.as_markup()
 
-def get_narrative_choice_keyboard(choices: list) -> InlineKeyboardMarkup:
+def get_narrative_choice_keyboard(choices: list, fragment_id: str = "unknown") -> InlineKeyboardMarkup:
     """Crea teclado específico para decisiones narrativas."""
     builder = InlineKeyboardBuilder()
     
     for index, choice_text in enumerate(choices):
         builder.button(
             text=choice_text,
-            callback_data=f"narrative_choice:{index}"
+            callback_data=f"cinema_choice_{fragment_id}_{index}"
         )
     
     builder.adjust(1)

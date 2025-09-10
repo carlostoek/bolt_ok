@@ -24,11 +24,11 @@ from .unified_mission_service import UnifiedMissionService
 
 logger = logging.getLogger(__name__)
 
-# Optional Cinema System Imports - Graceful fallback if unavailable
+# Optional Cinema System Imports - Using fixed version to avoid circular dependencies
 try:
-    from .cinema_master_integration import CinemaMasterIntegration
+    from .cinema_master_integration_fixed import CinemaMasterIntegrationFixed as CinemaMasterIntegration
     CINEMA_AVAILABLE = True
-    logger.info("Cinema Master Integration successfully imported")
+    logger.info("Cinema Master Integration (Fixed) successfully imported")
 except ImportError as e:
     logger.info(f"Cinema systems not available: {e}. Operating in standard mode.")
     CINEMA_AVAILABLE = False
@@ -1111,8 +1111,7 @@ class CoordinadorCentral:
         completed_missions = await self.unified_mission_service.update_user_progress(
             user_id,
             "narrative_fragment",
-            {"fragment_id": fragment_id},
-            bot=bot
+            {"fragment_id": fragment_id}
         )
         
         if not completed_missions:
@@ -1183,8 +1182,7 @@ class CoordinadorCentral:
         completed_missions = await self.unified_mission_service.update_user_progress(
             user_id,
             "lore_piece",
-            {"piece_code": piece_code},
-            bot=bot
+            {"piece_code": piece_code}
         )
         
         if not completed_missions:

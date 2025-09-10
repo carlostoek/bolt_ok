@@ -50,6 +50,7 @@ async def start_narrative_command(message: Message, session: AsyncSession):
                 return
         
         # Display current fragment with Cinema Architecture enhancement
+        logger.info(f"🔍 NARRATIVE DEBUG - User {user_id}: Displaying fragment {current_fragment.id} - {current_fragment.title}")
         await _display_mvp_narrative_fragment(message, current_fragment, session)
         
     except Exception as e:
@@ -198,7 +199,7 @@ async def show_narrative_stats(message: Message, session: AsyncSession):
         reply_markup=get_narrative_stats_keyboard()
     )
 
-@router.callback_query(F.data.startswith("narrative_choice_"))
+@router.callback_query(F.data.startswith("cinema_choice_"))
 @safe_handler("🌙 Los vientos del destino encuentran resistencia... Inténtalo de nuevo, querido.")
 @track_usage("mvp_narrative_choice")
 @transaction()
@@ -209,21 +210,33 @@ async def handle_mvp_narrative_choice(callback: CallbackQuery, session: AsyncSes
     try:
         from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
         
-        # Parse choice data: narrative_choice_{fragment_id}_{choice_index}
+        # DEBUGGING: Log the callback data
+        logger.info(f"🔍 CALLBACK DEBUG - User {user_id}: callback_data = '{callback.data}'")
+        
+        # Parse choice data: cinema_choice_{fragment_id}_{choice_index}
+        # Fragment IDs can contain underscores, so we parse from the end
         callback_parts = callback.data.split("_")
+        logger.info(f"🔍 CALLBACK DEBUG - Split parts: {callback_parts}")
+        
         if len(callback_parts) < 4:
+            logger.error(f"🔍 CALLBACK DEBUG - Invalid parts count: {len(callback_parts)}")
             await callback.answer("❌ Elección inválida", show_alert=True)
             return
         
-        fragment_id = callback_parts[2]
-        choice_index = int(callback_parts[3])
+        # Last part is always choice_index, everything between "cinema_choice_" and last part is fragment_id
+        choice_index = int(callback_parts[-1])
+        fragment_id = "_".join(callback_parts[2:-1])
+        logger.info(f"🔍 CALLBACK DEBUG - Parsed: fragment_id='{fragment_id}', choice_index={choice_index}")
         
         narrative_service = MVPNarrativeProgressionService(session)
         
         # Process the choice
+        logger.info(f"🔍 CALLBACK DEBUG - Processing choice for user {user_id}")
         choice_result = await narrative_service.make_user_choice(user_id, fragment_id, choice_index)
+        logger.info(f"🔍 CALLBACK DEBUG - Choice result: {choice_result}")
         
         if not choice_result['success']:
+            logger.error(f"🔍 CALLBACK DEBUG - Choice failed: {choice_result.get('error')}")
             await callback.answer(
                 "🌙 Esta senda está cerrada por ahora... Los secretos requieren preparación.",
                 show_alert=True
@@ -233,15 +246,20 @@ async def handle_mvp_narrative_choice(callback: CallbackQuery, session: AsyncSes
         # Get the next fragment
         next_fragment = choice_result.get('current_fragment')
         if not next_fragment:
+            logger.error(f"🔍 CALLBACK DEBUG - No next fragment returned")
             await callback.answer(
                 "🌙 Los misterios se profundizan... Tu elección resuena en las corrientes del destino.",
                 show_alert=True
             )
             return
         
+        logger.info(f"🔍 CALLBACK DEBUG - Next fragment: {next_fragment.id} - {next_fragment.title}")
+        
         # Display the next fragment
+        logger.info(f"🔍 CALLBACK DEBUG - Displaying next fragment")
         await _display_mvp_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
         await callback.answer("✨ Tu elección resuena en los misterios...")
+        logger.info(f"🔍 CALLBACK DEBUG - Choice processing completed successfully")
         
     except Exception as e:
         logger.error(f"Error handling MVP narrative choice for user {user_id}: {e}")
