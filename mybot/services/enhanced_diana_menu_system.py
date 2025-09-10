@@ -99,11 +99,18 @@ class EnhancedDianaMenuSystem:
         self.character_validation_time = 0.0
         
         # Use shared cache for templates to avoid reloading
+        templates_were_loaded = False
         if not self.__class__._shared_templates_cache:
             self.__class__._shared_templates_cache = self._load_menu_templates()
-            # Pre-build keyboards for all templates
-            self._prebuild_all_keyboards()
+            templates_were_loaded = True
         self.diana_menu_templates = self.__class__._shared_templates_cache
+        
+        # Pre-build keyboards for all templates after templates are assigned
+        if templates_were_loaded:
+            try:
+                self._prebuild_all_keyboards()
+            except Exception as e:
+                logger.warning(f"Could not prebuild keyboards: {e}")
         
         # Individual cache for dynamic content
         self.menu_cache = {}
@@ -1706,46 +1713,52 @@ class EnhancedDianaMenuSystem:
         callback_data = callback.data
         
         try:
-            from services.mvp_narrative_progression_service import MVPNarrativeProgressionService
+            from services.mvp_narrative_fragment_service import MVPNarrativeFragmentService
             
             user_id = callback.from_user.id
-            narrative_service = MVPNarrativeProgressionService(self.session)
+            narrative_service = MVPNarrativeFragmentService(self.session)
             
             if callback_data.startswith("narrative_choice_"):
                 # Handle choice selection
                 choice_index = int(callback_data.split("_")[-1])
                 
-                # Process choice with performance tracking
+                # Process choice with performance tracking via CoordinadorCentral
                 import time as time_module
+                from services.coordinador_central import CoordinadorCentral, AccionUsuario
                 choice_start = time_module.time()
                 
-                choice_result = await narrative_service.process_user_choice_advanced(
-                    user_id, 
-                    choice_index,
-                    response_time_ms=None,  # Could track from user interaction
-                    additional_context={'menu_source': 'diana_menu'}
+                # Use CoordinadorCentral for integrated cross-module processing
+                coordinador = CoordinadorCentral(self.session)
+                choice_result = await coordinador.ejecutar_flujo(
+                    user_id=user_id,
+                    accion=AccionUsuario.TOMAR_DECISION,
+                    decision_id=choice_index,
+                    bot=getattr(callback.message, 'bot', None)
                 )
                 
                 if choice_result['success']:
-                    # Show result with next fragment
-                    next_fragment = choice_result['current_fragment']
+                    # Extract narrative result from CoordinadorCentral response
+                    fragment_data = choice_result.get('fragment', {})
                     
-                    if next_fragment and next_fragment.is_decision:
-                        # Continue with decision fragment
-                        return await self._handle_narrative_menu(callback)
+                    # Show completion message with integrated rewards
+                    completion_text = await self._build_coordinator_choice_completion_text(choice_result)
+                    
+                    keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                        [InlineKeyboardButton(text="📖 Continuar Historia", callback_data="narrative_continue")],
+                        [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
+                    ])
+                    
+                    await safe_edit(callback, completion_text, kb=keyboard)
+                    
+                    # Enhanced callback answer with integrated rewards
+                    points_msg = choice_result.get('points_awarded', 0)
+                    if points_msg > 0:
+                        await callback.answer(f"✨ Excelente elección! +{points_msg} besitos otorgados por el Coordinador", show_alert=False)
                     else:
-                        # Show completion message for story fragment
-                        completion_text = await self._build_choice_completion_text(choice_result)
-                        
-                        keyboard = InlineKeyboardMarkup(inline_keyboard=[
-                            [InlineKeyboardButton(text="📖 Continuar", callback_data="narrative_continue")],
-                            [InlineKeyboardButton(text="🔙 Volver", callback_data="diana_main_menu")]
-                        ])
-                        
-                        await safe_edit(callback, completion_text, kb=keyboard)
-                        await callback.answer(f"¡Excelente elección! +{choice_result['points_awarded']} puntos")
+                        await callback.answer("✨ Tu elección ha sido registrada por Diana...", show_alert=False)
                 else:
-                    await callback.answer(f"Error: {choice_result['error']}", show_alert=True)
+                    error_msg = choice_result.get('message', 'Error desconocido en el flujo narrativo')
+                    await callback.answer(f"😔 {error_msg}", show_alert=True)
                     
                 return self._create_safe_menu_response(
                     success=choice_result['success'],
@@ -1810,7 +1823,8 @@ class EnhancedDianaMenuSystem:
             
             if next_fragment:
                 text += f"📖 **Siguiente:** {next_fragment.title}\n"
-                text += f"🌟 {next_fragment.content[:100]}...\n\n"
+                # FIXED: Show full content instead of preview for better narrative experience
+                text += f"🌟 {next_fragment.content}\n\n"
             
             text += "💋 *Diana sonríe con aprobación por tu decisión...*"
             
@@ -1819,6 +1833,45 @@ class EnhancedDianaMenuSystem:
         except Exception as e:
             logger.error(f"Error building choice completion text: {e}")
             return "✨ Tu elección ha sido registrada. Diana te observa con interés..."
+
+    async def _build_coordinator_choice_completion_text(self, coordinator_result: Dict[str, Any]) -> str:
+        """Build text for choice completion display using CoordinadorCentral response."""
+        try:
+            # Extract data from coordinator response
+            fragment_data = coordinator_result.get('fragment', {})
+            points_awarded = coordinator_result.get('points_awarded', 0)
+            message = coordinator_result.get('message', '')
+            
+            # Start with Diana's narrative response
+            if message and 'Diana' in message:
+                text = f"💋 {message}\n\n"
+            else:
+                text = "💋 **Diana observa tu elección con una sonrisa enigmática...**\n\n"
+            
+            # Show the actual fragment content (FIXED: Show real content)
+            if fragment_data and 'text' in fragment_data:
+                text += f"📖 {fragment_data['text']}\n\n"
+            elif fragment_data and 'content' in fragment_data:
+                text += f"📖 {fragment_data['content']}\n\n"
+            
+            # Add rewards information from cross-module integration
+            if points_awarded > 0:
+                text += f"✨ **Recompensas del Sistema Integrado:**\n"
+                text += f"💎 +{points_awarded} besitos otorgados\n"
+                
+                # Check for other rewards from coordinator
+                if coordinator_result.get('hint_unlocked'):
+                    text += f"🔮 Nueva pista desbloqueada\n"
+                
+                text += "\n"
+            
+            text += "🌟 *Los hilos del destino se entrelazan mientras la historia continúa...*"
+            
+            return text
+            
+        except Exception as e:
+            logger.error(f"Error building coordinator choice completion text: {e}")
+            return "✨ Tu elección ha resonado a través de los diferentes planos de la realidad. Diana sonríe misteriosamente..."
     
     async def _handle_narrative_progress(self, callback: CallbackQuery) -> MenuResponse:
         """Handle narrative progress display."""
@@ -2560,16 +2613,19 @@ class EnhancedDianaMenuSystem:
             narrative_text += f"🎭 Esencia: {dominant_archetype.title()}\n\n"
             narrative_text += f"💫 {archetype_touch}\n\n"
             
-            # Add current fragment info
-            if fragment and fragment.is_decision:
-                narrative_text += f"🌟 **Fragmento Actual:** {fragment.title}\n"
-                narrative_text += f"⚡ Una decisión importante aguarda tu elección..."
-            elif fragment:
-                narrative_text += f"📖 **Continuando:** {fragment.title}\n"
-                narrative_text += f"🌙 La historia se despliega ante ti..."
+            # Add current fragment content (FIXED: Show real narrative content)
+            if fragment:
+                narrative_text += f"📖 **{fragment.title}**\n\n"
+                # Show the ACTUAL fragment content instead of menu interface text
+                narrative_text += f"{fragment.content}\n\n"
+                
+                if fragment.is_decision:
+                    narrative_text += f"⚡ *¿Qué decides?*"
+                else:
+                    narrative_text += f"🌙 *La historia continúa...*"
             else:
-                narrative_text += f"🚀 **¡Comencemos tu viaje!**\n"
-                narrative_text += f"💋 Los misterios te esperan, querido..."
+                narrative_text += f"🚀 **¡Comencemos tu viaje narrativo!**\n\n"
+                narrative_text += f"💋 Bienvenido a los dominios de Diana... Los misterios más profundos aguardan por ti, querido."
             
             return narrative_text
             

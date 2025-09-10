@@ -183,7 +183,7 @@ class CoordinadorCentral:
                 }
                 
                 for prefix, pista in pistas.items():
-                    if fragmento_actual.key.startswith(prefix):
+                    if fragmento_actual.id.startswith(prefix):
                         pista_desbloqueada = pista
                         break
         

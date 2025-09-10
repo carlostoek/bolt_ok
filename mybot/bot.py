@@ -34,9 +34,34 @@ class DBSessionMiddleware(BaseMiddleware):
         self.session_pool = session_pool
 
     async def __call__(self, handler, event, data):
-        async with self.session_pool() as session:
+        session = None
+        try:
+            session = self.session_pool()
             data["session"] = session
-            return await handler(event, data)
+            result = await handler(event, data)
+            
+            # Commit only if we have active transactions
+            if session.in_transaction():
+                await session.commit()
+                
+            return result
+        except Exception as e:
+            # Rollback only if session exists and has active transaction
+            if session and session.in_transaction():
+                try:
+                    await session.rollback()
+                except Exception:
+                    pass  # Ignore rollback errors
+            raise e
+        finally:
+            # Safe cleanup
+            if session:
+                try:
+                    # Only close if not already closed
+                    if not session.is_closed:
+                        await session.close()
+                except Exception:
+                    pass  # Ignore cleanup errors
 
 # Imports
 from database.setup import init_db, get_session_factory

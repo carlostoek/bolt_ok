@@ -1083,6 +1083,19 @@ class DianaCharacterValidator:
         import time
         self.validation_cache[key] = (result, time.time())
 
+    async def validate_response(self, response_text: str, context: Optional[str] = None) -> CharacterValidationResult:
+        """
+        Validate a response for character consistency.
+        
+        Args:
+            response_text: The response text to validate
+            context: Optional context for validation
+            
+        Returns:
+            CharacterValidationResult with validation scores
+        """
+        return await self.validate_text(response_text, context)
+
 # Convenience function for quick validation
 async def validate_diana_character(text: str, session: AsyncSession, context: Optional[str] = None) -> CharacterValidationResult:
     """Quick validation function for Diana character consistency."""

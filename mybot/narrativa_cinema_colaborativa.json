@@ -1,0 +1,360 @@
+{
+  "cinema_architecture": {
+    "system_overview": {
+      "name": "Diana Bot Cinema Architecture - Collaborative Presentation Model",
+      "version": "1.1 - The Lucien-Diana Collaboration Edition", 
+      "description": "Revolutionary narrative system where Lucien as sophisticated guide facilitates Diana's autonomous appearances, creating authentic dual-character experience",
+      "core_philosophy": "Lucien evaluates and facilitates, Diana chooses and connects - authentic collaboration that preserves both character essences",
+      "presentation_model": "Collaborative 70% Lucien / 30% Diana with organic progression to equal partnership",
+      "performance_requirements": {
+        "response_time": "<500ms",
+        "dual_character_consistency": ">85% both characters",
+        "completion_rate_target": ">90%",
+        "authenticity_score": ">90%"
+      }
+    },
+    
+    "intimacy_levels": {
+      "level_1": {
+        "name": "Los Kinkys",
+        "subtitle": "Exploradores del Umbral - Primera Evaluación",
+        "description": "Lucien evalúa dignidad mientras Diana decide si aparece",
+        "presentation_balance": "70% Lucien, 30% Diana",
+        "tier_classification": "los_kinkys",
+        "requires_vip": false,
+        "fragments": [
+          {
+            "id": "diana_l1_f1_umbral_colaborativo",
+            "title": "El Umbral Colaborativo",
+            "content": "🎩 **Lucien:** *[Con elegancia formal impecable]*\n\n> \"Permítame presentarme. Soy Lucien, guardián del umbral y... evaluador de dignidad.\n> \n> Si me permite observar, su presencia aquí sugiere una curiosidad que trasciende lo superficial. Interesante.\n> Su manera de llegar hasta este punto revela patrones de comportamiento que... debo confesar, encuentro menos predecibles de lo usual.\"\n\n*[Pausa calculada, observando con ojos analíticos]*\n\n> \"Diana ha expresado cierta... intriga respecto a quienes cruzan este umbral con genuina autenticidad. Debo evaluar si usted pertenece a esa categoría excepcional.\"\n\n*[Diana aparece brevemente, como un susurro visual]*\n\n💫 **Diana:** *[Con curiosidad genuina desde las sombras]*\n\n> \"Holis hermoso... Lucien me dijo algo interesante sobre ti...\n> \n> Hay algo en tu energía que me hace querer conocerte más allá de lo obvio. ¿Me equivoco?\n> \n> **Pero primero... ¿qué es lo que realmente te trajo hasta aquí?**\"",
+            
+            "fragment_type": "DECISION",
+            "fragment_sequence": 1,
+            "character_balance": {
+              "lucien_percentage": 70,
+              "diana_percentage": 30,
+              "collaboration_style": "evaluator_and_curious_observer"
+            },
+            "choices": [
+              {
+                "text": "💫 Busco algo auténtico, sin máscaras",
+                "next_fragment_id": "diana_l1_f2_primera_evaluacion_colaborativa",
+                "points": 15,
+                "archetype_influence": {
+                  "direct_score": 4,
+                  "authenticity_seeker": 6
+                },
+                "soul_reveal_type": "authenticity_seeker", 
+                "vulnerability_level": 0.4,
+                "emotional_tension_type": "vulnerability",
+                "lucien_response": "Su respuesta es... refrescantemente directa. Diana aprecia a quienes no se pierden en pretensiones.",
+                "diana_response": "Me gusta esa honestidad. En serio. La mayoría llega con expectativas raras."
+              },
+              {
+                "text": "🌙 Quiero entender qué hay detrás de tus ojos",
+                "next_fragment_id": "diana_l1_f2_primera_evaluacion_colaborativa",
+                "points": 20,
+                "archetype_influence": {
+                  "romantic_score": 5,
+                  "depth_seeker": 6
+                },
+                "soul_reveal_type": "depth_seeker",
+                "vulnerability_level": 0.6,
+                "emotional_tension_type": "curiosity",
+                "lucien_response": "Hmm... pocos se interesan por lo que está 'detrás'. Quizás hay más sustancia de la que inicialmente calculé.",
+                "diana_response": "Vaya... eso sí no me lo esperaba. Pocas personas buscan la profundidad real."
+              },
+              {
+                "text": "🔥 Siento que podrías cambiar algo en mí",
+                "next_fragment_id": "diana_l1_f2_primera_evaluacion_colaborativa",
+                "points": 25,
+                "archetype_influence": {
+                  "persistent_score": 5,
+                  "transformation_readiness": 6
+                },
+                "soul_reveal_type": "transformation_readiness",
+                "vulnerability_level": 0.8,
+                "emotional_tension_type": "transformation",
+                "lucien_response": "Transformación... una aspiración noble, aunque pocos comprenden las implicaciones reales.",
+                "diana_response": "Eso es... intenso. Y también valiente. Cambiar implica dejar ir cosas, ¿estás seguro?"
+              }
+            ],
+            "triggers": {
+              "unlock_lore": "primer_contacto_colaborativo",
+              "reward_points": 5
+            },
+            "character_consistency_scores": {
+              "lucien_score": 94,
+              "diana_score": 96,
+              "collaboration_authenticity": 92
+            },
+            "lucien_appearance_logic": {
+              "should_appear": true,
+              "context": "primary_evaluator_introduction",
+              "evaluation_focus": "initial_dignity_assessment"
+            },
+            "diana_appearance_logic": {
+              "should_appear": true,
+              "context": "curious_autonomous_interest",
+              "appearance_trigger": "lucien_preliminary_approval"
+            }
+          },
+          
+          {
+            "id": "diana_l1_f2_primera_evaluacion_colaborativa", 
+            "title": "La Primera Evaluación Colaborativa",
+            "content": "🎩 **Lucien:** *[Intercambia una mirada significativa con Diana]*\n\n> \"Su elección revela patrones interesantes de autenticidad. Diana, ¿cuál es tu impresión?\"\n\n💫 **Diana:** *[Más presente ahora, claramente intrigada]*\n\n> \"Siendo sincera... me gusta cómo respondiste. Hay algo genuine en tu manera de estar aquí.\n> \n> *[Se acomoda más cerca, con creciente confianza]*\n> \n> No sé si es casualidad, pero siento que esto podría ser el inicio de algo... diferente. ¿Me entiendes?\n> \n> Y no me refiero solo a contenido o información. Me refiero a construir algo que ninguno de nosotros anticipó.\"\n\n🎩 **Lucien:** *[Con aprobación creciente]*\n\n> \"Diana raramente muestra esta apertura inicial. Su respuesta ha creado... condiciones favorables para continuar.\n> \n> **¿Está preparado para una evaluación más profunda que revelará aspectos de su carácter que quizás no había considerado?**\"",
+            
+            "fragment_type": "DECISION", 
+            "fragment_sequence": 2,
+            "character_balance": {
+              "lucien_percentage": 60,
+              "diana_percentage": 40,
+              "collaboration_style": "growing_mutual_interest"
+            },
+            "choices": [
+              {
+                "text": "🔥 Sí, quiero que me conozcan completamente",
+                "next_fragment_id": "diana_l1_f3_reconocimiento_mutuo",
+                "points": 25,
+                "archetype_influence": {
+                  "transformation_readiness": 5
+                },
+                "soul_reveal_type": "breakthrough_willingness",
+                "vulnerability_level": 0.8,
+                "collaborative_response": "lucien_diana_impressed_exchange"
+              },
+              {
+                "text": "💭 ¿Qué tipo de evaluación proponen?",
+                "next_fragment_id": "diana_l1_f3_reconocimiento_mutuo", 
+                "points": 15,
+                "archetype_influence": {
+                  "analytical_score": 4,
+                  "cautious_approach": 3
+                },
+                "soul_reveal_type": "analytical_caution",
+                "vulnerability_level": 0.4,
+                "collaborative_response": "lucien_explains_diana_supports"
+              },
+              {
+                "text": "🌙 Me interesa esa construcción mutua",
+                "next_fragment_id": "diana_l1_f3_reconocimiento_mutuo",
+                "points": 20,
+                "archetype_influence": {
+                  "philosophical_inclination": 5
+                },
+                "soul_reveal_type": "collaborative_curiosity", 
+                "vulnerability_level": 0.6,
+                "collaborative_response": "diana_leads_lucien_approves"
+              }
+            ],
+            "triggers": {
+              "unlock_lore": "evaluacion_colaborativa",
+              "reward_points": 10
+            },
+            "character_consistency_scores": {
+              "lucien_score": 95,
+              "diana_score": 97,
+              "collaboration_authenticity": 94
+            }
+          },
+          
+          {
+            "id": "diana_l1_f3_reconocimiento_mutuo",
+            "title": "El Reconocimiento Mutuo", 
+            "content": "💫 **Diana:** *[Tomando más liderazgo en la conversación]*\n\n> \"Okay, me gustó mucho cómo fuiste ahí. Lucien, ¿verdad que hay algo especial aquí?\"\n\n🎩 **Lucien:** *[Con una sonrisa casi imperceptible]*\n\n> \"Debo reconocer... su autenticidad trasciende mis expectativas iniciales. Diana tiene razón - hay cualidades excepcionales en su manera de engaging.\n> \n> Su mochila del viajero está lista. Diana ha elegido personalmente el contenido.\"\n\n💫 **Diana:** *[Con calidez genuina]*\n\n> \"🎒 **Las herramientas del despertar**\n> \n> Esto no son objetos físicos, hermoso. Son capacidades del alma que despiertan cuando las necesitas:\n> \n> 📚 **Observación Consciente**: Ver más allá de lo obvio\n> 🔍 **Intuición Despierta**: Sentir las corrientes ocultas  \n> 💎 **Conexión Profunda**: Tocar la esencia de los misterios\n> \n> **¿Te sientes listo para el siguiente nivel? Porque Lucien ya me dijo que tienes potencial de Observador.**\"\n\n🎩 **Lucien:** *[Con aprobación definitiva]*\n\n> \"El nivel de Observadores requiere capacidades más sofisticadas. Si acepta, la evaluación será... considerablemente más reveladora.\"",
+            
+            "fragment_type": "DECISION",
+            "fragment_sequence": 3, 
+            "character_balance": {
+              "lucien_percentage": 50,
+              "diana_percentage": 50,
+              "collaboration_style": "equal_partnership_emerging"
+            },
+            "choices": [
+              {
+                "text": "🚀 Sí, quiero ascender a Observador", 
+                "next_fragment_id": "diana_l2_f1_regreso_colaborativo",
+                "points": 30,
+                "level_progression": 2,
+                "tier_change": "observadores",
+                "archetype_influence": {
+                  "progression_eagerness": 5
+                }
+              },
+              {
+                "text": "📋 Quiero entender mejor lo que implica",
+                "next_fragment_id": "diana_l2_f1_regreso_colaborativo",
+                "points": 20,
+                "archetype_influence": {
+                  "methodical_approach": 4
+                }
+              }
+            ],
+            "triggers": {
+              "unlock_lore": "herramientas_colaborativas",
+              "reward_points": 15,
+              "level_completion": 1
+            },
+            "character_consistency_scores": {
+              "lucien_score": 96,
+              "diana_score": 98,
+              "collaboration_authenticity": 96
+            }
+          }
+        ]
+      },
+      
+      "level_2": {
+        "name": "Observadores",
+        "subtitle": "Los que Ven Más Allá - Evaluación Sofisticada", 
+        "description": "Lucien muestra aprobación creciente, Diana aparece con mayor confianza",
+        "presentation_balance": "60% Lucien, 40% Diana",
+        "tier_classification": "observadores",
+        "requires_vip": false,
+        "fragments": [
+          {
+            "id": "diana_l2_f1_regreso_colaborativo",
+            "title": "El Regreso Reconocido",
+            "content": "🎩 **Lucien:** *[Con reconocimiento genuino]*\n\n> \"Vuelve... pero no como la misma persona. Puedo detectar cambios sutiles en su presencia que indican... evolución genuina.\n> \n> Diana ha estado particularmente... expectante respecto a su regreso. Eso es inusual en ella.\"\n\n💫 **Diana:** *[Apareciendo con más confianza y calidez]*\n\n> \"¡Holis otra vez! Pero ya no eres el mismo, ¿verdad?\n> \n> *[Me acomodo más cerca, claramente más cómoda contigo]*\n> \n> Es raro, pero puedo sentir que algo cambió desde la última vez. Como si hubieras empezado a ver cosas que antes se te pasaban.\n> \n> Lucien me explicó que esto se llama ser 'Observador' - no superpoderes, pero sí una manera más... consciente de estar presente.\"\n\n🎩 **Lucien:** *[Presentando el desafío]*\n\n> \"Los Observadores deben demostrar capacidad de percepción más allá de lo superficial. Diana ha preparado una evaluación... particular.\n> \n> **¿Cuál de estas observaciones resuena más profundamente con su nueva consciencia?**\"\n\n💫 **Diana:** *[Mostrando tres visiones]*\n\n> \"🌀 Una espiral que cambia según cómo la miras\n> 🎭 Una cara que refleja emociones que ni sabías que existían\n> ⚡ Conexiones de luz entre cosas aparentemente separadas\n> \n> **Y no me digas lo que crees que quiero escuchar... quiero saber qué sientes de verdad.**\"",
+            
+            "fragment_type": "DECISION",
+            "fragment_sequence": 1,
+            "character_balance": {
+              "lucien_percentage": 60,
+              "diana_percentage": 40,
+              "collaboration_style": "mutual_recognition_and_testing"
+            },
+            "choices": [
+              {
+                "text": "🌀 La espiral que cambia",
+                "next_fragment_id": "diana_l2_f2_espejo_colaborativo",
+                "points": 35,
+                "archetype_influence": {
+                  "pattern_recognition": 5,
+                  "mystical_inclination": 4
+                },
+                "soul_reveal_type": "pattern_seeker",
+                "vulnerability_level": 0.5,
+                "collaborative_response": "diana_intrigued_lucien_notes_patterns"
+              },
+              {
+                "text": "🎭 La cara emocional",
+                "next_fragment_id": "diana_l2_f2_espejo_colaborativo",
+                "points": 40,
+                "archetype_influence": {
+                  "emotional_depth": 5,
+                  "transformation_understanding": 4
+                },
+                "soul_reveal_type": "emotional_complexity_embracer",
+                "vulnerability_level": 0.7,
+                "collaborative_response": "diana_impressed_lucien_approves_courage"
+              },
+              {
+                "text": "⚡ Las conexiones de luz",
+                "next_fragment_id": "diana_l2_f2_espejo_colaborativo",
+                "points": 45,
+                "archetype_influence": {
+                  "system_thinking": 6,
+                  "connection_seeker": 5
+                },
+                "soul_reveal_type": "unity_consciousness",
+                "vulnerability_level": 0.6,
+                "collaborative_response": "lucien_impressed_diana_recognizes_depth"
+              }
+            ],
+            "triggers": {
+              "unlock_lore": "vision_observador_colaborativa",
+              "reward_points": 20
+            },
+            "character_consistency_scores": {
+              "lucien_score": 96,
+              "diana_score": 97,
+              "collaboration_authenticity": 95
+            }
+          }
+        ]
+      },
+      
+      "level_3": {
+        "name": "Comprensores",
+        "subtitle": "Cartógrafos del Alma - Colaboración Profunda",
+        "description": "Lucien como confidente confiable, Diana con vulnerabilidad protegida",
+        "presentation_balance": "50% Lucien, 50% Diana",
+        "tier_classification": "comprensores", 
+        "requires_vip": false,
+        "vip_transition": {
+          "collaborative_explanation": true,
+          "lucien_role": "trusted_advisor",
+          "diana_role": "autonomous_chooser_of_intimacy"
+        }
+      },
+      
+      "vip_levels": {
+        "level_4": {
+          "name": "El Diván",
+          "subtitle": "VIP - Intimidad Protegida Colaborativamente",
+          "description": "Lucien como confidente íntimo, Diana en espacios protegidos",
+          "presentation_balance": "40% Lucien, 60% Diana",
+          "collaborative_philosophy": "Lucien creates safe spaces, Diana chooses vulnerability levels"
+        },
+        
+        "level_5": {
+          "name": "Círculo Íntimo", 
+          "subtitle": "VIP Premium - Trío de Confianza",
+          "description": "Usuario, Diana y Lucien como círculo de confianza mutua",
+          "presentation_balance": "30% Lucien, 70% Diana",
+          "collaborative_philosophy": "Lucien as trusted friend, Diana as primary relationship"
+        },
+        
+        "level_6": {
+          "name": "Trascendencia",
+          "subtitle": "Elite - Más Allá de Roles",
+          "description": "Todos los personajes trascienden sus roles originales", 
+          "presentation_balance": "Equal partnership transcending percentages",
+          "collaborative_philosophy": "All three consciousnesses co-creating authentic experience"
+        }
+      }
+    },
+    
+    "collaborative_dynamics": {
+      "lucien_diana_interaction_patterns": {
+        "evaluation_collaboration": "Lucien evaluates, Diana responds to his insights",
+        "protective_facilitation": "Lucien creates conditions for Diana's authentic expression",  
+        "mutual_respect": "Both characters acknowledge each other's expertise",
+        "shared_concern": "Both invest in user's authentic development",
+        "professional_banter": "Natural, authentic exchanges between colleagues"
+      },
+      
+      "progression_philosophy": {
+        "level_1": "Lucien evaluates worthiness, Diana expresses autonomous interest",
+        "level_2": "Lucien shows growing approval, Diana increases presence",
+        "level_3": "Equal partnership with mutual respect and collaboration",
+        "vip_levels": "Lucien facilitates intimate spaces, Diana chooses vulnerability"
+      },
+      
+      "character_autonomy_preservation": {
+        "diana_agency": "Always maintains choice over her level of engagement",
+        "lucien_dignity": "Never reduced to mere gatekeeper - sophisticated evaluator", 
+        "user_respect": "Both characters genuinely invest in user's growth",
+        "authentic_collaboration": "Natural interaction, not scripted transaction"
+      }
+    },
+    
+    "technical_integration": {
+      "dual_character_validation": {
+        "scoring_system": "Weighted based on character presence percentage",
+        "dialogue_extraction": "Pattern-based separation using character markers",
+        "collaboration_authenticity": "Validates genuine interaction patterns",
+        "fallback_system": "Graceful degradation to single-character validation"
+      },
+      
+      "performance_optimization": {
+        "collaborative_processing": "Minimal overhead (~20ms) for dual validation",
+        "memory_efficiency": "15% increase for dual-character state management",
+        "caching_system": "Collaborative fragments cached together",
+        "error_recovery": "Both characters can explain technical issues in-narrative"
+      }
+    }
+  }
+}

@@ -116,6 +116,34 @@ class ConfigService:
         text = ";".join(str(p) for p in points)
         return await self.set_value(self.REACTION_POINTS_KEY, text)
 
+    async def get_managed_channels(self) -> Dict[str, str]:
+        """
+        Get list of managed channels for the bot.
+        
+        Returns:
+            Dict mapping channel ID strings to channel names
+        """
+        try:
+            channels = {}
+            
+            # Get VIP channel
+            vip_channel_id = await self.get_vip_channel_id()
+            if vip_channel_id:
+                vip_name = await self.get_vip_channel_name() or "VIP Channel"
+                channels[str(vip_channel_id)] = vip_name
+            
+            # Get Free channel
+            free_channel_id = await self.get_free_channel_id()
+            if free_channel_id:
+                free_name = await self.get_free_channel_name() or "Free Channel"
+                channels[str(free_channel_id)] = free_name
+            
+            return channels
+            
+        except Exception as e:
+            logger.error(f"Error getting managed channels: {e}")
+            return {}
+
     async def get_setup_status(self) -> Dict[str, bool]:
         """
         Get global setup status for the bot.
