@@ -9,7 +9,7 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.coordinador_central import CoordinadorCentral, AccionUsuario
-from keyboards.narrative_kb import get_decision_keyboard
+from keyboards.narrative_kb import get_narrative_keyboard
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -17,13 +17,17 @@ logger = logging.getLogger(__name__)
 @router.message(Command("start_story"))
 async def start_story_command(message: Message, session: AsyncSession):
     """Inicia la historia para el usuario"""
-    from modules.narrative.story_engine import NarrativeEngine
-    engine = NarrativeEngine(session)
-    fragment = await engine.start_story(message.from_user.id)
+    from services.narrative_engine import NarrativeEngine
+    engine = NarrativeEngine(session, bot=message.bot)
+    fragment = await engine.start_narrative(message.from_user.id)
     
+    if not fragment:
+        await message.answer("❌ No se pudo iniciar la narrativa. Contacta al administrador.")
+        return
+        
     await message.answer(
-        fragment.content,
-        reply_markup=get_decision_keyboard(fragment)
+        fragment.text,
+        reply_markup=await get_narrative_keyboard(fragment, session)
     )
 
 @router.callback_query(F.data.startswith("narrative_choice:"))
@@ -36,22 +40,15 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
     _, fragment_id, choice_index = callback.data.split(":")
     choice_index = int(choice_index)
     
-    # Obtener el ID de decisión basado en el fragmento y la elección
-    from modules.narrative.story_engine import NarrativeEngine
-    engine = NarrativeEngine(session)
-    fragment = await engine.get_fragment(fragment_id)
-    if not fragment or choice_index >= len(fragment.decisions):
-        await callback.answer("Opción no válida", show_alert=True)
-        return
+    # Usar el CoordinadorCentral directamente para el flujo completo
+    # No necesitamos obtener el decision_id manualmente
     
-    decision_id = fragment.decisions[choice_index].id
-    
-    # Usar el coordinador central para el flujo completo
+    # Usar el coordinador central para el flujo completo  
     coordinador = CoordinadorCentral(session)
     result = await coordinador.ejecutar_flujo(
         user_id,
         AccionUsuario.TOMAR_DECISION,
-        decision_id=decision_id,
+        choice_index=choice_index,
         bot=callback.bot
     )
     
@@ -59,8 +56,8 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         # Decisión exitosa, mostrar nuevo fragmento
         next_fragment = result["fragment"]
         await callback.message.edit_text(
-            next_fragment.content,
-            reply_markup=get_decision_keyboard(next_fragment)
+            next_fragment.text,
+            reply_markup=await get_narrative_keyboard(next_fragment, session)
         )
         await callback.answer()
     else:

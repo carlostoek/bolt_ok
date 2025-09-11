@@ -1775,3 +1775,1087 @@ NameError: name 'get_admin_kb' is not defined. Did you mean: 'get_admin_main_kb'
 2025-09-11 21:06:34,269 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-09-11 21:06:34,269 - root - INFO - safe_task:117 - Tarea channel_cleanup cancelada
 2025-09-11 21:06:34,269 - root - INFO - shutdown:137 - Todas las tareas cerradas
+2025-09-11 23:25:00,213 - __main__ - INFO - main:147 - Inicializando base de datos...
+2025-09-11 23:25:00,214 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 23:25:00,229 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-11 23:25:00,249 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-11 23:25:00,250 - __main__ - INFO - main:150 - Aplicando parches de seguridad...
+2025-09-11 23:25:00,250 - __main__ - INFO - main:155 - VIP channel ID: -1001468184215
+2025-09-11 23:25:00,251 - __main__ - INFO - main:156 - Configurando bot...
+2025-09-11 23:25:00,295 - __main__ - INFO - main:185 - Registrando handlers...
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router setup registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router admin registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router start_token registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router start registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router backpack registrado
+2025-09-11 23:25:00,295 - __main__ - INFO - main:214 - Router missions registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router info registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router minigames registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router gamification registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router free_user registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router lore registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router narrative registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-09-11 23:25:00,296 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-09-11 23:25:00,297 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-09-11 23:25:00,297 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-11 23:25:00,299 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-11 23:25:00,300 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-11 23:25:00,301 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-11 23:25:00,303 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-11 23:25:00,318 - root - ERROR - run_auction_monitor_check:172 - Error in auction monitor check: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 168, in run_auction_monitor_check
+    expired_auctions = await auction_service.check_expired_auctions(bot)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/auction_service.py", line 304, in check_expired_auctions
+    result = await self.session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:00,328 - services.free_channel_service - ERROR - cleanup_old_requests:444 - Error cleaning up old requests: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:00,329 - root - ERROR - vip_membership_scheduler:160 - Unhandled error in VIP membership scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2522, in get_property
+    return self._props[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'story_fragments'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 149, in vip_membership_scheduler
+    await run_vip_membership_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 99, in run_vip_membership_check
+    vip_channel_id = await ConfigService(session).get_vip_channel_id()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 37, in get_vip_channel_id
+    value = await self.get_value(self.VIP_CHANNEL_KEY)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 20, in get_value
+    entry = await self.session.get(ConfigEntry, key)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4259, in _do_configure_registries
+    mapper._post_configure_properties()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2418, in _post_configure_properties
+    prop.init()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/interfaces.py", line 595, in init
+    self.do_init()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1660, in do_init
+    self._generate_backref()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 2144, in _generate_backref
+    self._add_reverse_property(self.back_populates)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1591, in _add_reverse_property
+    other = self.mapper.get_property(key, _configure_mappers=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2524, in get_property
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:00,332 - root - ERROR - vip_subscription_scheduler:140 - Unhandled error in VIP subscription scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 129, in vip_subscription_scheduler
+    await run_vip_subscription_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 52, in run_vip_subscription_check
+    reminder_msg = await config_service.get_value("vip_reminder_message")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 20, in get_value
+    entry = await self.session.get(ConfigEntry, key)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:00,334 - root - ERROR - channel_request_scheduler:43 - Unhandled error in channel request scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 32, in channel_request_scheduler
+    await run_channel_request_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 20, in run_channel_request_check
+    processed_count = await free_service.process_pending_requests()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/free_channel_service.py", line 163, in process_pending_requests
+    wait_minutes = await self.get_wait_time_minutes()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/free_channel_service.py", line 58, in get_wait_time_minutes
+    config = await self.session.get(BotConfig, 1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:41,616 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-11 23:25:41,868 - __main__ - INFO - main:249 - Cerrando bot...
+2025-09-11 23:25:41,868 - root - INFO - shutdown:128 - Cerrando tareas en segundo plano...
+2025-09-11 23:25:41,868 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-11 23:25:41,869 - root - INFO - safe_task:117 - Tarea auction_monitor cancelada
+2025-09-11 23:25:41,869 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-11 23:25:41,869 - root - INFO - safe_task:117 - Tarea channel_cleanup cancelada
+2025-09-11 23:25:41,869 - root - INFO - shutdown:137 - Todas las tareas cerradas
+2025-09-11 23:25:58,955 - __main__ - INFO - main:147 - Inicializando base de datos...
+2025-09-11 23:25:58,955 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 23:25:58,974 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-11 23:25:59,735 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-11 23:25:59,737 - __main__ - INFO - main:150 - Aplicando parches de seguridad...
+2025-09-11 23:25:59,737 - __main__ - INFO - main:155 - VIP channel ID: -1001468184215
+2025-09-11 23:25:59,737 - __main__ - INFO - main:156 - Configurando bot...
+2025-09-11 23:25:59,773 - __main__ - INFO - main:185 - Registrando handlers...
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router setup registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router admin registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router start_token registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router start registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router backpack registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router missions registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router info registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-09-11 23:25:59,774 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router minigames registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router gamification registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router free_user registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router lore registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router narrative registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-09-11 23:25:59,775 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-09-11 23:25:59,775 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-09-11 23:25:59,776 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-11 23:25:59,777 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-11 23:25:59,778 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-11 23:25:59,779 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-11 23:25:59,780 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-11 23:25:59,795 - root - ERROR - run_auction_monitor_check:172 - Error in auction monitor check: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 168, in run_auction_monitor_check
+    expired_auctions = await auction_service.check_expired_auctions(bot)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/auction_service.py", line 304, in check_expired_auctions
+    result = await self.session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:59,804 - services.free_channel_service - ERROR - cleanup_old_requests:444 - Error cleaning up old requests: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:59,806 - root - ERROR - vip_membership_scheduler:160 - Unhandled error in VIP membership scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 149, in vip_membership_scheduler
+    await run_vip_membership_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 99, in run_vip_membership_check
+    vip_channel_id = await ConfigService(session).get_vip_channel_id()
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 37, in get_vip_channel_id
+    value = await self.get_value(self.VIP_CHANNEL_KEY)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 20, in get_value
+    entry = await self.session.get(ConfigEntry, key)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:59,808 - root - ERROR - vip_subscription_scheduler:140 - Unhandled error in VIP subscription scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2522, in get_property
+    return self._props[key]
+           ~~~~~~~~~~~^^^^^
+KeyError: 'story_fragments'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 129, in vip_subscription_scheduler
+    await run_vip_subscription_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 52, in run_vip_subscription_check
+    reminder_msg = await config_service.get_value("vip_reminder_message")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/config_service.py", line 20, in get_value
+    entry = await self.session.get(ConfigEntry, key)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4259, in _do_configure_registries
+    mapper._post_configure_properties()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2418, in _post_configure_properties
+    prop.init()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/interfaces.py", line 595, in init
+    self.do_init()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1660, in do_init
+    self._generate_backref()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 2144, in _generate_backref
+    self._add_reverse_property(self.back_populates)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1591, in _add_reverse_property
+    other = self.mapper.get_property(key, _configure_mappers=False)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2524, in get_property
+    raise sa_exc.InvalidRequestError(
+sqlalchemy.exc.InvalidRequestError: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:25:59,812 - root - ERROR - channel_request_scheduler:43 - Unhandled error in channel request scheduler
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 32, in channel_request_scheduler
+    await run_channel_request_check(bot, session_factory)
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 20, in run_channel_request_check
+    processed_count = await free_service.process_pending_requests()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/free_channel_service.py", line 163, in process_pending_requests
+    wait_minutes = await self.get_wait_time_minutes()
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/free_channel_service.py", line 58, in get_wait_time_minutes
+    config = await self.session.get(BotConfig, 1)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:26:42,673 - __main__ - ERROR - global_error_handler:91 - Error en 978978067: InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 44, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 37, in __call__
+    user = await service.get_user(user_info.id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/user_service.py", line 16, in get_user
+    return await self.session.get(User, telegram_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:26:51,760 - __main__ - ERROR - global_error_handler:91 - Error en 978978068: InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 44, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 37, in __call__
+    user = await service.get_user(user_info.id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/user_service.py", line 16, in get_user
+    return await self.session.get(User, telegram_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 606, in get
+    return await greenlet_spawn(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3694, in get
+    return self._get_impl(
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 3873, in _get_impl
+    return db_load_fn(
+           ^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/loading.py", line 695, in load_on_pk_identity
+    session.execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:26:59,814 - root - ERROR - run_auction_monitor_check:172 - Error in auction monitor check: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/services/scheduler.py", line 168, in run_auction_monitor_check
+    expired_auctions = await auction_service.check_expired_auctions(bot)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/services/auction_service.py", line 304, in check_expired_auctions
+    result = await self.session.execute(stmt)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
+    result = context.switch(value)
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1633, in _execute_clauseelement
+    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
+                                                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 715, in _compile_w_cache
+    compiled_sql = self._compiler(
+                   ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 323, in _compiler
+    return dialect.statement_compiler(dialect, self, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
+    Compiled.__init__(self, dialect, statement, **kwargs)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
+    self.string = self.process(self.statement, **compile_kwargs)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
+    return obj._compiler_dispatch(self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 138, in _compiler_dispatch
+    return meth(self, **kw)  # type: ignore  # noqa: E501
+           ^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4781, in visit_select
+    compile_state = select_stmt._compile_state_factory(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 701, in create_for_statement
+    return klass.create_for_statement(statement, compiler, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
+    return cls._create_orm_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
+    _QueryEntity.to_compile_state(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
+    _MapperEntity(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
+    entity._post_inspect
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
+    obj.__dict__[self.__name__] = result = self.fget(obj)
+                                           ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
+    self._check_configure()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
+    _configure_registries({self.registry}, cascade=True)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4218, in _configure_registries
+    _do_configure_registries(registries, cascade)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
+    raise e
+sqlalchemy.exc.InvalidRequestError: One or more mappers failed to initialize - can't proceed with initialization of other mappers. Triggering mapper: 'Mapper[StoryFragment(story_fragments)]'. Original exception was: Mapper 'Mapper[Achievement(achievements)]' has no property 'story_fragments'.  If this property was indicated from other mappers or configure events, ensure registry.configure() has been called.
+2025-09-11 23:27:32,511 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-11 23:27:32,763 - __main__ - INFO - main:249 - Cerrando bot...
+2025-09-11 23:27:32,764 - root - INFO - shutdown:128 - Cerrando tareas en segundo plano...
+2025-09-11 23:27:32,764 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-11 23:27:32,764 - root - INFO - safe_task:117 - Tarea auction_monitor cancelada
+2025-09-11 23:27:32,764 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-11 23:27:32,764 - root - INFO - safe_task:117 - Tarea channel_cleanup cancelada
+2025-09-11 23:27:32,764 - root - INFO - shutdown:137 - Todas las tareas cerradas

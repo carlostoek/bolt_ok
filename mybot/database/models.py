@@ -63,6 +63,17 @@ class User(Base):
             cascade="all, delete-orphan"
         )
 
+    @declared_attr
+    def emotional_profile(cls):
+        from .emotional_models import UserEmotionalProfile
+        return relationship(
+            UserEmotionalProfile,
+            back_populates="user",
+            uselist=False,
+            lazy="selectin",
+            cascade="all, delete-orphan"
+        )
+
 
 class Reward(Base):
     """Rewards unlocked by reaching a number of points."""
@@ -97,6 +108,32 @@ class Achievement(Base):
     condition_value = Column(Integer, nullable=False)
     reward_text = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
+
+
+class UserArchetypeData(Base):
+    """Database model for storing user archetype classification data."""
+    __tablename__ = "user_archetypes"
+    
+    user_id = Column(BigInteger, primary_key=True)
+    current_archetype = Column(String, default="undefined")
+    confidence_score = Column(Float, default=0.0)
+    
+    # Archetype scores (JSON storing all archetype confidences)
+    archetype_scores = Column(JSON, default={})
+    
+    # Behavioral patterns (JSON storing pattern metrics)
+    behavioral_patterns = Column(JSON, default={})
+    
+    # Evolution tracking
+    archetype_history = Column(JSON, default=[])
+    classification_count = Column(Integer, default=0)
+    last_classification = Column(DateTime, default=func.now())
+    
+    # Performance tracking
+    avg_classification_time = Column(Float, default=0.0)
+    
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
     story_fragments = relationship(
         "StoryFragment",

@@ -3,6 +3,7 @@ Coordinador Central para orquestar la integración entre todos los módulos del 
 """
 import logging
 import enum
+import time
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,6 +13,7 @@ try:
     from .integration.narrative_access_service import NarrativeAccessService
     from .narrative_service import NarrativeService
     from .point_service import PointService
+    from .user_archetype_service import UserArchetypeService
 except ImportError:
     # Fallback to absolute imports for standalone usage
     from services.integration.channel_engagement_service import ChannelEngagementService
@@ -19,6 +21,7 @@ except ImportError:
     from services.integration.narrative_access_service import NarrativeAccessService
     from services.narrative_service import NarrativeService
     from services.point_service import PointService
+    from services.user_archetype_service import UserArchetypeService
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +32,7 @@ class AccionUsuario(enum.Enum):
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
+    ANALIZAR_ARQUETIPO = "analizar_arquetipo"
 
 class CoordinadorCentral:
     """
@@ -51,6 +55,10 @@ class CoordinadorCentral:
         # Servicios base
         self.narrative_service = NarrativeService(session)
         self.point_service = PointService(session)
+        # Servicio de arquetipos de usuario
+        self.archetype_service = UserArchetypeService(session)
+        # Servicio de análisis emocional
+        self.emotional_analysis = EmotionalAnalysisService(session)
     
     async def ejecutar_flujo(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
         """
@@ -76,6 +84,8 @@ class CoordinadorCentral:
                 return await self._flujo_participacion_canal(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
                 return await self._flujo_verificar_engagement(user_id, **kwargs)
+            elif accion == AccionUsuario.ANALIZAR_ARQUETIPO:
+                return await self._flujo_analizar_arquetipo(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -92,7 +102,7 @@ class CoordinadorCentral:
     
     async def _flujo_reaccion_publicacion(self, user_id: int, message_id: int, channel_id: int, reaction_type: str, bot=None) -> Dict[str, Any]:
         """
-        Flujo para manejar reacciones a publicaciones en canales.
+        Flujo para manejar reacciones a publicaciones en canales con clasificación de arquetipos.
         
         Args:
             user_id: ID del usuario
@@ -102,24 +112,37 @@ class CoordinadorCentral:
             bot: Instancia del bot para enviar mensajes
             
         Returns:
-            Dict con resultados y mensajes
+            Dict con resultados y mensajes personalizados por arquetipo
         """
-        # 1. Otorgar puntos por la reacción
+        # 1. Rastrear comportamiento para clasificación de arquetipo
+        await self.archetype_service.track_behavioral_event(
+            user_id, 
+            "emotional_reaction", 
+            {"reaction_type": reaction_type, "context": "channel_reaction"}
+        )
+        
+        # 2. Otorgar puntos por la reacción
         puntos_otorgados = await self.channel_engagement.award_channel_reaction(
             user_id, message_id, channel_id, bot=bot
         )
         
         if not puntos_otorgados:
+            # Personalizar mensaje de error basado en arquetipo
+            error_message = await self.archetype_service.get_personalized_response(
+                user_id, 
+                "reaction", 
+                "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde."
+            )
             return {
                 "success": False,
-                "message": "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde.",
+                "message": error_message,
                 "action": "reaction_failed"
             }
         
-        # 2. Obtener puntos actuales del usuario
+        # 3. Obtener puntos actuales del usuario
         puntos_actuales = await self.point_service.get_user_points(user_id)
         
-        # 3. Verificar si se desbloquea una pista narrativa
+        # 4. Verificar si se desbloquea una pista narrativa
         pista_desbloqueada = None
         if puntos_actuales % 50 <= 15 and puntos_actuales > 15:  # Desbloquear pista cada ~50 puntos
             # Obtener fragmento actual del usuario
@@ -140,16 +163,19 @@ class CoordinadorCentral:
                         pista_desbloqueada = pista
                         break
         
-        # 4. Generar mensaje de respuesta
+        # 5. Generar mensaje personalizado basado en arquetipo
         mensaje_base = "Diana sonríe al notar tu reacción... *+10 besitos* 💋 han sido añadidos a tu cuenta."
         if pista_desbloqueada:
-            mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
-        else:
-            mensaje = mensaje_base
+            mensaje_base = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+        
+        # Personalizar mensaje según el arquetipo del usuario
+        mensaje_personalizado = await self.archetype_service.get_personalized_response(
+            user_id, "reaction", mensaje_base
+        )
         
         return {
             "success": True,
-            "message": mensaje,
+            "message": mensaje_personalizado,
             "points_awarded": 10,
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
@@ -190,7 +216,7 @@ class CoordinadorCentral:
     
     async def _flujo_tomar_decision(self, user_id: int, decision_id: int, bot=None) -> Dict[str, Any]:
         """
-        Flujo para manejar decisiones narrativas del usuario.
+        Flujo para manejar decisiones narrativas del usuario con análisis de arquetipo.
         
         Args:
             user_id: ID del usuario
@@ -198,33 +224,105 @@ class CoordinadorCentral:
             bot: Instancia del bot para enviar mensajes
             
         Returns:
-            Dict con resultados y mensajes
+            Dict con resultados y mensajes personalizados
         """
-        # 1. Procesar la decisión con verificación de puntos
+        # 1. Rastrear patrones de decisión para clasificación de arquetipo
+        start_time = time.time()
+        
+        # 2. Procesar la decisión con verificación de puntos
         decision_result = await self.narrative_point.process_decision_with_points(user_id, decision_id, bot)
         
-        # 2. Verificar resultado
+        # Calcular tiempo de respuesta para análisis de arquetipo
+        response_time = time.time() - start_time
+        
+        # 3. Verificar resultado y rastrear comportamiento según el tipo
         if decision_result["type"] == "points_required":
+            await self.archetype_service.track_behavioral_event(
+                user_id, "analytical_pause", {"response_time": response_time, "context": "points_consideration"}
+            )
+            
+            error_message = await self.archetype_service.get_personalized_response(
+                user_id, 
+                "narrative",
+                "Diana suspira con anhelo...\n\n*\"Esta decisión requiere más besitos de los que tienes ahora, mi amor. Algunas fantasías necesitan más... intensidad.\"*\n\nNecesitas más besitos para esta elección. Participa en los canales para conseguir más."
+            )
+            
             return {
                 "success": False,
-                "message": "Diana suspira con anhelo...\n\n*\"Esta decisión requiere más besitos de los que tienes ahora, mi amor. Algunas fantasías necesitan más... intensidad.\"*\n\nNecesitas más besitos para esta elección. Participa en los canales para conseguir más.",
+                "message": error_message,
                 "action": "points_required",
                 "decision_id": decision_id
             }
+            
         elif decision_result["type"] == "error":
+            await self.archetype_service.track_behavioral_event(
+                user_id, "reflective_pause", {"response_time": response_time, "context": "decision_error"}
+            )
+            
+            error_message = await self.archetype_service.get_personalized_response(
+                user_id,
+                "narrative", 
+                "Diana parece confundida por tu elección...\n\n*\"No logro entender lo que deseas, mi amor. ¿Podrías intentarlo de nuevo?\"*"
+            )
+            
             return {
                 "success": False,
-                "message": "Diana parece confundida por tu elección...\n\n*\"No logro entender lo que deseas, mi amor. ¿Podrías intentarlo de nuevo?\"*",
+                "message": error_message,
                 "action": "decision_error",
                 "error": decision_result["message"]
             }
         
-        # 3. Decisión exitosa
+        # 4. Análisis emocional de la decisión
+        interaction_data = {
+            "response_time": response_time,
+            "interaction_type": "decision",
+            "content": decision_content,
+            "fragment_key": decision_result.get("fragment", {}).get("key"),
+            "context": {"decision_id": decision_id}
+        }
+        
+        # Realizar análisis emocional en paralelo con arquetipo
+        emotional_analysis = await self.emotional_analysis.analyze_interaction(
+            user_id, interaction_data
+        )
+        
+        # 5. Decisión exitosa - determinar tipo de decisión para arquetipo
+        decision_type = "quick_decision" if response_time < 5 else "thoughtful_decision"
+        
+        # Análisis adicional basado en el contenido de la decisión
+        decision_content = decision_result.get("decision_content", "")
+        if any(word in decision_content.lower() for word in ["poetic", "metaphor", "beauty", "aesthetic"]):
+            decision_type = "aesthetic_preference"
+        elif any(word in decision_content.lower() for word in ["analyze", "understand", "reflect", "consider"]):
+            decision_type = "systematic_navigation"
+        elif any(word in decision_content.lower() for word in ["explore", "detail", "deeper", "more"]):
+            decision_type = "detailed_exploration"
+        
+        await self.archetype_service.track_behavioral_event(
+            user_id, decision_type, {"response_time": response_time, "context": "narrative_decision"}
+        )
+        
+        # 6. Personalizar mensaje de éxito según arquetipo y análisis emocional
+        base_message = "Diana asiente con una sonrisa seductora mientras la historia toma un nuevo rumbo..."
+        personalized_message = await self.archetype_service.get_personalized_response(
+            user_id, "narrative", base_message
+        )
+        
+        # Enriquecer respuesta con insights emocionales si están disponibles
+        if emotional_analysis.get("success") and emotional_analysis.get("recommendations"):
+            logger.debug(f"Emotional insights for user {user_id}: {emotional_analysis['recommendations']}")
+        
         return {
             "success": True,
-            "message": "Diana asiente con una sonrisa seductora mientras la historia toma un nuevo rumbo...",
+            "message": personalized_message,
             "fragment": decision_result["fragment"],
-            "action": "decision_success"
+            "action": "decision_success",
+            "decision_type": decision_type,
+            "emotional_analysis": {
+                "response_type": emotional_analysis.get("response_type"),
+                "vulnerability_level": emotional_analysis.get("profile_update", {}).get("vulnerability_level"),
+                "analysis_time_ms": emotional_analysis.get("analysis_time_ms", 0)
+            } if emotional_analysis.get("success") else None
         }
     
     async def _flujo_participacion_canal(self, user_id: int, channel_id: int, action_type: str, bot=None) -> Dict[str, Any]:
@@ -311,3 +409,77 @@ class CoordinadorCentral:
             "points_awarded": 25 if streak % 7 == 0 else 10,
             "action": "daily_check_success"
         }
+    
+    async def _flujo_analizar_arquetipo(self, user_id: int, bot=None) -> Dict[str, Any]:
+        """
+        Flujo para análisis y clasificación de arquetipo de usuario.
+        
+        Args:
+            user_id: ID del usuario
+            bot: Instancia del bot para enviar mensajes
+            
+        Returns:
+            Dict con análisis de arquetipo y recomendaciones personalizadas
+        """
+        try:
+            # 1. Obtener clasificación actual del arquetipo
+            archetype, confidence = await self.archetype_service.get_user_archetype(user_id)
+            
+            # 2. Obtener análisis completo
+            analytics = await self.archetype_service.get_archetype_analytics(user_id)
+            
+            # 3. Generar mensaje personalizado según el arquetipo detectado
+            archetype_descriptions = {
+                "explorador_profundo": "Eres un alma curiosa que busca los secretos más profundos de cada historia. Tu paciencia y atención al detalle te revelan misterios que otros pasan por alto.",
+                "directo_autentico": "Tu autenticidad y franqueza son tu fortaleza. Vas directo al corazón de las emociones sin rodeos, creando conexiones profundas y genuinas.",
+                "poeta_deseo": "Posees un alma poética que encuentra belleza en cada metáfora. Tu sensibilidad estética te permite apreciar los matices más sutiles del arte del deseo.",
+                "analitico_empatico": "Tu mente analítica combinada con tu corazón empático te permite comprender tanto la lógica como la emoción de cada situación con gran profundidad.",
+                "persistente_paciente": "Tu constancia y paciencia son admirables. Sabes que las mejores experiencias requieren tiempo y dedicación, y nunca te rindes."
+            }
+            
+            archetype_name = archetype.value if hasattr(archetype, 'value') else str(archetype)
+            description = archetype_descriptions.get(archetype_name, "Tu personalidad única está siendo analizada por Diana...")
+            
+            # 4. Personalizar mensaje usando el servicio de arquetipos
+            base_message = f"Diana te observa con una mirada penetrante, leyendo los secretos de tu alma...\n\n*\"Tu arquetipo es: {archetype_name.replace('_', ' ').title()}\"*\n\n{description}\n\n*Confianza en la clasificación: {confidence:.1%}*"
+            
+            personalized_message = await self.archetype_service.get_personalized_response(
+                user_id, "analysis", base_message
+            )
+            
+            # 5. Agregar recomendaciones si hay suficientes datos
+            recommendations = []
+            if analytics.get('classification_count', 0) > 5:
+                if confidence < 0.7:
+                    recommendations.append("Continúa interactuando para que Diana pueda conocerte mejor.")
+                if archetype_name == "explorador_profundo":
+                    recommendations.append("Explora los fragmentos narrativos ocultos para descubrir secretos especiales.")
+                elif archetype_name == "directo_autentico":
+                    recommendations.append("Tus respuestas rápidas y honestas son valoradas. Mantén esa autenticidad.")
+                elif archetype_name == "poeta_deseo":
+                    recommendations.append("Busca las opciones más poéticas en la narrativa para experiencias únicas.")
+                elif archetype_name == "analitico_empatico":
+                    recommendations.append("Tus análisis profundos pueden desbloquear contenido especial.")
+                elif archetype_name == "persistente_paciente":
+                    recommendations.append("Tu paciencia será recompensada con contenido exclusivo por lealtad.")
+            
+            if recommendations:
+                personalized_message += f"\n\n*Recomendaciones personalizadas:*\n• " + "\n• ".join(recommendations)
+            
+            return {
+                "success": True,
+                "message": personalized_message,
+                "archetype": archetype_name,
+                "confidence": confidence,
+                "analytics": analytics,
+                "action": "archetype_analysis_success"
+            }
+            
+        except Exception as e:
+            logger.error(f"Error en análisis de arquetipo para usuario {user_id}: {e}")
+            return {
+                "success": False,
+                "message": "Diana parece confundida al intentar leer tu alma... Inténtalo de nuevo más tarde.",
+                "action": "archetype_analysis_error",
+                "error": str(e)
+            }
