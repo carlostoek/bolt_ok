@@ -3,5 +3,4 @@ SQLAlchemy
 aiosqlite
 APScheduler
 python-dotenv
-asyncpg
-psycopg2-binary
+
