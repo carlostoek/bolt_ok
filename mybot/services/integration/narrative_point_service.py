@@ -4,9 +4,18 @@ Integration service to connect narrative system with gamification (points) syste
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..narrative_service import NarrativeService
-from ..point_service import PointService
-from ..database.narrative_models import NarrativeDecision
+try:
+    from ..narrative_service import NarrativeService
+    from ..point_service import PointService
+    from ..database.narrative_models import NarrativeChoice
+except ImportError:
+    # Fallback to absolute imports for standalone usage
+    from services.narrative_service import NarrativeService
+    from services.point_service import PointService
+    from database.narrative_models import NarrativeChoice
+
+# Alias for compatibility
+NarrativeDecision = NarrativeChoice
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +52,14 @@ class NarrativePointService:
             logger.warning(f"Decision {decision_id} not found")
             return False
         
-        # Check if decision requires points
-        if decision.points_required and decision.points_required > 0:
+        # Check if decision requires points (using required_besitos field)
+        required_points = getattr(decision, 'required_besitos', 0) or 0
+        if required_points > 0:
             user_points = await self.point_service.get_user_points(user_id)
-            if user_points < decision.points_required:
-                logger.info(f"User {user_id} attempted to make decision {decision_id} but has insufficient points ({user_points}/{decision.points_required})")
+            if user_points < required_points:
+                logger.info(f"User {user_id} attempted to make decision {decision_id} but has insufficient points ({user_points}/{required_points})")
                 return False
-            logger.info(f"User {user_id} has sufficient points for decision {decision_id} ({user_points}/{decision.points_required})")
+            logger.info(f"User {user_id} has sufficient points for decision {decision_id} ({user_points}/{required_points})")
         
         return True
     
@@ -88,15 +98,14 @@ class NarrativePointService:
                 "message": "Decisión no encontrada."
             }
         
-        # Deduct points if required
-        if decision.points_required and decision.points_required > 0:
-            await self.point_service.deduct_points(user_id, decision.points_required)
-            logger.info(f"Deducted {decision.points_required} points from user {user_id} for decision {decision_id}")
+        # Deduct points if required (using required_besitos field)
+        required_points = getattr(decision, 'required_besitos', 0) or 0
+        if required_points > 0:
+            await self.point_service.deduct_points(user_id, required_points)
+            logger.info(f"Deducted {required_points} points from user {user_id} for decision {decision_id}")
         
-        # Award points if this decision gives points
-        if decision.points_awarded and decision.points_awarded > 0:
-            await self.point_service.add_points(user_id, decision.points_awarded, bot=bot)
-            logger.info(f"Awarded {decision.points_awarded} points to user {user_id} for decision {decision_id}")
+        # Note: The current NarrativeChoice model doesn't have a points_awarded field
+        # This would need to be added to the database model if point rewards for decisions are needed
         
         # Process the decision in the narrative system
         new_fragment = await self.narrative_service.process_user_decision(user_id, decision_id)

@@ -6,11 +6,19 @@ import enum
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .integration.channel_engagement_service import ChannelEngagementService
-from .integration.narrative_point_service import NarrativePointService
-from .integration.narrative_access_service import NarrativeAccessService
-from .narrative_service import NarrativeService
-from .point_service import PointService
+try:
+    from .integration.channel_engagement_service import ChannelEngagementService
+    from .integration.narrative_point_service import NarrativePointService
+    from .integration.narrative_access_service import NarrativeAccessService
+    from .narrative_service import NarrativeService
+    from .point_service import PointService
+except ImportError:
+    # Fallback to absolute imports for standalone usage
+    from services.integration.channel_engagement_service import ChannelEngagementService
+    from services.integration.narrative_point_service import NarrativePointService
+    from services.integration.narrative_access_service import NarrativeAccessService
+    from services.narrative_service import NarrativeService
+    from services.point_service import PointService
 
 logger = logging.getLogger(__name__)
 

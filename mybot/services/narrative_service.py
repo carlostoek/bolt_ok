@@ -1,8 +1,17 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from ..database.models import User
-from ..database.narrative_models import NarrativeFragment, NarrativeDecision, UserNarrativeState, UserDecisionLog
+
+try:
+    from ..database.models import User
+    from ..database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
+except ImportError:
+    # Fallback to absolute imports for standalone usage
+    from database.models import User
+    from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
+
+# Alias for compatibility
+NarrativeFragment = StoryFragment
+NarrativeDecision = NarrativeChoice
 
 class NarrativeService:
     def __init__(self, session: AsyncSession, user_service=None, point_service=None, backpack_service=None):
@@ -65,9 +74,8 @@ class NarrativeService:
         # if not await self.check_conditions(user_id, decision):
         #     return None # Conditions not met
 
-        # Log the decision
-        user_decision_log = UserDecisionLog(user_id=user_id, decision_id=decision.id)
-        self.session.add(user_decision_log)
+        # Note: UserDecisionLog model doesn't exist in the current database
+        # This functionality would need to be implemented if decision logging is required
 
         # Update user's narrative state
         user_state = await self.session.execute(
@@ -76,9 +84,9 @@ class NarrativeService:
         user_state = user_state.scalar_one_or_none()
 
         if user_state:
-            user_state.current_fragment_key = decision.next_fragment_key
+            user_state.current_fragment_key = decision.destination_fragment_key
         else:
-            user_state = UserNarrativeState(user_id=user_id, current_fragment_key=decision.next_fragment_key)
+            user_state = UserNarrativeState(user_id=user_id, current_fragment_key=decision.destination_fragment_key)
             self.session.add(user_state)
         
         await self.session.commit()
@@ -86,7 +94,7 @@ class NarrativeService:
 
         # Fetch and return the new fragment
         new_fragment = await self.session.execute(
-            select(NarrativeFragment).where(NarrativeFragment.key == decision.next_fragment_key)
+            select(NarrativeFragment).where(NarrativeFragment.key == decision.destination_fragment_key)
         )
         return new_fragment.scalar_one_or_none()
 

@@ -97,3 +97,22 @@ class ConfigService:
         """Store reaction points as a semicolon separated list."""
         text = ";".join(str(p) for p in points)
         return await self.set_value(self.REACTION_POINTS_KEY, text)
+
+    async def get_managed_channels(self) -> list[str]:
+        """
+        Return list of managed channel IDs for point awarding.
+        Includes both VIP and FREE channels if configured.
+        """
+        managed_channels = []
+        
+        # Add VIP channel if configured
+        vip_channel = await self.get_vip_channel_id()
+        if vip_channel:
+            managed_channels.append(str(vip_channel))
+            
+        # Add FREE channel if configured  
+        free_channel = await self.get_free_channel_id()
+        if free_channel:
+            managed_channels.append(str(free_channel))
+            
+        return managed_channels
