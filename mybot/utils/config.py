@@ -1,9 +1,6 @@
 import os
 from typing import List
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN")
 if BOT_TOKEN == "YOUR_BOT_TOKEN" or not BOT_TOKEN:
@@ -27,8 +24,8 @@ class Config:
     CHANNEL_ID = VIP_CHANNEL_ID
     FREE_CHANNEL_ID = FREE_CHANNEL_ID
     
-    # PostgreSQL configuration
-    DATABASE_URL = os.environ.get("DATABASE_URL", "postgresql+asyncpg://user:password@localhost:5432/gamification")
+    # SQLite configuration
+    DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///bot.db")
     DB_POOL_SIZE = int(os.environ.get("DB_POOL_SIZE", "10"))
     DB_MAX_OVERFLOW = int(os.environ.get("DB_MAX_OVERFLOW", "5"))
     

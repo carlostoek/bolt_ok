@@ -1,6 +1,10 @@
 import asyncio
 import logging
 import sys
+from dotenv import load_dotenv
+
+# Cargar variables de entorno ANTES de cualquier importación
+load_dotenv()
 
 from aiogram import Bot, Dispatcher, BaseMiddleware
 from aiogram.enums.parse_mode import ParseMode

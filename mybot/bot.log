@@ -330,3 +330,1229 @@ Traceback (most recent call last):
     for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 socket.gaierror: [Errno 7] No address associated with hostname
+2025-09-11 18:18:04,133 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:18:04,134 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos PostgreSQL...
+2025-09-11 18:18:04,275 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: password authentication failed for user "user"
+2025-09-11 18:18:04,275 - __main__ - CRITICAL - main:242 - Error crítico en main(): password authentication failed for user "user"
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 73, in init_db
+    async with _engine.begin() as conn:
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 1066, in begin
+    async with conn:
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 274, in start
+    await greenlet_spawn(self.sync_engine.connect)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 306, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 891, in _connect_addr
+    return await __connect_addr(params_retry, False, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "user"
+2025-09-11 18:18:04,281 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:18:04,281 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 73, in init_db
+    async with _engine.begin() as conn:
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 1066, in begin
+    async with conn:
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 274, in start
+    await greenlet_spawn(self.sync_engine.connect)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 306, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 891, in _connect_addr
+    return await __connect_addr(params_retry, False, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "user"
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:18:04,284 - root - CRITICAL - <module>:260 - Error fatal: password authentication failed for user "user"
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 73, in init_db
+    async with _engine.begin() as conn:
+  File "/usr/lib/python3.12/contextlib.py", line 210, in __aenter__
+    return await anext(self.gen)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 1066, in begin
+    async with conn:
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/base.py", line 121, in __aenter__
+    return await self.start(is_ctxmanager=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/engine.py", line 274, in start
+    await greenlet_spawn(self.sync_engine.connect)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3277, in connect
+    return self._connection_cls(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 143, in __init__
+    self._dbapi_connection = engine.raw_connection()
+                             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 3301, in raw_connection
+    return self.pool.connect()
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 447, in connect
+    return _ConnectionFairy._checkout(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 1264, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 711, in checkout
+    rec = pool._do_get()
+          ^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/impl.py", line 306, in _do_get
+    return self._create_connection()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 388, in _create_connection
+    return _ConnectionRecord(self)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 673, in __init__
+    self.__connect()
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 899, in __connect
+    with util.safe_reraise():
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 224, in __exit__
+    raise exc_value.with_traceback(exc_tb)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/pool/base.py", line 895, in __connect
+    self.dbapi_connection = connection = pool._invoke_creator(self)
+                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/create.py", line 661, in connect
+    return dialect.connect(*cargs, **cparams)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 629, in connect
+    return self.loaded_dbapi.connect(*cargs, **cparams)  # type: ignore[no-any-return]  # NOQA: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/postgresql/asyncpg.py", line 964, in connect
+    await_only(creator_fn(*arg, **kw)),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connection.py", line 2421, in connect
+    return await connect_utils._connect(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 1049, in _connect
+    conn = await _connect_addr(
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 891, in _connect_addr
+    return await __connect_addr(params_retry, False, *args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/asyncpg/connect_utils.py", line 934, in __connect_addr
+    await connected
+asyncpg.exceptions.InvalidPasswordError: password authentication failed for user "user"
+2025-09-11 18:21:27,461 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:21:27,461 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:21:27,461 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:21:27,462 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:21:27,462 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:21:27,463 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:21:27,464 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:00,747 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:22:00,747 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:22:00,747 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:00,747 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:00,748 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:22:00,748 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:22:00,749 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:44,416 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:22:44,416 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:22:44,416 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:44,416 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:22:44,417 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:22:44,417 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:22:44,418 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:26,688 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:24:26,688 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:24:26,688 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:26,689 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:26,689 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:24:26,690 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:24:26,690 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:57,889 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:24:57,890 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:24:57,890 - database.setup - CRITICAL - init_db:82 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:57,890 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:24:57,891 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:24:57,891 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:24:57,892 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:00,698 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:27:00,698 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:27:00,698 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:00,698 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:00,699 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:27:00,700 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:27:00,701 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:52,294 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:27:52,294 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:27:52,294 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:52,294 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:27:52,295 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:27:52,296 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:27:52,297 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:28:21,152 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:28:21,152 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:28:21,152 - database.setup - CRITICAL - init_db:82 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:28:21,152 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:28:21,153 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:28:21,153 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:28:21,154 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:29:41,727 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:29:41,727 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:29:41,727 - database.setup - CRITICAL - init_db:82 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:29:41,727 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:29:41,728 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:29:41,728 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:29:41,729 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:30:17,841 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:30:17,841 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:30:17,841 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:30:17,841 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:30:17,842 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:30:17,842 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:30:17,843 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:32:14,049 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:32:14,050 - database.setup - INFO - init_db:64 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:32:14,050 - database.setup - CRITICAL - init_db:86 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:32:14,050 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 69, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:32:14,051 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:32:14,051 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 69, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:32:14,052 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 69, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:36:43,148 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:36:43,148 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:36:43,149 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:36:43,149 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:36:43,150 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:36:43,150 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:36:43,151 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:37:31,548 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:37:31,549 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:37:31,549 - database.setup - CRITICAL - init_db:82 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:37:31,549 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:37:31,549 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:37:31,550 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:37:31,551 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 65, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:39:29,081 - __main__ - INFO - main:143 - Inicializando base de datos...
+2025-09-11 18:39:29,081 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:39:29,081 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:39:29,081 - __main__ - CRITICAL - main:242 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:39:29,082 - __main__ - INFO - main:245 - Cerrando bot...
+2025-09-11 18:39:29,082 - __main__ - ERROR - main:251 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 247, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:39:29,083 - root - CRITICAL - <module>:260 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 256, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 144, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:41:15,774 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:41:15,774 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:41:15,774 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:41:15,774 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:41:15,775 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:41:15,776 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:41:15,776 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:42:50,082 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:42:50,083 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:42:50,083 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:42:50,083 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:42:50,083 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:42:50,083 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:42:50,084 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:44:18,939 - __main__ - INFO - main:145 - Inicializando base de datos...
+2025-09-11 18:44:18,940 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 18:44:18,940 - database.setup - CRITICAL - init_db:81 - Error crítico al inicializar la base de datos: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:44:18,940 - __main__ - CRITICAL - main:244 - Error crítico en main(): DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 18:44:18,941 - __main__ - INFO - main:247 - Cerrando bot...
+2025-09-11 18:44:18,941 - __main__ - ERROR - main:253 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 249, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-11 18:44:18,942 - root - CRITICAL - <module>:262 - Error fatal: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 258, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 146, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 64, in init_db
+    raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
+ValueError: DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.
+2025-09-11 19:16:52,890 - __main__ - INFO - main:147 - Inicializando base de datos...
+2025-09-11 19:16:52,890 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 19:16:52,911 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-11 19:16:53,782 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-11 19:16:53,783 - __main__ - INFO - main:150 - Aplicando parches de seguridad...
+2025-09-11 19:16:53,783 - __main__ - INFO - main:155 - VIP channel ID: -1001468184215
+2025-09-11 19:16:53,784 - __main__ - INFO - main:156 - Configurando bot...
+2025-09-11 19:16:53,838 - __main__ - INFO - main:185 - Registrando handlers...
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router setup registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router admin registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router start_token registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router start registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router backpack registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router missions registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router info registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-09-11 19:16:53,839 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router minigames registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router gamification registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router free_user registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router lore registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router narrative registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-09-11 19:16:53,840 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-09-11 19:16:53,840 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-09-11 19:16:53,841 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-11 19:16:53,847 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-11 19:16:53,849 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-11 19:16:53,850 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-11 19:16:53,852 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-11 19:16:53,915 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-11 19:18:10,922 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-11 19:18:10,922 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-11 19:18:10,937 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
+2025-09-11 19:18:10,937 - handlers.start - INFO - cmd_start:71 - Admin user 1280444712 accessing start command
+2025-09-11 19:18:10,966 - services.tenant_service - INFO - initialize_tenant:48 - Initialized tenant for admin 1280444712
+2025-09-11 19:18:25,833 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
+2025-09-11 19:18:25,833 - handlers.start - INFO - cmd_start:71 - Admin user 1280444712 accessing start command
+2025-09-11 19:18:25,842 - services.tenant_service - INFO - initialize_tenant:48 - Initialized tenant for admin 1280444712
+2025-09-11 19:18:34,013 - __main__ - ERROR - global_error_handler:91 - Error en 978978013: NameError: name 'get_admin_kb' is not defined
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 44, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 48, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 28, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/handlers/admin/admin_menu.py", line 54, in admin_start
+    reply_markup=get_admin_kb()
+                 ^^^^^^^^^^^^
+NameError: name 'get_admin_kb' is not defined. Did you mean: 'get_admin_main_kb'?
+2025-09-11 19:24:56,249 - __main__ - INFO - main:147 - Inicializando base de datos...
+2025-09-11 19:24:56,249 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 19:24:56,267 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-11 19:24:56,290 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-11 19:24:56,291 - __main__ - INFO - main:150 - Aplicando parches de seguridad...
+2025-09-11 19:24:56,291 - __main__ - INFO - main:155 - VIP channel ID: -1001468184215
+2025-09-11 19:24:56,291 - __main__ - INFO - main:156 - Configurando bot...
+2025-09-11 19:24:56,336 - __main__ - INFO - main:185 - Registrando handlers...
+2025-09-11 19:24:56,336 - __main__ - INFO - main:214 - Router setup registrado
+2025-09-11 19:24:56,336 - __main__ - INFO - main:214 - Router admin registrado
+2025-09-11 19:24:56,336 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-09-11 19:24:56,336 - __main__ - INFO - main:214 - Router start_token registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router start registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router backpack registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router missions registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router info registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router minigames registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router gamification registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router free_user registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router lore registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router narrative registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-09-11 19:24:56,337 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-09-11 19:24:56,338 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-09-11 19:24:56,338 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-11 19:24:56,340 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-11 19:24:56,341 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-11 19:24:56,342 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-11 19:24:56,346 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-11 19:24:56,418 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-11 19:24:56,498 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
+2025-09-11 19:24:56,498 - handlers.start - INFO - cmd_start:71 - Admin user 1280444712 accessing start command
+2025-09-11 19:24:56,502 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
+2025-09-11 19:24:56,502 - handlers.start - INFO - cmd_start:71 - Admin user 1280444712 accessing start command
+2025-09-11 19:24:56,517 - services.tenant_service - INFO - initialize_tenant:48 - Initialized tenant for admin 1280444712
+2025-09-11 19:24:56,521 - services.tenant_service - INFO - initialize_tenant:48 - Initialized tenant for admin 1280444712
+2025-09-11 19:34:03,279 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGTERM signal
+2025-09-11 19:34:03,531 - __main__ - INFO - main:249 - Cerrando bot...
+2025-09-11 19:34:03,532 - root - INFO - shutdown:128 - Cerrando tareas en segundo plano...
+2025-09-11 19:34:03,532 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-11 19:34:03,533 - root - INFO - safe_task:117 - Tarea channel_requests cancelada
+2025-09-11 19:34:03,537 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-11 19:34:03,537 - root - INFO - safe_task:117 - Tarea vip_subscriptions cancelada
+2025-09-11 19:34:03,537 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-11 19:34:03,537 - root - INFO - safe_task:117 - Tarea vip_memberships cancelada
+2025-09-11 19:34:03,537 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-11 19:34:03,538 - root - INFO - safe_task:117 - Tarea auction_monitor cancelada
+2025-09-11 19:34:03,538 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-11 19:34:03,538 - root - INFO - safe_task:117 - Tarea channel_cleanup cancelada
+2025-09-11 19:34:03,538 - root - INFO - shutdown:137 - Todas las tareas cerradas
+2025-09-11 19:39:34,692 - __main__ - INFO - main:147 - Inicializando base de datos...
+2025-09-11 19:39:34,693 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-11 19:39:34,713 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-11 19:39:34,736 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-11 19:39:34,737 - __main__ - INFO - main:150 - Aplicando parches de seguridad...
+2025-09-11 19:39:34,737 - __main__ - INFO - main:155 - VIP channel ID: -1001468184215
+2025-09-11 19:39:34,737 - __main__ - INFO - main:156 - Configurando bot...
+2025-09-11 19:39:34,780 - __main__ - INFO - main:185 - Registrando handlers...
+2025-09-11 19:39:34,780 - __main__ - INFO - main:214 - Router setup registrado
+2025-09-11 19:39:34,780 - __main__ - INFO - main:214 - Router admin registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router auction_admin registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router start_token registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router start registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router main_menu registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router backpack registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router missions registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router info registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router free_channel_admin registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router publication_test registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router vip_menu registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router auction_user registrado
+2025-09-11 19:39:34,781 - __main__ - INFO - main:214 - Router reaction_callback registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router daily_gift registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router minigames registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router gamification registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router free_user registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router lore registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router combinar_pistas registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router channel_access registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router narrative registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:214 - Router admin_narrative registrado
+2025-09-11 19:39:34,782 - __main__ - INFO - main:219 - Iniciando tareas en segundo plano...
+2025-09-11 19:39:34,782 - __main__ - INFO - main:242 - Bot iniciado correctamente. Comenzando polling...
+2025-09-11 19:39:34,783 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-11 19:39:34,785 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-11 19:39:34,786 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-11 19:39:34,787 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-11 19:39:34,788 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-11 19:39:34,858 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-11 19:39:35,066 - services.subscription_service - INFO - create_subscription:32 - Created VIP subscription for user 1280444712, expires: None
+2025-09-11 19:39:35,066 - root - INFO - run_vip_membership_check:120 - Synced 1 users to VIP role via channel
+2025-09-11 19:40:26,883 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-11 19:40:27,135 - __main__ - INFO - main:249 - Cerrando bot...
+2025-09-11 19:40:27,135 - root - INFO - shutdown:128 - Cerrando tareas en segundo plano...
+2025-09-11 19:40:27,135 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-11 19:40:27,135 - root - INFO - safe_task:117 - Tarea channel_requests cancelada
+2025-09-11 19:40:27,136 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-11 19:40:27,136 - root - INFO - safe_task:117 - Tarea vip_subscriptions cancelada
+2025-09-11 19:40:27,136 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-11 19:40:27,136 - root - INFO - safe_task:117 - Tarea vip_memberships cancelada
+2025-09-11 19:40:27,136 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-11 19:40:27,136 - root - INFO - safe_task:117 - Tarea auction_monitor cancelada
+2025-09-11 19:40:27,136 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-11 19:40:27,136 - root - INFO - safe_task:117 - Tarea channel_cleanup cancelada
+2025-09-11 19:40:27,136 - root - INFO - shutdown:137 - Todas las tareas cerradas
