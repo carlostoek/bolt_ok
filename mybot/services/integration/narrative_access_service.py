@@ -3,8 +3,13 @@ Integration service to connect narrative system with subscription verification.
 """
 import logging
 from sqlalchemy.ext.asyncio import AsyncSession
-from ..subscription_service import SubscriptionService
-from ..narrative_service import NarrativeService
+try:
+    from ..subscription_service import SubscriptionService
+    from ..narrative_service import NarrativeService
+except ImportError:
+    # Fallback to absolute imports for standalone usage
+    from services.subscription_service import SubscriptionService
+    from services.narrative_service import NarrativeService
 
 logger = logging.getLogger(__name__)
 

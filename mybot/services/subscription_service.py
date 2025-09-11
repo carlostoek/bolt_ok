@@ -162,10 +162,11 @@ class SubscriptionService:
         if not sub:
             return False
         
-        if sub.expires_at is None:
+        expires_at = getattr(sub, 'expires_at', None)
+        if expires_at is None:
             return True
         
-        return sub.expires_at > datetime.utcnow()
+        return expires_at > datetime.utcnow()
 
 
 async def get_admin_statistics(session: AsyncSession) -> dict:
