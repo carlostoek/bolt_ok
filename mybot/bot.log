@@ -3719,3 +3719,201 @@ aiogram.exceptions.TelegramNetworkError: HTTP Client says - Request timeout erro
 2025-09-12 16:59:29,850 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 4.816185 seconds and try again... (tryings = 152, bot id = 7570619877)
 2025-09-12 16:59:34,677 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
 2025-09-12 16:59:34,678 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 4.996618 seconds and try again... (tryings = 133, bot id = 7570619877)
+2025-09-12 17:08:40,593 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-12 17:08:40,594 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-12 17:08:40,612 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-12 17:08:40,637 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-12 17:08:40,639 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-12 17:08:40,639 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-12 17:08:40,639 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-12 17:08:40,687 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-12 17:08:40,687 - __main__ - INFO - main:216 - Router setup registrado
+2025-09-12 17:08:40,687 - __main__ - INFO - main:216 - Router admin registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router start_token registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router start registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router backpack registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router missions registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router info registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-09-12 17:08:40,688 - __main__ - INFO - main:216 - Router minigames registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router gamification registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router free_user registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router lore registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router narrative registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:216 - Router test_evaluation registrado
+2025-09-12 17:08:40,689 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-09-12 17:08:40,689 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-09-12 17:08:40,690 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-12 17:08:40,692 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-12 17:08:40,694 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-12 17:08:40,694 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-12 17:08:40,696 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-12 17:08:40,762 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-12 17:08:40,795 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:40,795 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:08:44,813 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:44,814 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:08:45,825 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:45,825 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.294174 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:08:50,132 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:50,132 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.469303 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:08:51,620 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:51,620 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.614016 seconds and try again... (tryings = 2, bot id = 7570619877)
+2025-09-12 17:08:56,246 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:56,246 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.034539 seconds and try again... (tryings = 2, bot id = 7570619877)
+2025-09-12 17:08:58,294 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:08:58,294 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.079980 seconds and try again... (tryings = 3, bot id = 7570619877)
+2025-09-12 17:08:59,335 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-12 17:08:59,336 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-12 17:09:03,392 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:03,392 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:04,407 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:04,407 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:08,418 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:08,419 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.312010 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:09:09,744 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:09,745 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.213449 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:09:13,971 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:13,972 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.716569 seconds and try again... (tryings = 2, bot id = 7570619877)
+2025-09-12 17:09:15,701 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:15,701 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:19,712 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:19,712 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.238627 seconds and try again... (tryings = 3, bot id = 7570619877)
+2025-09-12 17:09:21,970 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:21,970 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:25,289 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-12 17:09:25,291 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-12 17:09:25,982 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:25,983 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 2.705220 seconds and try again... (tryings = 4, bot id = 7570619877)
+2025-09-12 17:09:28,704 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:28,704 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:32,714 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:32,714 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 3.599234 seconds and try again... (tryings = 5, bot id = 7570619877)
+2025-09-12 17:09:36,332 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:36,332 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:36,494 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-12 17:09:36,495 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-12 17:09:40,348 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:40,348 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:41,359 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:41,359 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 7570619877)
+2025-09-12 17:09:45,369 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:45,370 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.387601 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:09:46,771 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:46,771 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.189614 seconds and try again... (tryings = 1, bot id = 7570619877)
+2025-09-12 17:09:50,972 - aiogram.dispatcher - ERROR - _listen_updates:219 - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by other getUpdates request; make sure that only one bot instance is running
+2025-09-12 17:09:50,972 - aiogram.dispatcher - WARNING - _listen_updates:221 - Sleep for 1.839140 seconds and try again... (tryings = 2, bot id = 7570619877)
+2025-09-12 17:09:51,662 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-12 17:09:51,914 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-12 17:09:51,915 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-12 17:09:51,915 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-12 17:09:51,915 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-12 17:09:51,915 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-12 17:09:51,915 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-12 17:09:51,915 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-12 17:09:51,915 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-12 17:09:51,915 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-12 17:09:51,915 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-12 17:09:51,916 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-12 17:09:51,916 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-12 17:09:51,916 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-12 17:15:14,641 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGTERM signal
+2025-09-12 17:15:14,893 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-12 17:15:14,894 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-12 17:15:14,894 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-12 17:15:14,894 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-12 17:15:14,894 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-12 17:15:14,894 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-12 17:15:14,894 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-12 17:15:14,894 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-12 17:15:14,894 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-12 17:15:14,894 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-12 17:15:14,894 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-12 17:15:14,894 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-12 17:15:14,894 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-12 17:15:14,896 - handlers.test_evaluation_handler - INFO - cleanup_expired_sessions:351 - Limpiadas 2 sesiones expiradas de test emocional
+2025-09-12 17:34:23,608 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-12 17:34:23,608 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-12 17:34:23,632 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-12 17:34:23,654 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-12 17:34:23,656 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-12 17:34:23,656 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-12 17:34:23,656 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-12 17:34:23,695 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-12 17:34:23,695 - __main__ - INFO - main:216 - Router setup registrado
+2025-09-12 17:34:23,695 - __main__ - INFO - main:216 - Router admin registrado
+2025-09-12 17:34:23,695 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router start_token registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router start registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router backpack registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router missions registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router info registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router minigames registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router gamification registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router free_user registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router lore registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router narrative registrado
+2025-09-12 17:34:23,696 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-09-12 17:34:23,697 - __main__ - INFO - main:216 - Router test_evaluation registrado
+2025-09-12 17:34:23,697 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-09-12 17:34:23,697 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-09-12 17:34:23,697 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-12 17:34:23,699 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-12 17:34:23,700 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-12 17:34:23,701 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-12 17:34:23,702 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-12 17:34:23,774 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-12 17:34:45,857 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-12 17:34:45,858 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-12 17:35:12,811 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: garden_1
+2025-09-12 17:35:17,791 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 75.0
+2025-09-12 17:35:18,052 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-12 17:35:18,052 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-12 17:35:20,468 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: other_guests
+2025-09-12 17:35:22,552 - services.point_service - INFO - add_points:135 - User 6181290784 gained 40 points (base 20, x2). Total: 115.0
+2025-09-12 17:35:22,717 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 20 besitos del fragmento divan_experience
+2025-09-12 17:35:22,717 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a divan_experience
+2025-09-12 17:35:34,995 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 165.0
+2025-09-12 17:35:35,159 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diana_response_seek
+2025-09-12 17:35:35,160 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de divan_experience a diana_response_seek
+2025-09-12 17:35:37,846 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_patience
+2025-09-12 17:35:39,335 - services.point_service - INFO - add_points:135 - User 6181290784 gained 60 points (base 30, x2). Total: 225.0
+2025-09-12 17:35:39,509 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 30 besitos del fragmento vip_deep_1
+2025-09-12 17:35:39,510 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_response_seek a vip_deep_1
+2025-09-12 17:42:28,951 - handlers.test_evaluation_handler - INFO - cmd_test_evaluacion:76 - Test evaluacion command received from user 6181290784
+2025-09-12 17:42:28,952 - handlers.test_evaluation_handler - INFO - cmd_test_evaluacion_main:96 - Test emocional iniciado por usuario 6181290784
+2025-09-12 17:42:30,605 - handlers.test_evaluation_handler - INFO - handle_test_evaluation_callback:155 - Test callback recibido de usuario 6181290784: cancel
+2025-09-12 17:42:30,945 - handlers.test_evaluation_handler - INFO - _handle_test_finish:313 - Test finalizado para usuario 6181290784
+2025-09-12 17:51:29,819 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-12 17:51:30,071 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-12 17:51:30,071 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-12 17:51:30,071 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-12 17:51:30,072 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-12 17:51:30,072 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-12 17:51:30,072 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-12 17:51:30,072 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-12 17:51:30,072 - root - INFO - shutdown:138 - Todas las tareas cerradas

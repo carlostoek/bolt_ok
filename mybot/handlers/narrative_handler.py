@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.narrative_engine import NarrativeEngine
+from services.narrative_service import NarrativeService
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
 from utils.user_roles import get_user_role
@@ -23,14 +23,14 @@ async def start_narrative_command(message: Message, session: AsyncSession):
     user_id = message.from_user.id
     
     try:
-        engine = NarrativeEngine(session, message.bot)
+        service = NarrativeService(session, message.bot)
         
         # Obtener fragmento actual o iniciar narrativa
-        current_fragment = await engine.get_user_current_fragment(user_id)
+        current_fragment = await service.get_user_current_fragment(user_id)
         
         if not current_fragment:
             # Intentar iniciar narrativa
-            current_fragment = await engine.start_narrative(user_id)
+            current_fragment = await service.start_narrative(user_id)
             
             if not current_fragment:
                 await safe_answer(
@@ -66,10 +66,10 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         
         choice_index = int(choice_data[1])
         
-        engine = NarrativeEngine(session, callback.bot)
+        service = NarrativeService(session, callback.bot)
         
         # Procesar la decisión
-        next_fragment = await engine.process_user_decision(user_id, choice_index)
+        next_fragment = await service.process_user_decision(user_id, choice_index)
         
         if not next_fragment:
             await callback.answer(
@@ -95,18 +95,18 @@ async def handle_auto_continue(callback: CallbackQuery, session: AsyncSession):
     user_id = callback.from_user.id
     
     try:
-        engine = NarrativeEngine(session, callback.bot)
-        current_fragment = await engine.get_user_current_fragment(user_id)
+        service = NarrativeService(session, callback.bot)
+        current_fragment = await service.get_user_current_fragment(user_id)
         
         if current_fragment and current_fragment.auto_next_fragment_key:
             # Simular una decisión automática
-            next_fragment = await engine._get_fragment_by_key(current_fragment.auto_next_fragment_key)
+            next_fragment = await service._get_fragment_by_key(current_fragment.auto_next_fragment_key)
             if next_fragment:
                 # Actualizar estado del usuario
-                user_state = await engine._get_or_create_user_state(user_id)
+                user_state = await service._get_or_create_user_state(user_id)
                 user_state.current_fragment_key = next_fragment.key
                 user_state.fragments_visited += 1
-                await engine._process_fragment_rewards(user_id, next_fragment)
+                await service._process_fragment_rewards(user_id, next_fragment)
                 await session.commit()
                 
                 await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
@@ -127,12 +127,13 @@ async def show_narrative_stats(message: Message, session: AsyncSession):
     user_id = message.from_user.id
     
     try:
-        engine = NarrativeEngine(session, message.bot)
-        stats = await engine.get_user_narrative_stats(user_id)
+        service = NarrativeService(session, message.bot)
+        stats = await service.get_user_narrative_stats(user_id)
         
         # Crear mensaje de estadísticas
         if stats["current_fragment"]:
-            stats_text = f"""📖 **Tu Historia Personal**
+            stats_text = f"""
+📖 **Tu Historia Personal**
 
 🎭 **Fragmento Actual**: {stats['current_fragment']}
 📊 **Progreso**: {stats['progress_percentage']:.1f}%
@@ -146,7 +147,8 @@ async def show_narrative_stats(message: Message, session: AsyncSession):
                 for choice in stats['choices_made'][-3:]:  # Últimas 3 decisiones
                     stats_text += f"\n• {choice.get('choice_text', 'Decisión desconocida')}"
         else:
-            stats_text = """📖 **Tu Historia Personal**
+            stats_text = """
+📖 **Tu Historia Personal**
 
 🌟 **Estado**: Historia no iniciada
 🎭 **Sugerencia**: Usa `/historia` para comenzar tu aventura
@@ -173,8 +175,8 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
     user_id = callback.from_user.id
     
     try:
-        engine = NarrativeEngine(session, callback.bot)
-        current_fragment = await engine.get_user_current_fragment(user_id)
+        service = NarrativeService(session, callback.bot)
+        current_fragment = await service.get_user_current_fragment(user_id)
         
         if current_fragment:
             await _display_narrative_fragment(callback.message, current_fragment, session, is_callback=True)
@@ -194,7 +196,8 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
 @router.callback_query(F.data == "narrative_help")
 async def show_narrative_help(callback: CallbackQuery, session: AsyncSession):
     """Muestra ayuda sobre el sistema narrativo."""
-    help_text = """📚 **Guía del Sistema Narrativo**
+    help_text = """
+📚 **Guía del Sistema Narrativo**
 
 🎭 **¿Cómo funciona?**
 • Cada decisión que tomes afecta tu historia
@@ -223,18 +226,20 @@ async def show_narrative_stats_callback(callback: CallbackQuery, session: AsyncS
     user_id = callback.from_user.id
     
     try:
-        engine = NarrativeEngine(session, callback.bot)
-        stats = await engine.get_user_narrative_stats(user_id)
+        service = NarrativeService(session, callback.bot)
+        stats = await service.get_user_narrative_stats(user_id)
         
         if stats["current_fragment"]:
-            stats_text = f"""📖 **Tu Historia Personal**
+            stats_text = f"""
+📖 **Tu Historia Personal**
 
 🎭 **Fragmento Actual**: {stats['current_fragment']}
 📊 **Progreso**: {stats['progress_percentage']:.1f}%
 🗺️ **Fragmentos Visitados**: {stats['fragments_visited']}
 🎯 **Total Accesible**: {stats['total_accessible']}"""
         else:
-            stats_text = """📖 **Tu Historia Personal**
+            stats_text = """
+📖 **Tu Historia Personal**
 
 🌟 **Estado**: Historia no iniciada
 🎭 **Sugerencia**: Usa "Continuar Historia" para comenzar"""
