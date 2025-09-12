@@ -1,0 +1,17 @@
+@@ .. @@
+ TABLES_ORDER = [
+     'users',
+     'achievements',
+     'story_fragments',
+     'narrative_choices', 
+     'user_narrative_states',
+     'rewards',
+     'lore_pieces',
++    'shop_categories',
++    'shop_items',
++    'shop_discounts',
++    'user_purchases',
++    'user_inventory',
+     'missions',
+     'events',
+     'raffles',
