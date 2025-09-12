@@ -273,3 +273,9 @@ async def _display_narrative_fragment(
         await safe_edit(message, fragment_text, reply_markup=keyboard)
     else:
         await safe_answer(message, fragment_text, reply_markup=keyboard)
+
+@router.callback_query(F.data == "start_narrative")
+async def start_narrative_callback(callback: CallbackQuery, session: AsyncSession):
+    """Handles the 'start_narrative' button click by calling the command handler."""
+    await callback.answer("Iniciando historia...")
+    await start_narrative_command(callback.message, session)

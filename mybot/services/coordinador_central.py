@@ -12,6 +12,8 @@ try:
     from .integration.narrative_access_service import NarrativeAccessService
     from .narrative_service import NarrativeService
     from .point_service import PointService
+    from .emotional_analysis_service import EmotionalAnalysisService
+    from .character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
 except ImportError:
     # Fallback to absolute imports for standalone usage
     from services.integration.channel_engagement_service import ChannelEngagementService
@@ -19,6 +21,8 @@ except ImportError:
     from services.integration.narrative_access_service import NarrativeAccessService
     from services.narrative_service import NarrativeService
     from services.point_service import PointService
+    from services.emotional_analysis_service import EmotionalAnalysisService
+    from services.character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +33,7 @@ class AccionUsuario(enum.Enum):
     TOMAR_DECISION = "tomar_decision"
     PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
+    TEST_EVALUACION_EMOCIONAL = "test_evaluacion_emocional"
 
 class CoordinadorCentral:
     """
@@ -51,6 +56,15 @@ class CoordinadorCentral:
         # Servicios base
         self.narrative_service = NarrativeService(session)
         self.point_service = PointService(session)
+        # Servicio de análisis emocional (con graceful degradation)
+        try:
+            self.emotional_analysis = EmotionalAnalysisService(session)
+        except Exception as e:
+            logger.warning(f"EmotionalAnalysisService no disponible: {str(e)}")
+            self.emotional_analysis = None
+        
+        # Servicio de voces de personajes (siempre disponible)
+        self.character_voice = CharacterVoiceService()
     
     async def ejecutar_flujo(self, user_id: int, accion: AccionUsuario, **kwargs) -> Dict[str, Any]:
         """
@@ -76,6 +90,8 @@ class CoordinadorCentral:
                 return await self._flujo_participacion_canal(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
                 return await self._flujo_verificar_engagement(user_id, **kwargs)
+            elif accion == AccionUsuario.TEST_EVALUACION_EMOCIONAL:
+                return await self._flujo_test_evaluacion_emocional(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -104,22 +120,48 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
-        # 1. Otorgar puntos por la reacción
+        # 1. Análisis emocional de timing de respuesta (no bloquea funcionalidad)
+        emotional_context = None
+        if self.emotional_analysis:
+            try:
+                import datetime
+                emotional_context = await self.emotional_analysis.analyze_response_timing(
+                    user_id, datetime.datetime.utcnow(), "reaction"
+                )
+            except Exception as e:
+                logger.debug(f"Análisis emocional falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation - continuar sin análisis emocional
+        
+        # 2. Otorgar puntos por la reacción
         puntos_otorgados = await self.channel_engagement.award_channel_reaction(
             user_id, message_id, channel_id, bot=bot
         )
         
         if not puntos_otorgados:
+            # Determinar contexto emocional para respuesta de fallo
+            emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+                emotional_context, None, None, None
+            )
+            
+            # Obtener respuesta auténtica de Lucien (custodio en situaciones de fallo)
+            failure_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                emotional_context_enum,
+                "reaction_failed",
+                emotional_context
+            )
+            
             return {
                 "success": False,
-                "message": "Diana observa tu gesto desde lejos, pero no parece haberlo notado... Intenta de nuevo más tarde.",
-                "action": "reaction_failed"
+                "message": failure_message,
+                "action": "reaction_failed",
+                "emotional_context": emotional_context
             }
         
-        # 2. Obtener puntos actuales del usuario
+        # 3. Obtener puntos actuales del usuario
         puntos_actuales = await self.point_service.get_user_points(user_id)
         
-        # 3. Verificar si se desbloquea una pista narrativa
+        # 4. Verificar si se desbloquea una pista narrativa
         pista_desbloqueada = None
         if puntos_actuales % 50 <= 15 and puntos_actuales > 15:  # Desbloquear pista cada ~50 puntos
             # Obtener fragmento actual del usuario
@@ -140,12 +182,58 @@ class CoordinadorCentral:
                         pista_desbloqueada = pista
                         break
         
-        # 4. Generar mensaje de respuesta
-        mensaje_base = "Diana sonríe al notar tu reacción... *+10 besitos* 💋 han sido añadidos a tu cuenta."
+        # 5. Generar mensaje de respuesta con voces auténticas
+        # Determinar contexto emocional y personaje apropiado
+        user_history = {"total_interactions": puntos_actuales // 10}  # Aproximación basada en puntos
+        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+            emotional_context if emotional_context and emotional_context.get("success") else None,
+            emotional_context,
+            None,
+            user_history
+        )
+        
+        # Determinar qué personaje debe responder
+        selected_character = self.character_voice.determine_character_from_emotional_context(
+            emotional_context, "reaction_success", "high" if puntos_actuales > 100 else "moderate"
+        )
+        
+        # Obtener respuesta auténtica del personaje seleccionado
+        mensaje_autentico = self.character_voice.get_character_response(
+            selected_character,
+            emotional_context_enum,
+            "reaction_success",
+            emotional_context,
+            user_history
+        )
+        
+        # Agregar información de pista desbloqueada si existe
         if pista_desbloqueada:
-            mensaje = f"{mensaje_base}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
+            mensaje = f"{mensaje_autentico}\n\n*Nueva pista desbloqueada:* _{pista_desbloqueada}_"
         else:
-            mensaje = mensaje_base
+            mensaje = mensaje_autentico
+        
+        # 6. Análisis de vulnerabilidad y mejoras contextuales (no afecta funcionalidad base)
+        vulnerability_assessment = None
+        response_enhancements = None
+        if self.emotional_analysis:
+            try:
+                # Evaluar vulnerabilidad emocional
+                vulnerability_assessment = await self.emotional_analysis.assess_vulnerability_level(
+                    user_id, reaction_type, {"action": "reaction", "channel_id": channel_id}
+                )
+                
+                # Generar mejoras contextuales (solo sugerencias, no modifican respuesta)
+                base_response = {
+                    "message": mensaje,
+                    "type": "reaction_success",
+                    "points": 10
+                }
+                response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
+                    user_id, base_response, emotional_context
+                )
+            except Exception as e:
+                logger.debug(f"Análisis de vulnerabilidad/mejoras falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation
         
         return {
             "success": True,
@@ -153,7 +241,11 @@ class CoordinadorCentral:
             "points_awarded": 10,
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
-            "action": "reaction_success"
+            "action": "reaction_success",
+            # Información adicional de análisis emocional (no afecta funcionalidad existente)
+            "emotional_context": emotional_context,
+            "vulnerability_assessment": vulnerability_assessment,
+            "response_enhancements": response_enhancements
         }
     
     async def _flujo_acceso_narrativa_vip(self, user_id: int, fragment_key: str, bot=None) -> Dict[str, Any]:
@@ -171,19 +263,33 @@ class CoordinadorCentral:
         # 1. Verificar acceso al fragmento
         fragment_result = await self.narrative_access.get_accessible_fragment(user_id, fragment_key)
         
-        # 2. Procesar resultado
+        # 2. Procesar resultado con voces auténticas
         if isinstance(fragment_result, dict) and fragment_result.get("type") == "subscription_required":
+            # Diana maneja restricciones VIP con su concepto de intimidad
+            vip_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                EmotionalContext.VULNERABILIDAD_BAJA,  # Usuario no ha alcanzado nivel VIP aún
+                "vip_required"
+            )
+            
             return {
                 "success": False,
-                "message": "Diana te mira con deseo, pero niega suavemente con la cabeza...\n\n*\"Este contenido requiere una suscripción VIP, mi amor. Algunas fantasías son solo para mis amantes más dedicados...\"*\n\nUsa /vip para acceder a contenido exclusivo.",
+                "message": f"{vip_message}\n\nUsa /vip para acceder a contenido exclusivo.",
                 "action": "vip_required",
                 "fragment_key": fragment_key
             }
         
-        # 3. Acceso permitido, devolver fragmento
+        # 3. Acceso permitido con voz auténtica
+        # Diana guía hacia contenido VIP con intimidad profunda
+        access_message = self.character_voice.get_character_response(
+            CharacterType.DIANA,
+            EmotionalContext.USUARIO_AVANZADO,  # Usuario con acceso VIP es avanzado
+            "vip_access_granted"
+        )
+        
         return {
             "success": True,
-            "message": "Diana te toma de la mano y te guía hacia un nuevo capítulo de vuestra historia...",
+            "message": access_message,
             "fragment": fragment_result,
             "action": "fragment_accessed"
         }
@@ -200,31 +306,110 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
-        # 1. Procesar la decisión con verificación de puntos
+        # 1. Análisis emocional previo a la decisión (no bloquea funcionalidad)
+        emotional_context = None
+        behavioral_patterns = None
+        if self.emotional_analysis:
+            try:
+                import datetime
+                # Analizar timing de la decisión
+                emotional_context = await self.emotional_analysis.analyze_response_timing(
+                    user_id, datetime.datetime.utcnow(), "decision"
+                )
+                
+                # Detectar patrones de comportamiento para decisiones
+                recent_actions = [{"timestamp": datetime.datetime.utcnow(), "type": "decision", "id": decision_id}]
+                behavioral_patterns = await self.emotional_analysis.detect_behavioral_patterns(
+                    user_id, recent_actions
+                )
+            except Exception as e:
+                logger.debug(f"Análisis emocional de decisión falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation
+        
+        # 2. Procesar la decisión con verificación de puntos
         decision_result = await self.narrative_point.process_decision_with_points(user_id, decision_id, bot)
         
-        # 2. Verificar resultado
+        # 3. Verificar resultado con voces auténticas
         if decision_result["type"] == "points_required":
+            # Determinar contexto emocional para falta de puntos
+            emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+                emotional_context, None, behavioral_patterns, None
+            )
+            
+            # Diana responde con anhelo cuando faltan puntos
+            points_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                emotional_context_enum,
+                "points_required",
+                emotional_context
+            )
+            
             return {
                 "success": False,
-                "message": "Diana suspira con anhelo...\n\n*\"Esta decisión requiere más besitos de los que tienes ahora, mi amor. Algunas fantasías necesitan más... intensidad.\"*\n\nNecesitas más besitos para esta elección. Participa en los canales para conseguir más.",
+                "message": points_message,
                 "action": "points_required",
                 "decision_id": decision_id
             }
         elif decision_result["type"] == "error":
+            # Lucien maneja errores de sistema como custodio
+            error_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PAUSA_REFLEXIVA,
+                "decision_error",
+                emotional_context
+            )
+            
             return {
                 "success": False,
-                "message": "Diana parece confundida por tu elección...\n\n*\"No logro entender lo que deseas, mi amor. ¿Podrías intentarlo de nuevo?\"*",
+                "message": error_message,
                 "action": "decision_error",
                 "error": decision_result["message"]
             }
         
-        # 3. Decisión exitosa
+        # 4. Análisis emocional post-decisión y tracking de evolución
+        vulnerability_assessment = None
+        emotional_evolution = None
+        if self.emotional_analysis:
+            try:
+                # Evaluar vulnerabilidad después de la decisión exitosa
+                vulnerability_assessment = await self.emotional_analysis.assess_vulnerability_level(
+                    user_id, str(decision_id), {"action": "decision_success", "fragment": decision_result["fragment"]}
+                )
+                
+                # Rastrear evolución emocional (últimos 7 días)
+                emotional_evolution = await self.emotional_analysis.track_emotional_evolution(user_id, 7)
+                
+            except Exception as e:
+                logger.debug(f"Análisis post-decisión falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation
+        
+        # 5. Decisión exitosa con voz auténtica
+        # Determinar contexto emocional para éxito
+        user_points = await self.point_service.get_user_points(user_id)
+        user_history = {"total_interactions": user_points // 10}
+        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+            emotional_context, emotional_context, behavioral_patterns, user_history
+        )
+        
+        # Diana siempre responde a decisiones exitosas (momentos íntimos)
+        success_message = self.character_voice.get_character_response(
+            CharacterType.DIANA,
+            emotional_context_enum,
+            "decision_success",
+            emotional_context,
+            user_history
+        )
+        
         return {
             "success": True,
-            "message": "Diana asiente con una sonrisa seductora mientras la historia toma un nuevo rumbo...",
+            "message": success_message,
             "fragment": decision_result["fragment"],
-            "action": "decision_success"
+            "action": "decision_success",
+            # Información adicional de análisis emocional
+            "emotional_context": emotional_context,
+            "behavioral_patterns": behavioral_patterns,
+            "vulnerability_assessment": vulnerability_assessment,
+            "emotional_evolution": emotional_evolution
         }
     
     async def _flujo_participacion_canal(self, user_id: int, channel_id: int, action_type: str, bot=None) -> Dict[str, Any]:
@@ -240,37 +425,95 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
-        # 1. Otorgar puntos por participación
+        # 1. Análisis emocional de participación en canal (no bloquea funcionalidad)
+        emotional_context = None
+        if self.emotional_analysis:
+            try:
+                import datetime
+                # Analizar timing y patrones de participación
+                emotional_context = await self.emotional_analysis.analyze_response_timing(
+                    user_id, datetime.datetime.utcnow(), f"channel_participation_{action_type}"
+                )
+            except Exception as e:
+                logger.debug(f"Análisis emocional de participación falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation
+        
+        # 2. Otorgar puntos por participación
         participacion_exitosa = await self.channel_engagement.award_channel_participation(
             user_id, channel_id, action_type, bot
         )
         
         if not participacion_exitosa:
+            # Lucien maneja fallos de participación como custodio
+            participation_fail_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PAUSA_REFLEXIVA,
+                "participation_failed",
+                emotional_context
+            )
+            
             return {
                 "success": False,
-                "message": "Diana nota tu participación, pero parece que algo no ha funcionado correctamente...",
-                "action": "participation_failed"
+                "message": participation_fail_message,
+                "action": "participation_failed",
+                "emotional_context": emotional_context
             }
         
-        # 2. Determinar puntos otorgados según el tipo de acción
+        # 3. Determinar puntos otorgados según el tipo de acción
         puntos = 5 if action_type == "post" else 2 if action_type == "comment" else 1
         
-        # 3. Generar mensaje según tipo de acción
-        mensajes = {
-            "post": "Diana lee con interés tu publicación, sus ojos brillan de emoción...\n\n*+5 besitos* 💋 por compartir tus pensamientos.",
-            "comment": "Diana sonríe al leer tu comentario, mordiendo suavemente su labio inferior...\n\n*+2 besitos* 💋 por tu participación.",
-            "poll_vote": "Diana asiente al ver tu voto, apreciando tu opinión...\n\n*+1 besito* 💋 por participar.",
-            "message": "Diana nota tu mensaje, un suave rubor colorea sus mejillas...\n\n*+1 besito* 💋 por tu actividad."
-        }
+        # 4. Generar mensaje con voz auténtica según tipo de acción
+        user_points = await self.point_service.get_user_points(user_id)
+        user_history = {"total_interactions": user_points // 5}  # Aproximación
         
-        mensaje = mensajes.get(action_type, "Diana aprecia tu participación...\n\n*+1 besito* 💋 añadido.")
+        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+            emotional_context, emotional_context, None, user_history
+        )
+        
+        # Diana responde a participación social (conexión)
+        base_message = self.character_voice.get_character_response(
+            CharacterType.DIANA,
+            emotional_context_enum,
+            f"participation_{action_type}",
+            emotional_context,
+            user_history
+        )
+        
+        # Agregar puntos según acción
+        points_text = f"\n\n*+{puntos} besito{'s' if puntos > 1 else ''}* 💋 por tu {action_type}."
+        mensaje = f"{base_message}{points_text}"
+        
+        # 5. Análisis emocional post-participación y mejoras contextuales
+        behavioral_patterns = None
+        response_enhancements = None
+        if self.emotional_analysis:
+            try:
+                import datetime
+                # Detectar patrones de participación social
+                recent_actions = [{"timestamp": datetime.datetime.utcnow(), "type": "channel_participation", "action_type": action_type, "channel_id": channel_id}]
+                behavioral_patterns = await self.emotional_analysis.detect_behavioral_patterns(
+                    user_id, recent_actions
+                )
+                
+                # Generar mejoras contextuales
+                base_response = {"message": mensaje, "type": "participation_success", "points": puntos}
+                response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
+                    user_id, base_response, emotional_context
+                )
+            except Exception as e:
+                logger.debug(f"Análisis post-participación falló para usuario {user_id}: {str(e)}")
+                # Graceful degradation
         
         return {
             "success": True,
             "message": mensaje,
             "points_awarded": puntos,
             "action": "participation_success",
-            "action_type": action_type
+            "action_type": action_type,
+            # Información adicional de análisis emocional
+            "emotional_context": emotional_context,
+            "behavioral_patterns": behavioral_patterns,
+            "response_enhancements": response_enhancements
         }
     
     async def _flujo_verificar_engagement(self, user_id: int, bot=None) -> Dict[str, Any]:
@@ -288,9 +531,16 @@ class CoordinadorCentral:
         engagement_result = await self.channel_engagement.check_daily_engagement(user_id, bot)
         
         if not engagement_result:
+            # Diana maneja la paciencia con su concepto de timing
+            patience_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                EmotionalContext.PAUSA_REFLEXIVA,
+                "daily_already_done"
+            )
+            
             return {
                 "success": False,
-                "message": "Diana te observa con una sonrisa paciente...\n\n*\"Ya nos hemos visto hoy, mi amor. Regresa mañana para más recompensas...\"*",
+                "message": patience_message,
                 "action": "daily_check_already_done"
             }
         
@@ -298,11 +548,27 @@ class CoordinadorCentral:
         user_progress = await self.point_service.get_user_progress(user_id)
         streak = user_progress.checkin_streak if user_progress else 1
         
-        # 3. Generar mensaje según racha
-        if streak % 7 == 0:  # Racha semanal
-            mensaje = f"Diana te recibe con un abrazo apasionado...\n\n*\"¡Has vuelto por {streak} días consecutivos, mi amor! Tu dedicación merece una recompensa especial...\"*\n\n*+25 besitos* 💋 por tu constancia semanal."
+        # 3. Generar mensaje con voz auténtica según racha
+        user_history = {"streak": streak, "total_interactions": streak * 2}  # Aproximación
+        
+        if streak % 7 == 0:  # Racha semanal - alta dedicación
+            weekly_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                EmotionalContext.ENGAGEMENT_ALTO,
+                "weekly_streak",
+                None,
+                user_history
+            )
+            mensaje = f"{weekly_message}\n\n*+25 besitos* 💋 por tu constancia semanal."
         else:
-            mensaje = f"Diana te recibe con una sonrisa cálida...\n\n*\"Me alegra verte de nuevo, mi amor. Este es tu día {streak} consecutivo visitándome...\"*\n\n*+10 besitos* 💋 por tu visita diaria."
+            daily_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                EmotionalContext.USUARIO_AVANZADO if streak > 7 else EmotionalContext.NUEVO_USUARIO,
+                "daily_check",
+                None,
+                user_history
+            )
+            mensaje = f"{daily_message}\n\n*+10 besitos* 💋 por tu visita diaria."
         
         return {
             "success": True,
@@ -311,3 +577,193 @@ class CoordinadorCentral:
             "points_awarded": 25 if streak % 7 == 0 else 10,
             "action": "daily_check_success"
         }
+    
+    async def _flujo_test_evaluacion_emocional(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para ejecutar el test de evaluación emocional aislado.
+        
+        Args:
+            user_id: ID del usuario
+            **kwargs: Parámetros del test (action_type, response_time, option_selected)
+            
+        Returns:
+            Dict con resultados del análisis emocional y perfil del usuario
+        """
+        try:
+            import datetime
+            
+            action_type = kwargs.get("action_type", "start_test")
+            
+            if action_type == "start_test":
+                # Inicializar el test - retornar mensaje de bienvenida
+                welcome_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    EmotionalContext.NUEVO_USUARIO,
+                    "test_evaluation_start"
+                ) if self.character_voice else "¡Descubre tu perfil emocional!"
+                
+                return {
+                    "success": True,
+                    "action": "test_started",
+                    "message": welcome_message,
+                    "test_active": True
+                }
+            
+            elif action_type == "process_response":
+                # Procesar respuesta del usuario con análisis de timing
+                response_time = kwargs.get("response_time", 0)  # En segundos
+                option_selected = kwargs.get("option_selected", "unknown")
+                
+                # Realizar análisis emocional del timing de respuesta
+                emotional_context = None
+                if self.emotional_analysis:
+                    try:
+                        # Usar el servicio de análisis emocional para evaluar timing
+                        emotional_context = await self.emotional_analysis.analyze_response_timing(
+                            user_id, datetime.datetime.utcnow(), "test_evaluation"
+                        )
+                    except Exception as e:
+                        logger.debug(f"Análisis emocional de test falló para usuario {user_id}: {str(e)}")
+                
+                # Clasificar usuario según timing de respuesta
+                user_type = self._classify_user_by_response_time(response_time)
+                
+                # Evaluación de vulnerabilidad específica para el test
+                vulnerability_assessment = None
+                if self.emotional_analysis:
+                    try:
+                        vulnerability_assessment = await self.emotional_analysis.assess_vulnerability_level(
+                            user_id, option_selected, {
+                                "action": "test_evaluation", 
+                                "response_time": response_time,
+                                "option": option_selected
+                            }
+                        )
+                    except Exception as e:
+                        logger.debug(f"Evaluación de vulnerabilidad de test falló para usuario {user_id}: {str(e)}")
+                
+                # Determinar contexto emocional para la respuesta
+                emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+                    emotional_context, emotional_context, None, {"response_time": response_time}
+                ) if self.character_voice else EmotionalContext.PAUSA_REFLEXIVA
+                
+                # Generar mensaje personalizado según el perfil detectado
+                profile_message = self._generate_profile_message(
+                    user_type, emotional_context, vulnerability_assessment
+                )
+                
+                # Respuesta auténtica del personaje según el perfil
+                character_response = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    emotional_context_enum,
+                    f"test_result_{user_type}",
+                    emotional_context
+                ) if self.character_voice else profile_message
+                
+                return {
+                    "success": True,
+                    "action": "test_completed",
+                    "message": f"{character_response}\n\n{profile_message}",
+                    "user_type": user_type,
+                    "response_time": response_time,
+                    "option_selected": option_selected,
+                    "emotional_context": emotional_context,
+                    "vulnerability_assessment": vulnerability_assessment
+                }
+            
+            else:
+                return {
+                    "success": False,
+                    "message": "Tipo de acción no reconocido para el test emocional."
+                }
+                
+        except Exception as e:
+            logger.exception(f"Error en flujo de test emocional para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante el test emocional. Intenta nuevamente.",
+                "error": str(e)
+            }
+    
+    def _classify_user_by_response_time(self, response_time: float) -> str:
+        """
+        Clasifica al usuario según su tiempo de respuesta en el test.
+        
+        Args:
+            response_time: Tiempo de respuesta en segundos
+            
+        Returns:
+            String con el tipo de usuario detectado
+        """
+        if response_time < 3:
+            return "impulso_autentico"
+        elif response_time <= 15:
+            return "pausa_reflexiva"
+        elif response_time <= 60:
+            return "contemplacion"
+        else:
+            return "abandono"
+    
+    def _generate_profile_message(
+        self, 
+        user_type: str, 
+        emotional_context: Dict[str, Any] = None,
+        vulnerability_assessment: Dict[str, Any] = None
+    ) -> str:
+        """
+        Genera mensaje personalizado del perfil emocional detectado.
+        
+        Args:
+            user_type: Tipo de usuario clasificado
+            emotional_context: Contexto emocional del análisis
+            vulnerability_assessment: Evaluación de vulnerabilidad
+            
+        Returns:
+            String con el mensaje personalizado del perfil
+        """
+        profile_messages = {
+            "impulso_autentico": (
+                "🔥 **IMPULSO AUTÉNTICO**\n\n"
+                "Respondes desde el corazón, sin filtros. Tu naturaleza espontánea "
+                "te lleva a conectar de manera genuina y directa. Eres de quienes "
+                "viven el momento con intensidad."
+            ),
+            "pausa_reflexiva": (
+                "💭 **PAUSA REFLEXIVA**\n\n"
+                "Tomas tiempo para procesar antes de responder. Esta cualidad te "
+                "permite tomar decisiones más conscientes y conectar de manera "
+                "profunda con tus emociones."
+            ),
+            "contemplacion": (
+                "🌙 **CONTEMPLACIÓN**\n\n"
+                "Tu mente busca comprender profundamente antes de actuar. Este "
+                "enfoque reflexivo te permite acceder a capas más profundas de "
+                "comprensión y conexión emocional."
+            ),
+            "abandono": (
+                "🌊 **ABANDONO**\n\n"
+                "Tiendes a alejarte cuando sientes presión. Esto puede indicar "
+                "que necesitas espacios seguros para explorar y conectar a tu "
+                "propio ritmo, sin prisas."
+            )
+        }
+        
+        base_message = profile_messages.get(user_type, profile_messages["pausa_reflexiva"])
+        
+        # Agregar insights adicionales basados en el análisis emocional
+        if emotional_context and emotional_context.get("success"):
+            timing_pattern = emotional_context.get("timing_pattern", "normal")
+            if timing_pattern == "rapid_fire":
+                base_message += "\n\n💡 *Tu patrón de respuesta indica alta energía emocional.*"
+            elif timing_pattern == "spaced":
+                base_message += "\n\n💡 *Tus respuestas muestran un patrón meditativo y consciente.*"
+        
+        # Agregar recomendaciones según vulnerabilidad
+        if vulnerability_assessment and vulnerability_assessment.get("success"):
+            vulnerability_level = vulnerability_assessment.get("vulnerability_category", "moderate")
+            if vulnerability_level == "high":
+                base_message += "\n\n🤗 *Recomendación: Permite que las experiencias fluyan sin presión.*"
+            elif vulnerability_level == "low":
+                base_message += "\n\n✨ *Tu estabilidad emocional te permite explorar con confianza.*"
+        
+        return base_message
