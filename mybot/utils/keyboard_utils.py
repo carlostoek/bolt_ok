@@ -12,6 +12,7 @@ from utils.messages import BOT_MESSAGES
 def get_main_menu_keyboard():
     """Returns the main inline menu keyboard."""
     keyboard = [
+        [InlineKeyboardButton(text="📖 Historia", callback_data="start_narrative")],
         [InlineKeyboardButton(text="💎 Mi Diván", callback_data="vip_subscription")],
         [
             InlineKeyboardButton(text="🎯 Misiones", callback_data="menu:missions"),
