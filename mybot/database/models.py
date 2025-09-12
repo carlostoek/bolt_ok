@@ -475,6 +475,51 @@ class UserLorePiece(Base):
 
 
 
+# NEW SHOP SYSTEM MODELS
+class ShopItem(Base):
+    """Items available for purchase in the shop."""
+    
+    __tablename__ = "shop_items"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Integer, nullable=False)
+    image_url = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True)
+    required_vip = Column(Boolean, default=False)
+    unlocks_lore_piece_code = Column(
+        String, 
+        ForeignKey('lore_pieces.code_name', ondelete='SET NULL'),
+        nullable=True,
+        index=True
+    )
+    created_at = Column(DateTime, default=func.now())
+
+    lore_piece = relationship(
+        "LorePiece",
+        foreign_keys=[unlocks_lore_piece_code],
+        primaryjoin="ShopItem.unlocks_lore_piece_code == LorePiece.code_name"
+    )
+
+class UserInventory(Base):
+    """Tracks items purchased by users."""
+    
+    __tablename__ = "user_inventory"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    item_id = Column(Integer, ForeignKey("shop_items.id"), nullable=False)
+    purchased_at = Column(DateTime, default=func.now())
+    
+    __table_args__ = (
+        UniqueConstraint("user_id", "item_id", name="uix_user_inventory_item"),
+    )
+
+    user = relationship("User")
+    item = relationship("ShopItem")
+
+
 # Funciones para manejar el estado del menú del usuario
 async def get_user_menu_state(session, user_id: int) -> str:
     result = await session.execute(select(User).where(User.id == user_id))

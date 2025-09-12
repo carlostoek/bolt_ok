@@ -23,6 +23,7 @@ def get_main_menu_keyboard():
             InlineKeyboardButton(text="🗺️ Mochila", callback_data="open_backpack")
         ],
         [
+            InlineKeyboardButton(text="🛍️ Tienda", callback_data="menu:shop"),
             InlineKeyboardButton(text="💝 Recompensas", callback_data="menu:rewards"),
             InlineKeyboardButton(text="👑 Ranking", callback_data="menu:ranking")
         ],

@@ -3917,3 +3917,57 @@ aiogram.exceptions.TelegramNetworkError: HTTP Client says - Request timeout erro
 2025-09-12 17:51:30,072 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
 2025-09-12 17:51:30,072 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-12 21:01:58,666 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-12 21:01:58,667 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-12 21:01:58,683 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-12 21:01:58,705 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-12 21:01:58,706 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-12 21:01:58,706 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-12 21:01:58,706 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-12 21:01:58,750 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-12 21:01:58,750 - __main__ - INFO - main:216 - Router setup registrado
+2025-09-12 21:01:58,750 - __main__ - INFO - main:216 - Router admin registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router start_token registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router start registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router backpack registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router missions registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router info registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router minigames registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router gamification registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router free_user registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router lore registrado
+2025-09-12 21:01:58,751 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-09-12 21:01:58,752 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-09-12 21:01:58,752 - __main__ - INFO - main:216 - Router narrative registrado
+2025-09-12 21:01:58,752 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-09-12 21:01:58,752 - __main__ - INFO - main:216 - Router test_evaluation registrado
+2025-09-12 21:01:58,752 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-09-12 21:01:58,752 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-09-12 21:01:58,753 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-12 21:01:58,755 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-12 21:01:58,756 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-12 21:01:58,757 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-12 21:01:58,758 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-12 21:01:58,827 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-12 21:02:02,650 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-12 21:02:02,902 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-12 21:02:02,902 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-12 21:02:02,902 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-12 21:02:02,902 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-12 21:02:02,902 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-12 21:02:02,903 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-12 21:02:02,903 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-12 21:02:02,903 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-12 21:02:02,903 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-12 21:02:02,903 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-12 21:02:02,903 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-12 21:02:02,903 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-12 21:02:02,903 - root - INFO - shutdown:138 - Todas las tareas cerradas
