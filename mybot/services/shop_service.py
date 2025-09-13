@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database.models import ShopItem, UserPurchase, User
 from services.point_service import PointService
 from services.narrative_service import NarrativeService
@@ -18,22 +18,26 @@ class ShopService:
 
     async def get_available_items(self, user_id: int) -> List[ShopItem]:
         """Get available shop items for the user, considering VIP status"""
-        # Check if user is VIP
-        is_vip = await self.subscription_service.is_user_vip(user_id)
-        
-        stmt = select(ShopItem).where(ShopItem.is_active == True)
-        result = await self.session.execute(stmt)
-        all_items = result.scalars().all()
-        
-        # Filter VIP-only items if user is not VIP
-        if not is_vip:
-            return [item for item in all_items if not item.is_vip_only]
-        return all_items
+        try:
+            # Check if user is VIP by getting their subscription
+            subscription = await self.subscription_service.get_subscription(user_id)
+            is_vip = subscription is not None and (subscription.expires_at is None or subscription.expires_at > func.now())
+            
+            stmt = select(ShopItem).where(ShopItem.is_active == True)
+            result = await self.session.execute(stmt)
+            all_items = result.scalars().all()
+            
+            # Filter VIP-only items if user is not VIP
+            if not is_vip:
+                return [item for item in all_items if not item.is_vip_only]
+            return all_items
+        except Exception as e:
+            logger.error(f"Error getting available items for user {user_id}: {str(e)}")
+            return []
 
     async def purchase_item(self, user_id: int, item_id: int) -> Dict[str, Any]:
         """Purchase an item for the user"""
-        # Start a transaction
-        async with self.session.begin():
+        try:
             # Get the item
             stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
             result = await self.session.execute(stmt)
@@ -50,6 +54,9 @@ class ShopService:
             
             # Check user points
             user = await self.session.get(User, user_id)
+            if user is None:
+                return {"success": False, "message": "User not found"}
+                
             if user.points < item.price:
                 return {"success": False, "message": "Insufficient points"}
             
@@ -66,12 +73,19 @@ class ShopService:
             
             # Unlock lore piece if applicable
             if item.unlocks_lore_piece_id:
+                # Make sure to flush before calling other services
+                await self.session.flush()
                 await self.narrative_service.unlock_lore_piece(
                     user_id, item.unlocks_lore_piece_id
                 )
             
+            await self.session.commit()
             return {
                 "success": True, 
                 "message": "Purchase successful",
                 "unlocked_lore": item.unlocks_lore_piece_id is not None
             }
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Error purchasing item {item_id} for user {user_id}: {str(e)}")
+            return {"success": False, "message": "Error processing purchase"}
