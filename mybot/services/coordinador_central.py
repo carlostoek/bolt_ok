@@ -640,16 +640,6 @@ class CoordinadorCentral:
             shop_service = ShopService(self.session)
             result = await shop_service.purchase_item(user_id, int(item_id))
             
-            # If purchase was successful, add to backpack
-            if result.get("success") and result.get("unlocked_lore"):
-                # Add the item to the user's backpack
-                await self.ejecutar_flujo(
-                    user_id,
-                    AccionUsuario.AGREGAR_A_MOCHILA,
-                    item_id=item_id,
-                    **kwargs
-                )
-            
             return result
         except ValueError:
             return {
