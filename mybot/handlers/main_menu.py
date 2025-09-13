@@ -1,24 +1,16 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from sqlalchemy.ext.asyncio import AsyncSession
+from handlers.lore_handlers import show_lore_backpack
+from handlers.missions_handler import show_available_missions
+from handlers.narrative_handler import start_narrative_command
 
 router = Router()
 
 @router.message(F.text == "🎒 Mochila")
 async def handle_backpack_button(message: Message, session: AsyncSession):
-    # Import the router and use the handler directly
-    from backpack import router as backpack_router
-    # Trigger the backpack handler
-    from aiogram import F
-    from aiogram.types import Message
-    # Create a fake context to trigger the handler
-    # Since the handler is already registered, we can just call it directly
-    for handler in backpack_router.message.handlers:
-        if hasattr(handler, 'filters') and any(isinstance(f, F) and getattr(f, 'text', None) == "🎒 Mochila" for f in handler.filters):
-            await handler.handler(message, session=session)
-            return
-    # Fallback if handler not found
-    await message.answer("La mochila no está disponible en este momento.")
+    # Directly call the lore handler function
+    await show_lore_backpack(message, session)
 
 @router.message(F.text == "💰 Billetera")
 async def handle_wallet_button(message: Message, session: AsyncSession):
@@ -26,9 +18,18 @@ async def handle_wallet_button(message: Message, session: AsyncSession):
 
 @router.message(F.text == "🎯 Misiones")
 async def handle_missions_button(message: Message, session: AsyncSession):
-    from handlers.missions_handler import show_available_missions
-    fake_callback = type("cb", (), {"from_user": message.from_user, "data": "misiones_disponibles", "message": message})
-    await show_available_missions(fake_callback, session)
+    # Create a mock callback to reuse the existing handler
+    class MockCallback:
+        def __init__(self, message):
+            self.from_user = message.from_user
+            self.data = "misiones_disponibles"
+            self.message = message
+            
+        async def answer(self, *args, **kwargs):
+            pass
+    
+    mock_callback = MockCallback(message)
+    await show_available_missions(mock_callback, session)
 
 @router.message(F.text == "⚙️ Configuración")
 async def handle_config_button(message: Message, session: AsyncSession):
@@ -40,5 +41,4 @@ async def handle_help_button(message: Message, session: AsyncSession):
 
 @router.message(F.text == "📖 Historia")
 async def handle_narrative_button(message: Message, session: AsyncSession):
-    from handlers.narrative_handler import start_narrative_command
     await start_narrative_command(message, session)
