@@ -3917,3 +3917,144 @@ aiogram.exceptions.TelegramNetworkError: HTTP Client says - Request timeout erro
 2025-09-12 17:51:30,072 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-09-12 17:51:30,072 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
 2025-09-12 17:51:30,072 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-13 16:19:25,609 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-13 16:19:25,609 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-13 16:19:25,624 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-13 16:19:25,644 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-13 16:19:25,645 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-13 16:19:25,645 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-13 16:19:25,645 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-13 16:19:25,681 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router setup registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router admin registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router start_token registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router start registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router backpack registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router missions registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router info registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-09-13 16:19:25,682 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router minigames registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router gamification registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router free_user registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router lore registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router narrative registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:216 - Router test_evaluation registrado
+2025-09-13 16:19:25,683 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-09-13 16:19:25,683 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-09-13 16:19:25,684 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-13 16:19:25,685 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-13 16:19:25,686 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-13 16:19:25,687 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-13 16:19:25,688 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-13 16:19:25,746 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-13 16:19:46,332 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-13 16:19:46,333 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-13 16:19:54,028 - handlers.narrative_handler - ERROR - show_narrative_stats_callback:254 - Error mostrando estadísticas narrativas para usuario 6181290784: name 'func' is not defined
+2025-09-13 16:19:57,008 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_secrets_1
+2025-09-13 16:19:58,606 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_intimate_1
+2025-09-13 16:20:07,610 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-13 16:20:07,862 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-13 16:20:07,863 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-13 16:20:07,863 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-13 16:20:07,863 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-13 16:20:07,863 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-13 16:20:07,863 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-13 16:20:07,863 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-13 16:20:07,863 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-13 16:20:07,863 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-13 16:20:07,863 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-13 16:20:07,864 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-13 16:20:07,864 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-13 16:20:07,864 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-13 16:20:34,918 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-13 16:20:34,919 - database.setup - INFO - init_db:59 - Inicializando motor de base de datos SQLite...
+2025-09-13 16:20:34,934 - database.setup - INFO - init_db:74 - Creando tablas en orden definido...
+2025-09-13 16:20:35,713 - database.setup - INFO - init_db:77 - Tablas creadas exitosamente.
+2025-09-13 16:20:35,714 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-13 16:20:35,714 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-13 16:20:35,714 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-13 16:20:35,753 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-13 16:20:35,753 - __main__ - INFO - main:216 - Router setup registrado
+2025-09-13 16:20:35,753 - __main__ - INFO - main:216 - Router admin registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router auction_admin registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router start_token registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router start registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router main_menu registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router backpack registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router missions registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router info registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router free_channel_admin registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router publication_test registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router vip_menu registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router auction_user registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router reaction_callback registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router daily_gift registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router minigames registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router gamification registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router free_user registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router lore registrado
+2025-09-13 16:20:35,754 - __main__ - INFO - main:216 - Router combinar_pistas registrado
+2025-09-13 16:20:35,755 - __main__ - INFO - main:216 - Router channel_access registrado
+2025-09-13 16:20:35,755 - __main__ - INFO - main:216 - Router narrative registrado
+2025-09-13 16:20:35,755 - __main__ - INFO - main:216 - Router admin_narrative registrado
+2025-09-13 16:20:35,755 - __main__ - INFO - main:216 - Router test_evaluation registrado
+2025-09-13 16:20:35,755 - __main__ - INFO - main:221 - Iniciando tareas en segundo plano...
+2025-09-13 16:20:35,755 - __main__ - INFO - main:244 - Bot iniciado correctamente. Comenzando polling...
+2025-09-13 16:20:35,756 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-13 16:20:35,758 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-13 16:20:35,759 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-13 16:20:35,759 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-13 16:20:35,760 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-13 16:20:35,812 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-13 16:20:46,509 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-13 16:20:46,509 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-13 16:20:46,523 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-13 16:20:46,525 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-13 16:20:48,829 - services.narrative_service - ERROR - get_user_current_fragment:35 - No se encontró fragmento inicial 'start'
+2025-09-13 16:20:48,832 - services.narrative_service - ERROR - start_narrative:46 - No se encontró fragmento inicial 'start'
+2025-09-13 16:21:02,121 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-13 16:21:02,121 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-13 16:21:02,138 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-13 16:21:02,163 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-13 16:21:02,207 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-13 16:21:02,243 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-13 16:21:02,281 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-13 16:21:02,317 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-13 16:21:02,351 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-13 16:21:02,390 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-13 16:21:02,428 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-13 16:21:02,463 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-13 16:21:02,509 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-13 16:21:02,538 - services.narrative_loader - INFO - load_default_narrative:365 - Narrativa por defecto cargada exitosamente
+2025-09-13 16:21:14,653 - handlers.narrative_handler - ERROR - show_narrative_stats_callback:254 - Error mostrando estadísticas narrativas para usuario 6181290784: name 'func' is not defined
+2025-09-13 16:21:16,623 - services.point_service - INFO - add_points:135 - User 6181290784 gained 6 points (base 3, x2). Total: 6.0
+2025-09-13 16:21:16,770 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 3 besitos del fragmento info_1
+2025-09-13 16:21:16,770 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a info_1
+2025-09-13 16:21:18,393 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 26.0
+2025-09-13 16:21:18,588 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-13 16:21:18,588 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de info_1 a intro_1
+2025-09-13 16:21:20,014 - handlers.narrative_handler - ERROR - show_narrative_stats_callback:254 - Error mostrando estadísticas narrativas para usuario 6181290784: name 'func' is not defined
+2025-09-13 16:28:25,183 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-13 16:28:25,435 - __main__ - INFO - main:251 - Cerrando bot...
+2025-09-13 16:28:25,435 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-13 16:28:25,435 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-13 16:28:25,436 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-13 16:28:25,436 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-13 16:28:25,436 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-13 16:28:25,436 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-13 16:28:25,436 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-13 16:28:25,436 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-13 16:28:25,436 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-13 16:28:25,436 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-13 16:28:25,437 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-13 16:28:25,437 - root - INFO - shutdown:138 - Todas las tareas cerradas
