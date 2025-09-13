@@ -20,6 +20,9 @@ class ShopService:
     async def get_available_items(self, user_id: int) -> List[ShopItem]:
         """Get available shop items for the user, considering VIP status"""
         try:
+            # Ensure the "Diario de Diana" item exists
+            await self._ensure_diario_diana_item_exists()
+            
             # Check if user is VIP by getting their subscription
             subscription = await self.subscription_service.get_subscription(user_id)
             is_vip = subscription is not None and (subscription.expires_at is None or subscription.expires_at > func.now())
@@ -35,6 +38,58 @@ class ShopService:
         except Exception as e:
             logger.error(f"Error getting available items for user {user_id}: {str(e)}")
             return []
+
+    async def _ensure_diario_diana_item_exists(self):
+        """Ensure the 'Diario de Diana' shop item exists"""
+        try:
+            from database.models import LorePiece
+            # Check if the item already exists
+            stmt = select(ShopItem).where(ShopItem.name == "📖 Diario Secreto")
+            result = await self.session.execute(stmt)
+            item = result.scalar_one_or_none()
+            
+            if not item:
+                # Create the lore piece first
+                lore_piece = LorePiece(
+                    title="Diario Secreto de Diana",
+                    code_name="diario_secreto_diana",
+                    content="Contenido exclusivo del diario secreto de Diana...",
+                    content_type="text",
+                    unlock_conditions={"requires_item": "diario_diana"}
+                )
+                self.session.add(lore_piece)
+                await self.session.flush()
+                
+                # Create the shop item
+                shop_item = ShopItem(
+                    name="📖 Diario Secreto",
+                    description="Un diario personal de Diana que desbloquea contenido exclusivo",
+                    price=50,
+                    is_vip_only=False,
+                    is_active=True,
+                    unlocks_lore_piece_id=lore_piece.id
+                )
+                self.session.add(shop_item)
+                await self.session.commit()
+        except Exception as e:
+            logger.error(f"Error ensuring Diario de Diana item exists: {str(e)}")
+            await self.session.rollback()
+
+    async def has_item_in_inventory(self, user_id: int, item_name: str) -> bool:
+        """Check if user has a specific item in their inventory"""
+        try:
+            # Check if user has purchased the item
+            stmt = select(UserPurchase, ShopItem).join(
+                ShopItem, UserPurchase.shop_item_id == ShopItem.id
+            ).where(
+                UserPurchase.user_id == user_id,
+                ShopItem.name == item_name
+            )
+            result = await self.session.execute(stmt)
+            return result.first() is not None
+        except Exception as e:
+            logger.error(f"Error checking inventory for user {user_id}: {str(e)}")
+            return False
 
     async def purchase_item(self, user_id: int, item_id: int) -> Dict[str, Any]:
         """Purchase an item for the user directly"""

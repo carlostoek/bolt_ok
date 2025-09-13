@@ -42,3 +42,21 @@ async def handle_help_button(message: Message, session: AsyncSession):
 @router.message(F.text == "📖 Historia")
 async def handle_narrative_button(message: Message, session: AsyncSession):
     await start_narrative_command(message, session)
+
+@router.message(F.text == "🔓 Nivel de Muestra")
+async def handle_sample_level_button(message: Message, session: AsyncSession):
+    """Handle access to the sample level that requires 'Diario de Diana'"""
+    # Use CoordinadorCentral to check access
+    from services.coordinador_central import CoordinadorCentral, AccionUsuario
+    coordinador = CoordinadorCentral(session)
+    result = await coordinador.ejecutar_flujo(
+        message.from_user.id,
+        AccionUsuario.VERIFICAR_ACCESO_NIVEL,
+        level_name="nivel_muestra"
+    )
+    
+    if result.get("access_granted"):
+        await message.answer("🔓 **Acceso Concedido al Nivel de Muestra**\n\n¡Bienvenido al contenido exclusivo del Diario de Diana!")
+        # Here you would start the actual narrative level
+    else:
+        await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")
