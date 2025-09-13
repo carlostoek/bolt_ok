@@ -1,9 +1,11 @@
 from aiogram import Router, F
-from aiogram.types import CallbackQuery
+from aiogram.types import CallbackQuery, Message
+from aiogram.filters import Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.mission_service import MissionService
 from database.models import User
+from aiogram import Bot
 
 router = Router()
 

@@ -13,6 +13,7 @@ from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_k
 from utils.message_safety import safe_answer, safe_edit
 from utils.user_roles import get_user_role
 import logging
+from aiogram import Bot
 
 logger = logging.getLogger(__name__)
 router = Router(name="narrative_handler")
