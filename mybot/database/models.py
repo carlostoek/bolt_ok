@@ -71,6 +71,15 @@ class User(Base):
             lazy="selectin",
             cascade="all, delete-orphan"
         )
+        
+    @declared_attr
+    def purchases(cls):
+        return relationship(
+            "UserPurchase",
+            back_populates="user",
+            lazy="selectin",
+            cascade="all, delete-orphan"
+        )
 
 
 class Reward(Base):
@@ -467,6 +476,32 @@ class LorePiece(Base):
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
     is_active = Column(Boolean, default=True)
 
+
+class ShopItem(Base):
+    __tablename__ = "shop_items"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    price = Column(Integer, nullable=False)  # Price in besitos
+    is_vip_only = Column(Boolean, default=False)
+    unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    
+    lore_piece = relationship("LorePiece")
+
+class UserPurchase(Base):
+    __tablename__ = "user_purchases"
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    shop_item_id = Column(Integer, ForeignKey("shop_items.id"), nullable=False)
+    purchased_at = Column(DateTime, default=func.now())
+    price_paid = Column(Integer, nullable=False)
+    
+    user = relationship("User", back_populates="purchases")
+    shop_item = relationship("ShopItem")
 
 class UserLorePiece(Base):
     """Mapping of unlocked lore pieces per user."""
