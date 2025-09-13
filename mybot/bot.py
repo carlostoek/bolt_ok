@@ -184,6 +184,9 @@ async def main() -> None:
 
         # Registrar routers en orden de prioridad
         logger.info("Registrando handlers...")
+        # Import shop router
+        from handlers.shop_handlers import router as shop_router
+        
         routers = [
             ("setup", setup_handlers.router),
             ("admin", admin_router),
@@ -209,6 +212,7 @@ async def main() -> None:
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
             ("test_evaluation", test_evaluation_router),
+            ("shop", shop_router),  # Add shop router
         ]
         
         for name, router in routers:
