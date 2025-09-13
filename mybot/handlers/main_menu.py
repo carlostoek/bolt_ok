@@ -6,8 +6,19 @@ router = Router()
 
 @router.message(F.text == "🎒 Mochila")
 async def handle_backpack_button(message: Message, session: AsyncSession):
-    from backpack import mostrar_mochila_narrativa
-    await mostrar_mochila_narrativa(message)
+    # Import the router and use the handler directly
+    from backpack import router as backpack_router
+    # Trigger the backpack handler
+    from aiogram import F
+    from aiogram.types import Message
+    # Create a fake context to trigger the handler
+    # Since the handler is already registered, we can just call it directly
+    for handler in backpack_router.message.handlers:
+        if hasattr(handler, 'filters') and any(isinstance(f, F) and getattr(f, 'text', None) == "🎒 Mochila" for f in handler.filters):
+            await handler.handler(message, session=session)
+            return
+    # Fallback if handler not found
+    await message.answer("La mochila no está disponible en este momento.")
 
 @router.message(F.text == "💰 Billetera")
 async def handle_wallet_button(message: Message, session: AsyncSession):
