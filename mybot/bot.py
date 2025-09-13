@@ -46,7 +46,7 @@ class DBSessionMiddleware(BaseMiddleware):
                 await session.close()
 
 # Imports
-from mybot.database.setup import init_db, get_session_factory
+from database.setup import init_db, get_session_factory
 from utils.message_safety import patch_message_methods
 from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 
