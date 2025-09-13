@@ -15,6 +15,25 @@ def get_back_kb(callback_data: str = "admin_back"):
     return builder.as_markup()
 
 
+def build_shop_keyboard(items):
+    """
+    Build a keyboard for the shop with available items.
+    """
+    from aiogram.types import InlineKeyboardButton
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    
+    builder = InlineKeyboardBuilder()
+    
+    for item in items:
+        builder.button(
+            text=f"{item.name} - {item.price} besitos",
+            callback_data=f"buy_item:{item.id}"
+        )
+    
+    builder.button(text="🔙 Volver", callback_data="menu_principal")
+    builder.adjust(1)
+    return builder.as_markup()
+
 def get_interactive_post_kb(
     reactions: list[str],
     current_counts: Dict[str, int] | None,

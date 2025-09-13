@@ -62,6 +62,15 @@ class User(Base):
             lazy="selectin",
             cascade="all, delete-orphan"
         )
+        
+    @declared_attr
+    def purchases(cls):
+        return relationship(
+            "UserPurchase",
+            back_populates="user",
+            lazy="selectin",
+            cascade="all, delete-orphan"
+        )
 
 
 class Reward(Base):
