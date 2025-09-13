@@ -26,7 +26,10 @@ def get_main_menu_keyboard():
             InlineKeyboardButton(text="💝 Recompensas", callback_data="menu:rewards"),
             InlineKeyboardButton(text="👑 Ranking", callback_data="menu:ranking")
         ],
-        [InlineKeyboardButton(text="🏛️ Subastas", callback_data="auction_main")],
+        [
+            InlineKeyboardButton(text="🏛️ Subastas", callback_data="auction_main"),
+            InlineKeyboardButton(text="🛒 Tienda", callback_data="shop_access")
+        ],
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 

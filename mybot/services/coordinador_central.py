@@ -34,6 +34,8 @@ class AccionUsuario(enum.Enum):
     PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
     TEST_EVALUACION_EMOCIONAL = "test_evaluacion_emocional"
+    ACCEDER_TIENDA = "acceder_tienda"
+    COMPRAR_ITEM = "comprar_item"
 
 class CoordinadorCentral:
     """
@@ -92,6 +94,10 @@ class CoordinadorCentral:
                 return await self._flujo_verificar_engagement(user_id, **kwargs)
             elif accion == AccionUsuario.TEST_EVALUACION_EMOCIONAL:
                 return await self._flujo_test_evaluacion_emocional(user_id, **kwargs)
+            elif accion == AccionUsuario.ACCEDER_TIENDA:
+                return await self._flujo_acceder_tienda(user_id, **kwargs)
+            elif accion == AccionUsuario.COMPRAR_ITEM:
+                return await self._flujo_comprar_item(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -578,6 +584,57 @@ class CoordinadorCentral:
             "action": "daily_check_success"
         }
     
+    async def _flujo_acceder_tienda(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para acceder a la tienda y listar artículos disponibles.
+        """
+        try:
+            # Import here to avoid circular imports
+            from services.shop_service import ShopService
+            
+            shop_service = ShopService(self.session)
+            items = await shop_service.get_available_items(user_id)
+            
+            return {
+                "success": True,
+                "action": "shop_access",
+                "items": items
+            }
+        except Exception as e:
+            logger.exception(f"Error en flujo de tienda para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al acceder a la tienda. Intenta nuevamente.",
+                "error": str(e)
+            }
+
+    async def _flujo_comprar_item(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para comprar un item de la tienda.
+        """
+        try:
+            item_id = kwargs.get("item_id")
+            if not item_id:
+                return {
+                    "success": False,
+                    "message": "ID de artículo no proporcionado."
+                }
+            
+            # Import here to avoid circular imports
+            from services.shop_service import ShopService
+            
+            shop_service = ShopService(self.session)
+            result = await shop_service.purchase_item(user_id, item_id)
+            
+            return result
+        except Exception as e:
+            logger.exception(f"Error en compra para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la compra. Intenta nuevamente.",
+                "error": str(e)
+            }
+
     async def _flujo_test_evaluacion_emocional(self, user_id: int, **kwargs) -> Dict[str, Any]:
         """
         Flujo para ejecutar el test de evaluación emocional aislado.
