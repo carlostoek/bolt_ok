@@ -66,8 +66,8 @@ from handlers.free_channel_admin import router as free_channel_admin_router
 from handlers.publication_test import router as publication_test_router
 from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
-from handlers.admin_narrative_handlers import router as admin_narrative_handlers
-from handlers.test_evaluation_handler import router as test_evaluation_router
+from handlers.shop_handler import router as shop_router
+from handlers.admin.shop_admin import router as admin_shop_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -209,8 +209,8 @@ async def main() -> None:
             ("narrative", narrative_router),
             ("admin_narrative", admin_narrative_handlers),
             ("test_evaluation", test_evaluation_router),
-        ]
-        
+            ("shop", shop_router),
+            ("admin_shop", admin_shop_router),
         for name, router in routers:
             dp.include_router(router)
             logger.info(f"Router {name} registrado")
