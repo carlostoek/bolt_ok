@@ -318,6 +318,38 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
+        # Define which decisions require which items
+        decision_requirements = {
+            1: "📖 Diario Secreto",  # First decision requires the diary
+            # Add more decision IDs and their required items here
+        }
+        
+        # Check if this decision requires an item
+        required_item = decision_requirements.get(decision_id)
+        if required_item:
+            from services.shop_service import ShopService
+            shop_service = ShopService(self.session)
+            has_item = await shop_service.has_item_in_inventory(user_id, required_item)
+            
+            if not has_item:
+                # Try to get an authentic voice response, fallback to default
+                try:
+                    restriction_message = self.character_voice.get_character_response(
+                        CharacterType.DIANA,
+                        EmotionalContext.VULNERABILIDAD_BAJA,
+                        "item_required"
+                    )
+                except:
+                    restriction_message = "💋 Diana susurra: 'Este camino requiere algo más íntimo...'"
+                
+                return {
+                    "success": False,
+                    "message": f"{restriction_message}\n\n🔒 **Acceso Restringido**\n\nNecesitas el {required_item} para tomar esta decisión.\n\nVisita la tienda para adquirirlo.",
+                    "action": "item_required",
+                    "decision_id": decision_id,
+                    "required_item": required_item
+                }
+        
         # 1. Análisis emocional previo a la decisión (no bloquea funcionalidad)
         emotional_context = None
         behavioral_patterns = None
