@@ -36,6 +36,7 @@ class AccionUsuario(enum.Enum):
     TEST_EVALUACION_EMOCIONAL = "test_evaluacion_emocional"
     ACCEDER_TIENDA = "acceder_tienda"
     COMPRAR_ITEM = "comprar_item"
+    AGREGAR_A_MOCHILA = "agregar_a_mochila"
 
 class CoordinadorCentral:
     """
@@ -98,6 +99,8 @@ class CoordinadorCentral:
                 return await self._flujo_acceder_tienda(user_id, **kwargs)
             elif accion == AccionUsuario.COMPRAR_ITEM:
                 return await self._flujo_comprar_item(user_id, **kwargs)
+            elif accion == AccionUsuario.AGREGAR_A_MOCHILA:
+                return await self._flujo_agregar_a_mochila(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -637,6 +640,16 @@ class CoordinadorCentral:
             shop_service = ShopService(self.session)
             result = await shop_service.purchase_item(user_id, int(item_id))
             
+            # If purchase was successful, add to backpack
+            if result.get("success") and result.get("unlocked_lore"):
+                # Add the item to the user's backpack
+                await self.ejecutar_flujo(
+                    user_id,
+                    AccionUsuario.AGREGAR_A_MOCHILA,
+                    item_id=item_id,
+                    **kwargs
+                )
+            
             return result
         except ValueError:
             return {
@@ -648,6 +661,84 @@ class CoordinadorCentral:
             return {
                 "success": False,
                 "message": "Error durante la compra. Intenta nuevamente.",
+                "error": str(e)
+            }
+
+    async def _flujo_agregar_a_mochila(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para agregar items comprados a la mochila del usuario.
+        """
+        try:
+            item_id = kwargs.get("item_id")
+            if not item_id:
+                return {
+                    "success": False,
+                    "message": "ID de artículo no proporcionado."
+                }
+            
+            # Import here to avoid circular imports
+            from database.models import UserLorePiece, LorePiece, ShopItem
+            from datetime import datetime
+            
+            # Get the shop item to find the associated lore piece
+            stmt = select(ShopItem).where(ShopItem.id == item_id)
+            result = await self.session.execute(stmt)
+            shop_item = result.scalar_one_or_none()
+            
+            if not shop_item:
+                return {
+                    "success": False,
+                    "message": "Artículo no encontrado."
+                }
+            
+            # Check if the item unlocks a lore piece
+            if shop_item.unlocks_lore_piece_id:
+                # Check if the user already has this lore piece
+                stmt = select(UserLorePiece).where(
+                    UserLorePiece.user_id == user_id,
+                    UserLorePiece.lore_piece_id == shop_item.unlocks_lore_piece_id
+                )
+                result = await self.session.execute(stmt)
+                existing = result.scalar_one_or_none()
+                
+                if not existing:
+                    # Add to user's lore pieces (backpack)
+                    user_lore_piece = UserLorePiece(
+                        user_id=user_id,
+                        lore_piece_id=shop_item.unlocks_lore_piece_id,
+                        context={
+                            'source': 'shop_purchase',
+                            'item_id': item_id,
+                            'item_name': shop_item.name,
+                            'purchased_at': datetime.utcnow().isoformat()
+                        }
+                    )
+                    self.session.add(user_lore_piece)
+                    await self.session.flush()
+                    
+                    # Get the lore piece details
+                    lore_piece = await self.session.get(LorePiece, shop_item.unlocks_lore_piece_id)
+                    
+                    return {
+                        "success": True,
+                        "message": f"¡{lore_piece.title} ha sido agregado a tu mochila!",
+                        "lore_piece": lore_piece.title
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Ya tienes este ítem en tu mochila."
+                    }
+            else:
+                return {
+                    "success": False,
+                    "message": "Este ítem no desbloquea contenido para la mochila."
+                }
+        except Exception as e:
+            logger.exception(f"Error agregando a mochila para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al agregar el ítem a la mochila.",
                 "error": str(e)
             }
 
