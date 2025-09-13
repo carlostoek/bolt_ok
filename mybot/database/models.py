@@ -32,6 +32,7 @@ class AuctionStatus(enum.Enum):
 
 
 
+
 class User(Base):
     __tablename__ = "users"
     id = Column(BigInteger, primary_key=True, unique=True)
@@ -59,15 +60,6 @@ class User(Base):
             UserNarrativeState,
             back_populates="user",
             uselist=False,
-            lazy="selectin",
-            cascade="all, delete-orphan"
-        )
-        
-    @declared_attr
-    def purchases(cls):
-        return relationship(
-            "UserPurchase",
-            back_populates="user",
             lazy="selectin",
             cascade="all, delete-orphan"
         )
