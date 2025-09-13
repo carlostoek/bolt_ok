@@ -31,9 +31,17 @@ class ShopService:
             result = await self.session.execute(stmt)
             all_items = result.scalars().all()
             
+            # Log all found items for debugging
+            logger.info(f"Found {len(all_items)} active shop items")
+            for item in all_items:
+                logger.info(f"Shop item: {item.name} (VIP: {item.is_vip_only})")
+            
             # Filter VIP-only items if user is not VIP
             if not is_vip:
-                return [item for item in all_items if not item.is_vip_only]
+                non_vip_items = [item for item in all_items if not item.is_vip_only]
+                logger.info(f"Showing {len(non_vip_items)} non-VIP items to user {user_id}")
+                return non_vip_items
+            logger.info(f"Showing all {len(all_items)} items to VIP user {user_id}")
             return all_items
         except Exception as e:
             logger.error(f"Error getting available items for user {user_id}: {str(e)}")
@@ -71,6 +79,9 @@ class ShopService:
                 )
                 self.session.add(shop_item)
                 await self.session.commit()
+                logger.info("Created 'Diario Secreto' shop item")
+            else:
+                logger.info("'Diario Secreto' shop item already exists")
         except Exception as e:
             logger.error(f"Error ensuring Diario de Diana item exists: {str(e)}")
             await self.session.rollback()

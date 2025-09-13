@@ -60,3 +60,21 @@ async def handle_sample_level_button(message: Message, session: AsyncSession):
         # Here you would start the actual narrative level
     else:
         await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")
+
+@router.message(F.text == "📓 Diario Íntimo")
+async def handle_diario_intimo_button(message: Message, session: AsyncSession):
+    """Handle access to the 'Diario Íntimo' level that requires 'Diario de Diana'"""
+    # Use CoordinadorCentral to check access
+    from services.coordinador_central import CoordinadorCentral, AccionUsuario
+    coordinador = CoordinadorCentral(session)
+    result = await coordinador.ejecutar_flujo(
+        message.from_user.id,
+        AccionUsuario.VERIFICAR_ACCESO_NIVEL,
+        level_name="diario_intimo"
+    )
+    
+    if result.get("access_granted"):
+        await message.answer("🔓 **Acceso Concedido al Diario Íntimo**\n\nLas páginas del diario se abren, revelando secretos íntimos de Diana...")
+        # Here you would start the actual narrative level
+    else:
+        await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")

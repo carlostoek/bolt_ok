@@ -764,7 +764,25 @@ class CoordinadorCentral:
                 else:
                     return {
                         "success": False,
-                        "message": "Necesitas el Diario de Diana para acceder a este nivel.",
+                        "message": "Necesitas el 📖 Diario Secreto de Diana para acceder a este nivel.\n\nVisita la tienda para adquirirlo.",
+                        "access_granted": False
+                    }
+            elif level_name == "diario_intimo":
+                # Check for the "Diario Secreto" item for a specific narrative level
+                from services.shop_service import ShopService
+                shop_service = ShopService(self.session)
+                has_diario = await shop_service.has_item_in_inventory(user_id, "📖 Diario Secreto")
+                
+                if has_diario:
+                    return {
+                        "success": True,
+                        "message": "🔓 **Nivel Desbloqueado: Diario Íntimo**\n\nEl diario se abre ante ti, revelando secretos profundos...",
+                        "access_granted": True
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "❌ **Acceso Restringido**\n\nNecesitas el 📖 Diario Secreto de Diana para acceder al nivel 'Diario Íntimo'.\n\nVisita la tienda para adquirirlo.",
                         "access_granted": False
                     }
             else:
