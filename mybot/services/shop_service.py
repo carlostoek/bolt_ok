@@ -37,80 +37,19 @@ class ShopService:
             return []
 
     async def purchase_item(self, user_id: int, item_id: int) -> Dict[str, Any]:
-        """Purchase an item for the user"""
+        """Purchase an item for the user using the CoordinadorCentral"""
         try:
-            # Get the item
-            stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
-            result = await self.session.execute(stmt)
-            item = result.scalar_one_or_none()
+            # Use CoordinadorCentral to handle the purchase
+            from services.coordinador_central import CoordinadorCentral, AccionUsuario
             
-            if not item:
-                return {"success": False, "message": "Item not found"}
-            
-            # Check if user is VIP for VIP-only items
-            if item.is_vip_only:
-                is_vip = await self.subscription_service.is_user_vip(user_id)
-                if not is_vip:
-                    return {"success": False, "message": "VIP subscription required"}
-            
-            # Check user points
-            user = await self.session.get(User, user_id)
-            if user is None:
-                return {"success": False, "message": "User not found"}
-                
-            if user.points < item.price:
-                return {"success": False, "message": "Insufficient points"}
-            
-            # Deduct points
-            user.points -= item.price
-            
-            # Record purchase
-            purchase = UserPurchase(
-                user_id=user_id,
-                shop_item_id=item_id,
-                price_paid=item.price
+            coordinador = CoordinadorCentral(self.session)
+            result = await coordinador.ejecutar_flujo(
+                user_id,
+                AccionUsuario.COMPRAR_ITEM,
+                item_id=item_id
             )
-            self.session.add(purchase)
             
-            # Unlock lore piece if applicable
-            if item.unlocks_lore_piece_id:
-                # Make sure to flush before calling other services
-                await self.session.flush()
-                # Add to user's lore pieces (backpack)
-                from database.models import UserLorePiece
-                # Check if the user already has this lore piece
-                result = await self.session.execute(
-                    select(UserLorePiece).where(
-                        UserLorePiece.user_id == user_id,
-                        UserLorePiece.lore_piece_id == item.unlocks_lore_piece_id
-                    )
-                )
-                existing = result.scalar_one_or_none()
-                
-                if not existing:
-                    user_lore_piece = UserLorePiece(
-                        user_id=user_id,
-                        lore_piece_id=item.unlocks_lore_piece_id,
-                        context={
-                            'source': 'shop_purchase',
-                            'item_id': item_id,
-                            'item_name': item.name,
-                            'purchased_at': datetime.utcnow().isoformat()
-                        }
-                    )
-                    self.session.add(user_lore_piece)
-                    await self.session.flush()
-                    unlocked_lore = True
-                else:
-                    unlocked_lore = False
-            
-            await self.session.commit()
-            return {
-                "success": True, 
-                "message": "Purchase successful",
-                "unlocked_lore": unlocked_lore if item.unlocks_lore_piece_id is not None else False
-            }
+            return result
         except Exception as e:
-            await self.session.rollback()
             logger.error(f"Error purchasing item {item_id} for user {user_id}: {str(e)}")
             return {"success": False, "message": "Error processing purchase"}
