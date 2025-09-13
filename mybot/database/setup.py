@@ -51,6 +51,8 @@ TABLES_ORDER = [
     'trivia_questions',
     'trivia_attempts',
     'trivia_user_answers',
+    'shop_items',
+    'user_purchases',
 ]
 
 async def init_db():
@@ -74,7 +76,14 @@ async def init_db():
             logger.info("Creando tablas en orden definido...")
             tables = [Base.metadata.tables[name] for name in TABLES_ORDER if name in Base.metadata.tables]
             await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=tables))
-            logger.info("Tablas creadas exitosamente.")
+            
+            # Create any remaining tables that might not be in TABLES_ORDER
+            logger.info("Creando tablas restantes...")
+            remaining_tables = [table for name, table in Base.metadata.tables.items() if name not in TABLES_ORDER]
+            if remaining_tables:
+                await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=remaining_tables))
+            
+            logger.info("Todas las tablas creadas exitosamente.")
         return _engine
 
     except Exception as e:
