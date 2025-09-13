@@ -71,16 +71,27 @@ async def menu_callback_handler(callback: CallbackQuery, session: AsyncSession):
     user_id = callback.from_user.id
     role = await get_user_role(callback.bot, user_id, session=session)
     
-    # Check access for VIP-only features
-    if role not in ["vip", "admin"]:
-        await callback.answer(
-            "Esta función está disponible solo para miembros VIP.", 
-            show_alert=True
-        )
-        return
-    
     try:
         menu_type = callback.data.split(":")[1]
+        
+        # Check access for VIP-only features
+        vip_only_menus = ["rewards", "ranking", "auctions", "shop_inventory"]
+        if menu_type in vip_only_menus and role not in ["vip", "admin"]:
+            await callback.answer(
+                "Esta función está disponible solo para miembros VIP.", 
+                show_alert=True
+            )
+            return
+        
+        # Handle shop menus specially
+        if menu_type == "shop":
+            from handlers.shop_handler import shop_menu_callback
+            return await shop_menu_callback(callback, session)
+        elif menu_type == "shop_inventory":
+            from handlers.shop_handler import shop_inventory_callback
+            return await shop_inventory_callback(callback, session)
+        
+        # Handle other menus through menu factory
         text, keyboard = await menu_factory.create_menu(menu_type, user_id, session, callback.bot)
         await menu_manager.update_menu(callback, text, keyboard, session, menu_type)
     except Exception as e:
