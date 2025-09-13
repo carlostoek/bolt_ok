@@ -88,19 +88,15 @@ class ShopService:
                 existing = result.scalar_one_or_none()
                 
                 if not existing:
-                    user_lore_piece = UserLorePiece(
-                        user_id=user_id,
-                        lore_piece_id=item.unlocks_lore_piece_id,
-                        context={
-                            'source': 'shop_purchase',
-                            'item_id': item_id,
-                            'item_name': item.name,
-                            'purchased_at': datetime.utcnow().isoformat()
-                        }
+                    # Use CoordinadorCentral to add to backpack
+                    from services.coordinador_central import CoordinadorCentral, AccionUsuario
+                    coordinador = CoordinadorCentral(self.session)
+                    result = await coordinador.ejecutar_flujo(
+                        user_id,
+                        AccionUsuario.AGREGAR_A_MOCHILA,
+                        item_id=item_id
                     )
-                    self.session.add(user_lore_piece)
-                    await self.session.flush()
-                    unlocked_lore = True
+                    unlocked_lore = result.get("success", False)
                 else:
                     unlocked_lore = False
             
