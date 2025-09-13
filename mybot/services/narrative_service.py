@@ -210,3 +210,28 @@ class NarrativeService:
         stmt = select(func.count(StoryFragment.id))
         result = await self.session.execute(stmt)
         return result.scalar_one()
+
+    async def unlock_lore_piece(self, user_id: int, lore_piece_id: int) -> bool:
+        """
+        Unlock a lore piece for the user.
+        """
+        from database.models import UserLorePiece
+        # Check if already unlocked
+        result = await self.session.execute(
+            select(UserLorePiece).where(
+                UserLorePiece.user_id == user_id,
+                UserLorePiece.lore_piece_id == lore_piece_id
+            )
+        )
+        existing = result.scalar_one_or_none()
+        
+        if not existing:
+            # Add to user's unlocked lore pieces
+            user_lore_piece = UserLorePiece(
+                user_id=user_id,
+                lore_piece_id=lore_piece_id
+            )
+            self.session.add(user_lore_piece)
+            await self.session.commit()
+            return True
+        return False
