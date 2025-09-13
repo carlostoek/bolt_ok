@@ -22,6 +22,13 @@ class SubscriptionService:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def is_user_vip(self, user_id: int) -> bool:
+        subscription = await self.get_subscription(user_id)
+        if subscription and subscription.expires_at:
+            from datetime import datetime
+            return subscription.expires_at > datetime.utcnow()
+        return False
+
     async def create_subscription(
         self, user_id: int, expires_at: datetime | None = None
     ) -> VipSubscription:
