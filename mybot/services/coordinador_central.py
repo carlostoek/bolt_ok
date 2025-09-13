@@ -595,10 +595,21 @@ class CoordinadorCentral:
             shop_service = ShopService(self.session)
             items = await shop_service.get_available_items(user_id)
             
+            # Convert items to a list of dictionaries to ensure they're serializable
+            # and can be used in the keyboard builder
+            items_data = []
+            for item in items:
+                items_data.append({
+                    'id': item.id,
+                    'name': item.name,
+                    'price': item.price,
+                    'is_vip_only': item.is_vip_only
+                })
+            
             return {
                 "success": True,
                 "action": "shop_access",
-                "items": items
+                "items": items_data
             }
         except Exception as e:
             logger.exception(f"Error en flujo de tienda para usuario {user_id}: {str(e)}")
@@ -624,9 +635,14 @@ class CoordinadorCentral:
             from services.shop_service import ShopService
             
             shop_service = ShopService(self.session)
-            result = await shop_service.purchase_item(user_id, item_id)
+            result = await shop_service.purchase_item(user_id, int(item_id))
             
             return result
+        except ValueError:
+            return {
+                "success": False,
+                "message": "ID de artículo inválido."
+            }
         except Exception as e:
             logger.exception(f"Error en compra para usuario {user_id}: {str(e)}")
             return {
