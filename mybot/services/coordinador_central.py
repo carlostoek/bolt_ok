@@ -679,6 +679,7 @@ class CoordinadorCentral:
             # Import here to avoid circular imports
             from database.models import UserLorePiece, LorePiece, ShopItem
             from datetime import datetime
+            from sqlalchemy import select
             
             # Get the shop item to find the associated lore piece
             stmt = select(ShopItem).where(ShopItem.id == item_id)
