@@ -1,8 +1,9 @@
 import logging
+from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from database.models import ShopItem, UserPurchase, User
+from database.models import ShopItem, UserPurchase, User, UserLorePiece
 from services.point_service import PointService
 from services.narrative_service import NarrativeService
 from services.subscription_service import SubscriptionService
@@ -75,15 +76,39 @@ class ShopService:
             if item.unlocks_lore_piece_id:
                 # Make sure to flush before calling other services
                 await self.session.flush()
-                await self.narrative_service.unlock_lore_piece(
-                    user_id, item.unlocks_lore_piece_id
+                # Add to user's lore pieces (backpack)
+                from database.models import UserLorePiece
+                # Check if the user already has this lore piece
+                result = await self.session.execute(
+                    select(UserLorePiece).where(
+                        UserLorePiece.user_id == user_id,
+                        UserLorePiece.lore_piece_id == item.unlocks_lore_piece_id
+                    )
                 )
+                existing = result.scalar_one_or_none()
+                
+                if not existing:
+                    user_lore_piece = UserLorePiece(
+                        user_id=user_id,
+                        lore_piece_id=item.unlocks_lore_piece_id,
+                        context={
+                            'source': 'shop_purchase',
+                            'item_id': item_id,
+                            'item_name': item.name,
+                            'purchased_at': datetime.utcnow().isoformat()
+                        }
+                    )
+                    self.session.add(user_lore_piece)
+                    await self.session.flush()
+                    unlocked_lore = True
+                else:
+                    unlocked_lore = False
             
             await self.session.commit()
             return {
                 "success": True, 
                 "message": "Purchase successful",
-                "unlocked_lore": item.unlocks_lore_piece_id is not None
+                "unlocked_lore": unlocked_lore if item.unlocks_lore_piece_id is not None else False
             }
         except Exception as e:
             await self.session.rollback()
