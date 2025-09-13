@@ -18,6 +18,7 @@ def get_back_kb(callback_data: str = "admin_back"):
 def build_shop_keyboard(items):
     """
     Build a keyboard for the shop with available items.
+    Handles both ShopItem objects and dictionaries.
     """
     from aiogram.types import InlineKeyboardButton
     from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -25,10 +26,30 @@ def build_shop_keyboard(items):
     builder = InlineKeyboardBuilder()
     
     for item in items:
-        builder.button(
-            text=f"{item.name} - {item.price} besitos",
-            callback_data=f"buy_item:{item.id}"
-        )
+        try:
+            # Handle both object and dictionary
+            if hasattr(item, 'name'):
+                # It's a ShopItem object
+                item_name = item.name
+                item_price = item.price
+                item_id = item.id
+            elif isinstance(item, dict):
+                # It's a dictionary
+                item_name = item.get('name')
+                item_price = item.get('price')
+                item_id = item.get('id')
+            else:
+                continue
+                
+            builder.button(
+                text=f"{item_name} - {item_price} besitos",
+                callback_data=f"buy_item:{item_id}"
+            )
+        except (AttributeError, KeyError) as e:
+            # Log if there's an issue with the item structure
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Invalid item structure: {item}, error: {e}")
     
     builder.button(text="🔙 Volver", callback_data="menu_principal")
     builder.adjust(1)
