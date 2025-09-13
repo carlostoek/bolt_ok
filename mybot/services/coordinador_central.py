@@ -37,6 +37,7 @@ class AccionUsuario(enum.Enum):
     ACCEDER_TIENDA = "acceder_tienda"
     COMPRAR_ITEM = "comprar_item"
     AGREGAR_A_MOCHILA = "agregar_a_mochila"
+    VERIFICAR_ACCESO_NIVEL = "verificar_acceso_nivel"
 
 class CoordinadorCentral:
     """
@@ -101,6 +102,8 @@ class CoordinadorCentral:
                 return await self._flujo_comprar_item(user_id, **kwargs)
             elif accion == AccionUsuario.AGREGAR_A_MOCHILA:
                 return await self._flujo_agregar_a_mochila(user_id, **kwargs)
+            elif accion == AccionUsuario.VERIFICAR_ACCESO_NIVEL:
+                return await self._flujo_verificar_acceso_nivel(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -730,6 +733,50 @@ class CoordinadorCentral:
             return {
                 "success": False,
                 "message": "Error al agregar el ítem a la mochila.",
+                "error": str(e)
+            }
+
+    async def _flujo_verificar_acceso_nivel(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para verificar si el usuario puede acceder a un nivel específico.
+        """
+        try:
+            level_name = kwargs.get("level_name")
+            if not level_name:
+                return {
+                    "success": False,
+                    "message": "Nombre del nivel no proporcionado."
+                }
+            
+            # Check access based on level name
+            if level_name == "nivel_muestra":
+                # Import here to avoid circular imports
+                from services.shop_service import ShopService
+                shop_service = ShopService(self.session)
+                has_diario = await shop_service.has_item_in_inventory(user_id, "📖 Diario Secreto")
+                
+                if has_diario:
+                    return {
+                        "success": True,
+                        "message": "Acceso concedido al nivel de muestra.",
+                        "access_granted": True
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Necesitas el Diario de Diana para acceder a este nivel.",
+                        "access_granted": False
+                    }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Nivel '{level_name}' no reconocido."
+                }
+        except Exception as e:
+            logger.exception(f"Error verificando acceso para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al verificar el acceso al nivel.",
                 "error": str(e)
             }
 
