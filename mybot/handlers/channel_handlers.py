@@ -4,7 +4,7 @@ Manejadores para interacciones en canales con integración completa.
 import logging
 from aiogram import Router, F
 from aiogram.types import Message, ChatMemberUpdated
-from aiogram.filters import ChatMemberUpdatedFilter, IS_MEMBER, IS_NOT_MEMBER
+from aiogram.filters import ChatMemberUpdatedFilter, IS_MEMBER, IS_NOT_MEMBER, Command
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.coordinador_central import CoordinadorCentral, AccionUsuario

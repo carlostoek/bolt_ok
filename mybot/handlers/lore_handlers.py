@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from database.models import LorePiece, UserLorePiece
+from aiogram import Bot
 
 
 logger = logging.getLogger(__name__)
