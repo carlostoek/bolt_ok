@@ -4987,3 +4987,181 @@ sqlalchemy.exc.InvalidRequestError: A transaction is already begun on this Sessi
 2025-09-13 18:11:00,496 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
 2025-09-13 18:11:00,496 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
 2025-09-13 18:11:00,496 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-14 01:54:57,084 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 01:54:57,085 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 01:54:57,102 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 01:54:57,125 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 01:54:57,129 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 01:54:57,177 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-14 01:54:57,177 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-14 01:54:57,177 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-14 01:54:57,214 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router start registrado
+2025-09-14 01:54:57,214 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router info registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-14 01:54:57,215 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-14 01:54:57,215 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-14 01:54:57,216 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-14 01:54:57,218 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-14 01:54:57,218 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-14 01:54:57,219 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-14 01:54:57,220 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-14 01:54:57,241 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-14 01:55:21,558 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-14 01:55:21,559 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-14 01:55:24,641 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-14 01:55:24,646 - services.shop_service - INFO - _ensure_diario_diana_item_exists:84 - 'Diario Secreto' shop item already exists
+2025-09-14 01:55:24,648 - services.shop_service - INFO - get_available_items:35 - Found 8 active shop items
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: Pista del Pasado (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: Secreto Familiar (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: Acceso VIP a la Biblioteca (VIP: True)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:37 - Shop item: Llave Antigua (VIP: False)
+2025-09-14 01:55:24,649 - services.shop_service - INFO - get_available_items:42 - Showing 6 non-VIP items to user 6181290784
+2025-09-14 01:55:24,649 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': 'Pista del Pasado', 'price': 75, 'is_vip_only': False}, {'id': 6, 'name': 'Secreto Familiar', 'price': 120, 'is_vip_only': False}, {'id': 8, 'name': 'Llave Antigua', 'price': 180, 'is_vip_only': False}]}
+2025-09-14 01:55:31,717 - services.narrative_service - ERROR - get_user_current_fragment:35 - No se encontró fragmento inicial 'start'
+2025-09-14 01:55:31,719 - services.narrative_service - ERROR - start_narrative:46 - No se encontró fragmento inicial 'start'
+2025-09-14 01:55:38,905 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-14 01:55:38,905 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-14 01:55:38,922 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-14 01:55:38,962 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-14 01:55:39,008 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-14 01:55:39,048 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-14 01:55:39,087 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-14 01:55:39,125 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-14 01:55:39,166 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-14 01:55:39,212 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-14 01:55:39,261 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-14 01:55:39,301 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-14 01:55:39,352 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-14 01:55:39,374 - services.narrative_loader - INFO - load_default_narrative:365 - Narrativa por defecto cargada exitosamente
+2025-09-14 01:55:47,062 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-14 01:55:47,218 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-14 01:55:47,218 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-14 01:55:48,336 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-14 01:55:48,494 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-14 01:55:48,494 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-14 01:55:49,695 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-14 01:55:49,876 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-14 01:55:49,877 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-14 01:55:50,596 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: other_guests
+2025-09-14 01:55:52,027 - services.point_service - INFO - add_points:135 - User 6181290784 gained 40 points (base 20, x2). Total: 100.0
+2025-09-14 01:55:52,201 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 20 besitos del fragmento divan_experience
+2025-09-14 01:55:52,201 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a divan_experience
+2025-09-14 01:55:55,462 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-14 01:55:55,463 - services.shop_service - INFO - _ensure_diario_diana_item_exists:84 - 'Diario Secreto' shop item already exists
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:35 - Found 8 active shop items
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: Pista del Pasado (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: Secreto Familiar (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: Acceso VIP a la Biblioteca (VIP: True)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:37 - Shop item: Llave Antigua (VIP: False)
+2025-09-14 01:55:55,466 - services.shop_service - INFO - get_available_items:42 - Showing 6 non-VIP items to user 6181290784
+2025-09-14 01:55:55,466 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': 'Pista del Pasado', 'price': 75, 'is_vip_only': False}, {'id': 6, 'name': 'Secreto Familiar', 'price': 120, 'is_vip_only': False}, {'id': 8, 'name': 'Llave Antigua', 'price': 180, 'is_vip_only': False}]}
+2025-09-14 01:56:39,376 - services.point_service - INFO - add_points:135 - User 6181290784 gained 2 points (base 1, x2). Total: 52.0
+2025-09-14 01:56:41,389 - __main__ - ERROR - global_error_handler:92 - Error en 978978843: TelegramBadRequest: Telegram server says - Bad Request: message can't be edited
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 44, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 48, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/points_middleware.py", line 90, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/handlers/main_menu.py", line 32, in handle_missions_button
+    await show_available_missions(mock_callback, session)
+  File "/home/azureuser/repos/bolt_ok/mybot/handlers/missions_handler.py", line 30, in show_available_missions
+    await callback.message.edit_text(missions_text)
+  File "/home/azureuser/repos/bolt_ok/mybot/utils/message_safety.py", line 48, in _patched_edit_text
+    return await original_edit_text(self, text, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/methods/base.py", line 84, in emit
+    return await bot(self)
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 485, in __call__
+    return await self.session(self, method, timeout=request_timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/session/base.py", line 254, in __call__
+    return cast(TelegramType, await middleware(bot, method))
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/session/aiohttp.py", line 185, in make_request
+    response = self.check_response(
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/session/base.py", line 120, in check_response
+    raise TelegramBadRequest(method=method, message=description)
+aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: message can't be edited
+2025-09-14 01:56:50,676 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 102.0
+2025-09-14 01:56:50,676 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diana_response_seek
+2025-09-14 01:56:50,677 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de divan_experience a diana_response_seek
