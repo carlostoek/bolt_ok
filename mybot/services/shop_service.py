@@ -141,30 +141,8 @@ class ShopService:
             # Unlock lore piece if applicable
             unlocked_lore = False
             if item.unlocks_lore_piece_id:
-                # Make sure to flush before calling other services
-                await self.session.flush()
-                # Add to user's lore pieces (backpack)
-                # Check if the user already has this lore piece
-                result = await self.session.execute(
-                    select(UserLorePiece).where(
-                        UserLorePiece.user_id == user_id,
-                        UserLorePiece.lore_piece_id == item.unlocks_lore_piece_id
-                    )
-                )
-                existing = result.scalar_one_or_none()
-                
-                if not existing:
-                    # Use CoordinadorCentral to add to backpack
-                    from services.coordinador_central import CoordinadorCentral, AccionUsuario
-                    coordinador = CoordinadorCentral(self.session)
-                    result = await coordinador.ejecutar_flujo(
-                        user_id,
-                        AccionUsuario.AGREGAR_A_MOCHILA,
-                        item_id=item_id
-                    )
-                    unlocked_lore = result.get("success", False)
-                else:
-                    unlocked_lore = False
+                # Add to user's lore pieces (backpack) directly
+                unlocked_lore = await self._add_to_backpack(user_id, item_id, item)
             
             await self.session.commit()
             return {
@@ -176,3 +154,39 @@ class ShopService:
             await self.session.rollback()
             logger.error(f"Error purchasing item {item_id} for user {user_id}: {str(e)}")
             return {"success": False, "message": "Error processing purchase"}
+
+    async def _add_to_backpack(self, user_id: int, item_id: int, shop_item: ShopItem) -> bool:
+        """Add purchased item to user's backpack directly"""
+        try:
+            from database.models import UserLorePiece, LorePiece
+            from datetime import datetime
+            from sqlalchemy import select
+            
+            # Check if the user already has this lore piece
+            result = await self.session.execute(
+                select(UserLorePiece).where(
+                    UserLorePiece.user_id == user_id,
+                    UserLorePiece.lore_piece_id == shop_item.unlocks_lore_piece_id
+                )
+            )
+            existing = result.scalar_one_or_none()
+            
+            if not existing:
+                # Add to user's lore pieces (backpack)
+                user_lore_piece = UserLorePiece(
+                    user_id=user_id,
+                    lore_piece_id=shop_item.unlocks_lore_piece_id,
+                    context={
+                        'source': 'shop_purchase',
+                        'item_id': item_id,
+                        'item_name': shop_item.name,
+                        'purchased_at': datetime.utcnow().isoformat()
+                    }
+                )
+                self.session.add(user_lore_piece)
+                await self.session.flush()
+                return True
+            return False
+        except Exception as e:
+            logger.error(f"Error adding item to backpack for user {user_id}: {str(e)}")
+            return False
