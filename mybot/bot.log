@@ -1,0 +1,806 @@
+2025-09-14 01:13:22,490 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 01:13:22,490 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 01:13:22,508 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 01:13:23,391 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 01:13:23,640 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 01:13:23,691 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-14 01:13:23,710 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-14 01:13:23,711 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-14 01:13:23,711 - __main__ - INFO - main:156 - VIP channel ID: 111111111
+2025-09-14 01:13:23,711 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-14 01:13:23,711 - __main__ - CRITICAL - main:252 - Error crítico en main(): Token is invalid!
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+2025-09-14 01:13:23,713 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-14 01:13:23,713 - __main__ - ERROR - main:261 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 257, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-14 01:13:23,714 - root - CRITICAL - <module>:270 - Error fatal: Token is invalid!
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 266, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+2025-09-14 01:17:38,861 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 01:17:38,861 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 01:17:38,877 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 01:17:38,898 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 01:17:38,902 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 01:17:38,956 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-14 01:17:38,956 - __main__ - INFO - main:156 - VIP channel ID: 111111111
+2025-09-14 01:17:38,956 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-14 01:17:38,956 - __main__ - CRITICAL - main:252 - Error crítico en main(): Token is invalid!
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+2025-09-14 01:17:38,958 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-14 01:17:38,958 - __main__ - ERROR - main:261 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 257, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-14 01:17:38,959 - root - CRITICAL - <module>:270 - Error fatal: Token is invalid!
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 266, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 160, in main
+    bot = Bot(
+          ^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/client/bot.py", line 273, in __init__
+    validate_token(token)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/utils/token.py", line 27, in validate_token
+    raise TokenValidationError("Token is invalid!")
+aiogram.utils.token.TokenValidationError: Token is invalid!
+2025-09-14 01:18:53,424 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 01:18:53,424 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 01:18:53,441 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 01:18:53,517 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 01:18:53,534 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 01:18:53,592 - database.setup - CRITICAL - init_db:94 - Error crítico al inicializar la base de datos: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-14 01:18:53,592 - __main__ - CRITICAL - main:252 - Error crítico en main(): (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-14 01:18:53,598 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-14 01:18:53,599 - __main__ - ERROR - main:261 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 257, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-14 01:18:53,601 - root - CRITICAL - <module>:270 - Error fatal: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 266, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-14 01:32:53,924 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 01:32:53,925 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 01:32:53,941 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 01:32:54,016 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 01:32:54,031 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 01:32:54,087 - database.setup - CRITICAL - init_db:94 - Error crítico al inicializar la base de datos: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-14 01:32:54,087 - __main__ - CRITICAL - main:252 - Error crítico en main(): (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-09-14 01:32:54,093 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-14 01:32:54,093 - __main__ - ERROR - main:261 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 257, in main
+    await task_manager.shutdown()
+          ^^^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
+2025-09-14 01:32:54,096 - root - CRITICAL - <module>:270 - Error fatal: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlite3.OperationalError: no such table: shop_items
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 266, in <module>
+    asyncio.run(main())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 149, in main
+    await init_db()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
+    await populate_initial_shop_items()
+  File "/home/azureuser/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
+    result = await session.execute(select(ShopItem))
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
+    result = await greenlet_spawn(
+             ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 201, in greenlet_spawn
+    result = context.throw(*sys.exc_info())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
+    return self._execute_internal(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+             ^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1419, in execute
+    return meth(
+           ^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 177, in execute
+    self._adapt_connection._handle_exception(error)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 337, in _handle_exception
+    raise error
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/dialects/sqlite/aiosqlite.py", line 159, in execute
+    self.await_(_cursor.execute(operation, parameters))
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 132, in await_only
+    return current.parent.switch(awaitable)  # type: ignore[no-any-return,attr-defined] # noqa: E501
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 196, in greenlet_spawn
+    value = await result
+            ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 40, in execute
+    await self._execute(self._cursor.execute, sql, parameters)
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/cursor.py", line 32, in _execute
+    return await self._conn._execute(fn, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 122, in _execute
+    return await future
+           ^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiosqlite/core.py", line 105, in run
+    result = function()
+             ^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such table: shop_items
+[SQL: SELECT shop_items.id, shop_items.name, shop_items.description, shop_items.price, shop_items.is_vip_only, shop_items.unlocks_lore_piece_id, shop_items.is_active, shop_items.created_at 
+FROM shop_items]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
