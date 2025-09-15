@@ -469,19 +469,64 @@ class LorePiece(Base):
     is_active = Column(Boolean, default=True)
 
 
+class ShopCategory(Base):
+    __tablename__ = "shop_categories"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False, unique=True)
+    description = Column(Text, nullable=True)
+    display_order = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    is_vip_only = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationship to shop items
+    shop_items = relationship("ShopItem", back_populates="category")
+
+
+class ShopPromotion(Base):
+    __tablename__ = "shop_promotions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    discount_percentage = Column(Float, nullable=True)
+    discount_amount = Column(Integer, nullable=True)
+    minimum_purchase_amount = Column(Integer, default=0)
+    start_date = Column(DateTime, nullable=True)
+    end_date = Column(DateTime, nullable=True)
+    max_uses = Column(Integer, nullable=True)
+    current_uses = Column(Integer, default=0)
+    is_active = Column(Boolean, default=True)
+    applies_to_category_id = Column(Integer, ForeignKey("shop_categories.id"), nullable=True)
+    applies_to_item_id = Column(Integer, ForeignKey("shop_items.id"), nullable=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    category = relationship("ShopCategory")
+    item = relationship("ShopItem", foreign_keys="ShopPromotion.applies_to_item_id")
+
+
 class ShopItem(Base):
     __tablename__ = "shop_items"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     description = Column(Text)
     price = Column(Integer, nullable=False)  # Price in besitos
     is_vip_only = Column(Boolean, default=False)
     unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
+    category_id = Column(Integer, ForeignKey("shop_categories.id"), nullable=True)
+    promotion_id = Column(Integer, ForeignKey("shop_promotions.id"), nullable=True)
+    display_order = Column(Integer, default=0)
+    purchase_limit_per_user = Column(Integer, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
-    
+
     lore_piece = relationship("LorePiece")
+    category = relationship("ShopCategory", back_populates="shop_items")
+    promotion = relationship("ShopPromotion", foreign_keys="ShopItem.promotion_id")
 
 class UserPurchase(Base):
     __tablename__ = "user_purchases"
