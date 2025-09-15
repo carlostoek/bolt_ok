@@ -1,7 +1,20 @@
+# Aider-managed files
 .aider*
+
+# DBs and logs
+*.db
+*.log
 bot.db
 bot.log
+mybot/bot.db
+mybot/bot.log
+
+# Environments
 venv/
+.venv/
+mybot/.venvs/
+.python-version
+.pylintrc
 
 # Python cache files
 __pycache__/
@@ -74,3 +87,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Docs
+mybot/docs/guia-fragmentos-condicionados-items-2025-09-15.md

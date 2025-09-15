@@ -5,5 +5,4 @@ APScheduler
 python-dotenv
 
 
-# Base requirements
--r requirements-base.txt
+# Base require

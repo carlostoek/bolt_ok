@@ -68,9 +68,43 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         choice_index = int(choice_data[1])
         
         service = NarrativeService(session, callback.bot)
-        
-        # Procesar la decisión
-        next_fragment = await service.process_user_decision(user_id, choice_index)
+
+        # Get current fragment and choices to check for special decisions
+        current_fragment = await service.get_user_current_fragment(user_id)
+        if current_fragment:
+            choices = await service._get_fragment_choices(current_fragment.id)
+            if 0 <= choice_index < len(choices):
+                selected_choice = choices[choice_index]
+
+                # Check if this is a special decision that requires item verification
+                if "diario íntimo" in selected_choice.text.lower():
+                    # Use CoordinadorCentral for special item verification
+                    from services.coordinador_central import CoordinadorCentral, AccionUsuario
+                    coordinador = CoordinadorCentral(session)
+
+                    # Log for debugging
+                    logger.info(f"Processing diary decision for user {user_id}, choice ID: {selected_choice.id}")
+
+                    result = await coordinador.ejecutar_flujo(
+                        user_id,
+                        AccionUsuario.TOMAR_DECISION,
+                        decision_id=selected_choice.id
+                    )
+
+                    logger.info(f"Coordinator result: {result}")
+
+                    if result["success"]:
+                        next_fragment = result.get("fragment")
+                    else:
+                        await callback.answer(result.get("message", "No puedes tomar esta decisión"), show_alert=True)
+                        return
+                else:
+                    # Process normal decision using the actual decision ID, not the choice index
+                    next_fragment = await service.process_user_decision_by_id(user_id, selected_choice.id)
+            else:
+                next_fragment = None
+        else:
+            next_fragment = None
         
         if not next_fragment:
             await callback.answer(
