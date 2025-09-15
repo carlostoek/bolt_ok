@@ -22,9 +22,13 @@ def build_shop_keyboard(items):
     """
     from aiogram.types import InlineKeyboardButton
     from aiogram.utils.keyboard import InlineKeyboardBuilder
-    
+
     builder = InlineKeyboardBuilder()
-    
+
+    # Add category browsing and search buttons first
+    builder.button(text="📁 Ver por Categorías", callback_data="shop_browse_categories")
+    builder.button(text="🔍 Buscar y Filtrar", callback_data="shop_search")
+
     for item in items:
         try:
             # Handle both object and dictionary
@@ -40,17 +44,17 @@ def build_shop_keyboard(items):
                 item_id = item.get('id')
             else:
                 continue
-                
+
             builder.button(
                 text=f"{item_name} - {item_price} besitos",
-                callback_data=f"buy_item:{item_id}"
+                callback_data=f"item_details:{item_id}"
             )
         except (AttributeError, KeyError) as e:
             # Log if there's an issue with the item structure
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Invalid item structure: {item}, error: {e}")
-    
+
     builder.button(text="🔙 Volver", callback_data="menu_principal")
     builder.adjust(1)
     return builder.as_markup()

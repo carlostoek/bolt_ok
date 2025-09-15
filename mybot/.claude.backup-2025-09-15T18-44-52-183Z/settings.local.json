@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source:*)",
+      "Bash(python -m pytest tests/test_points_gamification.py --tb=short -v)",
+      "Bash(python:*)",
+      "Bash(PYTHONPATH=/home/azureuser/repos/bolt_ok/mybot python -c \"from services.coordinador_central import CoordinadorCentral, CINEMA_AVAILABLE; print(f''Cinema Available: {CINEMA_AVAILABLE}'')\")",
+      "Bash(find:*)",
+      "Bash(claude-code-spec-workflow get-tasks:*)",
+      "Read(//home/azureuser/repos/bolt_ok/**)",
+      "Bash(claude-code-spec-workflow list-specs:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
