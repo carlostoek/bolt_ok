@@ -321,6 +321,7 @@ class CoordinadorCentral:
         # Define which decisions require which items
         decision_requirements = {
             1: "📖 Diario Secreto",  # First decision requires the diary
+            15: "📓 Diario Íntimo",  # Diary intimate choice requires the intimate diary
             # Add more decision IDs and their required items here
         }
         
@@ -332,7 +333,25 @@ class CoordinadorCentral:
             has_item = await shop_service.has_item_in_inventory(user_id, required_item)
             
             if not has_item:
-                # Try to get an authentic voice response, fallback to default
+                # For diary intimate decision, redirect to teaser fragment instead of blocking
+                if decision_id == 15:  # Diary intimate decision
+                    # Process decision to teaser fragment instead
+                    teaser_fragment = await self.narrative_service._get_fragment_by_key("diana_diary_tease")
+                    if teaser_fragment:
+                        # Update user state to teaser fragment
+                        user_state = await self.narrative_service._get_or_create_user_state(user_id)
+                        user_state.current_fragment_key = teaser_fragment.key
+                        user_state.fragments_visited = (user_state.fragments_visited or 0) + 1
+                        await self.narrative_service._process_fragment_rewards(user_id, teaser_fragment)
+                        await self.session.commit()
+
+                        return {
+                            "success": True,
+                            "fragment": teaser_fragment,
+                            "action": "decision_success"
+                        }
+
+                # For other items, show restriction message
                 try:
                     restriction_message = self.character_voice.get_character_response(
                         CharacterType.DIANA,
@@ -341,7 +360,7 @@ class CoordinadorCentral:
                     )
                 except:
                     restriction_message = "💋 Diana susurra: 'Este camino requiere algo más íntimo...'"
-                
+
                 return {
                     "success": False,
                     "message": f"{restriction_message}\n\n🔒 **Acceso Restringido**\n\nNecesitas el {required_item} para tomar esta decisión.\n\nVisita la tienda para adquirirlo.",
@@ -427,34 +446,52 @@ class CoordinadorCentral:
                 logger.debug(f"Análisis post-decisión falló para usuario {user_id}: {str(e)}")
                 # Graceful degradation
         
-        # 5. Decisión exitosa con voz auténtica
-        # Determinar contexto emocional para éxito
-        user_points = await self.point_service.get_user_points(user_id)
-        user_history = {"total_interactions": user_points // 10}
-        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
-            emotional_context, emotional_context, behavioral_patterns, user_history
-        )
-        
-        # Diana siempre responde a decisiones exitosas (momentos íntimos)
-        success_message = self.character_voice.get_character_response(
-            CharacterType.DIANA,
-            emotional_context_enum,
-            "decision_success",
-            emotional_context,
-            user_history
-        )
-        
-        return {
-            "success": True,
-            "message": success_message,
-            "fragment": decision_result["fragment"],
-            "action": "decision_success",
-            # Información adicional de análisis emocional
-            "emotional_context": emotional_context,
-            "behavioral_patterns": behavioral_patterns,
-            "vulnerability_assessment": vulnerability_assessment,
-            "emotional_evolution": emotional_evolution
-        }
+        # 5. Decisión exitosa
+        # Para decisiones especiales (como las de items), no agregar mensaje extra
+        # ya que el flujo narrativo debe ser limpio
+        special_decision_ids = {15}  # Diary intimate decision
+
+        if decision_id in special_decision_ids:
+            # Para decisiones especiales, retornar solo el fragmento
+            return {
+                "success": True,
+                "fragment": decision_result["fragment"],
+                "action": "decision_success",
+                # Información adicional de análisis emocional
+                "emotional_context": emotional_context,
+                "behavioral_patterns": behavioral_patterns,
+                "vulnerability_assessment": vulnerability_assessment,
+                "emotional_evolution": emotional_evolution
+            }
+        else:
+            # Para decisiones normales, incluir voz auténtica
+            # Determinar contexto emocional para éxito
+            user_points = await self.point_service.get_user_points(user_id)
+            user_history = {"total_interactions": user_points // 10}
+            emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
+                emotional_context, emotional_context, behavioral_patterns, user_history
+            )
+
+            # Diana siempre responde a decisiones exitosas (momentos íntimos)
+            success_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                emotional_context_enum,
+                "decision_success",
+                emotional_context,
+                user_history
+            )
+
+            return {
+                "success": True,
+                "message": success_message,
+                "fragment": decision_result["fragment"],
+                "action": "decision_success",
+                # Información adicional de análisis emocional
+                "emotional_context": emotional_context,
+                "behavioral_patterns": behavioral_patterns,
+                "vulnerability_assessment": vulnerability_assessment,
+                "emotional_evolution": emotional_evolution
+            }
     
     async def _flujo_participacion_canal(self, user_id: int, channel_id: int, action_type: str, bot=None) -> Dict[str, Any]:
         """
@@ -722,21 +759,21 @@ class CoordinadorCentral:
                         "access_granted": False
                     }
             elif level_name == "diario_intimo":
-                # Check for the "Diario Secreto" item for a specific narrative level
+                # Check for the "Diario Íntimo" item for the intimate narrative level
                 from services.shop_service import ShopService
                 shop_service = ShopService(self.session)
-                has_diario = await shop_service.has_item_in_inventory(user_id, "📖 Diario Secreto")
-                
-                if has_diario:
+                has_diario_intimo = await shop_service.has_item_in_inventory(user_id, "📓 Diario Íntimo")
+
+                if has_diario_intimo:
                     return {
                         "success": True,
-                        "message": "🔓 **Nivel Desbloqueado: Diario Íntimo**\n\nEl diario se abre ante ti, revelando secretos profundos...",
+                        "message": "🔓 **Nivel Desbloqueado: Diario Íntimo**\n\n💫 *El diario más personal de Diana se abre ante ti...*\n\n✨ Sus pensamientos más profundos, sus deseos secretos y confesiones íntimas ahora son tuyos.",
                         "access_granted": True
                     }
                 else:
                     return {
                         "success": False,
-                        "message": "❌ **Acceso Restringido**\n\nNecesitas el 📖 Diario Secreto de Diana para acceder al nivel 'Diario Íntimo'.\n\nVisita la tienda para adquirirlo.",
+                        "message": "❌ **Acceso Restringido**\n\n💋 *Diana susurra: 'Mi diario más íntimo requiere una conexión especial...'*\n\nNecesitas el **📓 Diario Íntimo** (30 besitos) de la tienda para acceder a este contenido exclusivo.",
                         "access_granted": False
                     }
             else:

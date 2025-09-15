@@ -107,8 +107,8 @@ class NarrativePointService:
         # Note: The current NarrativeChoice model doesn't have a points_awarded field
         # This would need to be added to the database model if point rewards for decisions are needed
         
-        # Process the decision in the narrative system
-        new_fragment = await self.narrative_service.process_user_decision(user_id, decision_id)
+        # Process the decision in the narrative system using the actual decision ID
+        new_fragment = await self.narrative_service.process_user_decision_by_id(user_id, decision_id)
         
         if not new_fragment:
             return {

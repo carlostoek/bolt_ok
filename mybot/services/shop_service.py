@@ -22,6 +22,8 @@ class ShopService:
         try:
             # Ensure the "Diario de Diana" item exists
             await self._ensure_diario_diana_item_exists()
+            # Ensure the "Diario Íntimo" item exists
+            await self._ensure_diario_intimo_item_exists()
             
             # Check if user is VIP by getting their subscription
             subscription = await self.subscription_service.get_subscription(user_id)
@@ -84,6 +86,46 @@ class ShopService:
                 logger.info("'Diario Secreto' shop item already exists")
         except Exception as e:
             logger.error(f"Error ensuring Diario de Diana item exists: {str(e)}")
+            await self.session.rollback()
+
+    async def _ensure_diario_intimo_item_exists(self):
+        """Ensure the 'Diario Íntimo' shop item exists"""
+        try:
+            from database.models import LorePiece
+            # Check if the item already exists
+            stmt = select(ShopItem).where(ShopItem.name == "📓 Diario Íntimo")
+            result = await self.session.execute(stmt)
+            item = result.scalar_one_or_none()
+
+            if not item:
+                # Create the lore piece first
+                lore_piece = LorePiece(
+                    title="Diario Íntimo de Diana",
+                    code_name="diario_intimo_diana",
+                    content="Acceso exclusivo al contenido más íntimo de Diana. Sus pensamientos más profundos y secretos revelados...",
+                    content_type="text",
+                    unlock_condition_type="requires_item",
+                    unlock_condition_value="diario_intimo"
+                )
+                self.session.add(lore_piece)
+                await self.session.flush()
+
+                # Create the shop item
+                shop_item = ShopItem(
+                    name="📓 Diario Íntimo",
+                    description="El diario personal más íntimo de Diana. Desbloquea contenido narrativo especial y exclusivo.",
+                    price=30,
+                    is_vip_only=False,
+                    is_active=True,
+                    unlocks_lore_piece_id=lore_piece.id
+                )
+                self.session.add(shop_item)
+                await self.session.commit()
+                logger.info("Created 'Diario Íntimo' shop item")
+            else:
+                logger.info("'Diario Íntimo' shop item already exists")
+        except Exception as e:
+            logger.error(f"Error ensuring Diario Íntimo item exists: {str(e)}")
             await self.session.rollback()
 
     async def has_item_in_inventory(self, user_id: int, item_name: str) -> bool:

@@ -5165,3 +5165,1016 @@ aiogram.exceptions.TelegramBadRequest: Telegram server says - Bad Request: messa
 2025-09-14 01:56:50,676 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 102.0
 2025-09-14 01:56:50,676 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diana_response_seek
 2025-09-14 01:56:50,677 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de divan_experience a diana_response_seek
+2025-09-14 23:53:47,431 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-14 23:53:47,431 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-14 23:53:47,447 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-14 23:53:47,469 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-14 23:53:47,472 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-14 23:53:47,529 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-14 23:53:47,529 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-14 23:53:47,529 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-14 23:53:47,569 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-14 23:53:47,569 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-14 23:53:47,569 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-14 23:53:47,569 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-14 23:53:47,569 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-14 23:53:47,569 - __main__ - INFO - main:220 - Router start registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router info registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-14 23:53:47,570 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-14 23:53:47,571 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-14 23:53:47,571 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-14 23:53:47,571 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-14 23:53:47,572 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-14 23:53:47,573 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-14 23:53:47,574 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-14 23:53:47,575 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-14 23:53:47,575 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-14 23:53:47,594 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-14 23:54:01,898 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-14 23:54:01,899 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-14 23:54:04,282 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-14 23:54:04,287 - services.shop_service - INFO - _ensure_diario_diana_item_exists:84 - 'Diario Secreto' shop item already exists
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:35 - Found 8 active shop items
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: Pista del Pasado (VIP: False)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: Secreto Familiar (VIP: False)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: Acceso VIP a la Biblioteca (VIP: True)
+2025-09-14 23:54:04,290 - services.shop_service - INFO - get_available_items:37 - Shop item: Llave Antigua (VIP: False)
+2025-09-14 23:54:04,291 - services.shop_service - INFO - get_available_items:42 - Showing 6 non-VIP items to user 6181290784
+2025-09-14 23:54:04,291 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': 'Pista del Pasado', 'price': 75, 'is_vip_only': False}, {'id': 6, 'name': 'Secreto Familiar', 'price': 120, 'is_vip_only': False}, {'id': 8, 'name': 'Llave Antigua', 'price': 180, 'is_vip_only': False}]}
+2025-09-14 23:54:10,948 - services.point_service - INFO - add_points:135 - User 6181290784 gained 2 points (base 1, x2). Total: 54.0
+2025-09-14 23:54:13,509 - __main__ - ERROR - global_error_handler:92 - Error en 978978873: MultipleResultsFound: Multiple rows were found when one or none was required
+Traceback (most recent call last):
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/error.py", line 25, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/middlewares/user_context.py", line 56, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/fsm/middleware.py", line 42, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 44, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/middlewares/user_middleware.py", line 48, in __call__
+    return await handler(event, data)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/dispatcher.py", line 276, in _listen_update
+    return await self.propagate_event(update_type=update_type, event=event, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 174, in _propagate_event
+    response = await router.propagate_event(update_type=update_type, event=event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 146, in propagate_event
+    return await observer.wrap_outer_middleware(_wrapped, event=event, data=kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 141, in _wrapped
+    return await self._propagate_event(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/router.py", line 166, in _propagate_event
+    response = await observer.trigger(event, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/telegram.py", line 121, in trigger
+    return await wrapped_inner(event, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/aiogram/dispatcher/event/handler.py", line 43, in call
+    return await wrapped()
+           ^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/handlers/lore_handlers.py", line 137, in show_purchased_item
+    purchase = result.scalar_one_or_none()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/result.py", line 1492, in scalar_one_or_none
+    return self._only_one_row(
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/azureuser/repos/bolt_ok/mybot/venv/lib/python3.12/site-packages/sqlalchemy/engine/result.py", line 813, in _only_one_row
+    raise exc.MultipleResultsFound(
+sqlalchemy.exc.MultipleResultsFound: Multiple rows were found when one or none was required
+2025-09-14 23:54:22,591 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-14 23:54:22,592 - services.shop_service - INFO - _ensure_diario_diana_item_exists:84 - 'Diario Secreto' shop item already exists
+2025-09-14 23:54:22,594 - services.shop_service - INFO - get_available_items:35 - Found 8 active shop items
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: Pista del Pasado (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: Secreto Familiar (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: Acceso VIP a la Biblioteca (VIP: True)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:37 - Shop item: Llave Antigua (VIP: False)
+2025-09-14 23:54:22,595 - services.shop_service - INFO - get_available_items:42 - Showing 6 non-VIP items to user 6181290784
+2025-09-14 23:54:22,595 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': 'Pista del Pasado', 'price': 75, 'is_vip_only': False}, {'id': 6, 'name': 'Secreto Familiar', 'price': 120, 'is_vip_only': False}, {'id': 8, 'name': 'Llave Antigua', 'price': 180, 'is_vip_only': False}]}
+2025-09-14 23:54:45,167 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-14 23:54:45,420 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-14 23:54:45,420 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-14 23:54:45,421 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-14 23:54:45,421 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-14 23:54:45,421 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-14 23:54:45,421 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-14 23:54:45,421 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-14 23:54:45,421 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-14 23:54:45,421 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-14 23:54:45,421 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-14 23:54:45,421 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-14 23:54:45,421 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-14 23:54:45,422 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-15 00:00:22,492 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:00:22,492 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:00:22,509 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:00:22,533 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:00:22,536 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:00:22,593 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:00:22,594 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:00:22,594 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:00:22,634 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:00:22,634 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:00:22,634 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:00:22,634 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:00:22,635 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:00:22,636 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:00:22,636 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:00:22,637 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:00:22,638 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:00:22,639 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:00:22,640 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:00:22,641 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:00:22,661 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:00:30,685 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:00:30,687 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:00:32,203 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:00:32,206 - services.shop_service - INFO - _ensure_diario_diana_item_exists:84 - 'Diario Secreto' shop item already exists
+2025-09-15 00:00:32,209 - services.shop_service - INFO - get_available_items:35 - Found 8 active shop items
+2025-09-15 00:00:32,209 - services.shop_service - INFO - get_available_items:37 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:00:32,209 - services.shop_service - INFO - get_available_items:37 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:00:32,209 - services.shop_service - INFO - get_available_items:37 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:37 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:37 - Shop item: Pista del Pasado (VIP: False)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:37 - Shop item: Secreto Familiar (VIP: False)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:37 - Shop item: Acceso VIP a la Biblioteca (VIP: True)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:37 - Shop item: Llave Antigua (VIP: False)
+2025-09-15 00:00:32,210 - services.shop_service - INFO - get_available_items:42 - Showing 6 non-VIP items to user 6181290784
+2025-09-15 00:00:32,210 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': 'Pista del Pasado', 'price': 75, 'is_vip_only': False}, {'id': 6, 'name': 'Secreto Familiar', 'price': 120, 'is_vip_only': False}, {'id': 8, 'name': 'Llave Antigua', 'price': 180, 'is_vip_only': False}]}
+2025-09-15 00:00:38,112 - services.point_service - INFO - add_points:135 - User 6181290784 gained 2 points (base 1, x2). Total: 6.0
+2025-09-15 00:00:48,092 - aiogram.dispatcher - WARNING - _signal_stop_polling:491 - Received SIGINT signal
+2025-09-15 00:00:48,344 - __main__ - INFO - main:255 - Cerrando bot...
+2025-09-15 00:00:48,344 - root - INFO - shutdown:129 - Cerrando tareas en segundo plano...
+2025-09-15 00:00:48,344 - root - INFO - channel_request_scheduler:40 - Channel request scheduler cancelled
+2025-09-15 00:00:48,345 - root - INFO - safe_task:118 - Tarea channel_requests cancelada
+2025-09-15 00:00:48,345 - root - INFO - vip_subscription_scheduler:137 - VIP subscription scheduler cancelled
+2025-09-15 00:00:48,345 - root - INFO - safe_task:118 - Tarea vip_subscriptions cancelada
+2025-09-15 00:00:48,345 - root - INFO - vip_membership_scheduler:157 - VIP membership scheduler cancelled
+2025-09-15 00:00:48,345 - root - INFO - safe_task:118 - Tarea vip_memberships cancelada
+2025-09-15 00:00:48,345 - root - INFO - auction_monitor_scheduler:184 - Auction monitor scheduler cancelled
+2025-09-15 00:00:48,345 - root - INFO - safe_task:118 - Tarea auction_monitor cancelada
+2025-09-15 00:00:48,345 - root - INFO - free_channel_cleanup_scheduler:211 - Free channel cleanup scheduler cancelled
+2025-09-15 00:00:48,346 - root - INFO - safe_task:118 - Tarea channel_cleanup cancelada
+2025-09-15 00:00:48,346 - root - INFO - shutdown:138 - Todas las tareas cerradas
+2025-09-15 00:19:09,910 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:19:09,910 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:19:09,927 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:19:10,829 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:19:11,117 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:19:11,172 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 00:19:11,192 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 00:19:11,193 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:19:11,193 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:19:11,193 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:19:11,235 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:19:11,235 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:19:11,236 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:19:11,236 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:19:11,237 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:19:11,238 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:19:11,239 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:19:11,240 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:19:11,241 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:19:11,267 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:19:19,112 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 00:19:19,112 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 00:19:19,124 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:19:19,125 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:19:22,047 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:19:22,052 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:19:22,054 - services.shop_service - ERROR - _ensure_diario_intimo_item_exists:127 - Error ensuring Diario Íntimo item exists: 'unlock_conditions' is an invalid keyword argument for LorePiece
+2025-09-15 00:19:22,063 - services.shop_service - INFO - get_available_items:37 - Found 4 active shop items
+2025-09-15 00:19:22,063 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:19:22,063 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:19:22,063 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:19:22,064 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:19:22,064 - services.shop_service - INFO - get_available_items:44 - Showing 3 non-VIP items to user 6181290784
+2025-09-15 00:19:22,064 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}]}
+2025-09-15 00:19:27,992 - services.narrative_service - ERROR - get_user_current_fragment:35 - No se encontró fragmento inicial 'start'
+2025-09-15 00:19:27,993 - services.narrative_service - ERROR - start_narrative:46 - No se encontró fragmento inicial 'start'
+2025-09-15 00:19:39,640 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 00:19:39,640 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 00:19:39,656 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 00:19:39,683 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 00:19:39,737 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 00:19:39,776 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 00:19:39,818 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 00:19:39,861 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 00:19:39,910 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 00:19:39,951 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 00:19:39,992 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 00:19:40,034 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 00:19:40,078 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 00:19:40,097 - services.narrative_loader - INFO - load_default_narrative:365 - Narrativa por defecto cargada exitosamente
+2025-09-15 00:19:48,063 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 00:19:48,221 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 00:19:48,221 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 00:19:51,442 - services.point_service - INFO - add_points:135 - User 6181290784 gained 10 points (base 5, x2). Total: 30.0
+2025-09-15 00:19:51,598 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 5 besitos del fragmento besitos_guide
+2025-09-15 00:19:51,598 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a besitos_guide
+2025-09-15 00:19:53,577 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 46.0
+2025-09-15 00:19:53,734 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:19:53,734 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de besitos_guide a mansion_entrance
+2025-09-15 00:19:55,833 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 70.0
+2025-09-15 00:19:55,996 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:19:55,996 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:20:03,478 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 86.0
+2025-09-15 00:20:03,752 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:20:03,752 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a mansion_entrance
+2025-09-15 00:20:07,033 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 110.0
+2025-09-15 00:20:07,195 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:20:07,195 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:20:09,350 - services.point_service - INFO - add_points:135 - User 6181290784 gained 40 points (base 20, x2). Total: 150.0
+2025-09-15 00:20:09,509 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 20 besitos del fragmento divan_experience
+2025-09-15 00:20:09,509 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a divan_experience
+2025-09-15 00:20:13,189 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_response_understand
+2025-09-15 00:20:15,240 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_response_experience
+2025-09-15 00:20:19,684 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_response_understand
+2025-09-15 00:20:21,300 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 200.0
+2025-09-15 00:20:21,460 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diana_response_seek
+2025-09-15 00:20:21,460 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de divan_experience a diana_response_seek
+2025-09-15 00:20:24,828 - services.point_service - INFO - add_points:135 - User 6181290784 gained 60 points (base 30, x2). Total: 260.0
+2025-09-15 00:20:24,993 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 30 besitos del fragmento vip_deep_1
+2025-09-15 00:20:24,993 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_response_seek a vip_deep_1
+2025-09-15 00:20:28,145 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_intimate_1
+2025-09-15 00:20:29,645 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_secrets_1
+2025-09-15 00:20:35,427 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:20:35,429 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:20:35,430 - services.shop_service - ERROR - _ensure_diario_intimo_item_exists:127 - Error ensuring Diario Íntimo item exists: 'unlock_conditions' is an invalid keyword argument for LorePiece
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:37 - Found 4 active shop items
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:20:35,434 - services.shop_service - INFO - get_available_items:44 - Showing 3 non-VIP items to user 6181290784
+2025-09-15 00:20:35,434 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}]}
+2025-09-15 00:20:46,624 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:20:46,626 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:20:46,627 - services.shop_service - ERROR - _ensure_diario_intimo_item_exists:127 - Error ensuring Diario Íntimo item exists: 'unlock_conditions' is an invalid keyword argument for LorePiece
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:37 - Found 4 active shop items
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:20:46,632 - services.shop_service - INFO - get_available_items:44 - Showing 3 non-VIP items to user 6181290784
+2025-09-15 00:20:46,633 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}]}
+2025-09-15 00:25:36,141 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:25:36,141 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:25:36,157 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:25:37,083 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:25:37,363 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:25:37,412 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 00:25:37,435 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 00:25:37,435 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:25:37,435 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:25:37,435 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:25:37,473 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:25:37,473 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:25:37,474 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:25:37,474 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:25:37,475 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:25:37,476 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:25:37,477 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:25:37,477 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:25:37,478 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:25:37,505 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:25:43,520 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 00:25:43,521 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 00:25:43,540 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 00:25:43,568 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 00:25:43,613 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 00:25:43,657 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 00:25:43,700 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 00:25:43,739 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 00:25:43,788 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 00:25:43,829 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 00:25:43,865 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 00:25:43,910 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 00:25:43,947 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 00:25:43,987 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 00:25:44,026 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 00:25:44,045 - services.narrative_loader - INFO - load_default_narrative:409 - Narrativa por defecto cargada exitosamente
+2025-09-15 00:25:52,718 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 00:25:52,718 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 00:25:52,732 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:25:52,733 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:25:58,760 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 00:25:58,918 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 00:25:58,918 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 00:26:01,489 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 00:26:01,650 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:26:01,650 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 00:26:03,692 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 00:26:03,865 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:26:03,865 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:26:21,393 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 90.0
+2025-09-15 00:26:21,556 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:26:21,556 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:26:41,381 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 114.0
+2025-09-15 00:26:41,541 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:26:41,542 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:26:48,324 - services.point_service - INFO - add_points:135 - User 6181290784 gained 10 points (base 5, x2). Total: 124.0
+2025-09-15 00:26:48,483 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 5 besitos del fragmento diana_diary_tease
+2025-09-15 00:26:48,484 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_tease
+2025-09-15 00:27:04,038 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 148.0
+2025-09-15 00:27:04,259 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:27:04,260 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 00:27:10,444 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 178.0
+2025-09-15 00:27:10,613 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:27:10,613 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:27:21,171 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 202.0
+2025-09-15 00:27:21,332 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:27:21,332 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:27:29,759 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:27:29,766 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:27:29,789 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 00:27:29,793 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 00:27:29,793 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:27:29,793 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:27:29,793 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:27:29,793 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:27:29,794 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 00:27:29,794 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 00:27:29,794 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 00:27:44,327 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 202.0
+2025-09-15 00:27:44,328 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:27:44,331 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:27:48,153 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 226.0
+2025-09-15 00:27:48,326 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:27:48,330 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:27:52,488 - services.point_service - INFO - add_points:135 - User 6181290784 gained 10 points (base 5, x2). Total: 236.0
+2025-09-15 00:27:52,648 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 5 besitos del fragmento diana_diary_tease
+2025-09-15 00:27:52,648 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_tease
+2025-09-15 00:28:06,637 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 260.0
+2025-09-15 00:28:06,827 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:28:06,828 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 00:35:43,667 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:35:43,667 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:35:43,684 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:35:44,604 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:35:44,839 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:35:44,894 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 00:35:44,913 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 00:35:44,913 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:35:44,914 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:35:44,914 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:35:44,957 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:35:44,957 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:35:44,958 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:35:44,959 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:35:44,959 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:35:44,959 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:35:44,961 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:35:44,962 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:35:44,963 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:35:44,964 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:35:44,983 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:35:50,712 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 00:35:50,712 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 00:35:50,727 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 00:35:50,755 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 00:35:50,803 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 00:35:50,843 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 00:35:50,893 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 00:35:50,934 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 00:35:50,977 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 00:35:51,023 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 00:35:51,068 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 00:35:51,109 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 00:35:51,149 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 00:35:51,192 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 00:35:51,239 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 00:35:51,256 - services.narrative_loader - INFO - load_default_narrative:405 - Narrativa por defecto cargada exitosamente
+2025-09-15 00:35:59,994 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 00:35:59,994 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 00:36:00,570 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:36:00,572 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:36:10,751 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 00:36:10,919 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 00:36:10,919 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 00:36:13,400 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 00:36:13,561 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:36:13,561 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 00:36:15,564 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 00:36:15,720 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:36:15,721 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:36:18,914 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 90.0
+2025-09-15 00:36:19,073 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:36:19,073 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:36:32,306 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 114.0
+2025-09-15 00:36:32,466 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:36:32,467 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:36:42,401 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 144.0
+2025-09-15 00:36:42,557 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:36:42,557 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:36:51,848 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 168.0
+2025-09-15 00:36:52,012 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:36:52,013 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:36:55,411 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:36:55,415 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:36:55,440 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 00:36:55,445 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 00:36:55,445 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:36:55,445 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:36:55,445 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:36:55,445 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:36:55,446 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 00:36:55,446 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 00:36:55,446 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 00:37:02,325 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 168.0
+2025-09-15 00:37:02,325 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:37:02,326 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:37:04,047 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 192.0
+2025-09-15 00:37:04,205 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:37:04,205 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:37:11,732 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 222.0
+2025-09-15 00:37:11,892 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diana_diary_intimate
+2025-09-15 00:37:11,893 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 00:37:16,812 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 246.0
+2025-09-15 00:37:16,970 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:37:16,971 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 00:41:13,468 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:41:13,468 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:41:13,485 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:41:14,393 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:41:14,628 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:41:14,685 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 00:41:14,702 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 00:41:14,703 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:41:14,703 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:41:14,703 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:41:14,741 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:41:14,741 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:41:14,742 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:41:14,742 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:41:14,743 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:41:14,744 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:41:14,747 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:41:14,748 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:41:14,749 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:41:14,778 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:41:19,188 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 00:41:19,189 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 00:41:19,204 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 00:41:19,237 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 00:41:19,285 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 00:41:19,324 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 00:41:19,377 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 00:41:19,421 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 00:41:19,466 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 00:41:19,507 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 00:41:19,546 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 00:41:19,596 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 00:41:19,638 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 00:41:19,676 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 00:41:19,714 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 00:41:19,733 - services.narrative_loader - INFO - load_default_narrative:405 - Narrativa por defecto cargada exitosamente
+2025-09-15 00:41:28,982 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 00:41:28,983 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 00:41:28,997 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:41:28,999 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:41:33,469 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 00:41:33,634 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 00:41:33,634 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 00:41:36,197 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 00:41:36,362 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:41:36,362 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 00:41:38,087 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 00:41:38,257 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:41:38,258 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:41:52,952 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 84.0
+2025-09-15 00:41:53,126 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:41:53,127 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 00:41:58,997 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:41:58,999 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:41:59,022 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 00:41:59,026 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 00:41:59,027 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 00:42:05,372 - services.narrative_service - WARNING - process_user_decision:72 - Índice de decisión inválido: 15 para fragmento main_salon
+2025-09-15 00:42:44,762 - services.narrative_service - WARNING - process_user_decision:72 - Índice de decisión inválido: 15 para fragmento main_salon
+2025-09-15 00:45:41,223 - services.narrative_service - WARNING - process_user_decision:72 - Índice de decisión inválido: 15 para fragmento main_salon
+2025-09-15 00:55:57,126 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 00:55:57,126 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 00:55:57,146 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 00:55:58,081 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 00:55:58,395 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 00:55:58,445 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 00:55:58,473 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 00:55:58,474 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 00:55:58,474 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 00:55:58,474 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 00:55:58,516 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 00:55:58,516 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 00:55:58,516 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 00:55:58,516 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 00:55:58,517 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 00:55:58,518 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 00:55:58,518 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 00:55:58,518 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 00:55:58,518 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 00:55:58,518 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 00:55:58,519 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 00:55:58,520 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 00:55:58,521 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 00:55:58,522 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 00:55:58,523 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 00:55:58,549 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 00:56:07,251 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 00:56:07,251 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 00:56:07,268 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 00:56:07,311 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 00:56:07,355 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 00:56:07,396 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 00:56:07,438 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 00:56:07,475 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 00:56:07,513 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 00:56:07,562 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 00:56:07,600 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 00:56:07,637 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 00:56:07,677 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 00:56:07,720 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 00:56:07,760 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 00:56:07,782 - services.narrative_loader - INFO - load_default_narrative:405 - Narrativa por defecto cargada exitosamente
+2025-09-15 00:56:15,048 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 00:56:15,048 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 00:56:15,061 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:56:15,062 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:56:19,265 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 00:56:19,429 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 00:56:19,429 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 00:56:21,782 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 00:56:21,944 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 00:56:21,944 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 00:56:23,684 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 00:56:23,851 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:56:23,851 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 00:56:26,215 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 00:56:26,240 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x75640851a4e0>, 'action': 'decision_success'}
+2025-09-15 00:56:32,757 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 84.0
+2025-09-15 00:56:32,922 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 00:56:32,922 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 00:56:36,620 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 00:56:36,622 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 00:56:36,645 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 00:56:36,649 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 00:56:36,650 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 00:56:36,650 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 00:56:43,177 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 00:56:43,189 - services.narrative_service - WARNING - process_user_decision:72 - Índice de decisión inválido: 15 para fragmento main_salon
+2025-09-15 00:56:43,189 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': False, 'message': 'Tu reflexión indica que comprendes que estás en territorio sagrado.\n\n*"Parece que ha habido una confusión en tu elección. Permíteme guiarte mejor."*', 'action': 'decision_error', 'error': 'Error al procesar la decisión.'}
+2025-09-15 00:56:53,027 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 00:56:53,039 - services.narrative_service - WARNING - process_user_decision:72 - Índice de decisión inválido: 15 para fragmento main_salon
+2025-09-15 00:56:53,040 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': False, 'message': 'Tu cuidadosa consideración me dice que estás tomando esto en serio. Excelente.\n\n*"Parece que ha habido una confusión en tu elección. Permíteme guiarte mejor."*', 'action': 'decision_error', 'error': 'Error al procesar la decisión.'}
+2025-09-15 00:57:01,048 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 00:57:01,049 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 00:57:05,416 - handlers.narrative_handler - ERROR - show_narrative_stats_callback:289 - Error mostrando estadísticas narrativas para usuario 6181290784: name 'func' is not defined
+2025-09-15 00:57:08,913 - services.point_service - INFO - add_points:135 - User 6181290784 gained 40 points (base 20, x2). Total: 94.0
+2025-09-15 00:57:09,087 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 20 besitos del fragmento divan_experience
+2025-09-15 00:57:09,087 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a divan_experience
+2025-09-15 00:57:11,762 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_response_understand
+2025-09-15 00:57:13,143 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_response_experience
+2025-09-15 00:57:14,441 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 144.0
+2025-09-15 00:57:14,599 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diana_response_seek
+2025-09-15 00:57:14,599 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de divan_experience a diana_response_seek
+2025-09-15 00:57:17,978 - services.point_service - INFO - add_points:135 - User 6181290784 gained 60 points (base 30, x2). Total: 204.0
+2025-09-15 00:57:18,138 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 30 besitos del fragmento vip_deep_1
+2025-09-15 00:57:18,139 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_response_seek a vip_deep_1
+2025-09-15 00:57:20,095 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_intimate_1
+2025-09-15 00:57:21,513 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: vip_secrets_1
+2025-09-15 01:00:01,109 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 01:00:01,109 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 01:00:01,127 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 01:00:02,605 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 01:00:02,909 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 01:00:02,962 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 01:00:02,980 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 01:00:02,980 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 01:00:02,980 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 01:00:02,981 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 01:00:03,022 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 01:00:03,023 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 01:00:03,024 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 01:00:03,024 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 01:00:03,025 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 01:00:03,027 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 01:00:03,028 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 01:00:03,028 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 01:00:03,030 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 01:00:03,057 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 01:00:03,453 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 01:00:03,453 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 01:00:03,469 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 01:00:03,511 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 01:00:03,569 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 01:00:03,622 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 01:00:03,677 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 01:00:03,722 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 01:00:03,770 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 01:00:03,812 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 01:00:03,859 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 01:00:03,912 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 01:00:03,960 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 01:00:04,014 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 01:00:04,068 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 01:00:04,094 - services.narrative_loader - INFO - load_default_narrative:405 - Narrativa por defecto cargada exitosamente
+2025-09-15 01:00:11,170 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 01:00:11,170 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 01:00:11,184 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 01:00:11,186 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 01:00:15,307 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 01:00:15,469 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 01:00:15,470 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 01:00:18,308 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 01:00:18,470 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 01:00:18,471 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 01:00:19,764 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 01:00:19,932 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:00:19,933 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 01:00:21,306 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 01:00:21,333 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x7c499a546480>, 'action': 'decision_success'}
+2025-09-15 01:00:25,841 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 01:00:25,842 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 01:00:25,870 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 01:00:25,873 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 01:00:25,873 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 01:00:25,873 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 01:00:25,873 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 01:00:25,873 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 01:00:25,874 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 01:00:25,874 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 01:00:25,874 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 01:00:32,988 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 54.0
+2025-09-15 01:00:32,988 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:00:32,989 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 01:00:34,599 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 01:00:34,633 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 01:00:34,642 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x7c499a397a70>, 'action': 'decision_success', 'emotional_context': {'success': True, 'timing_pattern': 'insufficient_data', 'response_speed': 'unknown', 'consistency_score': 0.0, 'emotional_indicators': ['erratic_behavior'], 'analysis_confidence': 0.0, 'context': 'decision'}, 'behavioral_patterns': {'success': True, 'engagement_pattern': 'passive', 'behavioral_changes': [], 'consistency_score': 0.5, 'activity_level': 'very_low', 'social_engagement': 'low_social', 'pattern_confidence': 0.1}, 'vulnerability_assessment': {'success': True, 'vulnerability_level': 0.049999999999999996, 'vulnerability_category': 'low', 'indicators': ['intimate_content_seeking'], 'recommendations': ['standard_interaction_approach', 'maintain_current_engagement_level'], 'confidence': 0.2}, 'emotional_evolution': {'success': True, 'timeframe_days': 7, 'evolution_data': {}, 'trends': [], 'insights': ['Bajo engagement puede indicar necesidad de contenido más personalizado'], 'data_points': 0, 'analysis_reliability': 0.0}}
+2025-09-15 01:00:39,679 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 78.0
+2025-09-15 01:00:39,863 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:00:39,864 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 01:00:44,351 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 01:00:44,380 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 01:00:44,387 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x7c499a3b00b0>, 'action': 'decision_success', 'emotional_context': {'success': True, 'timing_pattern': 'insufficient_data', 'response_speed': 'unknown', 'consistency_score': 0.0, 'emotional_indicators': ['erratic_behavior'], 'analysis_confidence': 0.0, 'context': 'decision'}, 'behavioral_patterns': {'success': True, 'engagement_pattern': 'passive', 'behavioral_changes': [], 'consistency_score': 0.5, 'activity_level': 'very_low', 'social_engagement': 'low_social', 'pattern_confidence': 0.1}, 'vulnerability_assessment': {'success': True, 'vulnerability_level': 0.049999999999999996, 'vulnerability_category': 'low', 'indicators': ['intimate_content_seeking'], 'recommendations': ['standard_interaction_approach', 'maintain_current_engagement_level'], 'confidence': 0.2}, 'emotional_evolution': {'success': True, 'timeframe_days': 7, 'evolution_data': {}, 'trends': [], 'insights': ['Bajo engagement puede indicar necesidad de contenido más personalizado'], 'data_points': 0, 'analysis_reliability': 0.0}}
+2025-09-15 01:00:47,555 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 102.0
+2025-09-15 01:00:47,717 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:00:47,717 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a main_salon
+2025-09-15 01:11:03,314 - __main__ - INFO - main:148 - Inicializando base de datos...
+2025-09-15 01:11:03,314 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
+2025-09-15 01:11:03,329 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
+2025-09-15 01:11:04,347 - database.setup - INFO - init_db:81 - Creando tablas restantes...
+2025-09-15 01:11:04,619 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
+2025-09-15 01:11:04,676 - database.setup - INFO - populate_initial_shop_items:125 - Populating shop with initial items...
+2025-09-15 01:11:04,693 - database.setup - INFO - populate_initial_shop_items:160 - Added 4 initial shop items
+2025-09-15 01:11:04,694 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
+2025-09-15 01:11:04,694 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
+2025-09-15 01:11:04,694 - __main__ - INFO - main:157 - Configurando bot...
+2025-09-15 01:11:04,732 - __main__ - INFO - main:186 - Registrando handlers...
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router setup registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router admin registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router auction_admin registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router start_token registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router start registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router main_menu registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router backpack registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router missions registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router info registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router free_channel_admin registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router publication_test registrado
+2025-09-15 01:11:04,732 - __main__ - INFO - main:220 - Router vip_menu registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router auction_user registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router reaction_callback registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router daily_gift registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router minigames registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router gamification registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router free_user registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router lore registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router combinar_pistas registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router channel_access registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router narrative registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router admin_narrative registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router test_evaluation registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:220 - Router shop registrado
+2025-09-15 01:11:04,733 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
+2025-09-15 01:11:04,733 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
+2025-09-15 01:11:04,734 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
+2025-09-15 01:11:04,736 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
+2025-09-15 01:11:04,736 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
+2025-09-15 01:11:04,737 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
+2025-09-15 01:11:04,738 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
+2025-09-15 01:11:04,762 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
+2025-09-15 01:11:13,302 - services.user_service - INFO - create_user:35 - Created new user: 1280444712
+2025-09-15 01:11:13,302 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 1280444712
+2025-09-15 01:11:13,320 - services.narrative_loader - WARNING - load_fragments_from_directory:25 - Directorio de narrativa no encontrado: mybot/narrative_fragments
+2025-09-15 01:11:13,351 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: start
+2025-09-15 01:11:13,402 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: intro_1
+2025-09-15 01:11:13,444 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: info_1
+2025-09-15 01:11:13,483 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_question
+2025-09-15 01:11:13,529 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: besitos_guide
+2025-09-15 01:11:13,573 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: mansion_entrance
+2025-09-15 01:11:13,613 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: main_salon
+2025-09-15 01:11:13,670 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: divan_experience
+2025-09-15 01:11:13,724 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_response_seek
+2025-09-15 01:11:13,767 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: vip_deep_1
+2025-09-15 01:11:13,812 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_intimate
+2025-09-15 01:11:13,865 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_entry_1
+2025-09-15 01:11:13,913 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_entry_2
+2025-09-15 01:11:13,957 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_thoughts_1
+2025-09-15 01:11:14,001 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_connection_talk
+2025-09-15 01:11:14,048 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_intimate_response
+2025-09-15 01:11:14,096 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diary_entry_3
+2025-09-15 01:11:14,141 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_authenticity
+2025-09-15 01:11:14,184 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_connection_deep
+2025-09-15 01:11:14,229 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_deeper_intimacy
+2025-09-15 01:11:14,271 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_space_creation
+2025-09-15 01:11:14,316 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_dreams_deeper
+2025-09-15 01:11:14,355 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_vulnerable_moment
+2025-09-15 01:11:14,401 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_connection_explore
+2025-09-15 01:11:14,446 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_ultimate_trust
+2025-09-15 01:11:14,488 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_our_world
+2025-09-15 01:11:14,532 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_soul_recognition
+2025-09-15 01:11:14,574 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_mutual_feeling
+2025-09-15 01:11:14,617 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_complete_trust
+2025-09-15 01:11:14,661 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_shared_bond
+2025-09-15 01:11:14,704 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_perfect_moment
+2025-09-15 01:11:14,744 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_build_more
+2025-09-15 01:11:14,784 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_destined_souls
+2025-09-15 01:11:14,827 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_magical_moment
+2025-09-15 01:11:14,878 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_eternal_bond
+2025-09-15 01:11:14,924 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_unity
+2025-09-15 01:11:14,974 - services.narrative_loader - INFO - _create_fragment:109 - Fragmento creado: diana_diary_tease
+2025-09-15 01:11:14,991 - services.narrative_loader - INFO - load_default_narrative:947 - Narrativa por defecto cargada exitosamente
+2025-09-15 01:11:28,498 - services.user_service - INFO - create_user:35 - Created new user: 6181290784
+2025-09-15 01:11:28,498 - middlewares.user_middleware - INFO - __call__:45 - Created new user via middleware: 6181290784
+2025-09-15 01:11:28,513 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
+2025-09-15 01:11:28,514 - handlers.start - INFO - cmd_start:115 - Regular user 6181290784 accessing start command
+2025-09-15 01:11:33,255 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 20.0
+2025-09-15 01:11:33,415 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento intro_1
+2025-09-15 01:11:33,415 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de start a intro_1
+2025-09-15 01:11:35,384 - services.point_service - INFO - add_points:135 - User 6181290784 gained 16 points (base 8, x2). Total: 36.0
+2025-09-15 01:11:35,553 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 8 besitos del fragmento mansion_entrance
+2025-09-15 01:11:35,555 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de intro_1 a mansion_entrance
+2025-09-15 01:11:37,101 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 60.0
+2025-09-15 01:11:37,262 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:11:37,263 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de mansion_entrance a main_salon
+2025-09-15 01:11:38,720 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 01:11:38,749 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x708f3c2be750>, 'action': 'decision_success'}
+2025-09-15 01:11:50,769 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 84.0
+2025-09-15 01:11:50,948 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:11:50,948 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_tease a main_salon
+2025-09-15 01:11:56,982 - handlers.shop_handlers - INFO - show_shop:15 - Shop access requested by user 6181290784
+2025-09-15 01:11:56,985 - services.shop_service - INFO - _ensure_diario_diana_item_exists:86 - 'Diario Secreto' shop item already exists
+2025-09-15 01:11:57,007 - services.shop_service - INFO - _ensure_diario_intimo_item_exists:124 - Created 'Diario Íntimo' shop item
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:37 - Found 5 active shop items
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:39 - Shop item: 📖 Diario Secreto (VIP: False)
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:39 - Shop item: 🔑 Cofre del Recuerdo (VIP: False)
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:39 - Shop item: 💎 Collar VIP Exclusivo (VIP: True)
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:39 - Shop item: 🎭 Máscara del Baile (VIP: False)
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:39 - Shop item: 📓 Diario Íntimo (VIP: False)
+2025-09-15 01:11:57,012 - services.shop_service - INFO - get_available_items:44 - Showing 4 non-VIP items to user 6181290784
+2025-09-15 01:11:57,012 - handlers.shop_handlers - INFO - show_shop:22 - Shop access result: {'success': True, 'action': 'shop_access', 'items': [{'id': 1, 'name': '📖 Diario Secreto', 'price': 50, 'is_vip_only': False}, {'id': 2, 'name': '🔑 Cofre del Recuerdo', 'price': 100, 'is_vip_only': False}, {'id': 4, 'name': '🎭 Máscara del Baile', 'price': 150, 'is_vip_only': False}, {'id': 5, 'name': '📓 Diario Íntimo', 'price': 30, 'is_vip_only': False}]}
+2025-09-15 01:12:01,972 - handlers.narrative_handler - INFO - handle_narrative_choice:86 - Processing diary decision for user 6181290784, choice ID: 15
+2025-09-15 01:12:02,011 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de main_salon a diana_diary_intimate
+2025-09-15 01:12:02,022 - handlers.narrative_handler - INFO - handle_narrative_choice:94 - Coordinator result: {'success': True, 'fragment': <database.narrative_models.StoryFragment object at 0x708f3c30b800>, 'action': 'decision_success', 'emotional_context': {'success': True, 'timing_pattern': 'insufficient_data', 'response_speed': 'unknown', 'consistency_score': 0.0, 'emotional_indicators': ['erratic_behavior'], 'analysis_confidence': 0.0, 'context': 'decision'}, 'behavioral_patterns': {'success': True, 'engagement_pattern': 'passive', 'behavioral_changes': [], 'consistency_score': 0.5, 'activity_level': 'very_low', 'social_engagement': 'low_social', 'pattern_confidence': 0.1}, 'vulnerability_assessment': {'success': True, 'vulnerability_level': 0.049999999999999996, 'vulnerability_category': 'low', 'indicators': ['intimate_content_seeking'], 'recommendations': ['standard_interaction_approach', 'maintain_current_engagement_level'], 'confidence': 0.2}, 'emotional_evolution': {'success': True, 'timeframe_days': 7, 'evolution_data': {}, 'trends': [], 'insights': ['Bajo engagement puede indicar necesidad de contenido más personalizado'], 'data_points': 0, 'analysis_reliability': 0.0}}
+2025-09-15 01:12:12,860 - services.point_service - INFO - add_points:135 - User 6181290784 gained 20 points (base 10, x2). Total: 74.0
+2025-09-15 01:12:12,860 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 10 besitos del fragmento diary_entry_1
+2025-09-15 01:12:12,862 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_diary_intimate a diary_entry_1
+2025-09-15 01:12:25,386 - services.point_service - INFO - add_points:135 - User 6181290784 gained 36 points (base 18, x2). Total: 110.0
+2025-09-15 01:12:25,548 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 18 besitos del fragmento diary_connection_talk
+2025-09-15 01:12:25,548 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diary_entry_1 a diary_connection_talk
+2025-09-15 01:12:37,467 - services.point_service - INFO - add_points:135 - User 6181290784 gained 30 points (base 15, x2). Total: 140.0
+2025-09-15 01:12:37,636 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 15 besitos del fragmento diary_entry_2
+2025-09-15 01:12:37,637 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diary_connection_talk a diary_entry_2
+2025-09-15 01:12:47,083 - services.point_service - INFO - add_points:135 - User 6181290784 gained 50 points (base 25, x2). Total: 190.0
+2025-09-15 01:12:47,262 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 25 besitos del fragmento diary_intimate_response
+2025-09-15 01:12:47,262 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diary_entry_2 a diary_intimate_response
+2025-09-15 01:12:51,145 - services.point_service - INFO - add_points:135 - User 6181290784 gained 40 points (base 20, x2). Total: 230.0
+2025-09-15 01:12:51,309 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 20 besitos del fragmento diary_entry_3
+2025-09-15 01:12:51,311 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diary_intimate_response a diary_entry_3
+2025-09-15 01:12:54,351 - services.point_service - INFO - add_points:135 - User 6181290784 gained 70 points (base 35, x2). Total: 300.0
+2025-09-15 01:12:54,605 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 35 besitos del fragmento diana_space_creation
+2025-09-15 01:12:54,605 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diary_entry_3 a diana_space_creation
+2025-09-15 01:12:57,392 - services.point_service - INFO - add_points:135 - User 6181290784 gained 90 points (base 45, x2). Total: 390.0
+2025-09-15 01:12:57,575 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 45 besitos del fragmento diana_our_world
+2025-09-15 01:12:57,575 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_space_creation a diana_our_world
+2025-09-15 01:12:59,299 - services.point_service - INFO - add_points:135 - User 6181290784 gained 80 points (base 40, x2). Total: 470.0
+2025-09-15 01:12:59,488 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 40 besitos del fragmento diana_perfect_moment
+2025-09-15 01:12:59,488 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_our_world a diana_perfect_moment
+2025-09-15 01:13:02,102 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_treasure_moment
+2025-09-15 01:13:05,187 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: diana_eternity
+2025-09-15 01:13:15,022 - services.point_service - INFO - add_points:135 - User 6181290784 gained 24 points (base 12, x2). Total: 494.0
+2025-09-15 01:13:15,184 - services.narrative_service - INFO - _process_fragment_rewards:198 - Usuario 6181290784 recibió 12 besitos del fragmento main_salon
+2025-09-15 01:13:15,184 - services.narrative_service - INFO - _process_decision_by_id:124 - Usuario 6181290784 avanzó de diana_perfect_moment a main_salon
+2025-09-15 01:13:17,376 - services.narrative_service - ERROR - _process_decision_by_id:99 - Fragmento de destino no encontrado: other_guests
