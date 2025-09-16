@@ -150,7 +150,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: keyboards/admin_shop_kb.py, existing admin keyboard patterns_
   - _Requirements: 2.2, 2.4_
 
-- [ ] 17. Create analytics admin interface
+- [x] 17. Create analytics admin interface
   - File: handlers/admin/analytics_admin.py
   - Implement handlers for analytics dashboard and report generation
   - Add user segment analysis and conversion funnel viewing capabilities
@@ -158,7 +158,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: handlers/admin/shop_admin.py patterns, services/analytics_service.py_
   - _Requirements: 4.1, 4.3_
 
-- [ ] 18. Create analytics keyboard layouts and data export
+- [x] 18. Create analytics keyboard layouts and data export
   - File: keyboards/admin_analytics_kb.py
   - Design keyboards for analytics navigation and report configuration
   - Add date range selection and export format options
@@ -168,7 +168,7 @@ Each task meets these criteria for optimal agent execution:
 
 ### Phase 4: Enhanced User Experience
 
-- [ ] 19. Extend CoordinadorCentral with narrative admin operations
+- [x] 19. Extend CoordinadorCentral with narrative admin operations
   - File: services/coordinador_central.py (modify existing)
   - Add new AccionUsuario enum values for narrative admin operations
   - Implement _flujo_narrative_admin_operation method
@@ -176,7 +176,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing CoordinadorCentral patterns, admin operation flows_
   - _Requirements: 1.1, 2.1_
 
-- [ ] 20. Enhance narrative service with analytics integration
+- [x] 20. Enhance narrative service with analytics integration
   - File: services/narrative_service.py (modify existing)
   - Add analytics tracking to user progression methods
   - Implement get_user_narrative_insights and track_choice_patterns methods
@@ -184,7 +184,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing narrative progression logic, user state tracking_
   - _Requirements: 3.1, 4.1_
 
-- [ ] 21. Implement personalized teaser content system
+- [x] 21. Implement personalized teaser content system
   - File: services/narrative_service.py (continue from task 20)
   - Add generate_contextual_teaser for restricted content scenarios
   - Integrate user archetype data for personalized messaging
@@ -192,7 +192,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing teaser fragments, character voice service integration_
   - _Requirements: 3.2, 5.1_
 
-- [ ] 22. Enhance character intelligence integration
+- [x] 22. Enhance character intelligence integration
   - File: services/narrative_service.py (continue from task 21)
   - Add adapt_character_response_to_user_archetype method
   - Implement relationship progression tracking with characters
@@ -202,7 +202,7 @@ Each task meets these criteria for optimal agent execution:
 
 ### Phase 5: Testing and Validation
 
-- [ ] 23. Create narrative admin service unit tests
+- [x] 23. Create narrative admin service unit tests
   - File: tests/services/test_narrative_admin_service.py
   - Write tests for content CRUD operations and validation methods
   - Test narrative consistency checking and graph visualization
@@ -210,7 +210,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing test patterns in tests/services/, pytest fixtures_
   - _Requirements: 1.1, 1.3_
 
-- [ ] 24. Create lore management service unit tests
+- [x] 24. Create lore management service unit tests
   - File: tests/services/test_lore_management_service.py
   - Write tests for lore piece operations and shop item linking
   - Test analytics tracking and search functionality
