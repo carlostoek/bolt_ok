@@ -24,12 +24,16 @@ class NarrativeAdminStates(StatesGroup):
 
 @router.message(Command("load_narrative"))
 async def load_narrative_command(message: Message, session: AsyncSession):
-    """Carga fragmentos narrativos desde la carpeta narrative_fragments."""
+    """Carga fragmentos narrativos desde la carpeta narrative_fragments con validación."""
     if not await is_admin(message.from_user.id, session):
         await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
         return
     
     try:
+        # Usar el servicio administrativo para cargar con validación
+        from services.narrative_admin_service import NarrativeAdminService
+        admin_service = NarrativeAdminService(session)
+        
         loader = NarrativeLoader(session)
         
         # Intentar cargar desde directorio
@@ -76,7 +80,7 @@ async def upload_narrative_command(message: Message, session: AsyncSession, stat
 
 @router.message(NarrativeAdminStates.waiting_for_narrative_file, F.document)
 async def handle_narrative_file(message: Message, session: AsyncSession, state: FSMContext):
-    """Procesa un archivo JSON de fragmento narrativo."""
+    """Procesa un archivo JSON de fragmento narrativo con validación y seguridad."""
     if not message.document:
         await safe_answer(message, "❌ No se detectó ningún documento.")
         return
@@ -94,11 +98,39 @@ async def handle_narrative_file(message: Message, session: AsyncSession, state: 
             await message.bot.download_file(file.file_path, temp_file.name)
             temp_path = temp_file.name
         
-        # Cargar el fragmento
-        loader = NarrativeLoader(session)
-        await loader.load_fragment_from_file(temp_path)
+        # Leer el contenido del archivo para validación
+        with open(temp_path, 'rb') as f:
+            file_content = f.read()
         
-        await safe_answer(message, "✅ **Fragmento Cargado**\n\nEl fragmento narrativo se ha cargado exitosamente.")
+        # Usar el servicio administrativo para cargar con validación
+        from services.narrative_admin_service import NarrativeAdminService
+        admin_service = NarrativeAdminService(session)
+        result = await admin_service.bulk_import_narrative_content(file_content)
+        
+        if result["status"] == "success":
+            await safe_answer(
+                message, 
+                "✅ **Fragmentos Cargados**\n\n"
+                f"Los fragmentos narrativos se han cargado exitosamente.\n"
+                f"Importados: {result['imported_count']}"
+            )
+        elif result["status"] == "partial_success":
+            error_details = "\n".join([
+                f"• Fragmento {frag['key']}: {', '.join(frag['errors'])}"
+                for frag in result.get("failed_fragments", [])
+            ])
+            await safe_answer(
+                message,
+                "⚠️ **Carga Parcialmente Exitosa**\n\n"
+                f"Importados: {result['imported_count']}\n"
+                f"Fallidos: {result['failed_count']}\n\n"
+                f"**Errores:**\n{error_details}"
+            )
+        else:
+            error_msg = result.get("message", "Error desconocido")
+            error_details = "\n".join(result.get("errors", []))
+            full_error = f"{error_msg}\n{error_details}" if error_details else error_msg
+            await safe_answer(message, f"❌ **Error**: {full_error}")
         
     except json.JSONDecodeError as e:
         await safe_answer(message, f"❌ **Error de JSON**: {str(e)}")
@@ -195,5 +227,59 @@ async def reset_user_narrative(message: Message, session: AsyncSession):
             
     except ValueError:
         await safe_answer(message, "❌ ID de usuario inválido.")
+    except Exception as e:
+        await safe_answer(message, f"❌ **Error**: {str(e)}")
+
+@router.message(Command("validate_narrative"))
+async def validate_narrative_command(message: Message, session: AsyncSession):
+    """Valida la consistencia del sistema narrativo."""
+    if not await is_admin(message.from_user.id, session):
+        await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
+        return
+    
+    try:
+        from services.narrative_admin_service import NarrativeAdminService
+        admin_service = NarrativeAdminService(session)
+        
+        # Validar consistencia narrativa
+        report = await admin_service.validate_narrative_consistency()
+        
+        if report["status"] == "ok":
+            await safe_answer(
+                message,
+                "✅ **Validación Exitosa**\n\n"
+                "La narrativa es consistente. No se encontraron problemas.\n\n"
+                f"📊 **Estadísticas:**\n"
+                f"• Fragmentos totales: {report['summary']['total_fragments']}\n"
+                f"• Fragmentos accesibles: {report['summary']['reachable_fragments']}"
+            )
+        elif report["status"] == "empty":
+            await safe_answer(message, "⚠️ **Sin Fragmentos**\n\nNo hay fragmentos narrativos en la base de datos.")
+        elif report["status"] == "error":
+            error_msg = "\n".join(report["issues"])
+            await safe_answer(message, f"❌ **Error de Validación**\n\n{error_msg}")
+        else:  // issues_found
+            orphaned = ", ".join(report["orphaned_fragments"]) if report["orphaned_fragments"] else "Ninguno"
+            dead_ends = ", ".join(report["dead_end_fragments"]) if report["dead_end_fragments"] else "Ninguno"
+            
+            broken_links_text = "\n".join([
+                f"• {link['source']} → {link['destination']} (\"{link['choice_text']}\")"
+                for link in report["broken_links"]
+            ]) if report["broken_links"] else "Ninguno"
+            
+            await safe_answer(
+                message,
+                "⚠️ **Problemas Encontrados**\n\n"
+                f"📊 **Resumen:**\n"
+                f"• Fragmentos totales: {report['summary']['total_fragments']}\n"
+                f"• Fragmentos accesibles: {report['summary']['reachable_fragments']}\n"
+                f"• Fragmentos huérfanos: {report['summary']['orphaned_count']}\n"
+                f"• Fragmentos sin salida: {report['summary']['dead_end_count']}\n"
+                f"• Enlaces rotos: {report['summary']['broken_link_count']}\n\n"
+                f"🔗 **Fragmentos Huérfanos:**\n{orphaned}\n\n"
+                f"🔚 **Fragmentos Sin Salida:**\n{dead_ends}\n\n"
+                f"❌ **Enlaces Rotos:**\n{broken_links_text}"
+            )
+            
     except Exception as e:
         await safe_answer(message, f"❌ **Error**: {str(e)}")
