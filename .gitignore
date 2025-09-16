@@ -30,5 +30,5 @@ share/python-wheels/
 MANIFEST
 
 # Other
-.claude/
+
 .pytest_cache/
