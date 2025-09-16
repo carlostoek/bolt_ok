@@ -258,7 +258,7 @@ async def validate_narrative_command(message: Message, session: AsyncSession):
         elif report["status"] == "error":
             error_msg = "\n".join(report["issues"])
             await safe_answer(message, f"❌ **Error de Validación**\n\n{error_msg}")
-        else:  // issues_found
+        else:  # issues_found
             orphaned = ", ".join(report["orphaned_fragments"]) if report["orphaned_fragments"] else "Ninguno"
             dead_ends = ", ".join(report["dead_end_fragments"]) if report["dead_end_fragments"] else "Ninguno"
             

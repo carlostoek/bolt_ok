@@ -49,7 +49,7 @@ async def show_lore_management_menu(callback: CallbackQuery, session: AsyncSessi
         result = await session.execute(stmt)
         total_lore_pieces = result.scalar()
 
-        stmt = select(func.count(UserLorePiece.id))
+        stmt = select(func.count(UserLorePiece.c.id))
         result = await session.execute(stmt)
         total_unlocks = result.scalar()
 
@@ -252,7 +252,7 @@ async def list_lore_pieces_handler(callback: CallbackQuery, session: AsyncSessio
         else:
             for lore in lore_pieces:
                 # Get unlock count for this lore piece
-                unlock_stmt = select(func.count(UserLorePiece.id)).where(
+                unlock_stmt = select(func.count(UserLorePiece.c.id)).where(
                     UserLorePiece.lore_piece_id == lore.id
                 )
                 unlock_result = await session.execute(unlock_stmt)
@@ -484,14 +484,14 @@ async def show_lore_analytics(callback: CallbackQuery, session: AsyncSession):
         result = await session.execute(stmt)
         total_lore = result.scalar()
 
-        stmt = select(func.count(UserLorePiece.id))
+        stmt = select(func.count(UserLorePiece.c.id))
         result = await session.execute(stmt)
         total_unlocks = result.scalar()
 
         # Top unlocked lore pieces
         stmt = select(
             LorePiece.title,
-            func.count(UserLorePiece.id).label('unlock_count')
+            func.count(UserLorePiece.c.id).label('unlock_count')
         ).join(
             UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id
         ).group_by(
@@ -986,7 +986,7 @@ async def show_detailed_analytics(callback: CallbackQuery, session: AsyncSession
         # Recent activity (last 7 days)
         from datetime import timedelta
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
-        stmt = select(func.count(UserLorePiece.id)).where(
+        stmt = select(func.count(UserLorePiece.c.id)).where(
             UserLorePiece.unlocked_at >= seven_days_ago
         )
         result = await session.execute(stmt)

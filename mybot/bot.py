@@ -210,7 +210,7 @@ async def main() -> None:
             ("combinar_pistas", combinar_pistas.router),
             ("channel_access", channel_access_router),
             ("narrative", narrative_router),
-            ("admin_narrative", admin_narrative_handlers),
+            # admin_narrative_handlers is included in admin_router
             ("test_evaluation", test_evaluation_router),
             ("shop", shop_router),  # Add shop router
         ]

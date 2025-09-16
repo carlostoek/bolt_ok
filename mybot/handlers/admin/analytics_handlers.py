@@ -1,8 +1,8 @@
-\"\"\"
+"""
 Analytics admin handlers router and menu implementation.
 Provides comprehensive analytics dashboard for administrators.
 Implements requirements 4.1 (Analytics and User Journey Tracking) and 4.3 (Character Voice Analytics).
-\"\"\"
+"""
 import logging
 from datetime import datetime, timedelta
 from aiogram import Router, F
@@ -31,18 +31,18 @@ router = Router()
 cache_service = CacheService()
 
 
-@router.callback_query(F.data == \"admin_analytics_main\")
+@router.callback_query(F.data == "admin_analytics_main")
 async def show_analytics_admin_menu(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display the main analytics administration menu with navigation options.
 
     This handler serves as the entry point for all analytics features,
     providing access to user journey tracking, narrative analysis, and
     character voice analytics as specified in requirements 4.1 and 4.3.
-    \"\"\"
+    """
     # Admin authentication check using existing patterns
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         # Initialize cached analytics service
@@ -52,34 +52,34 @@ async def show_analytics_admin_menu(callback: CallbackQuery, session: AsyncSessi
         dashboard_result = await cached_analytics_service.get_comprehensive_dashboard_data()
 
         # Build the analytics admin menu text
-        menu_text = \"📊 **Panel de Análisis Narrativo**\\n\\n\"
-        menu_text += \"Analiza el comportamiento de usuarios, efectividad narrativa y progresión emocional.\\n\\n\"
+        menu_text = "📊 **Panel de Análisis Narrativo**\\n\\n"
+        menu_text += "Analiza el comportamiento de usuarios, efectividad narrativa y progresión emocional.\\n\\n"
 
-        if dashboard_result.get(\"status\") == \"success\":
-            summary = dashboard_result.get(\"summary\", {})
-            data_availability = summary.get(\"data_availability\", {})
+        if dashboard_result.get("status") == "success":
+            summary = dashboard_result.get("summary", {})
+            data_availability = summary.get("data_availability", {})
 
-            menu_text += \"📈 **Estado de Datos:**\\n\"
-            menu_text += f\"• Segmentos de usuarios: {'✅' if data_availability.get('user_segments') else '❌'}\\n\"
-            menu_text += f\"• Patrones de decisiones: {'✅' if data_availability.get('choice_patterns') else '❌'}\\n\"
-            menu_text += f\"• Análisis de personajes: {'✅' if data_availability.get('character_voice') else '❌'}\\n\"
-            menu_text += f\"• Detección de problemas: {'✅' if data_availability.get('bottlenecks') else '❌'}\\n\\n\"
+            menu_text += "📈 **Estado de Datos:**\\n"
+            menu_text += f"• Segmentos de usuarios: {'✅' if data_availability.get('user_segments') else '❌'}\\n"
+            menu_text += f"• Patrones de decisiones: {'✅' if data_availability.get('choice_patterns') else '❌'}\\n"
+            menu_text += f"• Análisis de personajes: {'✅' if data_availability.get('character_voice') else '❌'}\\n"
+            menu_text += f"• Detección de problemas: {'✅' if data_availability.get('bottlenecks') else '❌'}\\n\\n"
 
-            last_updated = summary.get(\"last_updated\")
+            last_updated = summary.get("last_updated")
             if last_updated:
                 try:
                     update_time = datetime.fromisoformat(last_updated.replace('Z', '+00:00'))
-                    menu_text += f\"🕒 **Última actualización:** {update_time.strftime('%d/%m/%Y %H:%M')}\\n\\n\"
+                    menu_text += f"🕒 **Última actualización:** {update_time.strftime('%d/%m/%Y %H:%M')}\\n\\n"
                 except:
                     pass
         else:
-            menu_text += \"📊 **Datos:** Preparando análisis...\\n\\n\"
+            menu_text += "📊 **Datos:** Preparando análisis...\\n\\n"
 
         # Add cache status information
         cache_stats = cached_analytics_service.get_cache_stats()
-        menu_text += f\"💾 **Caché:** {cache_stats.get('backend', 'N/A')} ({cache_stats.get('entries', 0)} entradas)\\n\\n\"
+        menu_text += f"💾 **Caché:** {cache_stats.get('backend', 'N/A')} ({cache_stats.get('entries', 0)} entradas)\\n\\n"
 
-        menu_text += \"**Selecciona una opción para continuar:**\"
+        menu_text += "**Selecciona una opción para continuar:**"
 
         # Get the analytics admin main keyboard
         keyboard = get_analytics_admin_main_kb()
@@ -90,14 +90,14 @@ async def show_analytics_admin_menu(callback: CallbackQuery, session: AsyncSessi
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_main\"
+            "admin_analytics_main"
         )
 
-        logger.info(f\"Analytics admin menu displayed for admin {callback.from_user.id}\")
+        logger.info(f"Analytics admin menu displayed for admin {callback.from_user.id}")
 
     except Exception as e:
-        logger.error(f\"Error showing analytics admin menu for user {callback.from_user.id}: {e}\")
-        await callback.answer(\"❌ Error al cargar el menú de análisis\", show_alert=True)
+        logger.error(f"Error showing analytics admin menu for user {callback.from_user.id}: {e}")
+        await callback.answer("❌ Error al cargar el menú de análisis", show_alert=True)
 
     await callback.answer()
 
@@ -121,17 +121,17 @@ async def analytics_admin_back(callback: CallbackQuery, session: AsyncSession):
         await callback.answer("Error en la navegación", show_alert=True)
 
 
-@router.message(Command(\"analytics_admin\"))
+@router.message(Command("analytics_admin"))
 async def analytics_admin_command(message: Message, session: AsyncSession):
-    \"\"\"
+    """
     Command handler to access analytics administration menu directly.
     Provides alternative access method for administrators.
-    \"\"\"
+    """
     # Admin authentication check using existing patterns
     if not await is_admin(message.from_user.id, session):
         await menu_manager.send_temporary_message(
             message,
-            \"❌ **Acceso Denegado**\\n\\nNo tienes permisos de administrador para acceder al análisis narrativo.\",
+            "❌ **Acceso Denegado**\\n\\nNo tienes permisos de administrador para acceder al análisis narrativo.",
             auto_delete_seconds=5
         )
         return
@@ -144,26 +144,25 @@ async def analytics_admin_command(message: Message, session: AsyncSession):
         dashboard_result = await cached_analytics_service.get_comprehensive_dashboard_data()
 
         # Build the analytics admin menu text
-        menu_text = \"📊 **Panel de Análisis Narrativo**\\n\\n\"
-        menu_text += \"Analiza el comportamiento de usuarios, efectividad narrativa y progresión emocional.\\n\\n\"
+        menu_text = "📊 **Panel de Análisis Narrativo**\\n\\n"
+        menu_text += "Analiza el comportamiento de usuarios, efectividad narrativa y progresión emocional.\\n\\n"
 
-        if dashboard_result.get(\"status\") == \"success\"
-:
-            summary = dashboard_result.get(\"summary\", {})
-            data_availability = summary.get(\"data_availability\", {})
+        if dashboard_result.get("status") == "success":
+            summary = dashboard_result.get("summary", {})
+            data_availability = summary.get("data_availability", {})
 
-            menu_text += \"📈 **Estado de Datos:**\\n\"
+            menu_text += "📈 **Estado de Datos:**\\n"
             available_features = sum(1 for available in data_availability.values() if available)
             total_features = len(data_availability)
-            menu_text += f\"• Funciones disponibles: {available_features}/{total_features}\\n\\n\"
+            menu_text += f"• Funciones disponibles: {available_features}/{total_features}\\n\\n"
         else:
-            menu_text += \"📊 **Datos:** Preparando análisis inicial...\\n\\n\"
+            menu_text += "📊 **Datos:** Preparando análisis inicial...\\n\\n"
 
         # Add cache status information
         cache_stats = cached_analytics_service.get_cache_stats()
-        menu_text += f\"💾 **Caché:** {cache_stats.get('backend', 'N/A')} ({cache_stats.get('entries', 0)} entradas)\\n\\n\"
+        menu_text += f"💾 **Caché:** {cache_stats.get('backend', 'N/A')} ({cache_stats.get('entries', 0)} entradas)\\n\\n"
 
-        menu_text += \"**Selecciona una opción para continuar:**\"
+        menu_text += "**Selecciona una opción para continuar:**"
 
         # Get the analytics admin main keyboard
         keyboard = get_analytics_admin_main_kb()
@@ -174,147 +173,147 @@ async def analytics_admin_command(message: Message, session: AsyncSession):
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_main\"
+            "admin_analytics_main"
         )
 
-        logger.info(f\"Analytics admin menu accessed via command by admin {message.from_user.id}\")
+        logger.info(f"Analytics admin menu accessed via command by admin {message.from_user.id}")
 
     except Exception as e:
-        logger.error(f\"Error in analytics admin command for user {message.from_user.id}: {e}\")
+        logger.error(f"Error in analytics admin command for user {message.from_user.id}: {e}")
         await menu_manager.send_temporary_message(
             message,
-            \"❌ **Error Temporal**\\n\\nNo se pudo cargar el panel de análisis narrativo.\",
+            "❌ **Error Temporal**\\n\\nNo se pudo cargar el panel de análisis narrativo.",
             auto_delete_seconds=5
         )
 
 
 # DASHBOARD AND OVERVIEW HANDLERS
 
-@router.callback_query(F.data == \"admin_analytics_dashboard\")
+@router.callback_query(F.data == "admin_analytics_dashboard")
 async def show_analytics_dashboard(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display comprehensive analytics dashboard with all key metrics.
     Implements requirement 4.1 - Comprehensive Analytics.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         dashboard_data = await cached_analytics_service.get_comprehensive_dashboard_data()
 
-        menu_text = \"📊 **Dashboard de Análisis Completo**\\n\\n\"
+        menu_text = "📊 **Dashboard de Análisis Completo**\\n\\n"
 
-        if dashboard_data.get(\"status\") == \"success\":
+        if dashboard_data.get("status") == "success":
             # User segments summary
-            user_segments = dashboard_data.get(\"user_segments\", {})
-            if user_segments.get(\"status\") == \"success\":
-                segment_counts = user_segments.get(\"segment_counts\", {})
-                menu_text += \"👥 **Segmentos de Usuarios:**\\n\"
-                menu_text += f\"• Whales: {segment_counts.get('whales', 0)}\\n\"
-                menu_text += f\"• Exploradores: {segment_counts.get('explorers', 0)}\\n\"
-                menu_text += f\"• Altamente activos: {segment_counts.get('highly_engaged', 0)}\\n\"
-                menu_text += f\"• Estancados: {segment_counts.get('stalled', 0)}\\n\"
-                menu_text += f\"• Nuevos: {segment_counts.get('new_users', 0)}\\n\\n\"
+            user_segments = dashboard_data.get("user_segments", {})
+            if user_segments.get("status") == "success":
+                segment_counts = user_segments.get("segment_counts", {})
+                menu_text += "👥 **Segmentos de Usuarios:**\\n"
+                menu_text += f"• Whales: {segment_counts.get('whales', 0)}\\n"
+                menu_text += f"• Exploradores: {segment_counts.get('explorers', 0)}\\n"
+                menu_text += f"• Altamente activos: {segment_counts.get('highly_engaged', 0)}\\n"
+                menu_text += f"• Estancados: {segment_counts.get('stalled', 0)}\\n"
+                menu_text += f"• Nuevos: {segment_counts.get('new_users', 0)}\\n\\n"
 
             # Choice patterns summary
-            choice_patterns = dashboard_data.get(\"choice_patterns\", {})
-            if choice_patterns.get(\"status\") == \"success\":
-                summary = choice_patterns.get(\"summary\", {})
-                menu_text += \"🎯 **Patrones de Decisiones:**\\n\"
-                menu_text += f\"• Total decisiones: {summary.get('total_choices_made', 0)}\\n\"
-                menu_text += f\"• Fragmentos analizados: {summary.get('fragments_analyzed', 0)}\\n\"
-                menu_text += f\"• Opciones únicas: {summary.get('unique_choices', 0)}\\n\\n\"
+            choice_patterns = dashboard_data.get("choice_patterns", {})
+            if choice_patterns.get("status") == "success":
+                summary = choice_patterns.get("summary", {})
+                menu_text += "🎯 **Patrones de Decisiones:**\\n"
+                menu_text += f"• Total decisiones: {summary.get('total_choices_made', 0)}\\n"
+                menu_text += f"• Fragmentos analizados: {summary.get('fragments_analyzed', 0)}\\n"
+                menu_text += f"• Opciones únicas: {summary.get('unique_choices', 0)}\\n\\n"
 
             # Bottlenecks summary
-            bottlenecks = dashboard_data.get(\"bottlenecks\", {})
-            if bottlenecks.get(\"status\") == \"success\":
-                bottleneck_summary = bottlenecks.get(\"summary\", {})
-                menu_text += \"⚠️ **Cuellos de Botella:**\\n\"
-                menu_text += f\"• Críticos: {bottleneck_summary.get('critical_bottlenecks', 0)}\\n\"
-                menu_text += f\"• Advertencias: {bottleneck_summary.get('warning_bottlenecks', 0)}\\n\"
-                menu_text += f\"• Usuarios estancados: {bottleneck_summary.get('stalled_users_count', 0)}\\n\\n\"
+            bottlenecks = dashboard_data.get("bottlenecks", {})
+            if bottlenecks.get("status") == "success":
+                bottleneck_summary = bottlenecks.get("summary", {})
+                menu_text += "⚠️ **Cuellos de Botella:**\\n"
+                menu_text += f"• Críticos: {bottleneck_summary.get('critical_bottlenecks', 0)}\\n"
+                menu_text += f"• Advertencias: {bottleneck_summary.get('warning_bottlenecks', 0)}\\n"
+                menu_text += f"• Usuarios estancados: {bottleneck_summary.get('stalled_users_count', 0)}\\n\\n"
 
             # Character voice summary
-            character_voice = dashboard_data.get(\"character_voice\", {})
-            if character_voice.get(\"status\") == \"success\":
-                insights = character_voice.get(\"insights\", {})
-                menu_text += \"🎭 **Análisis de Personajes:**\\n\"
-                menu_text += f\"• Interacciones totales: {insights.get('total_tracked_interactions', 0)}\\n\"
-                menu_text += f\"• Emociones rastreadas: {insights.get('emotions_tracked', 0)}\\n\"
+            character_voice = dashboard_data.get("character_voice", {})
+            if character_voice.get("status") == "success":
+                insights = character_voice.get("insights", {})
+                menu_text += "🎭 **Análisis de Personajes:**\\n"
+                menu_text += f"• Interacciones totales: {insights.get('total_tracked_interactions', 0)}\\n"
+                menu_text += f"• Emociones rastreadas: {insights.get('emotions_tracked', 0)}\\n"
 
-                most_effective = insights.get(\"most_effective_character\")
+                most_effective = insights.get("most_effective_character")
                 if most_effective:
-                    menu_text += f\"• Más efectivo: {most_effective.get('name', 'N/A')}\\n\\n\"
+                    menu_text += f"• Más efectivo: {most_effective.get('name', 'N/A')}\\n\\n"
                 else:
-                    menu_text += \"\\n\"
+                    menu_text += "\\n"
         else:
-            menu_text += \"❌ Error al cargar datos del dashboard.\\n\\n\"
+            menu_text += "❌ Error al cargar datos del dashboard.\\n\\n"
 
         # Add cache information
         cache_stats = cached_analytics_service.get_cache_stats()
-        menu_text += f\"💾 **Caché:** {cache_stats.get('backend', 'N/A')}\\n\"
+        menu_text += f"💾 **Caché:** {cache_stats.get('backend', 'N/A')}\\n"
 
-        keyboard = get_analytics_detail_kb(\"dashboard\")
+        keyboard = get_analytics_detail_kb("dashboard")
 
         await menu_manager.update_menu(
             callback,
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_dashboard\"
+            "admin_analytics_dashboard"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing analytics dashboard: {e}\")
-        await callback.answer(\"Error al cargar el dashboard\", show_alert=True)
+        logger.error(f"Error showing analytics dashboard: {e}")
+        await callback.answer("Error al cargar el dashboard", show_alert=True)
 
     await callback.answer()
 
 
 # USER SEGMENTS HANDLERS
 
-@router.callback_query(F.data == \"admin_analytics_segments\")
+@router.callback_query(F.data == "admin_analytics_segments")
 async def show_user_segments(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display user segmentation analysis menu.
     Implements requirement 4.1 - User Journey Tracking.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         segments_data = await cached_analytics_service.generate_user_segment_analysis()
 
-        menu_text = \"👥 **Análisis de Segmentos de Usuarios**\\n\\n\"
+        menu_text = "👥 **Análisis de Segmentos de Usuarios**\\n\\n"
 
-        if segments_data.get(\"status\") == \"success\";
-            segment_counts = segments_data.get(\"segment_counts\", {})
+        if segments_data.get("status") == "success":
+            segment_counts = segments_data.get("segment_counts", {})
             total_users = sum(segment_counts.values())
 
-            menu_text += f\"📊 **Total de usuarios analizados:** {total_users}\\n\\n\"
+            menu_text += f"📊 **Total de usuarios analizados:** {total_users}\\n\\n"
 
             for segment, count in segment_counts.items():
                 percentage = round((count / total_users * 100), 1) if total_users > 0 else 0
                 segment_emoji = {
-                    \"whales\": \"🐋\",
-                    \"explorers\": \"🗺️\",
-                    \"highly_engaged\": \"🔥\",
-                    \"stalled\": \"😴\",
-                    \"new_users\": \"👶\",
-                    \"inactive\": \"💤\"
+                    "whales": "🐋",
+                    "explorers": "🗺️",
+                    "highly_engaged": "🔥",
+                    "stalled": "😴",
+                    "new_users": "👶",
+                    "inactive": "💤"
                 }
 
-                emoji = segment_emoji.get(segment, \"👤\")
-                segment_name = segment.replace(\"_\", \" \").title()
-                menu_text += f\"{emoji} **{segment_name}:** {count} ({percentage}%)\\n\"
+                emoji = segment_emoji.get(segment, "👤")
+                segment_name = segment.replace("_", " ").title()
+                menu_text += f"{emoji} **{segment_name}:** {count} ({percentage}%)\\n"
 
-            menu_text += f\"\\n🕒 **Generado:** {segments_data.get('generated_at', 'N/A')}\\n\\n\"
+            menu_text += f"\\n🕒 **Generado:** {segments_data.get('generated_at', 'N/A')}\\n\\n"
         else:
-            menu_text += \"❌ No hay datos de segmentación disponibles.\\n\\n\"
+            menu_text += "❌ No hay datos de segmentación disponibles.\\n\\n"
 
-        menu_text += \"**Selecciona un segmento para análisis detallado:**\"
+        menu_text += "**Selecciona un segmento para análisis detallado:**"
 
         keyboard = get_user_segments_kb()
 
@@ -323,12 +322,12 @@ async def show_user_segments(callback: CallbackQuery, session: AsyncSession):
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_segments\"
+            "admin_analytics_segments"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing user segments: {e}\")
-        await callback.answer(\"Error al cargar segmentos\", show_alert=True)
+        logger.error(f"Error showing user segments: {e}")
+        await callback.answer("Error al cargar segmentos", show_alert=True)
 
     await callback.answer()
 
@@ -375,41 +374,41 @@ async def show_fragment_analytics(callback: CallbackQuery, session: AsyncSession
 
 # CHOICE PATTERNS HANDLERS
 
-@router.callback_query(F.data == \"admin_analytics_choices\")
+@router.callback_query(F.data == "admin_analytics_choices")
 async def show_choice_patterns(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display choice distribution patterns and decision analysis.
     Implements requirement 4.1 - Choice patterns tracking.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         choice_data = await cached_analytics_service.analyze_choice_distribution_patterns()
 
-        menu_text = \"🎯 **Análisis de Patrones de Decisiones**\\n\\n\"
+        menu_text = "🎯 **Análisis de Patrones de Decisiones**\\n\\n"
 
-        if choice_data.get(\"status\") == \"success\":
-            summary = choice_data.get(\"summary\", {})
-            menu_text += f\"📊 **Resumen:**\\n\"
-            menu_text += f\"• Total decisiones tomadas: {summary.get('total_choices_made', 0)}\\n\"
-            menu_text += f\"• Fragmentos analizados: {summary.get('fragments_analyzed', 0)}\\n\"
-            menu_text += f\"• Opciones únicas: {summary.get('unique_choices', 0)}\\n\\n\"
+        if choice_data.get("status") == "success":
+            summary = choice_data.get("summary", {})
+            menu_text += f"📊 **Resumen:**\\n"
+            menu_text += f"• Total decisiones tomadas: {summary.get('total_choices_made', 0)}\\n"
+            menu_text += f"• Fragmentos analizados: {summary.get('fragments_analyzed', 0)}\\n"
+            menu_text += f"• Opciones únicas: {summary.get('unique_choices', 0)}\\n\\n"
 
             # Show top choices
-            most_popular = choice_data.get(\"most_popular_choices\", [])
+            most_popular = choice_data.get("most_popular_choices", [])
             if most_popular:
-                menu_text += \"⭐ **Decisiones más populares:**\\n\"
+                menu_text += "⭐ **Decisiones más populares:**\\n"
                 for i, (choice_id, count) in enumerate(most_popular[:3], 1):
-                    menu_text += f\"{i}. Opción {choice_id}: {count} veces\\n\"
-                menu_text += \"\\n\"
+                    menu_text += f"{i}. Opción {choice_id}: {count} veces\\n"
+                menu_text += "\\n"
 
-            menu_text += f\"🕒 **Generado:** {choice_data.get('generated_at', 'N/A')}\\n\\n\"
+            menu_text += f"🕒 **Generado:** {choice_data.get('generated_at', 'N/A')}\\n\\n"
         else:
-            menu_text += \"❌ No hay datos de patrones de decisiones disponibles.\\n\\n\"
+            menu_text += "❌ No hay datos de patrones de decisiones disponibles.\\n\\n"
 
-        menu_text += \"**Selecciona el tipo de análisis:**\"
+        menu_text += "**Selecciona el tipo de análisis:**"
 
         keyboard = get_choice_patterns_kb()
 
@@ -418,66 +417,66 @@ async def show_choice_patterns(callback: CallbackQuery, session: AsyncSession):
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_choices\"
+            "admin_analytics_choices"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing choice patterns: {e}\")
-        await callback.answer(\"Error al cargar patrones de decisiones\", show_alert=True)
+        logger.error(f"Error showing choice patterns: {e}")
+        await callback.answer("Error al cargar patrones de decisiones", show_alert=True)
 
     await callback.answer()
 
 
 # BOTTLENECKS HANDLERS
 
-@router.callback_query(F.data == \"admin_analytics_bottlenecks\")
+@router.callback_query(F.data == "admin_analytics_bottlenecks")
 async def show_bottlenecks_analysis(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display narrative bottlenecks and problem detection.
     Implements requirement 4.1 - Drop-off points and progression issues.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         bottlenecks_data = await cached_analytics_service.identify_narrative_bottlenecks()
 
-        menu_text = \"⚠️ **Análisis de Cuellos de Botella**\\n\\n\"
+        menu_text = "⚠️ **Análisis de Cuellos de Botella**\\n\\n"
 
-        if bottlenecks_data.get(\"status\") == \"success\":
-            summary = bottlenecks_data.get(\"summary\", {})
-            menu_text += f\"📊 **Resumen:**\\n\"
-            menu_text += f\"• Fragmentos analizados: {summary.get('total_fragments_analyzed', 0)}\\n\"
-            menu_text += f\"• Problemas críticos: {summary.get('critical_bottlenecks', 0)}\\n\"
-            menu_text += f\"• Advertencias: {summary.get('warning_bottlenecks', 0)}\\n\"
-            menu_text += f\"• Usuarios estancados: {summary.get('stalled_users_count', 0)}\\n\\n\"
+        if bottlenecks_data.get("status") == "success":
+            summary = bottlenecks_data.get("summary", {})
+            menu_text += f"📊 **Resumen:**\\n"
+            menu_text += f"• Fragmentos analizados: {summary.get('total_fragments_analyzed', 0)}\\n"
+            menu_text += f"• Problemas críticos: {summary.get('critical_bottlenecks', 0)}\\n"
+            menu_text += f"• Advertencias: {summary.get('warning_bottlenecks', 0)}\\n"
+            menu_text += f"• Usuarios estancados: {summary.get('stalled_users_count', 0)}\\n\\n"
 
             # Show critical bottlenecks
-            bottlenecks = bottlenecks_data.get(\"bottlenecks\", [])
-            critical_bottlenecks = [b for b in bottlenecks if b.get(\"severity\") == \"critical\"]
+            bottlenecks = bottlenecks_data.get("bottlenecks", [])
+            critical_bottlenecks = [b for b in bottlenecks if b.get("severity") == "critical"]
 
             if critical_bottlenecks:
-                menu_text += \"🔴 **Problemas críticos detectados:**\\n\"
+                menu_text += "🔴 **Problemas críticos detectados:**\\n"
                 for bottleneck in critical_bottlenecks[:3]:
-                    fragment_key = bottleneck.get(\"fragment_key\", \"N/A\")
-                    drop_off_rate = bottleneck.get(\"drop_off_rate\", 0)
-                    menu_text += f\"• {fragment_key}: {drop_off_rate}% abandono\\n\"
-                menu_text += \"\\n\"
+                    fragment_key = bottleneck.get("fragment_key", "N/A")
+                    drop_off_rate = bottleneck.get("drop_off_rate", 0)
+                    menu_text += f"• {fragment_key}: {drop_off_rate}% abandono\\n"
+                menu_text += "\\n"
 
             # Show recommendations
-            recommendations = bottlenecks_data.get(\"recommendations\", [])
+            recommendations = bottlenecks_data.get("recommendations", [])
             if recommendations:
-                menu_text += \"💡 **Recomendaciones:**\\n\"
+                menu_text += "💡 **Recomendaciones:**\\n"
                 for i, rec in enumerate(recommendations[:2], 1):
-                    menu_text += f\"{i}. {rec}\\n\"
-                menu_text += \"\\n\"
+                    menu_text += f"{i}. {rec}\\n"
+                menu_text += "\\n"
 
-            menu_text += f\"🕒 **Generado:** {bottlenecks_data.get('generated_at', 'N/A')}\\n\\n\"
+            menu_text += f"🕒 **Generado:** {bottlenecks_data.get('generated_at', 'N/A')}\\n\\n"
         else:
-            menu_text += \"❌ No hay datos de cuellos de botella disponibles.\\n\\n\"
+            menu_text += "❌ No hay datos de cuellos de botella disponibles.\\n\\n"
 
-        menu_text += \"**Selecciona el tipo de análisis:**\"
+        menu_text += "**Selecciona el tipo de análisis:**"
 
         keyboard = get_bottlenecks_kb()
 
@@ -486,70 +485,70 @@ async def show_bottlenecks_analysis(callback: CallbackQuery, session: AsyncSessi
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_bottlenecks\"
+            "admin_analytics_bottlenecks"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing bottlenecks analysis: {e}\")
-        await callback.answer(\"Error al cargar análisis de cuellos de botella\", show_alert=True)
+        logger.error(f"Error showing bottlenecks analysis: {e}")
+        await callback.answer("Error al cargar análisis de cuellos de botella", show_alert=True)
 
     await callback.answer()
 
 
 # CHARACTER VOICE ANALYTICS HANDLERS
 
-@router.callback_query(F.data == \"admin_analytics_characters\")
+@router.callback_query(F.data == "admin_analytics_characters")
 async def show_character_voice_analytics(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display character voice and emotional progression analytics.
     Implements requirement 4.3 - Character Voice and Emotional Intelligence Analytics.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         character_data = await cached_analytics_service.get_character_voice_analytics()
 
-        menu_text = \"🎭 **Análisis de Voz de Personajes**\\n\\n\"
+        menu_text = "🎭 **Análisis de Voz de Personajes**\\n\\n"
 
-        if character_data.get(\"status\") == \"success\":
-            insights = character_data.get(\"insights\", {})
+        if character_data.get("status") == "success":
+            insights = character_data.get("insights", {})
 
-            menu_text += f\"📊 **Resumen:**\\n\"
-            menu_text += f\"• Interacciones totales: {insights.get('total_tracked_interactions', 0)}\\n\"
-            menu_text += f\"• Emociones rastreadas: {insights.get('emotions_tracked', 0)}\\n\\n\"
+            menu_text += f"📊 **Resumen:**\\n"
+            menu_text += f"• Interacciones totales: {insights.get('total_tracked_interactions', 0)}\\n"
+            menu_text += f"• Emociones rastreadas: {insights.get('emotions_tracked', 0)}\\n\\n"
 
             # Most effective character
-            most_effective = insights.get(\"most_effective_character\")
+            most_effective = insights.get("most_effective_character")
             if most_effective:
-                menu_text += f\"🏆 **Personaje más efectivo:**\\n\"
-                menu_text += f\"• {most_effective.get('name', 'N/A')}\\n\"
-                menu_text += f\"• Score: {most_effective.get('engagement_score', 0)}\\n\\n\"
+                menu_text += f"🏆 **Personaje más efectivo:**\\n"
+                menu_text += f"• {most_effective.get('name', 'N/A')}\\n"
+                menu_text += f"• Score: {most_effective.get('engagement_score', 0)}\\n\\n"
 
             # Dominant emotion
-            dominant_emotion = insights.get(\"dominant_emotion\")
+            dominant_emotion = insights.get("dominant_emotion")
             if dominant_emotion:
-                menu_text += f\"💭 **Emoción dominante:**\\n\"
-                menu_text += f\"• {dominant_emotion.get('emotion', 'N/A')}\\n\"
-                menu_text += f\"• Ocurrencias: {dominant_emotion.get('occurrences', 0)}\\n\"
-                menu_text += f\"• Intensidad promedio: {dominant_emotion.get('average_intensity', 0)}\\n\\n\"
+                menu_text += f"💭 **Emoción dominante:**\\n"
+                menu_text += f"• {dominant_emotion.get('emotion', 'N/A')}\\n"
+                menu_text += f"• Ocurrencias: {dominant_emotion.get('occurrences', 0)}\\n"
+                menu_text += f"• Intensidad promedio: {dominant_emotion.get('average_intensity', 0)}\\n\\n"
 
             # Character effectiveness
-            character_analytics = character_data.get(\"character_analytics\", {})
+            character_analytics = character_data.get("character_analytics", {})
             if character_analytics:
-                menu_text += \"🎯 **Efectividad por personaje:**\\n\"
+                menu_text += "🎯 **Efectividad por personaje:**\\n"
                 for char_name, stats in list(character_analytics.items())[:3]:
-                    interactions = stats.get(\"total_interactions\", 0)
-                    score = stats.get(\"engagement_score\", 0)
-                    menu_text += f\"• {char_name}: {interactions} interacciones ({score:.1f}%)\\n\"
-                menu_text += \"\\n\"
+                    interactions = stats.get("total_interactions", 0)
+                    score = stats.get("engagement_score", 0)
+                    menu_text += f"• {char_name}: {interactions} interacciones ({score:.1f}%)\\n"
+                menu_text += "\\n"
 
-            menu_text += f\"🕒 **Generado:** {character_data.get('generated_at', 'N/A')}\\n\\n\"
+            menu_text += f"🕒 **Generado:** {character_data.get('generated_at', 'N/A')}\\n\\n"
         else:
-            menu_text += \"❌ No hay datos de análisis de personajes disponibles.\\n\\n\"
+            menu_text += "❌ No hay datos de análisis de personajes disponibles.\\n\\n"
 
-        menu_text += \"**Selecciona el tipo de análisis:**\"
+        menu_text += "**Selecciona el tipo de análisis:**"
 
         keyboard = get_character_voice_kb()
 
@@ -558,12 +557,12 @@ async def show_character_voice_analytics(callback: CallbackQuery, session: Async
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_characters\"
+            "admin_analytics_characters"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing character voice analytics: {e}\")
-        await callback.answer(\"Error al cargar análisis de personajes\", show_alert=True)
+        logger.error(f"Error showing character voice analytics: {e}")
+        await callback.answer("Error al cargar análisis de personajes", show_alert=True)
 
     await callback.answer()
 
@@ -838,43 +837,43 @@ async def show_report_generation(callback: CallbackQuery, session: AsyncSession)
     await callback.answer()
 
 
-@router.callback_query(F.data == \"admin_analytics_insights\")
+@router.callback_query(F.data == "admin_analytics_insights")
 async def show_analytics_insights(callback: CallbackQuery, session: AsyncSession):
-    \"\"\"
+    """
     Display AI-powered analytics insights.
     Implements advanced analytics with AI recommendations.
-    \"\"\"
+    """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer(\"❌ Acceso denegado\", show_alert=True)
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
 
     try:
-        menu_text = \"💡 **Insights y Recomendaciones IA**\\n\\n\"
-        menu_text += \"Análisis automatizado con recomendaciones inteligentes para optimizar la narrativa.\\n\\n\"
+        menu_text = "💡 **Insights y Recomendaciones IA**\\n\\n"
+        menu_text += "Análisis automatizado con recomendaciones inteligentes para optimizar la narrativa.\\n\\n"
 
         # Get insights from analytics data
         cached_analytics_service = CachedAnalyticsService(session, cache_service)
         dashboard_data = await cached_analytics_service.get_comprehensive_dashboard_data()
 
         insights_generated = 0
-        if dashboard_data.get(\"status\") == \"success\":
+        if dashboard_data.get("status") == "success":
             # Count available insights
-            bottlenecks = dashboard_data.get(\"bottlenecks\", {})
-            if bottlenecks.get(\"status\") == \"success\":
-                recommendations = bottlenecks.get(\"recommendations\", [])
+            bottlenecks = dashboard_data.get("bottlenecks", {})
+            if bottlenecks.get("status") == "success":
+                recommendations = bottlenecks.get("recommendations", [])
                 insights_generated += len(recommendations)
 
-            character_data = dashboard_data.get(\"character_voice\", {})
-            if character_data.get(\"status\") == \"success\":
-                insights = character_data.get(\"insights\", {})
+            character_data = dashboard_data.get("character_voice", {})
+            if character_data.get("status") == "success":
+                insights = character_data.get("insights", {})
                 if insights:
                     insights_generated += 1
 
-        menu_text += f\"🤖 **Estado de insights:**\\n\"
-        menu_text += f\"• Insights generados: {insights_generated}\\n\"
-        menu_text += f\"• Análisis IA disponible: {'✅' if insights_generated > 0 else '⏳'}\\n\"
-        menu_text += f\"• Recomendaciones activas: {insights_generated}\\n\\n\"
+        menu_text += f"🤖 **Estado de insights:**\\n"
+        menu_text += f"• Insights generados: {insights_generated}\\n"
+        menu_text += f"• Análisis IA disponible: {'✅' if insights_generated > 0 else '⏳'}\\n"
+        menu_text += f"• Recomendaciones activas: {insights_generated}\\n\\n"
 
-        menu_text += \"**Selecciona el tipo de análisis:**\"
+        menu_text += "**Selecciona el tipo de análisis:**"
 
         keyboard = get_analytics_insights_kb()
 
@@ -883,12 +882,12 @@ async def show_analytics_insights(callback: CallbackQuery, session: AsyncSession
             menu_text,
             keyboard,
             session,
-            \"admin_analytics_insights\"
+            "admin_analytics_insights"
         )
 
     except Exception as e:
-        logger.error(f\"Error showing analytics insights: {e}\")
-        await callback.answer(\"Error al cargar insights\", show_alert=True)
+        logger.error(f"Error showing analytics insights: {e}")
+        await callback.answer("Error al cargar insights", show_alert=True)
 
     await callback.answer()
 

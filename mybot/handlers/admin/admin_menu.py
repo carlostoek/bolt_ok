@@ -35,6 +35,10 @@ from .event_admin import router as event_admin_router
 from .admin_config import router as admin_config_router
 from .shop_admin import router as shop_admin_router
 from .analytics_handlers import router as analytics_router
+from .lore_admin_handlers import router as lore_admin_router
+
+# Include narrative admin handlers from root handlers directory
+from ..admin_narrative_handlers import router as narrative_handlers_router
 
 router.include_router(vip_router)
 router.include_router(free_router)
@@ -46,6 +50,8 @@ router.include_router(event_admin_router)
 router.include_router(admin_config_router)
 router.include_router(shop_admin_router)
 router.include_router(analytics_router)
+router.include_router(lore_admin_router)
+router.include_router(narrative_handlers_router)
 
 @router.message(Command("admin"))
 async def admin_start(message: Message, session: AsyncSession):
@@ -361,8 +367,319 @@ async def admin_free_channel_redirect(callback: CallbackQuery, session: AsyncSes
     await free_channel_admin_menu(callback, session)
 
 
+# COMPREHENSIVE NARRATIVE MANAGEMENT
+
+@router.callback_query(F.data == "admin_narrative_main")
+async def show_narrative_admin_main(callback: CallbackQuery, session: AsyncSession):
+    """
+    Display the main narrative administration menu with comprehensive management options.
+
+    This handler serves as the central entry point for all narrative management features,
+    implementing requirements 1.1 (Enhanced Narrative Content Management System) and
+    4.1 (Comprehensive Analytics and User Journey Tracking).
+    """
+    # Admin authentication check using existing patterns
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        # Get narrative system overview statistics
+        from sqlalchemy import select, func
+        from database.narrative_models import StoryFragment, UserNarrativeState
+        from database.models import LorePiece, UserLorePiece
+
+        # Count story fragments
+        fragments_stmt = select(func.count()).select_from(StoryFragment)
+        fragments_result = await session.execute(fragments_stmt)
+        total_fragments = fragments_result.scalar() or 0
+
+        # Count lore pieces
+        lore_stmt = select(func.count()).select_from(LorePiece).where(LorePiece.is_active == True)
+        lore_result = await session.execute(lore_stmt)
+        total_lore = lore_result.scalar() or 0
+
+        # Count active users in narrative system
+        users_stmt = select(func.count()).select_from(UserNarrativeState)
+        users_result = await session.execute(users_stmt)
+        active_users = users_result.scalar() or 0
+
+        # Build comprehensive narrative admin menu text
+        menu_text = "📚 **Panel de Gestión Narrativa Integral**\n\n"
+        menu_text += "Centro de administración para todo el contenido narrativo del sistema.\n\n"
+
+        menu_text += "📊 **Estado del Sistema:**\n"
+        menu_text += f"• Fragmentos narrativos: {total_fragments}\n"
+        menu_text += f"• Piezas de lore: {total_lore}\n"
+        menu_text += f"• Usuarios activos: {active_users}\n\n"
+
+        menu_text += "**🎯 Funciones disponibles:**\n"
+        menu_text += "• Gestión completa de fragmentos narrativos\n"
+        menu_text += "• Administración de contenido de lore\n"
+        menu_text += "• Analytics y seguimiento de usuarios\n"
+        menu_text += "• Validación de consistencia narrativa\n"
+        menu_text += "• Herramientas de monitoreo del sistema\n\n"
+
+        menu_text += "**Selecciona una opción para continuar:**"
+
+        # Get the narrative admin main keyboard
+        from keyboards.admin_narrative_kb import get_narrative_admin_main_kb
+        keyboard = get_narrative_admin_main_kb()
+
+        # Update the menu using existing menu manager pattern
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_narrative_main"
+        )
+
+        logger.info(f"Narrative admin main menu displayed for admin {callback.from_user.id}")
+
+    except Exception as e:
+        logger.error(f"Error showing narrative admin main menu for user {callback.from_user.id}: {e}")
+        await callback.answer("❌ Error al cargar el panel de gestión narrativa", show_alert=True)
+
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_narrative_fragments")
+async def show_narrative_fragments_menu(callback: CallbackQuery, session: AsyncSession):
+    """
+    Display the story fragments management menu.
+
+    Implements requirement 1.1 - Story fragment management organized by level and progression path.
+    """
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        from keyboards.admin_narrative_kb import get_fragment_management_kb
+
+        menu_text = "📖 **Gestión de Fragmentos Narrativos**\n\n"
+        menu_text += "Administra todos los fragmentos de la historia organizados por nivel y ruta de progresión.\n\n"
+
+        menu_text += "**🔧 Herramientas disponibles:**\n"
+        menu_text += "• Crear nuevos fragmentos con editor enriquecido\n"
+        menu_text += "• Editar fragmentos existentes preservando la integridad\n"
+        menu_text += "• Organizar por nivel y ruta de progresión\n"
+        menu_text += "• Configurar condiciones de acceso complejas\n"
+        menu_text += "• Validar consistencia narrativa automáticamente\n\n"
+
+        menu_text += "**Selecciona una acción:**"
+
+        keyboard = get_fragment_management_kb()
+
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_narrative_fragments"
+        )
+
+    except Exception as e:
+        logger.error(f"Error showing fragments menu: {e}")
+        await callback.answer("❌ Error al cargar gestión de fragmentos", show_alert=True)
+
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_narrative_analytics")
+async def show_narrative_analytics_menu(callback: CallbackQuery, session: AsyncSession):
+    """
+    Display narrative-specific analytics menu with direct integration to analytics system.
+
+    Implements requirement 4.1 - Analytics integration from narrative admin panel.
+    """
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        # Redirect to the comprehensive analytics admin menu with narrative focus
+        from .analytics_handlers import show_analytics_admin_menu
+        await show_analytics_admin_menu(callback, session)
+
+    except Exception as e:
+        logger.error(f"Error showing narrative analytics: {e}")
+        await callback.answer("❌ Error al cargar analytics narrativos", show_alert=True)
+
+@router.callback_query(F.data == "admin_narrative_validate")
+async def validate_narrative_system(callback: CallbackQuery, session: AsyncSession):
+    """
+    Perform comprehensive narrative system validation.
+
+    Implements requirement 1.1 - Narrative consistency validation and system health monitoring.
+    """
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        await callback.answer("🔍 Ejecutando validación completa del sistema narrativo...", show_alert=False)
+
+        from services.narrative_admin_service import NarrativeAdminService
+        admin_service = NarrativeAdminService(session)
+
+        # Perform comprehensive validation
+        report = await admin_service.validate_narrative_consistency()
+
+        menu_text = "🔍 **Validación del Sistema Narrativo**\n\n"
+
+        if report["status"] == "ok":
+            menu_text += "✅ **Sistema Consistente**\n\n"
+            menu_text += "La narrativa es consistente y no se encontraron problemas.\n\n"
+            menu_text += f"📊 **Estadísticas:**\n"
+            menu_text += f"• Fragmentos totales: {report['summary']['total_fragments']}\n"
+            menu_text += f"• Fragmentos accesibles: {report['summary']['reachable_fragments']}\n"
+            menu_text += f"• Integridad: 100%\n\n"
+            menu_text += "🏥 **Estado del sistema:** Saludable"
+
+        elif report["status"] == "empty":
+            menu_text += "⚠️ **Sistema Vacío**\n\n"
+            menu_text += "No hay fragmentos narrativos en la base de datos.\n"
+            menu_text += "Considera cargar contenido narrativo inicial."
+
+        elif report["status"] == "error":
+            menu_text += "❌ **Errores Críticos Detectados**\n\n"
+            error_msg = "\n".join(report["issues"])
+            menu_text += f"{error_msg}\n\n"
+            menu_text += "🚨 **Acción requerida:** Revisar y corregir errores críticos."
+
+        else:  # issues_found
+            menu_text += "⚠️ **Problemas Detectados**\n\n"
+
+            summary = report['summary']
+            menu_text += f"📊 **Resumen:**\n"
+            menu_text += f"• Fragmentos totales: {summary['total_fragments']}\n"
+            menu_text += f"• Fragmentos accesibles: {summary['reachable_fragments']}\n"
+            menu_text += f"• Fragmentos huérfanos: {summary['orphaned_count']}\n"
+            menu_text += f"• Enlaces rotos: {summary['broken_link_count']}\n\n"
+
+            # Show specific issues
+            if report.get("orphaned_fragments"):
+                orphaned = ", ".join(report["orphaned_fragments"][:3])
+                if len(report["orphaned_fragments"]) > 3:
+                    orphaned += f" y {len(report['orphaned_fragments']) - 3} más"
+                menu_text += f"🔗 **Fragmentos huérfanos:** {orphaned}\n"
+
+            if report.get("broken_links"):
+                broken_count = len(report["broken_links"])
+                menu_text += f"❌ **Enlaces rotos:** {broken_count} detectados\n"
+
+            menu_text += "\n💡 **Recomendación:** Revisar y corregir problemas detectados."
+
+        from keyboards.common import get_back_kb
+        keyboard = get_back_kb("admin_narrative_main")
+
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_narrative_validate"
+        )
+
+        logger.info(f"Narrative validation performed by admin {callback.from_user.id}: {report['status']}")
+
+    except Exception as e:
+        logger.error(f"Error in narrative validation: {e}")
+        await callback.answer("❌ Error al validar el sistema narrativo", show_alert=True)
+
+@router.callback_query(F.data == "admin_narrative_import")
+async def show_narrative_import_menu(callback: CallbackQuery, session: AsyncSession):
+    """
+    Display bulk import options for narrative content.
+
+    Implements requirement 1.1 - Bulk content management capabilities.
+    """
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        menu_text = "📦 **Importación Masiva de Contenido**\n\n"
+        menu_text += "Importa y gestiona contenido narrativo en lote desde archivos estructurados.\n\n"
+
+        menu_text += "**📁 Formatos soportados:**\n"
+        menu_text += "• JSON - Fragmentos narrativos estructurados\n"
+        menu_text += "• CSV - Datos tabulares de lore\n"
+        menu_text += "• Archivos de texto - Contenido narrativo\n\n"
+
+        menu_text += "**🔧 Herramientas disponibles:**\n"
+        menu_text += "• Validación automática de consistencia\n"
+        menu_text += "• Importación por lotes con rollback\n"
+        menu_text += "• Verificación de dependencias\n"
+        menu_text += "• Mapeo automático de referencias\n\n"
+
+        menu_text += "**🚀 Para importar contenido:**\n"
+        menu_text += "Usa el comando `/upload_narrative` y sigue las instrucciones.\n\n"
+
+        menu_text += "**📋 Comando de carga directa:**\n"
+        menu_text += "Usa `/load_narrative` para cargar desde el directorio del sistema."
+
+        from keyboards.common import get_back_kb
+        keyboard = get_back_kb("admin_narrative_main")
+
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_narrative_import"
+        )
+
+    except Exception as e:
+        logger.error(f"Error showing import menu: {e}")
+        await callback.answer("❌ Error al cargar menú de importación", show_alert=True)
+
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_narrative_user_tools")
+async def show_narrative_user_tools(callback: CallbackQuery, session: AsyncSession):
+    """
+    Display user management tools for narrative system.
+
+    Implements requirement 4.1 - User journey tracking and admin management tools.
+    """
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        menu_text = "🎮 **Herramientas de Gestión de Usuarios**\n\n"
+        menu_text += "Administra usuarios, progreso narrativo y seguimiento del sistema.\n\n"
+
+        menu_text += "**🔧 Herramientas disponibles:**\n"
+        menu_text += "• Resetear progreso narrativo de usuarios\n"
+        menu_text += "• Otorgar pistas y fragmentos específicos\n"
+        menu_text += "• Ver progreso detallado de usuarios\n"
+        menu_text += "• Gestionar estados de progresión\n"
+        menu_text += "• Herramientas de debugging narrativo\n\n"
+
+        menu_text += "**📋 Comandos administrativos:**\n"
+        menu_text += "• `/give_hint <user_id> <hint_code>` - Otorgar pista\n"
+        menu_text += "• `/reset_narrative <user_id>` - Reiniciar progreso\n"
+        menu_text += "• `/narrative_stats` - Ver estadísticas del sistema\n"
+        menu_text += "• `/validate_narrative` - Validar consistencia\n\n"
+
+        menu_text += "**⚡ Acceso rápido:**\n"
+        menu_text += "Usa los comandos directamente o navega por las opciones del menú."
+
+        from keyboards.common import get_back_kb
+        keyboard = get_back_kb("admin_narrative_main")
+
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_narrative_user_tools"
+        )
+
+    except Exception as e:
+        logger.error(f"Error showing user tools: {e}")
+        await callback.answer("❌ Error al cargar herramientas de usuario", show_alert=True)
+
+    await callback.answer()
+
 @router.message(F.text.startswith("/give_hint "))
-async def cmd_give_hint(message: Message):
+async def cmd_give_hint(message: Message, session: AsyncSession):
     """Comando de admin para dar una pista a un usuario."""
     if not await is_admin(message.from_user.id, session):
         await message.answer(

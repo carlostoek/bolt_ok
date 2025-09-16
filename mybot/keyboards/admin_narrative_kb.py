@@ -4,28 +4,41 @@ from aiogram.types import InlineKeyboardMarkup
 def get_narrative_admin_main_kb() -> InlineKeyboardMarkup:
     """
     Returns the main keyboard for the narrative administration panel.
+
+    Implements comprehensive narrative management with access to:
+    - Story fragment management with level organization
+    - Lore piece management with shop integration
+    - Analytics dashboard for user journey tracking
+    - System validation and consistency tools
+    - Bulk import and export capabilities
     """
     builder = InlineKeyboardBuilder()
-    builder.button(text="Fragments Management", callback_data="admin_narrative_fragments")
-    builder.button(text="Lore Management", callback_data="admin_narrative_lore")
-    builder.button(text="Narrative Analytics", callback_data="admin_narrative_analytics")
-    builder.button(text="Validate Consistency", callback_data="admin_narrative_validate")
-    builder.button(text="Bulk Import", callback_data="admin_narrative_import")
-    builder.button(text="Back", callback_data="admin_back")
-    builder.adjust(2, 2, 1, 1)
+    builder.button(text="📖 Fragmentos", callback_data="admin_narrative_fragments")
+    builder.button(text="📚 Lore & Historia", callback_data="admin_narrative_lore")
+    builder.button(text="📊 Analytics", callback_data="admin_narrative_analytics")
+    builder.button(text="🔍 Validar Sistema", callback_data="admin_narrative_validate")
+    builder.button(text="📦 Importar/Exportar", callback_data="admin_narrative_import")
+    builder.button(text="🎮 Gestión Usuario", callback_data="admin_narrative_user_tools")
+    builder.button(text="🔙 Menú Principal", callback_data="admin_main_menu")
+    builder.adjust(2, 2, 2, 1)
     return builder.as_markup()
 
 def get_fragment_management_kb() -> InlineKeyboardMarkup:
     """
     Returns the keyboard for managing story fragments.
+
+    Implements requirement 1.1 - Enhanced fragment management with
+    level organization and progression path tools.
     """
     builder = InlineKeyboardBuilder()
-    builder.button(text="Create Fragment", callback_data="admin_fragment_create")
-    builder.button(text="List Fragments", callback_data="admin_fragment_list")
-    builder.button(text="Edit Fragment", callback_data="admin_fragment_edit")
-    builder.button(text="Delete Fragment", callback_data="admin_fragment_delete")
-    builder.button(text="Back", callback_data="admin_narrative_main")
-    builder.adjust(2, 2, 1)
+    builder.button(text="➕ Crear Fragmento", callback_data="admin_fragment_create")
+    builder.button(text="📋 Lista Fragmentos", callback_data="admin_fragment_list")
+    builder.button(text="✏️ Editar Fragmento", callback_data="admin_fragment_edit")
+    builder.button(text="🗂️ Por Nivel", callback_data="admin_fragment_by_level")
+    builder.button(text="🔗 Conexiones", callback_data="admin_fragment_connections")
+    builder.button(text="🗑️ Eliminar", callback_data="admin_fragment_delete")
+    builder.button(text="🔙 Volver", callback_data="admin_narrative_main")
+    builder.adjust(2, 2, 2, 1)
     return builder.as_markup()
 
 def get_lore_management_kb() -> InlineKeyboardMarkup:
