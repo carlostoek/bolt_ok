@@ -44,58 +44,117 @@ class UserExperienceService:
         """
         Generates personalized teaser content for restricted narrative paths.
         This is more engaging than a simple "access denied" message.
+        Now uses the comprehensive PersonalizedTeaserService for enhanced personalization.
         """
         logger.info(f"Generating personalized teaser for content '{restricted_content_key}' for user {user_id}")
 
-        user_state_stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
-        user_state_res = await self.session.execute(user_state_stmt)
-        user_state = user_state_res.scalar_one_or_none()
+        try:
+            # Import PersonalizedTeaserService
+            from services.personalized_teaser_service import PersonalizedTeaserService
 
-        fragment_stmt = select(StoryFragment).where(StoryFragment.key == restricted_content_key)
-        fragment_res = await self.session.execute(fragment_stmt)
-        fragment = fragment_res.scalar_one_or_none()
+            # Get the restricted fragment
+            fragment_stmt = select(StoryFragment).where(StoryFragment.key == restricted_content_key)
+            fragment_res = await self.session.execute(fragment_stmt)
+            fragment = fragment_res.scalar_one_or_none()
 
-        if not fragment:
-            return "Un misterio se esconde aquí, pero su forma aún no está clara..."
+            if not fragment:
+                return "Un misterio se esconde aquí, pero su forma aún no está clara..."
 
-        # Determine character and context for the teaser
-        character = CharacterType.DIANA if fragment.character.lower() == 'diana' else CharacterType.LUCIEN
-        
-        # Base teaser message
-        teaser_message = f"Sientes una presencia, una historia que anhela ser contada en '{fragment.key}'..."
+            # Determine restriction type and amount
+            restriction_type = "besitos"
+            restriction_amount = fragment.min_besitos
 
-        # Personalize based on user archetype if available
-        archetype = user_state.archetype_classification.get("archetype") if user_state and user_state.archetype_classification else None
-        
-        if archetype == "explorer":
-            teaser_message += "\nTu espíritu curioso te ha traído hasta aquí. ¿Qué secretos crees que aguardan?"
-        elif archetype == "poet":
-            teaser_message += "\nLas palabras no dichas de este momento resuenan con tu alma. ¿Puedes oír su eco?"
-        elif archetype == "direct":
-            teaser_message += "\nHay un camino directo hacia este secreto, pero requiere una llave que aún no posees."
+            if fragment.required_role and fragment.required_role.lower() == "vip":
+                restriction_type = "vip"
+                restriction_amount = 0
 
-        # Use CharacterVoiceService to wrap the message in the character's voice
-        # We can use a specific emotional context for teasers
-        emotional_context = EmotionalContext.PAUSA_REFLEXIVA # A good default for a teaser
+            # Use PersonalizedTeaserService for comprehensive teaser generation
+            teaser_service = PersonalizedTeaserService(self.session)
+            teaser_result = await teaser_service.generate_personalized_teaser(
+                user_id=user_id,
+                restricted_fragment=fragment,
+                restriction_type=restriction_type,
+                restriction_amount=restriction_amount
+            )
 
-        enhanced_teaser = self.character_voice_service.enhance_message_with_character_voice(
-            base_message=teaser_message,
-            character=character,
-            emotional_context=emotional_context
-        )
+            # Return the personalized teaser content
+            teaser_content = teaser_result.get("teaser_content", "")
 
-        # Add a hint about how to unlock, if possible
-        unlock_hint = ""
-        if fragment.min_besitos > 0:
-            unlock_hint = f"Parece que un gesto de mayor devoción ({fragment.min_besitos} besitos) podría desvelar este camino."
-        elif fragment.required_role:
-             unlock_hint = f"Solo aquellos con el estatus de '{fragment.required_role}' pueden transitar por aquí."
-        
-        final_teaser = enhanced_teaser
-        if unlock_hint:
-            final_teaser += f"\n\n*{unlock_hint}*"
+            # Add purchase motivation if available
+            purchase_motivation = teaser_result.get("purchase_motivation")
+            if purchase_motivation and purchase_motivation.get("motivation_text"):
+                teaser_content += f"\n\n*{purchase_motivation['motivation_text']}*"
 
-        return final_teaser
+                # Add relevant items suggestion if available
+                relevant_items = purchase_motivation.get("relevant_items", [])
+                if relevant_items:
+                    teaser_content += "\n\n📦 *Objetos que podrían ayudarte:*"
+                    for item in relevant_items[:2]:  # Show top 2 items
+                        teaser_content += f"\n• {item['name']} ({item['price']} besitos)"
+
+            return teaser_content
+
+        except Exception as e:
+            logger.error(f"Error generating personalized teaser using PersonalizedTeaserService: {e}")
+
+            # Fallback to simpler teaser generation
+            return await self._generate_fallback_teaser(user_id, restricted_content_key)
+
+    async def _generate_fallback_teaser(self, user_id: int, restricted_content_key: str) -> str:
+        """Fallback teaser generation if PersonalizedTeaserService fails."""
+        try:
+            user_state_stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            user_state_res = await self.session.execute(user_state_stmt)
+            user_state = user_state_res.scalar_one_or_none()
+
+            fragment_stmt = select(StoryFragment).where(StoryFragment.key == restricted_content_key)
+            fragment_res = await self.session.execute(fragment_stmt)
+            fragment = fragment_res.scalar_one_or_none()
+
+            if not fragment:
+                return "Un misterio se esconde aquí, pero su forma aún no está clara..."
+
+            # Determine character and context for the teaser
+            character = CharacterType.DIANA if fragment.character.lower() == 'diana' else CharacterType.LUCIEN
+
+            # Base teaser message
+            teaser_message = f"Sientes una presencia, una historia que anhela ser contada en '{fragment.key}'..."
+
+            # Basic archetype personalization if available
+            archetype = user_state.archetype_classification.get("archetype") if user_state and user_state.archetype_classification else None
+
+            if archetype == "explorer":
+                teaser_message += "\nTu espíritu curioso te ha traído hasta aquí. ¿Qué secretos crees que aguardan?"
+            elif archetype == "poet":
+                teaser_message += "\nLas palabras no dichas de este momento resuenan con tu alma. ¿Puedes oír su eco?"
+            elif archetype == "direct":
+                teaser_message += "\nHay un camino directo hacia este secreto, pero requiere una llave que aún no posees."
+
+            # Use CharacterVoiceService to wrap the message in the character's voice
+            emotional_context = EmotionalContext.PAUSA_REFLEXIVA
+
+            enhanced_teaser = self.character_voice_service.enhance_message_with_character_voice(
+                base_message=teaser_message,
+                character=character,
+                emotional_context=emotional_context
+            )
+
+            # Add a hint about how to unlock, if possible
+            unlock_hint = ""
+            if fragment.min_besitos > 0:
+                unlock_hint = f"Parece que un gesto de mayor devoción ({fragment.min_besitos} besitos) podría desvelar este camino."
+            elif fragment.required_role:
+                unlock_hint = f"Solo aquellos con el estatus de '{fragment.required_role}' pueden transitar por aquí."
+
+            final_teaser = enhanced_teaser
+            if unlock_hint:
+                final_teaser += f"\n\n*{unlock_hint}*"
+
+            return final_teaser
+
+        except Exception as e:
+            logger.error(f"Error in fallback teaser generation: {e}")
+            return "Un misterio te espera aquí, cuando estés listo para descubrirlo..."
 
     async def get_user_narrative_insights(self, user_id: int) -> UserInsights:
         """

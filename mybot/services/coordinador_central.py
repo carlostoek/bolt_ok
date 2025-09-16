@@ -40,6 +40,8 @@ class AccionUsuario(enum.Enum):
     VERIFICAR_ACCESO_NIVEL = "verificar_acceso_nivel"
     ACCEDER_LORE = "acceder_lore"
     ADMIN_SHOP_OPERATION = "admin_shop_operation"
+    ADMIN_NARRATIVE_OPERATION = "admin_narrative_operation"
+    ADMIN_LORE_OPERATION = "admin_lore_operation"
 
 class CoordinadorCentral:
     """
@@ -110,6 +112,10 @@ class CoordinadorCentral:
                 return await self._flujo_acceder_lore(user_id, **kwargs)
             elif accion == AccionUsuario.ADMIN_SHOP_OPERATION:
                 return await self._flujo_admin_shop_operation(user_id, **kwargs)
+            elif accion == AccionUsuario.ADMIN_NARRATIVE_OPERATION:
+                return await self._flujo_admin_narrative_operation(user_id, **kwargs)
+            elif accion == AccionUsuario.ADMIN_LORE_OPERATION:
+                return await self._flujo_admin_lore_operation(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -1356,5 +1362,689 @@ class CoordinadorCentral:
             return {
                 "success": False,
                 "message": "Error durante la operación de inventario.",
+                "error": str(e)
+            }
+
+    async def _flujo_admin_narrative_operation(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para manejar operaciones administrativas de narrativa.
+
+        Args:
+            user_id: ID del usuario (debe ser administrador)
+            **kwargs: Parámetros específicos de la operación (operation_type, fragment_data, etc.)
+
+        Returns:
+            Dict con resultados de la operación administrativa de narrativa
+        """
+        try:
+            operation_type = kwargs.get("operation_type")
+            if not operation_type:
+                return {
+                    "success": False,
+                    "message": "Tipo de operación no especificado."
+                }
+
+            # Import here to avoid circular imports
+            from services.narrative_admin_service import NarrativeAdminService
+
+            narrative_admin_service = NarrativeAdminService(self.session)
+
+            # Verificar permisos de administrador
+            is_admin = await self._verify_admin_permissions(user_id)
+            if not is_admin:
+                # Lucien maneja restricciones de acceso administrativo
+                access_denied_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_access_denied"
+                ) if self.character_voice else "Acceso denegado. Permisos de administrador requeridos."
+
+                return {
+                    "success": False,
+                    "message": access_denied_message,
+                    "action": "admin_access_denied"
+                }
+
+            # Procesar según el tipo de operación
+            if operation_type == "create_fragment":
+                return await self._handle_create_fragment_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "update_fragment":
+                return await self._handle_update_fragment_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "delete_fragment":
+                return await self._handle_delete_fragment_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "validate_consistency":
+                return await self._handle_validate_consistency_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "visualize_graph":
+                return await self._handle_visualize_graph_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "bulk_import":
+                return await self._handle_bulk_import_operation(narrative_admin_service, user_id, **kwargs)
+            elif operation_type == "get_analytics":
+                return await self._handle_narrative_analytics_operation(narrative_admin_service, user_id, **kwargs)
+            else:
+                return {
+                    "success": False,
+                    "message": f"Operación de narrativa '{operation_type}' no reconocida."
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en operación administrativa de narrativa para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error interno durante la operación administrativa de narrativa.",
+                "error": str(e)
+            }
+
+    async def _flujo_admin_lore_operation(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para manejar operaciones administrativas de lore pieces.
+
+        Args:
+            user_id: ID del usuario (debe ser administrador)
+            **kwargs: Parámetros específicos de la operación (operation_type, lore_data, etc.)
+
+        Returns:
+            Dict con resultados de la operación administrativa de lore
+        """
+        try:
+            operation_type = kwargs.get("operation_type")
+            if not operation_type:
+                return {
+                    "success": False,
+                    "message": "Tipo de operación no especificado."
+                }
+
+            # Import here to avoid circular imports
+            from services.lore_management_service import LoreManagementService
+
+            lore_service = LoreManagementService(self.session)
+
+            # Verificar permisos de administrador
+            is_admin = await self._verify_admin_permissions(user_id)
+            if not is_admin:
+                # Lucien maneja restricciones de acceso administrativo
+                access_denied_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_access_denied"
+                ) if self.character_voice else "Acceso denegado. Permisos de administrador requeridos."
+
+                return {
+                    "success": False,
+                    "message": access_denied_message,
+                    "action": "admin_access_denied"
+                }
+
+            # Procesar según el tipo de operación
+            if operation_type == "create_lore":
+                return await self._handle_create_lore_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "update_lore":
+                return await self._handle_update_lore_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "link_to_shop":
+                return await self._handle_link_lore_to_shop_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "unlink_from_shop":
+                return await self._handle_unlink_lore_from_shop_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "organize_by_category":
+                return await self._handle_organize_lore_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "search_lore":
+                return await self._handle_search_lore_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "get_unlock_analytics":
+                return await self._handle_lore_unlock_analytics_operation(lore_service, user_id, **kwargs)
+            elif operation_type == "bulk_lore_operations":
+                return await self._handle_bulk_lore_operations(lore_service, user_id, **kwargs)
+            else:
+                return {
+                    "success": False,
+                    "message": f"Operación de lore '{operation_type}' no reconocida."
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en operación administrativa de lore para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error interno durante la operación administrativa de lore.",
+                "error": str(e)
+            }
+
+    async def _verify_admin_permissions(self, user_id: int) -> bool:
+        """
+        Verifica si el usuario tiene permisos de administrador.
+        """
+        try:
+            # Import here to avoid circular imports
+            from utils.user_roles import is_admin
+            return await is_admin(user_id, self.session)
+        except Exception as e:
+            logger.error(f"Error verificando permisos de admin para usuario {user_id}: {str(e)}")
+            return False
+
+    # Narrative Admin Operation Handlers
+
+    async def _handle_create_fragment_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la creación de fragmentos narrativos."""
+        try:
+            fragment_data = kwargs.get("fragment_data", {})
+            result = await narrative_admin_service.create_story_fragment(fragment_data)
+
+            if result.get("success", False):
+                # Lucien confirma la creación exitosa como custodio del sistema
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_fragment_created",
+                    {"fragment_key": fragment_data.get("key")}
+                ) if self.character_voice else f"Fragmento '{fragment_data.get('key')}' creado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error creando fragmento narrativo: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la creación del fragmento narrativo.",
+                "error": str(e)
+            }
+
+    async def _handle_update_fragment_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la actualización de fragmentos narrativos."""
+        try:
+            fragment_id = kwargs.get("fragment_id")
+            updates = kwargs.get("updates", {})
+
+            if not fragment_id:
+                return {
+                    "success": False,
+                    "message": "ID del fragmento requerido para actualización."
+                }
+
+            result = await narrative_admin_service.update_story_fragment(fragment_id, updates)
+
+            if result.get("success", False):
+                # Lucien confirma la actualización
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_fragment_updated",
+                    {"fragment_id": fragment_id}
+                ) if self.character_voice else f"Fragmento {fragment_id} actualizado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error actualizando fragmento narrativo: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la actualización del fragmento narrativo.",
+                "error": str(e)
+            }
+
+    async def _handle_delete_fragment_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la eliminación de fragmentos narrativos."""
+        try:
+            fragment_id = kwargs.get("fragment_id")
+
+            if not fragment_id:
+                return {
+                    "success": False,
+                    "message": "ID del fragmento requerido para eliminación."
+                }
+
+            result = await narrative_admin_service.delete_story_fragment(fragment_id)
+
+            if result.get("success", False):
+                # Lucien confirma la eliminación
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_fragment_deleted",
+                    {"fragment_id": fragment_id}
+                ) if self.character_voice else f"Fragmento {fragment_id} eliminado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error eliminando fragmento narrativo: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la eliminación del fragmento narrativo.",
+                "error": str(e)
+            }
+
+    async def _handle_validate_consistency_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la validación de consistencia narrativa."""
+        try:
+            result = await narrative_admin_service.validate_narrative_consistency()
+
+            if result.get("status") == "ok":
+                # Lucien confirma que todo está en orden
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_consistency_ok"
+                ) if self.character_voice else "La narrativa está consistente."
+
+                result["message"] = success_message
+                result["success"] = True
+            elif result.get("status") == "issues_found":
+                # Lucien reporta problemas encontrados
+                issues_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_consistency_issues",
+                    {"summary": result.get("summary")}
+                ) if self.character_voice else "Se encontraron problemas de consistencia."
+
+                result["message"] = issues_message
+                result["success"] = True  # Successful validation, but with issues
+            else:
+                result["success"] = False
+                result["message"] = "Error durante la validación de consistencia."
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error validando consistencia narrativa: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la validación de consistencia narrativa.",
+                "error": str(e)
+            }
+
+    async def _handle_visualize_graph_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la visualización del grafo narrativo."""
+        try:
+            result = await narrative_admin_service.visualize_narrative_graph()
+
+            # Lucien presenta el grafo narrativo
+            graph_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PRESENTACION_CONTENIDO,
+                "admin_graph_visualization"
+            ) if self.character_voice else "Grafo narrativo generado."
+
+            return {
+                "success": True,
+                "message": graph_message,
+                "graph_data": result,
+                "action": "graph_visualized"
+            }
+
+        except Exception as e:
+            logger.exception(f"Error visualizando grafo narrativo: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la visualización del grafo narrativo.",
+                "error": str(e)
+            }
+
+    async def _handle_bulk_import_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la importación masiva de contenido narrativo."""
+        try:
+            file_data = kwargs.get("file_data")
+
+            if not file_data:
+                return {
+                    "success": False,
+                    "message": "Datos de archivo requeridos para importación masiva."
+                }
+
+            result = await narrative_admin_service.bulk_import_narrative_content(file_data)
+
+            if result.get("success", False):
+                # Lucien confirma la importación
+                import_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_bulk_import_success",
+                    {"imported_count": result.get("imported_count", 0)}
+                ) if self.character_voice else "Importación masiva completada."
+
+                result["message"] = import_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error en importación masiva: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la importación masiva de contenido narrativo.",
+                "error": str(e)
+            }
+
+    async def _handle_narrative_analytics_operation(self, narrative_admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la obtención de analytics narrativos."""
+        try:
+            fragment_id = kwargs.get("fragment_id")
+            result = await narrative_admin_service.get_fragment_with_analytics(fragment_id)
+
+            # Lucien presenta los analytics
+            analytics_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PRESENTACION_CONTENIDO,
+                "admin_narrative_analytics",
+                {"fragment_id": fragment_id}
+            ) if self.character_voice else f"Analytics del fragmento {fragment_id} obtenidos."
+
+            return {
+                "success": True,
+                "message": analytics_message,
+                "analytics_data": result,
+                "action": "analytics_retrieved"
+            }
+
+        except Exception as e:
+            logger.exception(f"Error obteniendo analytics narrativos: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al obtener los analytics narrativos.",
+                "error": str(e)
+            }
+
+    # Lore Admin Operation Handlers
+
+    async def _handle_create_lore_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la creación de lore pieces."""
+        try:
+            lore_data = kwargs.get("lore_data", {})
+            result = await lore_service.create_lore_piece(lore_data)
+
+            if result.get("success", False):
+                # Diana responde para contenido de lore (íntimo y personal)
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_lore_created",
+                    {"lore_title": lore_data.get("title")}
+                ) if self.character_voice else f"Lore '{lore_data.get('title')}' creado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error creando lore piece: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la creación del lore piece.",
+                "error": str(e)
+            }
+
+    async def _handle_update_lore_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la actualización de lore pieces."""
+        try:
+            lore_id = kwargs.get("lore_id")
+            updates = kwargs.get("updates", {})
+
+            if not lore_id:
+                return {
+                    "success": False,
+                    "message": "ID del lore requerido para actualización."
+                }
+
+            result = await lore_service.update_lore_piece(lore_id, updates)
+
+            if result.get("success", False):
+                # Diana confirma la actualización
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_lore_updated",
+                    {"lore_id": lore_id}
+                ) if self.character_voice else f"Lore {lore_id} actualizado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error actualizando lore piece: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la actualización del lore piece.",
+                "error": str(e)
+            }
+
+    async def _handle_link_lore_to_shop_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la vinculación de lore pieces a items de tienda."""
+        try:
+            lore_id = kwargs.get("lore_id")
+            shop_item_id = kwargs.get("shop_item_id")
+
+            if not lore_id or not shop_item_id:
+                return {
+                    "success": False,
+                    "message": "ID del lore e ID del item de tienda requeridos para vinculación."
+                }
+
+            result = await lore_service.link_lore_to_shop_item(lore_id, shop_item_id)
+
+            if result.get("success", False):
+                # Diana confirma la vinculación (contenido íntimo con compras)
+                link_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    EmotionalContext.INTIMIDAD_PROFUNDA,
+                    "admin_lore_linked",
+                    {"lore_id": lore_id, "shop_item_id": shop_item_id}
+                ) if self.character_voice else f"Lore {lore_id} vinculado al item {shop_item_id}."
+
+                result["message"] = link_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error vinculando lore a item de tienda: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la vinculación de lore al item de tienda.",
+                "error": str(e)
+            }
+
+    async def _handle_unlink_lore_from_shop_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la desvinculación de lore pieces de items de tienda."""
+        try:
+            lore_id = kwargs.get("lore_id")
+            shop_item_id = kwargs.get("shop_item_id")
+
+            if not lore_id or not shop_item_id:
+                return {
+                    "success": False,
+                    "message": "ID del lore e ID del item de tienda requeridos para desvinculación."
+                }
+
+            result = await lore_service.unlink_lore_from_shop_item(lore_id, shop_item_id)
+
+            if result.get("success", False):
+                # Lucien maneja la desvinculación (acción técnica)
+                unlink_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_lore_unlinked",
+                    {"lore_id": lore_id, "shop_item_id": shop_item_id}
+                ) if self.character_voice else f"Lore {lore_id} desvinculado del item {shop_item_id}."
+
+                result["message"] = unlink_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error desvinculando lore de item de tienda: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la desvinculación de lore del item de tienda.",
+                "error": str(e)
+            }
+
+    async def _handle_organize_lore_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la organización de lore pieces por categoría."""
+        try:
+            category_filters = kwargs.get("category_filters", {})
+            result = await lore_service.organize_lore_by_category(category_filters)
+
+            # Diana presenta la organización de contenido
+            organize_message = self.character_voice.get_character_response(
+                CharacterType.DIANA,
+                EmotionalContext.PRESENTACION_CONTENIDO,
+                "admin_lore_organized"
+            ) if self.character_voice else "Lore organizado por categorías."
+
+            return {
+                "success": True,
+                "message": organize_message,
+                "categorized_lore": result,
+                "action": "lore_organized"
+            }
+
+        except Exception as e:
+            logger.exception(f"Error organizando lore por categoría: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la organización de lore por categoría.",
+                "error": str(e)
+            }
+
+    async def _handle_search_lore_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la búsqueda de lore pieces."""
+        try:
+            search_criteria = kwargs.get("search_criteria", {})
+            results = await lore_service.search_lore_pieces(search_criteria)
+
+            # Lucien presenta los resultados de búsqueda
+            search_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PRESENTACION_CONTENIDO,
+                "admin_lore_search_results",
+                {"results_count": len(results)}
+            ) if self.character_voice else f"Búsqueda completada: {len(results)} resultados."
+
+            return {
+                "success": True,
+                "message": search_message,
+                "search_results": results,
+                "action": "lore_search_completed"
+            }
+
+        except Exception as e:
+            logger.exception(f"Error en búsqueda de lore: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la búsqueda de lore pieces.",
+                "error": str(e)
+            }
+
+    async def _handle_lore_unlock_analytics_operation(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la obtención de analytics de desbloqueos de lore."""
+        try:
+            lore_id = kwargs.get("lore_id")
+
+            if not lore_id:
+                return {
+                    "success": False,
+                    "message": "ID del lore requerido para analytics de desbloqueos."
+                }
+
+            analytics = await lore_service.get_lore_unlock_analytics(lore_id)
+
+            # Lucien presenta los analytics de desbloqueos
+            analytics_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PRESENTACION_CONTENIDO,
+                "admin_lore_unlock_analytics",
+                {"lore_id": lore_id, "analytics": analytics}
+            ) if self.character_voice else f"Analytics de desbloqueos para lore {lore_id} obtenidos."
+
+            return {
+                "success": True,
+                "message": analytics_message,
+                "unlock_analytics": analytics,
+                "action": "unlock_analytics_retrieved"
+            }
+
+        except Exception as e:
+            logger.exception(f"Error obteniendo analytics de desbloqueos: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al obtener los analytics de desbloqueos.",
+                "error": str(e)
+            }
+
+    async def _handle_bulk_lore_operations(self, lore_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja operaciones masivas de lore pieces."""
+        try:
+            bulk_operation = kwargs.get("bulk_operation")
+            operation_data = kwargs.get("operation_data", {})
+
+            if not bulk_operation:
+                return {
+                    "success": False,
+                    "message": "Tipo de operación masiva no especificado."
+                }
+
+            # Coordinar diferentes tipos de operaciones masivas
+            if bulk_operation == "bulk_category_update":
+                # Actualizar categorías en lote
+                category_updates = operation_data.get("category_updates", {})
+                results = []
+                for lore_id, new_category in category_updates.items():
+                    result = await lore_service.update_lore_piece(lore_id, {"category": new_category})
+                    results.append({"lore_id": lore_id, "result": result})
+
+                success_count = sum(1 for r in results if r["result"].get("success"))
+
+                # Diana confirma las operaciones masivas
+                bulk_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_bulk_lore_update",
+                    {"success_count": success_count, "total_count": len(results)}
+                ) if self.character_voice else f"Operación masiva completada: {success_count}/{len(results)} exitosas."
+
+                return {
+                    "success": True,
+                    "message": bulk_message,
+                    "bulk_results": results,
+                    "action": "bulk_operation_completed"
+                }
+
+            elif bulk_operation == "bulk_status_update":
+                # Activar/desactivar lore pieces en lote
+                status_updates = operation_data.get("status_updates", {})
+                results = []
+                for lore_id, is_active in status_updates.items():
+                    result = await lore_service.update_lore_piece(lore_id, {"is_active": is_active})
+                    results.append({"lore_id": lore_id, "result": result})
+
+                success_count = sum(1 for r in results if r["result"].get("success"))
+
+                # Lucien maneja cambios de estado masivos
+                bulk_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_bulk_status_update",
+                    {"success_count": success_count, "total_count": len(results)}
+                ) if self.character_voice else f"Actualización de estado masiva: {success_count}/{len(results)} exitosas."
+
+                return {
+                    "success": True,
+                    "message": bulk_message,
+                    "bulk_results": results,
+                    "action": "bulk_status_update_completed"
+                }
+
+            else:
+                return {
+                    "success": False,
+                    "message": f"Operación masiva '{bulk_operation}' no reconocida."
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en operaciones masivas de lore: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante las operaciones masivas de lore.",
                 "error": str(e)
             }
