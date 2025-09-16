@@ -1,28 +1,14 @@
-# Aider-managed files
-.aider*
-
-# DBs and logs
-*.db
-*.log
-bot.db
-bot.log
-mybot/bot.db
-mybot/bot.log
-
 # Environments
+.env
+.venv
 venv/
-.venv/
-mybot/.venvs/
-.python-version
-.pylintrc
+.venvs/
 
-# Python cache files
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-
-# Distribution / packaging
+*.pyc
+*.pyo
+*.pyd
 .Python
 build/
 develop-eggs/
@@ -41,52 +27,8 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
+# Other
+.claude/
 .pytest_cache/
-
-# Environments
-.env
-.venv
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-
-# Docs
-mybot/docs/guia-fragmentos-condicionados-items-2025-09-15.md

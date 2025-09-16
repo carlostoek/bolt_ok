@@ -505,7 +505,7 @@ class ShopPromotion(Base):
 
     # Relationships
     category = relationship("ShopCategory")
-    item = relationship("ShopItem", foreign_keys="ShopPromotion.applies_to_item_id")
+    item = relationship("ShopItem", foreign_keys=[applies_to_item_id])
 
 
 class ShopItem(Base):
@@ -526,7 +526,7 @@ class ShopItem(Base):
 
     lore_piece = relationship("LorePiece")
     category = relationship("ShopCategory", back_populates="shop_items")
-    promotion = relationship("ShopPromotion", foreign_keys="ShopItem.promotion_id")
+    promotion = relationship("ShopPromotion", foreign_keys=[promotion_id])
 
 class UserPurchase(Base):
     __tablename__ = "user_purchases"

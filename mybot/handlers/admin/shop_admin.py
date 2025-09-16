@@ -2449,6 +2449,77 @@ async def show_import_instructions(callback: CallbackQuery, session: AsyncSessio
 
     await callback.answer()
 
+
+@router.callback_query(F.data == "admin_shop_config")
+async def show_shop_config_menu(callback: CallbackQuery, session: AsyncSession):
+    """Display shop configuration menu with system settings."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("❌ Acceso denegado", show_alert=True)
+
+    try:
+        config_text = "⚙️ **Configuración de Tienda**\n\n"
+
+        config_text += "🔧 **Configuraciones Disponibles:**\n"
+        config_text += "• Configuración general de la tienda\n"
+        config_text += "• Límites de compra por usuario\n"
+        config_text += "• Configuración de categorías VIP\n"
+        config_text += "• Gestión de promociones\n"
+        config_text += "• Configuración de precios\n\n"
+
+        config_text += "📊 **Estado Actual del Sistema:**\n"
+
+        # Get basic shop stats
+        shop_admin_service = ShopAdminService(session)
+
+        # Get categories count
+        from sqlalchemy import select, func
+        from database.models import ShopCategory, ShopItem
+
+        categories_result = await session.execute(select(func.count()).select_from(ShopCategory))
+        categories_count = categories_result.scalar() or 0
+
+        items_result = await session.execute(select(func.count()).select_from(ShopItem))
+        items_count = items_result.scalar() or 0
+
+        active_categories_result = await session.execute(
+            select(func.count()).select_from(ShopCategory).where(ShopCategory.is_active == True)
+        )
+        active_categories = active_categories_result.scalar() or 0
+
+        active_items_result = await session.execute(
+            select(func.count()).select_from(ShopItem).where(ShopItem.is_active == True)
+        )
+        active_items = active_items_result.scalar() or 0
+
+        config_text += f"• Total de categorías: {categories_count} ({active_categories} activas)\n"
+        config_text += f"• Total de items: {items_count} ({active_items} activos)\n\n"
+
+        config_text += "💡 **Próximamente:**\n"
+        config_text += "• Editor de configuración global\n"
+        config_text += "• Gestión de descuentos automáticos\n"
+        config_text += "• Configuración de notificaciones\n"
+        config_text += "• Sistema de logs de administración\n\n"
+
+        config_text += "Para configuraciones específicas, usa los menús de gestión de items y categorías."
+
+        from keyboards.common import get_back_kb
+        keyboard = get_back_kb("admin_shop_main")
+
+        await menu_manager.update_menu(
+            callback,
+            config_text,
+            keyboard,
+            session,
+            "admin_shop_config_menu"
+        )
+
+    except Exception as e:
+        logger.error(f"Error showing shop config menu: {e}")
+        await callback.answer("❌ Error al mostrar configuración", show_alert=True)
+
+    await callback.answer()
+
+
 @router.message(Command("export_catalog"))
 async def handle_export_catalog(message: Message, session: AsyncSession):
     """

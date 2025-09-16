@@ -28,17 +28,11 @@ class ShopAdminService:
             bool: True if user is admin, False otherwise
         """
         try:
-            stmt = select(User).where(User.id == user_id)
-            result = await self.session.execute(stmt)
-            user = result.scalar_one_or_none()
-
-            if not user:
-                logger.warning(f"User {user_id} not found during admin access validation")
-                return False
-
-            is_admin = bool(user.is_admin)
-            logger.info(f"Admin access validation for user {user_id}: {is_admin}")
-            return is_admin
+            # Use the existing is_admin function that checks both ADMIN_IDS and database
+            from utils.user_roles import is_admin
+            is_user_admin = await is_admin(user_id, self.session)
+            logger.info(f"Admin access validation for user {user_id}: {is_user_admin}")
+            return is_user_admin
 
         except Exception as e:
             logger.error(f"Error validating admin access for user {user_id}: {str(e)}")
