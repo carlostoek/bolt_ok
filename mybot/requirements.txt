@@ -3,6 +3,4 @@ SQLAlchemy
 aiosqlite
 APScheduler
 python-dotenv
-
-
-# Base require
+redis>=5.0.1

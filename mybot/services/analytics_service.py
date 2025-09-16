@@ -776,6 +776,20 @@ class AnalyticsService:
             logger.error(f"Error exporting user journey data: {e}")
             return {"status": "error", "message": str(e)}
 
+    def invalidate_cache_signal(self, data_type: str, identifier: Optional[str] = None):
+        """
+        Signal that cache should be invalidated for specific data types.
+        This method is called when underlying data changes.
+        
+        Args:
+            data_type: Type of data that changed ('fragment', 'user_segments', etc.)
+            identifier: Specific identifier that changed (e.g., fragment key)
+        """
+        logger.info(f"Cache invalidation signal received for {data_type} {identifier or 'all'}")
+        # This is a placeholder method that would be used by other services
+        # to signal when data has changed and cache should be invalidated
+        pass
+
     async def generate_comprehensive_report(self, report_type: str = "executive", date_range: Tuple[str, str] = None) -> Dict[str, Any]:
         """
         Generate comprehensive analytics reports.
