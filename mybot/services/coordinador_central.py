@@ -38,6 +38,8 @@ class AccionUsuario(enum.Enum):
     COMPRAR_ITEM = "comprar_item"
     AGREGAR_A_MOCHILA = "agregar_a_mochila"
     VERIFICAR_ACCESO_NIVEL = "verificar_acceso_nivel"
+    ACCEDER_LORE = "acceder_lore"
+    ADMIN_SHOP_OPERATION = "admin_shop_operation"
 
 class CoordinadorCentral:
     """
@@ -104,6 +106,10 @@ class CoordinadorCentral:
                 return await self._flujo_agregar_a_mochila(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ACCESO_NIVEL:
                 return await self._flujo_verificar_acceso_nivel(user_id, **kwargs)
+            elif accion == AccionUsuario.ACCEDER_LORE:
+                return await self._flujo_acceder_lore(user_id, **kwargs)
+            elif accion == AccionUsuario.ADMIN_SHOP_OPERATION:
+                return await self._flujo_admin_shop_operation(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -789,6 +795,109 @@ class CoordinadorCentral:
                 "error": str(e)
             }
 
+    async def _flujo_acceder_lore(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para acceder a contenido lore desbloqueado desde el inventario.
+
+        Args:
+            user_id: ID del usuario de Telegram
+            **kwargs: Debe contener lore_piece_id
+
+        Returns:
+            Dict con resultado del acceso al lore
+        """
+        try:
+            lore_piece_id = kwargs.get("lore_piece_id")
+            if not lore_piece_id:
+                return {
+                    "success": False,
+                    "message": "ID de lore no proporcionado."
+                }
+
+            # Verificar que el usuario tiene acceso al lore piece
+            from database.models import UserLorePiece, LorePiece
+            from sqlalchemy import select
+
+            # Check if user has this lore piece in their collection
+            user_lore_stmt = select(UserLorePiece).where(
+                UserLorePiece.user_id == user_id,
+                UserLorePiece.lore_piece_id == lore_piece_id
+            )
+            user_lore_result = await self.session.execute(user_lore_stmt)
+            user_lore = user_lore_result.scalar_one_or_none()
+
+            if not user_lore:
+                return {
+                    "success": False,
+                    "message": "No tienes acceso a este contenido. Debe ser desbloqueado primero."
+                }
+
+            # Get the lore piece content
+            lore_stmt = select(LorePiece).where(LorePiece.id == lore_piece_id)
+            lore_result = await self.session.execute(lore_stmt)
+            lore_piece = lore_result.scalar_one_or_none()
+
+            if not lore_piece:
+                return {
+                    "success": False,
+                    "message": "Contenido no encontrado."
+                }
+
+            # Update the access timestamp if this is not the first access
+            if not user_lore.unlocked_at:
+                from datetime import datetime
+                user_lore.unlocked_at = datetime.utcnow()
+                await self.session.commit()
+
+            # Use narrative service to display the lore content
+            display_result = await self.narrative_service.display_lore_piece(user_id, lore_piece)
+
+            if display_result["success"]:
+                # Generate character response based on lore content
+                character_response = None
+                if self.character_voice:
+                    # Determine which character should respond based on lore content
+                    if "diana" in lore_piece.title.lower() or "íntimo" in lore_piece.title.lower():
+                        character_type = CharacterType.DIANA
+                        emotional_context = EmotionalContext.INTIMIDAD_PROFUNDA
+                    else:
+                        character_type = CharacterType.LUCIEN
+                        emotional_context = EmotionalContext.PRESENTACION_CONTENIDO
+
+                    character_response = self.character_voice.get_character_response(
+                        character_type,
+                        emotional_context,
+                        "lore_access_success",
+                        {"lore_title": lore_piece.title}
+                    )
+
+                return {
+                    "success": True,
+                    "message": "Contenido accedido exitosamente.",
+                    "lore_content": {
+                        "id": lore_piece.id,
+                        "title": lore_piece.title,
+                        "content": lore_piece.content,
+                        "content_type": lore_piece.content_type,
+                        "category": lore_piece.category
+                    },
+                    "character_response": character_response,
+                    "display_result": display_result
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Error al mostrar el contenido: {display_result.get('message', 'Error desconocido')}"
+                }
+
+        except Exception as e:
+            logger.exception(f"Error accediendo al lore {lore_piece_id} para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error interno al acceder al contenido.",
+                "error": str(e)
+            }
+
     async def _flujo_test_evaluacion_emocional(self, user_id: int, **kwargs) -> Dict[str, Any]:
         """
         Flujo para ejecutar el test de evaluación emocional aislado.
@@ -978,3 +1087,274 @@ class CoordinadorCentral:
                 base_message += "\n\n✨ *Tu estabilidad emocional te permite explorar con confianza.*"
         
         return base_message
+
+    async def _flujo_admin_shop_operation(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para manejar operaciones administrativas de la tienda.
+
+        Args:
+            user_id: ID del usuario (debe ser administrador)
+            **kwargs: Parámetros específicos de la operación (operation_type, item_data, etc.)
+
+        Returns:
+            Dict con resultados de la operación administrativa
+        """
+        try:
+            operation_type = kwargs.get("operation_type")
+            if not operation_type:
+                return {
+                    "success": False,
+                    "message": "Tipo de operación no especificado."
+                }
+
+            # Import here to avoid circular imports
+            from services.shop_admin_service import ShopAdminService
+
+            admin_service = ShopAdminService(self.session)
+
+            # Verificar permisos de administrador
+            is_admin = await admin_service.verify_admin_permissions(user_id)
+            if not is_admin:
+                # Lucien maneja restricciones de acceso administrativo
+                access_denied_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_access_denied"
+                ) if self.character_voice else "Acceso denegado. Permisos de administrador requeridos."
+
+                return {
+                    "success": False,
+                    "message": access_denied_message,
+                    "action": "admin_access_denied"
+                }
+
+            # Procesar según el tipo de operación
+            if operation_type == "create_item":
+                return await self._handle_create_item_operation(admin_service, user_id, **kwargs)
+            elif operation_type == "update_item":
+                return await self._handle_update_item_operation(admin_service, user_id, **kwargs)
+            elif operation_type == "delete_item":
+                return await self._handle_delete_item_operation(admin_service, user_id, **kwargs)
+            elif operation_type == "list_items":
+                return await self._handle_list_items_operation(admin_service, user_id, **kwargs)
+            elif operation_type == "view_analytics":
+                return await self._handle_analytics_operation(admin_service, user_id, **kwargs)
+            elif operation_type == "manage_inventory":
+                return await self._handle_inventory_operation(admin_service, user_id, **kwargs)
+            else:
+                return {
+                    "success": False,
+                    "message": f"Operación '{operation_type}' no reconocida."
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en operación administrativa de tienda para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error interno durante la operación administrativa.",
+                "error": str(e)
+            }
+
+    async def _handle_create_item_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la creación de nuevos items en la tienda."""
+        try:
+            item_data = kwargs.get("item_data", {})
+            result = await admin_service.create_shop_item(
+                name=item_data.get("name"),
+                description=item_data.get("description"),
+                price=item_data.get("price"),
+                is_vip_only=item_data.get("is_vip_only", False),
+                category=item_data.get("category"),
+                unlocks_lore_piece_id=item_data.get("unlocks_lore_piece_id")
+            )
+
+            if result["success"]:
+                # Lucien confirma la creación exitosa como custodio del sistema
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_item_created",
+                    {"item_name": item_data.get("name")}
+                ) if self.character_voice else f"Artículo '{item_data.get('name')}' creado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error creando item: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la creación del artículo.",
+                "error": str(e)
+            }
+
+    async def _handle_update_item_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la actualización de items existentes."""
+        try:
+            item_id = kwargs.get("item_id")
+            updates = kwargs.get("updates", {})
+
+            if not item_id:
+                return {
+                    "success": False,
+                    "message": "ID del artículo requerido para actualización."
+                }
+
+            result = await admin_service.update_shop_item(item_id, updates)
+
+            if result["success"]:
+                # Lucien confirma la actualización
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_item_updated",
+                    {"item_id": item_id}
+                ) if self.character_voice else f"Artículo {item_id} actualizado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error actualizando item: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la actualización del artículo.",
+                "error": str(e)
+            }
+
+    async def _handle_delete_item_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la eliminación de items de la tienda."""
+        try:
+            item_id = kwargs.get("item_id")
+
+            if not item_id:
+                return {
+                    "success": False,
+                    "message": "ID del artículo requerido para eliminación."
+                }
+
+            result = await admin_service.delete_shop_item(item_id)
+
+            if result["success"]:
+                # Lucien confirma la eliminación
+                success_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "admin_item_deleted",
+                    {"item_id": item_id}
+                ) if self.character_voice else f"Artículo {item_id} eliminado exitosamente."
+
+                result["message"] = success_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error eliminando item: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la eliminación del artículo.",
+                "error": str(e)
+            }
+
+    async def _handle_list_items_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la listado administrativo de items."""
+        try:
+            filters = kwargs.get("filters", {})
+            result = await admin_service.get_admin_shop_items(filters)
+
+            if result["success"]:
+                # Lucien presenta la información del inventario
+                info_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_inventory_overview",
+                    {"item_count": len(result.get("items", []))}
+                ) if self.character_voice else f"Mostrando {len(result.get('items', []))} artículos."
+
+                result["message"] = info_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error listando items: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al obtener el listado de artículos.",
+                "error": str(e)
+            }
+
+    async def _handle_analytics_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja la visualización de analytics de la tienda."""
+        try:
+            period = kwargs.get("period", "week")
+            result = await admin_service.get_shop_analytics(period)
+
+            if result["success"]:
+                # Lucien presenta los datos analíticos
+                analytics_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    "admin_analytics_overview",
+                    {"period": period, "analytics": result.get("analytics")}
+                ) if self.character_voice else f"Analytics del período: {period}"
+
+                result["message"] = analytics_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error obteniendo analytics: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error al obtener las estadísticas de la tienda.",
+                "error": str(e)
+            }
+
+    async def _handle_inventory_operation(self, admin_service, user_id: int, **kwargs) -> Dict[str, Any]:
+        """Maneja operaciones de gestión de inventario de usuarios."""
+        try:
+            target_user_id = kwargs.get("target_user_id")
+            operation = kwargs.get("inventory_operation")
+
+            if not target_user_id:
+                return {
+                    "success": False,
+                    "message": "ID del usuario objetivo requerido."
+                }
+
+            if operation == "view":
+                result = await admin_service.view_user_inventory(target_user_id)
+            elif operation == "add_item":
+                item_name = kwargs.get("item_name")
+                result = await admin_service.add_item_to_user_inventory(target_user_id, item_name)
+            elif operation == "remove_item":
+                item_name = kwargs.get("item_name")
+                result = await admin_service.remove_item_from_user_inventory(target_user_id, item_name)
+            else:
+                return {
+                    "success": False,
+                    "message": f"Operación de inventario '{operation}' no reconocida."
+                }
+
+            if result["success"]:
+                # Lucien confirma la operación de inventario
+                inventory_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PRESENTACION_CONTENIDO,
+                    f"admin_inventory_{operation}",
+                    {"target_user_id": target_user_id, "operation": operation}
+                ) if self.character_voice else f"Operación de inventario '{operation}' completada."
+
+                result["message"] = inventory_message
+
+            return result
+
+        except Exception as e:
+            logger.exception(f"Error en operación de inventario: {str(e)}")
+            return {
+                "success": False,
+                "message": "Error durante la operación de inventario.",
+                "error": str(e)
+            }
