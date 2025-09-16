@@ -992,3 +992,47 @@ if __name__ == "__main__":
     else:
         print("Use 'pytest tests/services/test_analytics_service.py -v' to run the full test suite")
         print("Test file created successfully with comprehensive coverage for AnalyticsService")
+    
+    # Simple test runner for development
+    import asyncio
+    
+    async def run_basic_tests():
+        """Run basic tests to verify the test structure"""
+        print("\nRunning basic test structure verification...")
+        
+        # Create a mock session
+        mock_session = AsyncMock(spec=AsyncSession)
+        mock_session.execute = AsyncMock()
+        mock_session.scalar = AsyncMock()
+        mock_session.scalars = AsyncMock()
+        
+        # Try to create service instance
+        try:
+            service = AnalyticsService(mock_session)
+            print("✓ AnalyticsService instantiated successfully")
+        except Exception as e:
+            print(f"✗ Failed to instantiate AnalyticsService: {e}")
+            return
+        
+        # Test each method with basic mocks
+        test_methods = [
+            ("get_fragment_engagement_metrics", ["test_fragment"]),
+            ("analyze_choice_distribution_patterns", []),
+            ("identify_narrative_bottlenecks", []),
+            ("generate_user_segment_analysis", []),
+            ("track_conversion_funnel_metrics", []),
+            ("get_character_voice_analytics", []),
+            ("get_comprehensive_dashboard_data", []),
+            ("export_analytics_data", [("2024-01-01", "2024-01-31"), "json"])
+        ]
+        
+        for method_name, args in test_methods:
+            try:
+                method = getattr(service, method_name)
+                result = await method(*args)
+                print(f"✓ {method_name}: {result.get('status', 'executed')}")
+            except Exception as e:
+                print(f"✗ {method_name}: Error - {e}")
+    
+    # Run basic tests
+    asyncio.run(run_basic_tests())
