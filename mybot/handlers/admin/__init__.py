@@ -13,7 +13,7 @@ from .lore_admin_handlers import router as lore_admin_router
 
 # Asegúrate de incluir todos los admin routers:
 admin_router.include_router(trivia_admin_router)
-admin_router.include_router(lore_admin_router)
+# lore_admin_router is included in admin_menu.py
 
 __all__ = [
     "admin_router",

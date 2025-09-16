@@ -260,7 +260,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing admin_check utilities, validation patterns_
   - _Requirements: Security_
 
-- [ ] 30. Optimize database queries for analytics performance
+- [x] 30. Optimize database queries for analytics performance
   - File: services/analytics_service.py (optimize existing methods)
   - Add database indexes for analytics queries
   - Implement query optimization for large dataset operations
@@ -270,7 +270,7 @@ Each task meets these criteria for optimal agent execution:
 
 ### Phase 7: Documentation and Deployment
 
-- [ ] 31. Update admin menu integration
+- [x] 31. Update admin menu integration
   - File: handlers/admin/admin_menu.py (modify existing)
   - Add narrative management and analytics menu options
   - Integrate new admin interfaces with existing menu structure
@@ -278,7 +278,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing admin_menu.py structure, menu navigation patterns_
   - _Requirements: 1.1, 4.1_
 
-- [ ] 32. Create narrative admin documentation
+- [x] 32. Create narrative admin documentation
   - File: docs/admin/narrative_management.md
   - Document narrative content creation and management workflows
   - Include lore piece management and analytics usage guides
@@ -286,7 +286,7 @@ Each task meets these criteria for optimal agent execution:
   - _Leverage: existing documentation patterns, admin guide structures_
   - _Requirements: 1.1, 2.1_
 
-- [ ] 33. Update system configuration for new features
+- [x] 33. Update system configuration for new features
   - File: config/narrative_config.py
   - Add configuration options for analytics processing and caching
   - Include settings for content validation and security measures

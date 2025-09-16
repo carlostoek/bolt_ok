@@ -290,7 +290,7 @@ class ShopAdminService:
             # Check if category has associated shop items (unless force is True)
             if not force:
                 from database.models import ShopItem
-                stmt = select(func.count(ShopItem.id)).where(ShopItem.category_id == category_id)
+                stmt = select(func.count(ShopItem.c.id)).where(ShopItem.category_id == category_id)
                 result = await self.session.execute(stmt)
                 item_count = result.scalar()
 
@@ -445,7 +445,7 @@ class ShopAdminService:
                 return {"success": False, "message": "Admin access required"}
 
             # Get existing item
-            stmt = select(ShopItem).where(ShopItem.id == item_id)
+            stmt = select(ShopItem).where(ShopItem.c.id == item_id)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
 
@@ -458,7 +458,7 @@ class ShopAdminService:
 
             # Check if new name conflicts with existing items (if name is being changed)
             if name and name.strip() != item.name:
-                stmt = select(ShopItem).where(and_(ShopItem.name == name.strip(), ShopItem.id != item_id))
+                stmt = select(ShopItem).where(and_(ShopItem.name == name.strip(), ShopItem.c.id != item_id))
                 result = await self.session.execute(stmt)
                 existing_item = result.scalar_one_or_none()
 
@@ -800,15 +800,15 @@ class ShopAdminService:
             # Date filtering
             if days_back is not None:
                 cutoff_date = datetime.utcnow() - timedelta(days=days_back)
-                conditions.append(UserPurchase.purchased_at >= cutoff_date)
+                conditions.append(UserPurchase.c.purchased_at >= cutoff_date)
 
             # User filtering
             if user_id is not None:
-                conditions.append(UserPurchase.user_id == user_id)
+                conditions.append(UserPurchase.c.user_id == user_id)
 
             # Item filtering
             if item_id is not None:
-                conditions.append(UserPurchase.shop_item_id == item_id)
+                conditions.append(UserPurchase.c.shop_item_id == item_id)
 
             # Category filtering (requires join with ShopItem)
             if category_id is not None:
@@ -817,11 +817,11 @@ class ShopAdminService:
             # Get purchase history with user and item details
             purchase_query = (
                 select(
-                    UserPurchase.id,
-                    UserPurchase.user_id,
-                    UserPurchase.shop_item_id,
-                    UserPurchase.purchased_at,
-                    UserPurchase.price_paid,
+                    UserPurchase.c.id,
+                    UserPurchase.c.user_id,
+                    UserPurchase.c.shop_item_id,
+                    UserPurchase.c.purchased_at,
+                    UserPurchase.c.price_paid,
                     User.username,
                     User.first_name,
                     User.role,
@@ -832,8 +832,8 @@ class ShopAdminService:
                 )
                 .select_from(
                     UserPurchase
-                    .join(User, UserPurchase.user_id == User.id)
-                    .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+                    .join(User, UserPurchase.c.user_id == User.c.id)
+                    .join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id)
                     .outerjoin(ShopCategory, ShopItem.category_id == ShopCategory.id)
                 )
             )
@@ -841,7 +841,7 @@ class ShopAdminService:
             if conditions:
                 purchase_query = purchase_query.where(and_(*conditions))
 
-            purchase_query = purchase_query.order_by(desc(UserPurchase.purchased_at))
+            purchase_query = purchase_query.order_by(desc(UserPurchase.c.purchased_at))
 
             result = await self.session.execute(purchase_query)
             purchases = result.fetchall()
@@ -901,12 +901,12 @@ class ShopAdminService:
             # Total sales and revenue
             revenue_query = (
                 select(
-                    func.count(UserPurchase.id).label('total_purchases'),
-                    func.sum(UserPurchase.price_paid).label('total_revenue'),
-                    func.avg(UserPurchase.price_paid).label('average_order_value'),
-                    func.count(func.distinct(UserPurchase.user_id)).label('unique_buyers')
+                    func.count(UserPurchase.c.id).label('total_purchases'),
+                    func.sum(UserPurchase.c.price_paid).label('total_revenue'),
+                    func.avg(UserPurchase.c.price_paid).label('average_order_value'),
+                    func.count(func.distinct(UserPurchase.c.user_id)).label('unique_buyers')
                 )
-                .select_from(UserPurchase.join(ShopItem, UserPurchase.shop_item_id == ShopItem.id))
+                .select_from(UserPurchase.join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id))
             )
 
             if base_conditions:
@@ -920,13 +920,13 @@ class ShopAdminService:
                 select(
                     ShopCategory.name.label('category_name'),
                     func.coalesce(ShopCategory.name, 'Uncategorized').label('category_display'),
-                    func.count(UserPurchase.id).label('purchases'),
-                    func.sum(UserPurchase.price_paid).label('revenue'),
-                    func.avg(UserPurchase.price_paid).label('avg_price')
+                    func.count(UserPurchase.c.id).label('purchases'),
+                    func.sum(UserPurchase.c.price_paid).label('revenue'),
+                    func.avg(UserPurchase.c.price_paid).label('avg_price')
                 )
                 .select_from(
                     UserPurchase
-                    .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+                    .join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id)
                     .outerjoin(ShopCategory, ShopItem.category_id == ShopCategory.id)
                 )
             )
@@ -944,13 +944,13 @@ class ShopAdminService:
                 select(
                     ShopItem.name.label('item_name'),
                     ShopItem.price.label('item_price'),
-                    func.count(UserPurchase.id).label('purchases'),
-                    func.sum(UserPurchase.price_paid).label('revenue'),
+                    func.count(UserPurchase.c.id).label('purchases'),
+                    func.sum(UserPurchase.c.price_paid).label('revenue'),
                     ShopCategory.name.label('category_name')
                 )
                 .select_from(
                     UserPurchase
-                    .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+                    .join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id)
                     .outerjoin(ShopCategory, ShopItem.category_id == ShopCategory.id)
                 )
             )
@@ -960,7 +960,7 @@ class ShopAdminService:
 
             top_items_query = (
                 top_items_query
-                .group_by(ShopItem.id, ShopItem.name, ShopItem.price, ShopCategory.name)
+                .group_by(ShopItem.c.id, ShopItem.name, ShopItem.price, ShopCategory.name)
                 .order_by(desc('purchases'))
                 .limit(10)
             )
@@ -972,15 +972,15 @@ class ShopAdminService:
             vip_analysis_query = (
                 select(
                     User.role,
-                    func.count(UserPurchase.id).label('purchases'),
-                    func.sum(UserPurchase.price_paid).label('revenue'),
-                    func.avg(UserPurchase.price_paid).label('avg_order_value'),
-                    func.count(func.distinct(UserPurchase.user_id)).label('unique_buyers')
+                    func.count(UserPurchase.c.id).label('purchases'),
+                    func.sum(UserPurchase.c.price_paid).label('revenue'),
+                    func.avg(UserPurchase.c.price_paid).label('avg_order_value'),
+                    func.count(func.distinct(UserPurchase.c.user_id)).label('unique_buyers')
                 )
                 .select_from(
                     UserPurchase
-                    .join(User, UserPurchase.user_id == User.id)
-                    .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+                    .join(User, UserPurchase.c.user_id == User.c.id)
+                    .join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id)
                 )
             )
 
@@ -997,11 +997,11 @@ class ShopAdminService:
             if days_back is not None and days_back <= 90:  # Only for reasonable timeframes
                 daily_query = (
                     select(
-                        func.date(UserPurchase.purchased_at).label('purchase_date'),
-                        func.count(UserPurchase.id).label('purchases'),
-                        func.sum(UserPurchase.price_paid).label('revenue')
+                        func.date(UserPurchase.c.purchased_at).label('purchase_date'),
+                        func.count(UserPurchase.c.id).label('purchases'),
+                        func.sum(UserPurchase.c.price_paid).label('revenue')
                     )
-                    .select_from(UserPurchase.join(ShopItem, UserPurchase.shop_item_id == ShopItem.id))
+                    .select_from(UserPurchase.join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id))
                 )
 
                 if base_conditions:
@@ -1009,8 +1009,8 @@ class ShopAdminService:
 
                 daily_query = (
                     daily_query
-                    .group_by(func.date(UserPurchase.purchased_at))
-                    .order_by(func.date(UserPurchase.purchased_at))
+                    .group_by(func.date(UserPurchase.c.purchased_at))
+                    .order_by(func.date(UserPurchase.c.purchased_at))
                 )
 
                 result = await self.session.execute(daily_query)
@@ -1024,7 +1024,7 @@ class ShopAdminService:
                     })
 
             # Calculate conversion rate (users who purchased vs total active users)
-            total_users_query = select(func.count(User.id)).where(User.role.in_(['free', 'vip']))
+            total_users_query = select(func.count(User.c.id)).where(User.role.in_(['free', 'vip']))
             result = await self.session.execute(total_users_query)
             total_users = result.scalar() or 0
 
@@ -1135,7 +1135,7 @@ class ShopAdminService:
         try:
             # Total items and categories
             items_query = select(
-                func.count(ShopItem.id).label('total_items'),
+                func.count(ShopItem.c.id).label('total_items'),
                 func.count(case((ShopItem.is_active == True, 1))).label('active_items'),
                 func.count(case((ShopItem.is_vip_only == True, 1))).label('vip_items'),
                 func.count(case((ShopItem.unlocks_lore_piece_id.isnot(None), 1))).label('lore_items')
@@ -1190,10 +1190,10 @@ class ShopAdminService:
         try:
             # Overall sales metrics
             overall_query = select(
-                func.count(UserPurchase.id).label('total_sales'),
-                func.sum(UserPurchase.price_paid).label('total_revenue'),
-                func.avg(UserPurchase.price_paid).label('avg_order_value'),
-                func.count(func.distinct(UserPurchase.user_id)).label('unique_customers')
+                func.count(UserPurchase.c.id).label('total_sales'),
+                func.sum(UserPurchase.c.price_paid).label('total_revenue'),
+                func.avg(UserPurchase.c.price_paid).label('avg_order_value'),
+                func.count(func.distinct(UserPurchase.c.user_id)).label('unique_customers')
             )
             result = await self.session.execute(overall_query)
             overall_data = result.fetchone()
@@ -1206,25 +1206,25 @@ class ShopAdminService:
 
             # Today's sales
             today_query = select(
-                func.count(UserPurchase.id).label('sales'),
-                func.sum(UserPurchase.price_paid).label('revenue')
-            ).where(UserPurchase.purchased_at >= today_start)
+                func.count(UserPurchase.c.id).label('sales'),
+                func.sum(UserPurchase.c.price_paid).label('revenue')
+            ).where(UserPurchase.c.purchased_at >= today_start)
             result = await self.session.execute(today_query)
             today_data = result.fetchone()
 
             # Week's sales
             week_query = select(
-                func.count(UserPurchase.id).label('sales'),
-                func.sum(UserPurchase.price_paid).label('revenue')
-            ).where(UserPurchase.purchased_at >= week_start)
+                func.count(UserPurchase.c.id).label('sales'),
+                func.sum(UserPurchase.c.price_paid).label('revenue')
+            ).where(UserPurchase.c.purchased_at >= week_start)
             result = await self.session.execute(week_query)
             week_data = result.fetchone()
 
             # Month's sales
             month_query = select(
-                func.count(UserPurchase.id).label('sales'),
-                func.sum(UserPurchase.price_paid).label('revenue')
-            ).where(UserPurchase.purchased_at >= month_start)
+                func.count(UserPurchase.c.id).label('sales'),
+                func.sum(UserPurchase.c.price_paid).label('revenue')
+            ).where(UserPurchase.c.purchased_at >= month_start)
             result = await self.session.execute(month_query)
             month_data = result.fetchone()
 
@@ -1258,7 +1258,7 @@ class ShopAdminService:
         try:
             # User base metrics
             users_query = select(
-                func.count(User.id).label('total_users'),
+                func.count(User.c.id).label('total_users'),
                 func.count(case((User.role == 'vip', 1))).label('vip_users'),
                 func.count(case((User.role == 'free', 1))).label('free_users')
             )
@@ -1267,7 +1267,7 @@ class ShopAdminService:
 
             # Users with purchases
             buyers_query = select(
-                func.count(func.distinct(UserPurchase.user_id)).label('total_buyers')
+                func.count(func.distinct(UserPurchase.c.user_id)).label('total_buyers')
             )
             result = await self.session.execute(buyers_query)
             buyers_data = result.fetchone()
@@ -1279,9 +1279,9 @@ class ShopAdminService:
 
             # VIP conversion metrics
             vip_buyers_query = select(
-                func.count(func.distinct(UserPurchase.user_id)).label('vip_buyers')
+                func.count(func.distinct(UserPurchase.c.user_id)).label('vip_buyers')
             ).select_from(
-                UserPurchase.join(User, UserPurchase.user_id == User.id)
+                UserPurchase.join(User, UserPurchase.c.user_id == User.c.id)
             ).where(User.role == 'vip')
             result = await self.session.execute(vip_buyers_query)
             vip_buyers_data = result.fetchone()
@@ -1315,18 +1315,18 @@ class ShopAdminService:
             yesterday = datetime.utcnow() - timedelta(days=1)
 
             recent_purchases_query = select(
-                UserPurchase.purchased_at,
+                UserPurchase.c.purchased_at,
                 User.username,
                 User.first_name,
                 ShopItem.name.label('item_name'),
-                UserPurchase.price_paid
+                UserPurchase.c.price_paid
             ).select_from(
                 UserPurchase
-                .join(User, UserPurchase.user_id == User.id)
-                .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+                .join(User, UserPurchase.c.user_id == User.c.id)
+                .join(ShopItem, UserPurchase.c.shop_item_id == ShopItem.c.id)
             ).where(
-                UserPurchase.purchased_at >= yesterday
-            ).order_by(desc(UserPurchase.purchased_at)).limit(10)
+                UserPurchase.c.purchased_at >= yesterday
+            ).order_by(desc(UserPurchase.c.purchased_at)).limit(10)
 
             result = await self.session.execute(recent_purchases_query)
             recent_purchases = result.fetchall()
@@ -1872,7 +1872,7 @@ class ShopAdminService:
                 return {"success": False, "message": "Admin access required"}
 
             # Get the shop item
-            stmt = select(ShopItem).where(ShopItem.id == item_id)
+            stmt = select(ShopItem).where(ShopItem.c.id == item_id)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
 
