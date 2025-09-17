@@ -263,13 +263,17 @@ async def list_lore_pieces_handler(callback: CallbackQuery, session: AsyncSessio
                 menu_text += f"{status_icon} **{lore.title}**\n"
                 menu_text += f"   `ID: {lore.id}` | `Código: {lore.code_name}`\n"
                 menu_text += f"   📊 {unlock_count} desbloqueos\n"
-                menu_text += f"   📅 {lore.created_at.strftime('%d/%m/%Y')}\n"
-                menu_text += f"   ✏️ Editar (ID: {lore.id})\n\n"
+                menu_text += f"   📅 {lore.created_at.strftime('%d/%m/%Y')}\n\n"
 
         # Create keyboard with pagination
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
         builder = InlineKeyboardBuilder()
 
+        # Add edit buttons for each lore piece
+        if lore_pieces:
+            for lore in lore_pieces:
+                builder.button(text=f"✏️ {lore.id}", callback_data=f"admin_lore_edit:{lore.id}")
+            builder.adjust(3)  # 3 buttons per row
+        
         # Pagination controls
         if total_pages > 1:
             if page > 0:
