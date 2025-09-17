@@ -22,3 +22,17 @@ class BulkOperationStates(StatesGroup):
     waiting_for_file_upload = State()
     waiting_for_operation_confirmation = State()
     processing_bulk_operation = State()
+
+class NarrativeFragmentStates(StatesGroup):
+    """States for narrative fragment management"""
+    waiting_for_fragment_key = State()
+    waiting_for_fragment_text = State()
+    waiting_for_fragment_character = State()
+    waiting_for_fragment_level = State()
+    waiting_for_fragment_besitos_required = State()
+    waiting_for_fragment_besitos_reward = State()
+    waiting_for_fragment_decisions = State()
+    waiting_for_edit_selection = State()
+    waiting_for_edit_field_value = State()
+    waiting_for_delete_confirmation = State()
+    editing_fragment = State()

@@ -1,0 +1,18 @@
+{
+  "fragment_id": "test_admin_upload",
+  "content": "🧪 **Fragmento de Prueba** 🧪\n\nEste es un fragmento creado para probar la funcionalidad de carga administrativa. Si estás viendo esto, significa que:\n\n✅ El sistema de carga funciona\n✅ Los handlers administrativos funcionan\n✅ La base de datos acepta nuevos fragmentos\n\n**Diana:** Excelente, el sistema está funcionando como esperábamos.",
+  "character": "Diana",
+  "level": 1,
+  "required_besitos": 0,
+  "reward_besitos": 15,
+  "decisions": [
+    {
+      "text": "Probar otro fragmento",
+      "next_fragment": "start"
+    },
+    {
+      "text": "Validar configuración",
+      "next_fragment": "validation_test"
+    }
+  ]
+}
