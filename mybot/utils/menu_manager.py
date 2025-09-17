@@ -1,10 +1,12 @@
 """
 Advanced menu management system for seamless user experience.
 Handles message lifecycle, navigation state, and prevents chat clutter.
+Extended with HTML formatting support for enhanced administrative interfaces.
 """
 import asyncio
 import logging
-from typing import Dict, Optional, Tuple, Any
+import time
+from typing import Dict, Optional, Tuple, Any, Union
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup
 from utils.message_safety import (
     safe_answer,
@@ -15,6 +17,13 @@ from utils.message_safety import (
 from aiogram.exceptions import TelegramBadRequest, TelegramAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import User, set_user_menu_state
+
+# Import HTML formatter for enhanced menu display
+try:
+    from utils.html_formatter import HTMLMessageFormatter
+except ImportError:
+    HTMLMessageFormatter = None
+    logging.warning("HTMLMessageFormatter not available - HTML features will be limited")
 
 logger = logging.getLogger(__name__)
 
@@ -249,13 +258,371 @@ class MenuManager:
         """
         # Clean up temporary messages
         await self._cleanup_temp_messages(bot, user_id)
-        
+
         # Remove active menu reference
         self._active_menus.pop(user_id, None)
-        
+
         # Clear navigation history
         self._nav_history.pop(user_id, None)
-    
+
+    async def create_html_menu(
+        self,
+        user_id: int,
+        menu_data: Dict[str, Any],
+        format_type: str = "html",
+        user_context: Optional[Dict] = None
+    ) -> str:
+        """
+        Create HTML-formatted menu text using HTMLMessageFormatter.
+
+        Args:
+            user_id: User ID for context
+            menu_data: Menu data dictionary containing title, sections, etc.
+            format_type: Format type ("html" or "markdown")
+            user_context: Optional user context for personalization
+
+        Returns:
+            Formatted menu text string
+        """
+        try:
+            if format_type == "html" and HTMLMessageFormatter:
+                return HTMLMessageFormatter.format_admin_menu(menu_data, user_context)
+            else:
+                # Fallback to basic formatting
+                lines = []
+                if 'title' in menu_data:
+                    lines.append(f"**{menu_data['title']}**\n")
+
+                if 'description' in menu_data:
+                    lines.append(f"{menu_data['description']}\n")
+
+                if 'sections' in menu_data:
+                    for section in menu_data['sections']:
+                        if 'title' in section:
+                            lines.append(f"\n**{section['title']}**")
+                        if 'options' in section:
+                            for option in section['options']:
+                                if isinstance(option, dict):
+                                    lines.append(f"• {option.get('icon', '')} {option.get('text', '')}")
+                                else:
+                                    lines.append(f"• {option}")
+
+                return "\n".join(lines)
+
+        except Exception as e:
+            logger.error(f"Error creating HTML menu for user {user_id}: {e}")
+            return "**Menú Administrativo**\n\nError al cargar el menú."
+
+    async def cleanup_with_retry(
+        self,
+        user_id: int,
+        bot,
+        max_retries: int = 3,
+        backoff_factor: float = 1.0
+    ) -> bool:
+        """
+        Enhanced cleanup with retry mechanism and graceful error handling.
+
+        Args:
+            user_id: User ID for cleanup
+            bot: Bot instance for message operations
+            max_retries: Maximum number of retry attempts
+            backoff_factor: Exponential backoff multiplier
+
+        Returns:
+            True if cleanup successful, False otherwise
+        """
+        retry_count = 0
+        last_error = None
+
+        while retry_count < max_retries:
+            try:
+                # Clean up temporary messages first
+                await self._cleanup_temp_messages(bot, user_id)
+
+                # Clean up active menu if exists
+                active_menu = self._active_menus.get(user_id)
+                if active_menu:
+                    chat_id, message_id = active_menu
+                    try:
+                        await bot.delete_message(chat_id, message_id)
+                        self._active_menus.pop(user_id, None)
+                        logger.debug(f"Successfully cleaned up menu for user {user_id}")
+                    except TelegramBadRequest as e:
+                        if "message to delete not found" in str(e).lower():
+                            # Message already deleted, just clean up reference
+                            self._active_menus.pop(user_id, None)
+                            logger.debug(f"Menu message already deleted for user {user_id}")
+                        else:
+                            raise
+
+                return True
+
+            except Exception as e:
+                retry_count += 1
+                last_error = e
+
+                if retry_count >= max_retries:
+                    logger.error(f"Failed to cleanup for user {user_id} after {max_retries} retries: {e}")
+                    break
+
+                # Exponential backoff
+                delay = backoff_factor * (2 ** (retry_count - 1))
+                logger.warning(f"Cleanup retry {retry_count}/{max_retries} for user {user_id}, waiting {delay}s: {e}")
+                await asyncio.sleep(delay)
+
+        # Graceful degradation - clean up what we can
+        try:
+            self._active_menus.pop(user_id, None)
+            self._temp_messages.pop(user_id, None)
+            logger.warning(f"Performed graceful cleanup degradation for user {user_id}")
+        except Exception as degradation_error:
+            logger.error(f"Even graceful degradation failed for user {user_id}: {degradation_error}")
+
+        return False
+
+    async def schedule_cleanup(
+        self,
+        user_id: int,
+        bot,
+        delay_seconds: int = 7
+    ) -> None:
+        """
+        Schedule automatic cleanup of user's temporary messages after delay.
+
+        Args:
+            user_id: User ID for cleanup
+            bot: Bot instance
+            delay_seconds: Delay before cleanup in seconds
+        """
+        try:
+            logger.debug(f"Scheduling cleanup for user {user_id} in {delay_seconds} seconds")
+
+            # Schedule the cleanup task
+            asyncio.create_task(self._execute_scheduled_cleanup(user_id, bot, delay_seconds))
+
+        except Exception as e:
+            logger.error(f"Error scheduling cleanup for user {user_id}: {e}")
+
+    async def _execute_scheduled_cleanup(
+        self,
+        user_id: int,
+        bot,
+        delay_seconds: int
+    ) -> None:
+        """
+        Execute scheduled cleanup after delay.
+
+        Args:
+            user_id: User ID for cleanup
+            bot: Bot instance
+            delay_seconds: Delay before cleanup
+        """
+        try:
+            await asyncio.sleep(delay_seconds)
+
+            # Check if user still has temporary messages to clean up
+            temp_msg = self._temp_messages.get(user_id)
+            if temp_msg:
+                chat_id, message_id, expire_time = temp_msg
+                current_time = time.time()
+
+                # Only clean up if message hasn't been manually cleaned up and is expired
+                if current_time >= expire_time:
+                    try:
+                        await bot.delete_message(chat_id, message_id)
+                        logger.debug(f"Scheduled cleanup executed for user {user_id}, message {message_id}")
+                    except TelegramBadRequest as e:
+                        if "message to delete not found" in str(e).lower():
+                            logger.debug(f"Scheduled message already deleted for user {user_id}")
+                        else:
+                            logger.warning(f"Scheduled cleanup failed for user {user_id}: {e}")
+                    except Exception as e:
+                        logger.error(f"Unexpected error in scheduled cleanup for user {user_id}: {e}")
+                    finally:
+                        self._temp_messages.pop(user_id, None)
+
+        except Exception as e:
+            logger.error(f"Error in scheduled cleanup execution for user {user_id}: {e}")
+
+    async def show_html_menu(
+        self,
+        message: Message,
+        menu_data: Dict[str, Any],
+        keyboard: InlineKeyboardMarkup,
+        session: AsyncSession,
+        menu_state: str,
+        user_context: Optional[Dict] = None,
+        delete_origin_message: bool = False
+    ) -> Message:
+        """
+        Display an HTML-formatted menu using the enhanced MenuManager capabilities.
+        This is the main method for showing admin menus with HTML formatting.
+
+        Args:
+            message: Telegram message object
+            menu_data: Menu data dictionary for HTML formatting
+            keyboard: Inline keyboard for menu navigation
+            session: Database session
+            menu_state: Current menu state for navigation
+            user_context: Optional user context for personalization
+            delete_origin_message: Whether to delete the original message
+
+        Returns:
+            Sent message object
+        """
+        try:
+            # Create HTML-formatted menu text
+            text = await self.create_html_menu(
+                message.from_user.id,
+                menu_data,
+                format_type="html",
+                user_context=user_context
+            )
+
+            # Display menu using existing show_menu method with HTML parse mode
+            return await self.show_menu(
+                message=message,
+                text=text,
+                keyboard=keyboard,
+                session=session,
+                menu_state=menu_state,
+                parse_mode="HTML",  # Use HTML parse mode
+                delete_origin_message=delete_origin_message
+            )
+
+        except Exception as e:
+            logger.error(f"Error showing HTML menu for user {message.from_user.id}: {e}")
+            # Fallback to basic menu
+            fallback_text = "**Menú Administrativo**\n\nError al cargar el menú."
+            return await self.show_menu(
+                message=message,
+                text=fallback_text,
+                keyboard=keyboard,
+                session=session,
+                menu_state=menu_state,
+                parse_mode="Markdown",
+                delete_origin_message=delete_origin_message
+            )
+
+    async def update_html_menu(
+        self,
+        callback: CallbackQuery,
+        menu_data: Dict[str, Any],
+        keyboard: InlineKeyboardMarkup,
+        session: AsyncSession,
+        menu_state: str,
+        user_context: Optional[Dict] = None
+    ) -> bool:
+        """
+        Update current menu with HTML-formatted content.
+
+        Args:
+            callback: Callback query from user interaction
+            menu_data: Menu data dictionary for HTML formatting
+            keyboard: Updated inline keyboard
+            session: Database session
+            menu_state: New menu state
+            user_context: Optional user context for personalization
+
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            # Create HTML-formatted menu text
+            text = await self.create_html_menu(
+                callback.from_user.id,
+                menu_data,
+                format_type="html",
+                user_context=user_context
+            )
+
+            # Update menu using existing method with HTML parse mode
+            return await self.update_menu(
+                callback=callback,
+                text=text,
+                keyboard=keyboard,
+                session=session,
+                menu_state=menu_state,
+                parse_mode="HTML"
+            )
+
+        except Exception as e:
+            logger.error(f"Error updating HTML menu for user {callback.from_user.id}: {e}")
+            return False
+
+    async def send_html_temporary_message(
+        self,
+        message: Message,
+        action: str,
+        result: Any,
+        auto_delete_seconds: int = 7,
+        details: Optional[Dict] = None,
+        keyboard: Optional[InlineKeyboardMarkup] = None
+    ) -> Message:
+        """
+        Send a temporary HTML-formatted message (usually for confirmations or errors).
+
+        Args:
+            message: Original message object
+            action: Action that was performed
+            result: Result of the action
+            auto_delete_seconds: Seconds before auto-deletion
+            details: Optional additional details
+            keyboard: Optional inline keyboard
+
+        Returns:
+            Sent temporary message
+        """
+        try:
+            if HTMLMessageFormatter:
+                text = HTMLMessageFormatter.format_confirmation_message(
+                    action=action,
+                    result=result,
+                    auto_delete=True,
+                    details=details
+                )
+                parse_mode = "HTML"
+            else:
+                # Fallback formatting
+                if isinstance(result, bool):
+                    status = "✅ Exitoso" if result else "❌ Fallido"
+                else:
+                    status = "📋 Completado"
+                text = f"**{status}**\n{action}"
+                if auto_delete_seconds > 0:
+                    text += f"\n\n_Se eliminará en {auto_delete_seconds}s_"
+                parse_mode = "Markdown"
+
+            # Send temporary message with enhanced cleanup
+            sent_message = await self.send_temporary_message(
+                message=message,
+                text=text,
+                keyboard=keyboard,
+                auto_delete_seconds=auto_delete_seconds,
+                parse_mode=parse_mode
+            )
+
+            # Schedule additional cleanup using new method
+            if auto_delete_seconds > 0:
+                await self.schedule_cleanup(
+                    user_id=message.from_user.id,
+                    bot=message.bot,
+                    delay_seconds=auto_delete_seconds
+                )
+
+            return sent_message
+
+        except Exception as e:
+            logger.error(f"Error sending HTML temporary message for user {message.from_user.id}: {e}")
+            # Fallback to basic temporary message
+            return await self.send_temporary_message(
+                message=message,
+                text=f"Action: {action}",
+                keyboard=keyboard,
+                auto_delete_seconds=auto_delete_seconds
+            )
+
     def _update_nav_history(self, user_id: int, menu_state: str) -> None:
         """Update navigation history for back button functionality."""
         if user_id not in self._nav_history:
