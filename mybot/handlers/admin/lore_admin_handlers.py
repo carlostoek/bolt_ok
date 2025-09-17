@@ -5,11 +5,12 @@ Provides comprehensive lore piece management interface for administrators.
 import logging
 from datetime import datetime
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, and_, or_
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from utils.user_roles import is_admin
 from utils.menu_manager import menu_manager
@@ -263,7 +264,7 @@ async def list_lore_pieces_handler(callback: CallbackQuery, session: AsyncSessio
                 menu_text += f"   `ID: {lore.id}` | `Código: {lore.code_name}`\n"
                 menu_text += f"   📊 {unlock_count} desbloqueos\n"
                 menu_text += f"   📅 {lore.created_at.strftime('%d/%m/%Y')}\n"
-                menu_text += f"   ✏️ [Editar](callback:admin_lore_edit:{lore.id})\n\n"
+                menu_text += f"   ✏️ Editar (ID: {lore.id})\n\n"
 
         # Create keyboard with pagination
         from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -652,7 +653,6 @@ async def edit_lore_piece(callback: CallbackQuery, session: AsyncSession):
         menu_text += f"**Condición de desbloqueo:** {lore_piece.unlock_condition_type or 'Ninguna'}\n\n"
         menu_text += "Selecciona qué deseas editar:"
 
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
         builder = InlineKeyboardBuilder()
 
         builder.button(text="📝 Título", callback_data=f"admin_lore_edit_title:{lore_id}")
