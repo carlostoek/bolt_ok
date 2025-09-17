@@ -21,6 +21,7 @@ async def is_admin(user_id: int, session: AsyncSession | None = None) -> bool:
     """Check if the user is an admin with session support."""
     # Primero verificar en la lista estática de admins
     if user_id in ADMIN_IDS:
+        logger.info(f"User {user_id} found in static ADMIN_IDS")
         return True
     
     # Si tenemos sesión, verificar en la base de datos
@@ -29,10 +30,13 @@ async def is_admin(user_id: int, session: AsyncSession | None = None) -> bool:
             result = await session.execute(
                 select(User.is_admin).where(User.id == user_id)
             )
-            return result.scalar_one_or_none() or False
+            db_result = result.scalar_one_or_none()
+            logger.info(f"User {user_id} admin status from DB: {db_result}")
+            return db_result or False
         except Exception as e:
             logger.error(f"Error checking admin status in DB: {e}")
     
+    logger.info(f"User {user_id} is not an admin")
     return False
 
 

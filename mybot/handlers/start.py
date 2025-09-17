@@ -67,28 +67,22 @@ async def cmd_start(message: Message, session: AsyncSession):
                 logger.info(f"Updated user info: {user_id}")
         
         # Check if this is an admin
-        if await is_admin(user_id, session):
+        admin_status = await is_admin(user_id, session)
+        logger.info(f"User {user_id} admin status: {admin_status}")
+        
+        if admin_status:
             logger.info(f"Admin user {user_id} accessing start command")
-            tenant_service = TenantService(session)
             
-            # Initialize tenant for admin
-            init_result = await tenant_service.initialize_tenant(user_id)
-            if not init_result["success"]:
-                logger.error(f"Failed to initialize tenant for admin {user_id}: {init_result['error']}")
-                await message.answer(
-                    "❌ **Error Crítico**\n\n"
-                    "No se pudo inicializar la configuración de administrador. "
-                    "Por favor, contacta a soporte."
-                )
-                return
-
-            # Admin menu
+            # Debug: Check what menu factory returns
             try:
                 text, keyboard = await menu_factory.create_menu("admin_main", user_id, session, message.bot)
+                logger.info(f"Menu factory returned text length: {len(text)}, keyboard type: {type(keyboard)}")
+                
                 welcome_prefix = "👑 **¡Bienvenido, Administrador!**\n\n"
                 text = welcome_prefix + text.split('\n\n', 1)[-1]
 
-                await menu_manager.show_menu(
+                # Show the menu
+                result = await menu_manager.show_menu(
                     message,
                     text,
                     keyboard,
@@ -96,6 +90,7 @@ async def cmd_start(message: Message, session: AsyncSession):
                     "admin_main",
                     delete_origin_message=True
                 )
+                logger.info(f"Menu manager show_menu result: {result}")
                 
                 # Show reply keyboard
                 await message.answer(
@@ -104,7 +99,7 @@ async def cmd_start(message: Message, session: AsyncSession):
                 )
                 
             except Exception as e:
-                logger.error(f"Error creating admin menu for {user_id}: {e}")
+                logger.error(f"Error creating admin menu for {user_id}: {e}", exc_info=True)
                 await message.answer(
                     "❌ Error al cargar el panel de administración. "
                     "Intenta nuevamente en unos segundos."

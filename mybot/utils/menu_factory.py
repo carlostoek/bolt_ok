@@ -55,6 +55,7 @@ class MenuFactory:
         """
         try:
             role = await get_user_role(bot, user_id, session=session)
+            logger.info(f"Creating menu for user {user_id}, state {menu_state}, role {role}")
             
             # Handle setup flow for new installations
             if menu_state.startswith("setup_") or menu_state == "admin_setup_choice": # Añadido admin_setup_choice aquí
@@ -62,13 +63,20 @@ class MenuFactory:
             
             # Handle role-based main menus
             if menu_state in ["main", "admin_main", "vip_main", "free_main"]:
-                return self._create_main_menu(role)
+                result = self._create_main_menu(role)
+                logger.info(f"Main menu created for role {role}: text length {len(result[0])}")
+                return result
             
             # Handle specific menu states
             return await self._create_specific_menu(menu_state, user_id, session, role)
             
         except Exception as e:
-            logger.error(f"Error creating menu for state {menu_state}, user {user_id}: {e}")
+            logger.error(f"Error creating menu for state {menu_state}, user {user_id}: {e}", exc_info=True)
+            # Make sure to pass role to _create_fallback_menu
+            try:
+                role = await get_user_role(bot, user_id, session=session)
+            except:
+                role = "free"
             return self._create_fallback_menu(role) 
     
     def _create_main_menu(self, role: str) -> Tuple[str, InlineKeyboardMarkup]:
