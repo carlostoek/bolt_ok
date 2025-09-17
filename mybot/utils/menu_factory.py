@@ -45,7 +45,7 @@ class MenuFactory:
         menu_state: str, 
         user_id: int, 
         session: AsyncSession,
-        bot=None # Asegúrate de que el objeto bot siempre se pase desde los handlers
+        bot=None
     ) -> Tuple[str, InlineKeyboardMarkup]:
         """
         Create a menu based on the current state and user role.
@@ -58,7 +58,7 @@ class MenuFactory:
             logger.info(f"Creating menu for user {user_id}, state {menu_state}, role {role}")
             
             # Handle setup flow for new installations
-            if menu_state.startswith("setup_") or menu_state == "admin_setup_choice": # Añadido admin_setup_choice aquí
+            if menu_state.startswith("setup_") or menu_state == "admin_setup_choice":
                 return await self._create_setup_menu(menu_state, user_id, session)
             
             # Handle role-based main menus

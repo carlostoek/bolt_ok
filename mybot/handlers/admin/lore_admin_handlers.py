@@ -50,7 +50,8 @@ async def show_lore_management_menu(callback: CallbackQuery, session: AsyncSessi
         result = await session.execute(stmt)
         total_lore_pieces = result.scalar()
 
-        stmt = select(func.count(UserLorePiece.c.id))
+        # Fix: UserLorePiece is a table, not an association object with .c
+        stmt = select(func.count(UserLorePiece.id))
         result = await session.execute(stmt)
         total_unlocks = result.scalar()
 
@@ -253,7 +254,8 @@ async def list_lore_pieces_handler(callback: CallbackQuery, session: AsyncSessio
         else:
             for lore in lore_pieces:
                 # Get unlock count for this lore piece
-                unlock_stmt = select(func.count(UserLorePiece.c.id)).where(
+                # Fix: UserLorePiece is a table, not an association object with .c
+                unlock_stmt = select(func.count(UserLorePiece.id)).where(
                     UserLorePiece.lore_piece_id == lore.id
                 )
                 unlock_result = await session.execute(unlock_stmt)
@@ -489,7 +491,7 @@ async def show_lore_analytics(callback: CallbackQuery, session: AsyncSession):
         result = await session.execute(stmt)
         total_lore = result.scalar()
 
-        stmt = select(func.count(UserLorePiece.c.id))
+        stmt = select(func.count(UserLorePiece.id))
         result = await session.execute(stmt)
         total_unlocks = result.scalar()
 
@@ -990,7 +992,7 @@ async def show_detailed_analytics(callback: CallbackQuery, session: AsyncSession
         # Recent activity (last 7 days)
         from datetime import timedelta
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
-        stmt = select(func.count(UserLorePiece.c.id)).where(
+        stmt = select(func.count(UserLorePiece.id)).where(
             UserLorePiece.unlocked_at >= seven_days_ago
         )
         result = await session.execute(stmt)

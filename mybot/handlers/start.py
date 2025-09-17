@@ -138,12 +138,17 @@ async def cmd_start(message: Message, session: AsyncSession):
             )
 
         except Exception as e:
-            logger.error(f"Error creating main menu for user {user_id}: {e}")
-            await message.answer(
-                "❌ **Error Temporal**\n\n"
-                "Hubo un problema al cargar el menú. "
-                "Por favor, intenta nuevamente en unos segundos."
-            )
+            logger.error(f"Error creating main menu for user {user_id}: {e}", exc_info=True)
+            # Fallback to a simple message if menu creation fails
+            try:
+                await message.answer(
+                    "🌟 **¡Bienvenido!**\n\n"
+                    "Estamos experimentando problemas técnicos momentáneos. "
+                    "Por favor, intenta nuevamente en unos segundos.",
+                    reply_markup=main_menu_keyboard
+                )
+            except Exception as fallback_error:
+                logger.error(f"Fallback message also failed for user {user_id}: {fallback_error}")
 
     except Exception as e:
         logger.error(f"Critical error in start command: {e}", exc_info=True)
