@@ -111,6 +111,14 @@ def format_time_remaining(end_time) -> str:
         return f"{minutes}m"
 
 
+def escape_markdown(text: str) -> str:
+    """
+    Escape special characters for Markdown formatting.
+    """
+    import re
+    # Escape characters that have special meaning in Markdown
+    return re.sub(r'([_*\[\]()~`>#+\-=|{}.!])', r'\\\1', text)
+
 def truncate_text(text: str, max_length: int = 100) -> str:
     """Truncate text to specified length with ellipsis."""
     if not text:
