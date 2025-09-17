@@ -50,10 +50,17 @@ async def show_lore_management_menu(callback: CallbackQuery, session: AsyncSessi
         result = await session.execute(stmt)
         total_lore_pieces = result.scalar()
 
-        # Fix: UserLorePiece is a table, not an association object with .c
-        stmt = select(func.count(UserLorePiece.id))
-        result = await session.execute(stmt)
-        total_unlocks = result.scalar()
+        # Check if UserLorePiece has an 'id' column
+        # If not, we need to count using a different approach
+        try:
+            stmt = select(func.count(UserLorePiece.id))
+            result = await session.execute(stmt)
+            total_unlocks = result.scalar()
+        except Exception:
+            # Fallback: count all UserLorePiece records
+            stmt = select(func.count('*')).select_from(UserLorePiece)
+            result = await session.execute(stmt)
+            total_unlocks = result.scalar()
 
         # Build the lore management menu text
         menu_text = "📚 **Gestión de Fragmentos de Historia**\n\n"
@@ -254,12 +261,19 @@ async def list_lore_pieces_handler(callback: CallbackQuery, session: AsyncSessio
         else:
             for lore in lore_pieces:
                 # Get unlock count for this lore piece
-                # Fix: UserLorePiece is a table, not an association object with .c
-                unlock_stmt = select(func.count(UserLorePiece.id)).where(
-                    UserLorePiece.lore_piece_id == lore.id
-                )
-                unlock_result = await session.execute(unlock_stmt)
-                unlock_count = unlock_result.scalar()
+                try:
+                    unlock_stmt = select(func.count(UserLorePiece.id)).where(
+                        UserLorePiece.lore_piece_id == lore.id
+                    )
+                    unlock_result = await session.execute(unlock_stmt)
+                    unlock_count = unlock_result.scalar()
+                except Exception:
+                    # Fallback approach
+                    unlock_stmt = select(func.count('*')).select_from(UserLorePiece).where(
+                        UserLorePiece.lore_piece_id == lore.id
+                    )
+                    unlock_result = await session.execute(unlock_stmt)
+                    unlock_count = unlock_result.scalar()
 
                 status_icon = "✅" if lore.is_active else "❌"
                 menu_text += f"{status_icon} **{lore.title}**\n"
@@ -491,9 +505,15 @@ async def show_lore_analytics(callback: CallbackQuery, session: AsyncSession):
         result = await session.execute(stmt)
         total_lore = result.scalar()
 
-        stmt = select(func.count(UserLorePiece.id))
-        result = await session.execute(stmt)
-        total_unlocks = result.scalar()
+        try:
+            stmt = select(func.count(UserLorePiece.id))
+            result = await session.execute(stmt)
+            total_unlocks = result.scalar()
+        except Exception:
+            # Fallback: count all UserLorePiece records
+            stmt = select(func.count('*')).select_from(UserLorePiece)
+            result = await session.execute(stmt)
+            total_unlocks = result.scalar()
 
         # Top unlocked lore pieces
         stmt = select(
@@ -992,11 +1012,19 @@ async def show_detailed_analytics(callback: CallbackQuery, session: AsyncSession
         # Recent activity (last 7 days)
         from datetime import timedelta
         seven_days_ago = datetime.utcnow() - timedelta(days=7)
-        stmt = select(func.count(UserLorePiece.id)).where(
-            UserLorePiece.unlocked_at >= seven_days_ago
-        )
-        result = await session.execute(stmt)
-        recent_unlocks = result.scalar()
+        try:
+            stmt = select(func.count(UserLorePiece.id)).where(
+                UserLorePiece.unlocked_at >= seven_days_ago
+            )
+            result = await session.execute(stmt)
+            recent_unlocks = result.scalar()
+        except Exception:
+            # Fallback approach
+            stmt = select(func.count('*')).select_from(UserLorePiece).where(
+                UserLorePiece.unlocked_at >= seven_days_ago
+            )
+            result = await session.execute(stmt)
+            recent_unlocks = result.scalar()
 
         # Build detailed analytics display
         menu_text = "📊 **Analytics Detallados**\n\n"

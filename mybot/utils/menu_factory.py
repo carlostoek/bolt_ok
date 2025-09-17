@@ -67,6 +67,14 @@ class MenuFactory:
                 logger.info(f"Main menu created for role {role}: text length {len(result[0])}")
                 return result
             
+            # Handle admin narrative main menu
+            if menu_state == "admin_narrative_main":
+                return await self._create_admin_narrative_menu()
+            
+            # Handle admin gamification main menu
+            if menu_state == "admin_gamification_main":
+                return await self._create_admin_gamification_menu()
+            
             # Handle specific menu states
             return await self._create_specific_menu(menu_state, user_id, session, role)
             
@@ -262,6 +270,65 @@ class MenuFactory:
         else:
             logger.warning(f"Unknown specific menu state: {menu_state}. Falling back to main menu for role: {role}")
             return self._create_main_menu(role)
+    
+    async def _create_admin_narrative_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
+        """Create the admin narrative main menu."""
+        try:
+            from keyboards.admin_narrative_kb import get_admin_narrative_main_kb
+            text = "📚 **Panel de Administración Narrativa**\n\n" \
+                   "Gestiona todos los aspectos del sistema narrativo desde este panel central.\n\n" \
+                   "**Funcionalidades disponibles:**\n" \
+                   "• Crear y editar fragmentos de historia\n" \
+                   "• Gestionar conexiones entre fragmentos\n" \
+                   "• Analizar métricas de engagement\n" \
+                   "• Validar consistencia narrativa\n" \
+                   "• Configurar voces de personajes"
+            
+            return text, get_admin_narrative_main_kb()
+        except ImportError:
+            # Fallback if the keyboard doesn't exist
+            from aiogram.utils.keyboard import InlineKeyboardBuilder
+            builder = InlineKeyboardBuilder()
+            builder.button(text="📝 Gestionar Fragmentos", callback_data="admin_narrative_fragments")
+            builder.button(text="🔗 Conexiones", callback_data="admin_narrative_connections")
+            builder.button(text="📊 Analytics", callback_data="admin_narrative_analytics")
+            builder.button(text="✅ Validar", callback_data="admin_narrative_validate")
+            builder.button(text="🔙 Volver", callback_data="admin_main")
+            builder.adjust(2)
+            
+            text = "📚 **Panel de Administración Narrativa**\n\n" \
+                   "Gestiona todos los aspectos del sistema narrativo."
+            
+            return text, builder.as_markup()
+
+    async def _create_admin_gamification_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
+        """Create the admin gamification main menu."""
+        try:
+            from keyboards.admin_gamification_kb import get_admin_gamification_main_kb
+            text = "🎮 **Panel de Gamificación**\n\n" \
+                   "Gestiona misiones, logros y sistema de puntos.\n\n" \
+                   "**Funcionalidades disponibles:**\n" \
+                   "• Crear y editar misiones\n" \
+                   "• Gestionar logros e insignias\n" \
+                   "• Configurar sistema de puntos\n" \
+                   "• Ver estadísticas de gamificación"
+            
+            return text, get_admin_gamification_main_kb()
+        except ImportError:
+            # Fallback if the keyboard doesn't exist
+            from aiogram.utils.keyboard import InlineKeyboardBuilder
+            builder = InlineKeyboardBuilder()
+            builder.button(text="🎯 Misiones", callback_data="admin_missions")
+            builder.button(text="🏆 Logros", callback_data="admin_achievements")
+            builder.button(text="⭐ Puntos", callback_data="admin_points")
+            builder.button(text="📊 Estadísticas", callback_data="admin_gamification_stats")
+            builder.button(text="🔙 Volver", callback_data="admin_main")
+            builder.adjust(2)
+            
+            text = "🎮 **Panel de Gamificación**\n\n" \
+                   "Gestiona misiones, logros y sistema de puntos."
+            
+            return text, builder.as_markup()
     
     async def _create_narrative_menu(self, user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
         """Create the narrative menu for a user."""
