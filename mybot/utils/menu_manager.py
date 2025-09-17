@@ -103,11 +103,18 @@ class MenuManager:
             except Exception as e:
                 logger.error(f"Error updating menu for user {user_id}, falling back to create new: {e}")
         
+        # Sanitize text to prevent Markdown parsing errors
+        if parse_mode == "Markdown":
+            from utils.text_utils import escape_markdown
+            sanitized_text = escape_markdown(text)
+        else:
+            sanitized_text = text
+        
         # Create new menu message (either because no existing, or update failed)
         try:
             sent_message = await safe_answer(
                 message,
-                text,
+                sanitized_text,
                 reply_markup=keyboard,
                 parse_mode=parse_mode,
             )
@@ -150,9 +157,16 @@ class MenuManager:
         await self._cleanup_temp_messages(bot, user_id)
         
         try:
+            # Sanitize text to prevent Markdown parsing errors
+            if parse_mode == "Markdown":
+                from utils.text_utils import escape_markdown
+                sanitized_text = escape_markdown(text)
+            else:
+                sanitized_text = text
+            
             await safe_edit(
                 message,
-                text,
+                sanitized_text,
                 reply_markup=keyboard,
                 parse_mode=parse_mode,
             )
