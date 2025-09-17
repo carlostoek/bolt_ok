@@ -78,10 +78,7 @@ async def cmd_start(message: Message, session: AsyncSession):
                 text, keyboard = await menu_factory.create_menu("admin_main", user_id, session, message.bot)
                 logger.info(f"Menu factory returned text length: {len(text)}, keyboard type: {type(keyboard)}")
                 
-                welcome_prefix = "👑 **¡Bienvenido, Administrador!**\n\n"
-                text = welcome_prefix + text.split('\n\n', 1)[-1]
-
-                # Show the menu
+                # Show the menu directly without modifying the text
                 result = await menu_manager.show_menu(
                     message,
                     text,
@@ -111,17 +108,7 @@ async def cmd_start(message: Message, session: AsyncSession):
         try:
             text, keyboard = await menu_factory.create_menu("main", user_id, session, message.bot)
             
-            if is_new_user:
-                welcome_prefix = "🌟 **¡Bienvenido!**\n\n"
-                if "suscripción vip" in text.lower() or "experiencia premium" in text.lower():
-                    welcome_prefix = "✨ **¡Bienvenido, Miembro VIP!**\n\n"
-                text = welcome_prefix + text
-            else:
-                if "suscripción vip" in text.lower() or "experiencia premium" in text.lower():
-                    text = "✨ **Bienvenido de vuelta**\n\n" + text.split('\n\n', 1)[-1]
-                else:
-                    text = "🌟 **¡Hola de nuevo!**\n\n" + text.split('\n\n', 1)[-1]
-            
+            # Show the menu directly without modifying the text
             await menu_manager.show_menu(
                 message,
                 text,

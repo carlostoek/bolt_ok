@@ -83,7 +83,7 @@ class MenuFactory:
         """Create the main menu based on user role."""
         if role == "admin":
             return (
-                "🛠️ **Panel de Administración**\n\n"
+                "👑 **¡Bienvenido, Administrador!**\n\n"
                 "Bienvenido al centro de control del bot. Desde aquí puedes gestionar "
                 "todos los aspectos del sistema.",
                 get_admin_main_kb()
