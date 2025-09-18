@@ -2,6 +2,8 @@
 Enhanced admin menu with improved navigation, multi-tenant support, and HTML formatting.
 Implements requirements 1.1 (Enhanced Administrative Menu System) and 1.5 (Administrative Analysis and Reports).
 """
+import logging
+
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup
 from aiogram.filters import CommandStart, Command
@@ -37,8 +39,6 @@ try:
 except ImportError:
     AUTOMATION_AVAILABLE = False
     logging.warning("Automation handlers not available")
-
-import logging
 
 logger = logging.getLogger(__name__)
 router = Router()
