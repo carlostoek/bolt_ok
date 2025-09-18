@@ -1,0 +1,374 @@
+# Channel Administration Module - Configuration
+# Modulo-admon configuration file for admin automation tasks
+# Supports requirements 6.1 (Subscription Reminders) and 6.2 (Message Cleanup Automation)
+
+# ===== AUTOMATION SERVICE CONFIGURATION =====
+automation:
+  # Task Scheduling Configuration
+  scheduler:
+    # Main scheduler loop check interval (seconds)
+    check_interval: 60
+    # Enable automation service by default
+    enabled: true
+    # Maximum concurrent tasks
+    max_concurrent_tasks: 5
+    # Task execution timeout (seconds)
+    task_timeout: 300
+
+  # Requirement 6.1: Subscription Reminder Automation
+  subscription_reminders:
+    # Enable subscription reminder automation
+    enabled: true
+    # Days before expiration to send reminders
+    reminder_days_before: [3, 1]
+    # Execution interval for reminder task (seconds) - every hour
+    execution_interval: 3600
+    # Maximum retry attempts for failed reminders
+    max_retries: 3
+    # Retry delay between attempts (seconds)
+    retry_delay: 300
+    # Priority level (1=LOW, 2=NORMAL, 3=HIGH, 4=CRITICAL)
+    priority: 3
+    # Personalized message templates
+    templates:
+      3_day_reminder: |
+        🌟 *¡Hola, {username}!*
+
+        Diana susurra: "Tu suscripción VIP expira en *3 días*... No queremos que te pierdas las próximas aventuras."
+
+        ✨ *Expira:* {expiration_date}
+        💎 *Renueva ahora:* /vip
+
+        *¡Mantén tu acceso exclusivo!*
+      1_day_reminder: |
+        ⚠️ *¡Atención, {username}!*
+
+        Diana murmura con urgencia: "Tu suscripción VIP expira *mañana*... El tiempo se agota."
+
+        ⏰ *Expira:* {expiration_date}
+        🚨 *Renueva AHORA:* /vip
+
+        *¡No pierdas tu lugar en esta historia!*
+
+  # Requirement 6.2: Message Cleanup Automation
+  message_cleanup:
+    # Enable message cleanup automation
+    enabled: true
+    # Execution interval for cleanup task (seconds) - every 30 minutes
+    execution_interval: 1800
+    # Maximum age for temporary messages (hours)
+    max_age_hours: 24
+    # Number of messages to process per batch
+    batch_size: 50
+    # Maximum retry attempts for failed cleanup
+    max_retries: 2
+    # Priority level
+    priority: 2
+    # Extended cleanup configuration
+    extended_cleanup:
+      # Clean menu manager temporary messages
+      clean_temp_messages: true
+      # Clean expired message tracking
+      clean_message_tracking: true
+      # Clean user session data
+      clean_session_data: true
+      # Retention period for cleanup logs (days)
+      log_retention_days: 30
+
+  # Additional Automation Tasks
+  expired_subscriptions:
+    # Process expired VIP subscriptions
+    enabled: true
+    execution_interval: 7200  # Every 2 hours
+    priority: 2
+    max_retries: 2
+    # Farewell message for expired users
+    farewell_message: |
+      💔 *Tu suscripción VIP ha expirado*
+
+      Diana susurra: 'Ha sido un placer compartir estos momentos contigo...'
+
+      💫 Usa /vip para renovar tu acceso exclusivo
+
+  health_check:
+    # Monitor automation service health
+    enabled: true
+    execution_interval: 900  # Every 15 minutes
+    priority: 1
+    max_retries: 1
+    # Health score thresholds
+    healthy_threshold: 90
+    degraded_threshold: 70
+
+  # Task for requirement 6.3: User departure monitoring
+  user_departure_monitoring:
+    enabled: true
+    execution_interval: 300  # Every 5 minutes for requirement compliance
+    priority: 3
+    max_retries: 3
+    # Send retention messages to VIP users who leave
+    vip_retention_enabled: true
+    # Clean pending requests on departure
+    clean_pending_requests: true
+
+  # Task for requirement 6.4: Inactive VIP user detection
+  inactive_vip_detection:
+    enabled: true
+    execution_interval: 21600  # Every 6 hours
+    priority: 3
+    max_retries: 3
+    # Days without activity to consider inactive
+    inactivity_threshold_days: 7
+    # Notify administrators of inactive users
+    admin_notifications: true
+
+  # Token and data cleanup
+  token_cleanup:
+    enabled: true
+    execution_interval: 7200  # Every 2 hours
+    retention_days: 30
+    priority: 2
+    max_retries: 2
+
+  analytics_archival:
+    enabled: true
+    execution_interval: 86400  # Every 24 hours
+    retention_days: 90
+    priority: 1
+    max_retries: 2
+
+# ===== ADMIN PANEL CONFIGURATION =====
+admin_panel:
+  # Menu and UI Configuration
+  menu:
+    # Use HTML formatting instead of Markdown
+    use_html_formatting: true
+    # Auto-cleanup previous menus
+    auto_cleanup: true
+    # Menu timeout (seconds)
+    menu_timeout: 300
+    # Maximum navigation history depth
+    max_history_depth: 10
+
+  # Session Management
+  session:
+    # Admin session timeout (minutes)
+    timeout_minutes: 30
+    # Maximum concurrent admin sessions
+    max_concurrent_sessions: 5
+    # Session validation interval (seconds)
+    validation_interval: 300
+
+  # Security Configuration
+  security:
+    # Enable multi-factor authentication
+    mfa_enabled: false
+    # Rate limiting for admin operations (per hour)
+    rate_limit_operations: 100
+    # Maximum content length for admin inputs
+    max_content_length: 5000
+    # Log all admin actions
+    audit_logging: true
+    # Admin action log retention (days)
+    audit_retention_days: 90
+
+  # Performance Configuration
+  performance:
+    # Cache TTL for admin data (seconds)
+    cache_ttl: 3600
+    # Analytics batch size for processing
+    analytics_batch_size: 100
+    # Database connection pool size for admin operations
+    db_pool_size: 10
+    # Query timeout for admin operations (seconds)
+    query_timeout: 30
+
+# ===== VIP MANAGEMENT CONFIGURATION =====
+vip_management:
+  # Token Generation
+  tokens:
+    # Default token validity (days)
+    default_validity_days: 30
+    # Maximum batch size for token generation
+    max_batch_size: 50
+    # Token format (uuid4 recommended)
+    token_format: "uuid4"
+    # Enable token usage tracking
+    usage_tracking: true
+
+  # Subscription Management
+  subscriptions:
+    # Enable automatic renewal reminders
+    auto_reminders: true
+    # Grace period after expiration (hours)
+    grace_period_hours: 24
+    # Enable subscription analytics
+    analytics_enabled: true
+
+  # Channel Access Control
+  channels:
+    # Automatic VIP channel access management
+    auto_access_management: true
+    # Remove users within X seconds of expiration
+    removal_delay_seconds: 30
+    # Enable content protection for VIP channels
+    content_protection: true
+
+# ===== CONTENT MANAGEMENT CONFIGURATION =====
+content:
+  # File Upload Limits
+  upload:
+    # Maximum file size (MB)
+    max_file_size_mb: 10
+    # Allowed file types
+    allowed_types: ["jpg", "jpeg", "png", "gif", "mp4", "mp3", "txt", "pdf"]
+    # Upload path for admin content
+    upload_path: "uploads/admin/"
+
+  # Content Validation
+  validation:
+    # Enable content validation
+    enabled: true
+    # Maximum content length
+    max_length: 5000
+    # Enable automatic content moderation
+    auto_moderation: false
+
+  # Content Scheduling
+  scheduling:
+    # Enable content scheduling
+    enabled: true
+    # Maximum scheduled content per admin
+    max_scheduled_per_admin: 100
+    # Schedule validation interval (minutes)
+    validation_interval: 60
+
+# ===== ANALYTICS AND REPORTING =====
+analytics:
+  # Data Collection
+  collection:
+    # Enable admin action analytics
+    admin_actions: true
+    # Enable performance metrics
+    performance_metrics: true
+    # Enable user engagement tracking
+    user_engagement: true
+    # Data retention period (days)
+    retention_days: 365
+
+  # Report Generation
+  reports:
+    # Enable automatic report generation
+    auto_generation: true
+    # Report generation interval (hours)
+    generation_interval: 24
+    # Available export formats
+    export_formats: ["json", "csv"]
+    # Maximum report history
+    max_history: 30
+
+  # Real-time Monitoring
+  monitoring:
+    # Enable real-time analytics
+    real_time: true
+    # Metrics update interval (seconds)
+    update_interval: 300
+    # Enable alerts for anomalies
+    anomaly_alerts: true
+
+# ===== COORDINATOR CENTRAL INTEGRATION =====
+coordinator:
+  # Integration Settings
+  integration:
+    # Enable CoordinadorCentral integration
+    enabled: true
+    # Coordination timeout (seconds)
+    timeout: 30
+    # Retry attempts for coordination failures
+    max_retries: 3
+    # Batch operations support
+    batch_operations: true
+
+  # Cross-module Synchronization
+  synchronization:
+    # Sync interval for module coordination (seconds)
+    interval: 60
+    # Enable automatic conflict resolution
+    auto_conflict_resolution: true
+    # Sync timeout (seconds)
+    sync_timeout: 15
+
+# ===== ERROR HANDLING AND RECOVERY =====
+error_handling:
+  # Retry Configuration
+  retry:
+    # Default retry attempts
+    default_attempts: 3
+    # Exponential backoff base (seconds)
+    backoff_base: 2
+    # Maximum backoff time (seconds)
+    max_backoff: 300
+
+  # Recovery Options
+  recovery:
+    # Enable automatic recovery
+    auto_recovery: true
+    # Recovery timeout (seconds)
+    timeout: 60
+    # Enable fallback operations
+    fallback_enabled: true
+
+  # Error Notifications
+  notifications:
+    # Notify admins of critical errors
+    admin_notifications: true
+    # Error notification threshold
+    error_threshold: 5
+    # Notification cooldown (minutes)
+    cooldown_minutes: 30
+
+# ===== LOGGING CONFIGURATION =====
+logging:
+  # Log Levels
+  levels:
+    # Root logger level
+    root: "INFO"
+    # Automation service logger level
+    automation: "INFO"
+    # Admin panel logger level
+    admin_panel: "INFO"
+    # Database logger level
+    database: "WARNING"
+
+  # Log Rotation
+  rotation:
+    # Enable log rotation
+    enabled: true
+    # Maximum log file size (MB)
+    max_size_mb: 100
+    # Number of backup files to keep
+    backup_count: 5
+
+  # Log Retention
+  retention:
+    # Log retention period (days)
+    days: 30
+    # Enable automatic cleanup
+    auto_cleanup: true
+
+# ===== VERSION AND METADATA =====
+metadata:
+  # Configuration version
+  version: "1.0.0"
+  # Last updated timestamp
+  last_updated: "2025-09-18T00:00:00Z"
+  # Configuration description
+  description: "Admin configuration for Channel Administration Module (modulo-admon)"
+  # Compatible bot version
+  bot_version: ">=2.0.0"
+  # Requirements implemented
+  requirements:
+    - "6.1: Subscription reminder automation"
+    - "6.2: Message cleanup automation"
+    - "6.3: User departure monitoring"
+    - "6.4: Inactive VIP user detection"

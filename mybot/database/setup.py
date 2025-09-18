@@ -113,7 +113,7 @@ async def get_session() -> AsyncSession:
 async def populate_initial_shop_items():
     """Add some initial items to the shop if it's empty"""
     # Import using the full module path to avoid naming conflicts
-    from mybot.database.models import ShopItem
+    from database.models import ShopItem
     from sqlalchemy import select
     
     session_factory = get_session_factory()

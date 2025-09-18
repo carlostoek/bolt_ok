@@ -8,6 +8,9 @@ and validates the system configuration for the narrative features.
 
 import asyncio
 import logging
+import yaml
+from pathlib import Path
+from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.setup import get_session_factory
 from services.config_service import ConfigService
@@ -120,6 +123,91 @@ class ConfigInitializer:
                 logger.error(error_msg)
 
         return results
+
+
+class AdminConfigLoader:
+    """Load and manage admin configuration from YAML file."""
+
+    def __init__(self, config_path: str = "config/admin_config.yaml"):
+        self.config_path = Path(config_path)
+        self._config_data: Optional[Dict[str, Any]] = None
+
+    def load_config(self) -> Dict[str, Any]:
+        """Load admin configuration from YAML file."""
+        try:
+            if not self.config_path.exists():
+                raise FileNotFoundError(f"Admin config file not found: {self.config_path}")
+
+            with open(self.config_path, 'r', encoding='utf-8') as f:
+                self._config_data = yaml.safe_load(f)
+
+            logger.info(f"Admin configuration loaded from {self.config_path}")
+            return self._config_data
+
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in admin config: {str(e)}")
+            raise
+        except Exception as e:
+            logger.error(f"Failed to load admin config: {str(e)}")
+            raise
+
+    def get_automation_config(self) -> Dict[str, Any]:
+        """Get automation section configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("automation", {})
+
+    def get_admin_panel_config(self) -> Dict[str, Any]:
+        """Get admin panel section configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("admin_panel", {})
+
+    def get_vip_management_config(self) -> Dict[str, Any]:
+        """Get VIP management section configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("vip_management", {})
+
+    def get_coordinator_config(self) -> Dict[str, Any]:
+        """Get coordinator integration configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("coordinator", {})
+
+    def get_error_handling_config(self) -> Dict[str, Any]:
+        """Get error handling configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("error_handling", {})
+
+    def get_logging_config(self) -> Dict[str, Any]:
+        """Get logging configuration."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("logging", {})
+
+    def get_subscription_reminders_config(self) -> Dict[str, Any]:
+        """Get subscription reminders configuration (Requirement 6.1)."""
+        automation = self.get_automation_config()
+        return automation.get("subscription_reminders", {})
+
+    def get_message_cleanup_config(self) -> Dict[str, Any]:
+        """Get message cleanup configuration (Requirement 6.2)."""
+        automation = self.get_automation_config()
+        return automation.get("message_cleanup", {})
+
+    def is_automation_enabled(self) -> bool:
+        """Check if automation service is enabled."""
+        automation = self.get_automation_config()
+        scheduler = automation.get("scheduler", {})
+        return scheduler.get("enabled", False)
+
+    def get_metadata(self) -> Dict[str, Any]:
+        """Get configuration metadata."""
+        if self._config_data is None:
+            self.load_config()
+        return self._config_data.get("metadata", {})
 
 
 async def initialize_system_configuration():

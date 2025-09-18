@@ -73,9 +73,14 @@ class AdminActionType(enum.Enum):
 
     # System Administration Actions
     SYSTEM_CONFIG_UPDATED = "system_config_updated"
+    SYSTEM_CONFIG_CHANGED = "system_config_changed"
     SYSTEM_MAINTENANCE = "system_maintenance"
     DATABASE_BACKUP = "database_backup"
     DATABASE_RESTORE = "database_restore"
+
+    # Admin Permission Management Actions
+    ADMIN_PERMISSIONS_GRANTED = "admin_permissions_granted"
+    ADMIN_PERMISSIONS_REVOKED = "admin_permissions_revoked"
 
     # Automation Actions
     AUTOMATION_RULE_CREATED = "automation_rule_created"
@@ -85,6 +90,7 @@ class AdminActionType(enum.Enum):
 
     # Reporting and Analytics Actions
     REPORT_GENERATED = "report_generated"
+    REVENUE_REPORT_GENERATED = "revenue_report_generated"
     DATA_EXPORTED = "data_exported"
     ANALYTICS_ACCESSED = "analytics_accessed"
 

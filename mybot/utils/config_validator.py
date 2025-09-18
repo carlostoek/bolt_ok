@@ -11,7 +11,9 @@ This module provides:
 
 import re
 import os
+import yaml
 import logging
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from utils.config import Config
 from utils.database_config import validate_all_configs
@@ -33,6 +35,7 @@ class ConfigValidator:
             "security": ConfigValidator.validate_security_config(),
             "performance": validate_performance_config(),
             "narrative": ConfigValidator.validate_narrative_config(),
+            "admin_config": ConfigValidator.validate_admin_config(),
         }
 
         # Overall validation status
@@ -129,6 +132,123 @@ class ConfigValidator:
         except Exception as e:
             validation_results["error"] = str(e)
             validation_results["overall_valid"] = False
+
+        return validation_results
+
+    @staticmethod
+    def validate_admin_config() -> Dict[str, Any]:
+        """Validate admin configuration YAML file (modulo-admon requirements 6.1, 6.2)."""
+        validation_results = {}
+
+        try:
+            # Check if admin config file exists
+            config_path = Path("config/admin_config.yaml")
+            validation_results["config_file_exists"] = config_path.exists()
+
+            if not config_path.exists():
+                validation_results["overall_valid"] = False
+                validation_results["error"] = "Admin config file not found at config/admin_config.yaml"
+                return validation_results
+
+            # Load and validate YAML structure
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config_data = yaml.safe_load(f)
+                validation_results["yaml_valid"] = True
+            except yaml.YAMLError as e:
+                validation_results["yaml_valid"] = False
+                validation_results["yaml_error"] = str(e)
+                validation_results["overall_valid"] = False
+                return validation_results
+
+            # Validate automation section (Requirements 6.1, 6.2)
+            automation = config_data.get("automation", {})
+            validation_results["automation_section_exists"] = bool(automation)
+
+            # Requirement 6.1: Subscription reminder automation
+            reminders = automation.get("subscription_reminders", {})
+            validation_results["req_6_1_reminders_enabled"] = reminders.get("enabled", False)
+            validation_results["req_6_1_reminder_days_valid"] = isinstance(reminders.get("reminder_days_before"), list)
+            validation_results["req_6_1_execution_interval_valid"] = isinstance(reminders.get("execution_interval"), int)
+
+            # Requirement 6.2: Message cleanup automation
+            cleanup = automation.get("message_cleanup", {})
+            validation_results["req_6_2_cleanup_enabled"] = cleanup.get("enabled", False)
+            validation_results["req_6_2_execution_interval_valid"] = isinstance(cleanup.get("execution_interval"), int)
+            validation_results["req_6_2_max_age_hours_valid"] = isinstance(cleanup.get("max_age_hours"), int)
+            validation_results["req_6_2_batch_size_valid"] = isinstance(cleanup.get("batch_size"), int)
+
+            # Validate scheduler configuration
+            scheduler = automation.get("scheduler", {})
+            validation_results["scheduler_enabled"] = scheduler.get("enabled", False)
+            validation_results["scheduler_check_interval_valid"] = 30 <= scheduler.get("check_interval", 60) <= 300
+
+            # Validate admin panel configuration
+            admin_panel = config_data.get("admin_panel", {})
+            validation_results["admin_panel_section_exists"] = bool(admin_panel)
+
+            menu = admin_panel.get("menu", {})
+            validation_results["html_formatting_enabled"] = menu.get("use_html_formatting", False)
+            validation_results["auto_cleanup_enabled"] = menu.get("auto_cleanup", False)
+
+            # Validate security settings
+            security = admin_panel.get("security", {})
+            validation_results["audit_logging_enabled"] = security.get("audit_logging", False)
+            rate_limit = security.get("rate_limit_operations", 0)
+            validation_results["rate_limit_valid"] = 10 <= rate_limit <= 1000
+
+            # Validate VIP management
+            vip_mgmt = config_data.get("vip_management", {})
+            validation_results["vip_management_section_exists"] = bool(vip_mgmt)
+
+            tokens = vip_mgmt.get("tokens", {})
+            max_batch = tokens.get("max_batch_size", 0)
+            validation_results["token_batch_size_valid"] = 1 <= max_batch <= 100
+
+            # Validate coordinator integration
+            coordinator = config_data.get("coordinator", {})
+            integration = coordinator.get("integration", {})
+            validation_results["coordinator_integration_enabled"] = integration.get("enabled", False)
+
+            # Validate error handling
+            error_handling = config_data.get("error_handling", {})
+            retry = error_handling.get("retry", {})
+            validation_results["retry_attempts_valid"] = 1 <= retry.get("default_attempts", 0) <= 10
+
+            # Validate logging configuration
+            logging_config = config_data.get("logging", {})
+            levels = logging_config.get("levels", {})
+            validation_results["logging_levels_configured"] = all(
+                level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
+                for level in levels.values() if isinstance(level, str)
+            )
+
+            # Check metadata and version
+            metadata = config_data.get("metadata", {})
+            validation_results["version_specified"] = bool(metadata.get("version"))
+            validation_results["requirements_documented"] = bool(metadata.get("requirements"))
+
+            # Overall validation for admin config
+            validation_results["overall_valid"] = all([
+                validation_results["yaml_valid"],
+                validation_results["automation_section_exists"],
+                validation_results["req_6_1_reminders_enabled"],
+                validation_results["req_6_1_reminder_days_valid"],
+                validation_results["req_6_2_cleanup_enabled"],
+                validation_results["req_6_2_execution_interval_valid"],
+                validation_results["scheduler_enabled"],
+                validation_results["admin_panel_section_exists"],
+                validation_results["vip_management_section_exists"],
+                validation_results["coordinator_integration_enabled"],
+                validation_results["logging_levels_configured"],
+            ])
+
+            logger.info("Admin config validation completed successfully")
+
+        except Exception as e:
+            validation_results["error"] = str(e)
+            validation_results["overall_valid"] = False
+            logger.exception(f"Error validating admin config: {str(e)}")
 
         return validation_results
 

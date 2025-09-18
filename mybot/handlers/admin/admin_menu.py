@@ -56,6 +56,30 @@ from .shop_admin import router as shop_admin_router
 from .analytics_handlers import router as analytics_router
 from .lore_admin_handlers import router as lore_admin_router
 
+# Import enhanced analytics with error handling
+try:
+    from .enhanced_analytics import router as enhanced_analytics_router
+    ENHANCED_ANALYTICS_AVAILABLE = True
+except ImportError:
+    ENHANCED_ANALYTICS_AVAILABLE = False
+    logging.warning("Enhanced analytics handlers not available")
+
+# Import auction admin with error handling
+try:
+    from .auction_admin import router as auction_admin_router
+    AUCTION_ADMIN_AVAILABLE = True
+except ImportError:
+    AUCTION_ADMIN_AVAILABLE = False
+    logging.warning("Auction admin handlers not available")
+
+# Import trivia admin with error handling
+try:
+    from .trivia_admin import router as trivia_admin_router
+    TRIVIA_ADMIN_AVAILABLE = True
+except ImportError:
+    TRIVIA_ADMIN_AVAILABLE = False
+    logging.warning("Trivia admin handlers not available")
+
 # Include narrative admin handlers from root handlers directory
 from ..admin_narrative_handlers import router as narrative_handlers_router
 
@@ -71,6 +95,18 @@ router.include_router(shop_admin_router)
 router.include_router(analytics_router)
 router.include_router(lore_admin_router)
 router.include_router(narrative_handlers_router)
+
+# Include enhanced analytics if available
+if ENHANCED_ANALYTICS_AVAILABLE:
+    router.include_router(enhanced_analytics_router)
+
+# Include auction admin if available
+if AUCTION_ADMIN_AVAILABLE:
+    router.include_router(auction_admin_router)
+
+# Include trivia admin if available
+if TRIVIA_ADMIN_AVAILABLE:
+    router.include_router(trivia_admin_router)
 
 # Include automation handlers if available
 if AUTOMATION_AVAILABLE:
@@ -269,7 +305,22 @@ def get_enhanced_admin_main_kb() -> InlineKeyboardMarkup:
     builder.button(text="📚 Narrativa", callback_data="admin_narrative_main")
     builder.button(text="📈 Analytics", callback_data="admin_analytics_main")
 
-    # Row 4: Automation and system
+    # Row 4: Additional game features (if available)
+    row4_added = False
+    if AUCTION_ADMIN_AVAILABLE:
+        builder.button(text="🎯 Subastas", callback_data="admin_auction_main")
+        row4_added = True
+    if TRIVIA_ADMIN_AVAILABLE:
+        builder.button(text="🧠 Trivias", callback_data="list_trivias")
+        row4_added = True
+
+    # Fill row 4 if no special features available
+    if not row4_added:
+        if ENHANCED_ANALYTICS_AVAILABLE:
+            builder.button(text="📊 Analytics+", callback_data="enhanced_analytics_main")
+        builder.button(text="🔧 Herramientas", callback_data="admin_tools")
+
+    # Row 5: Automation and system
     if AUTOMATION_AVAILABLE:
         builder.button(text="🤖 Automatización", callback_data="automation")
         builder.button(text="⚙️ Config", callback_data="admin_config")
@@ -277,7 +328,7 @@ def get_enhanced_admin_main_kb() -> InlineKeyboardMarkup:
         builder.button(text="⚙️ Configuración", callback_data="admin_config")
         builder.button(text="📊 Sistema", callback_data="admin_stats")
 
-    # Row 5: Statistics and navigation
+    # Row 6: Statistics and navigation
     if AUTOMATION_AVAILABLE:
         builder.button(text="📊 Estadísticas", callback_data="admin_stats")
         builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
@@ -285,11 +336,17 @@ def get_enhanced_admin_main_kb() -> InlineKeyboardMarkup:
         builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
         builder.button(text="↩️ Volver", callback_data="admin_back")
 
-    # Adjust layout based on automation availability
-    if AUTOMATION_AVAILABLE:
-        builder.adjust(2, 2, 2, 2, 2)  # 5 rows of 2 buttons each
+    # Adjust layout based on available features
+    if row4_added:
+        if AUTOMATION_AVAILABLE:
+            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows of 2 buttons each
+        else:
+            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows of 2 buttons each
     else:
-        builder.adjust(2, 2, 2, 2, 2)  # 5 rows of 2 buttons each
+        if AUTOMATION_AVAILABLE:
+            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows
+        else:
+            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows
 
     return builder.as_markup()
 
@@ -476,12 +533,49 @@ async def admin_stats(callback: CallbackQuery, session: AsyncSession):
 
     await callback.answer()
 
+@router.callback_query(F.data == "admin_tools")
+async def admin_tools(callback: CallbackQuery, session: AsyncSession):
+    """Enhanced admin tools menu."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    try:
+        from keyboards.common import get_back_kb
+
+        tools_text = "🔧 **Herramientas Administrativas**\n\n"
+        tools_text += "**🛠️ Herramientas disponibles:**\n"
+        tools_text += "• Configuración del sistema\n"
+        tools_text += "• Gestión de usuarios\n"
+        tools_text += "• Limpieza de datos\n"
+        tools_text += "• Backup y restauración\n"
+        tools_text += "• Logs del sistema\n\n"
+
+        tools_text += "**📋 Comandos administrativos:**\n"
+        tools_text += "• `/admin_generate_token` - Generar tokens VIP\n"
+        tools_text += "• `/give_hint <user_id> <hint>` - Otorgar pistas\n"
+        tools_text += "• `/reset_narrative <user_id>` - Reiniciar progreso\n\n"
+
+        tools_text += "Usa los comandos directamente o navega por las opciones específicas."
+
+        await menu_manager.update_menu(
+            callback,
+            tools_text,
+            get_back_kb("admin_main_menu"),
+            session,
+            "admin_tools"
+        )
+    except Exception as e:
+        logger.error(f"Error showing admin tools: {e}")
+        await callback.answer("Error al cargar herramientas", show_alert=True)
+
+    await callback.answer()
+
 @router.callback_query(F.data == "admin_back")
 async def admin_back(callback: CallbackQuery, session: AsyncSession):
     """Enhanced back navigation for admin."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
-    
+
     try:
         # Use menu manager's back functionality
         success = await menu_manager.go_back(callback, session, "admin_main")
@@ -492,7 +586,28 @@ async def admin_back(callback: CallbackQuery, session: AsyncSession):
     except Exception as e:
         logger.error(f"Error in admin back navigation: {e}")
         await callback.answer("Error en la navegación", show_alert=True)
-    
+
+    await callback.answer()
+
+@router.callback_query(F.data == "enhanced_analytics_main")
+async def enhanced_analytics_main(callback: CallbackQuery, session: AsyncSession):
+    """Enhanced analytics main menu entry point."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    try:
+        # Redirect to enhanced analytics if available
+        if ENHANCED_ANALYTICS_AVAILABLE:
+            from .enhanced_analytics import show_enhanced_analytics_main
+            await show_enhanced_analytics_main(callback, session)
+        else:
+            # Fallback to regular analytics
+            from .analytics_handlers import show_analytics_admin_menu
+            await show_analytics_admin_menu(callback, session)
+    except Exception as e:
+        logger.error(f"Error loading enhanced analytics: {e}")
+        await callback.answer("Error al cargar analytics avanzados", show_alert=True)
+
     await callback.answer()
 
 @router.callback_query(F.data == "admin_main_menu")
