@@ -81,3 +81,6 @@ instance/
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+
+.aider.chat.history.md

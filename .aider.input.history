@@ -635,3 +635,333 @@
 +2025-09-17 23:45:14,295 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
 +2025-09-17 23:45:14,301 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
 +2025-09-17 23:45:14,459 - handlers.admin_narrative_handlers - INFO - show_fragment_connections:707 - Fragment connections analysis performed by admin 1280444712                        2025-09-17 23:45:24,604 - utils.menu_manager - ERROR - update_menu:171 - Error updating menu for user 1280444712: Telegram server says - Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 552
+
+# 2025-09-18 01:22:31.555062
++Ayúdame con este error
++Traceback (most recent call last):              File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 60, in <module>                       from handlers.admin import admin_router
++  File "/home/azureuser/repos/bolt_ok/mybot/handlers/admin/__init__.py", line 1, in <module>    from .admin_menu import router as admin_router                                            File "/home/azureuser/repos/bolt_ok/mybot/handlers/admin/admin_menu.py", line 94, in <module>                                               ) -> tuple[str, InlineKeyboardMarkup]:
++                    ^^^^^^^^^^^^^^^^^^^^      NameError: name 'InlineKeyboardMarkup' is not defined
+
+# 2025-09-18 16:02:36.525195
++ayudame con este error Traceback (most recent call last):                       File "/home/azureuser/repos/bolt_ok/mybot/bot.py", line 54, in <module>                                         from handlers import start, free_user, daily_gift, minigames, setup as setup_handlers                       File "/home/azureuser/repos/bolt_ok/mybot/handlers/start.py", line 13, in <module>                              from utils.menu_factory import menu_factory            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^          File "/home/azureuser/repos/bolt_ok/mybot/utils/menu_factory.py", line 49, in <module>                          class MenuFactory:                                   File "/home/azureuser/repos/bolt_ok/mybot/utils/menu_factory.py", line 1550, in MenuFactory                     def _get_recovery_options_for_error(self, error_type: str, menu_state: str) -> List[str]:                                                                                                    ^^^^                       NameError: name 'List' is not defined. Did you mean: 'list'?
+
+# 2025-09-18 16:14:52.303258
++ayudame con esto Traceback (most recent call last):
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 149, in main
++    await init_db()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
++    await populate_initial_shop_items()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
++    result = await session.execute(select(ShopItem))
++             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
++    result = await greenlet_spawn(
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
++    result = context.switch(value)
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
++    return self._execute_internal(
++           ^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
++    result: Result[Any] = compile_state_cls.orm_execute_statement(
++                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
++    result = conn.execute(
++             ^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
++    return meth(
++           ^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
++    return connection._execute_clauseelement(
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1629, in _execute_clauseelement
++    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
++                                                ^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 711, in _compile_w_cache
++    compiled_sql = self._compiler(
++                   ^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 320, in _compiler
++    return dialect.statement_compiler(dialect, self, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
++    Compiled.__init__(self, dialect, statement, **kwargs)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
++    self.string = self.process(self.statement, **compile_kwargs)
++                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
++    return obj._compiler_dispatch(self, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
++    return meth(self, **kw)  # type: ignore  # noqa: E501
++           ^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4728, in visit_select
++    compile_state = select_stmt._compile_state_factory(
++                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 687, in create_for_statement
++    return klass.create_for_statement(statement, compiler, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
++    return cls._create_orm_context(
++           ^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
++    _QueryEntity.to_compile_state(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
++    _MapperEntity(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
++    entity._post_inspect
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
++    obj.__dict__[self.__name__] = result = self.fget(obj)
++                                           ^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
++    self._check_configure()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
++    _configure_registries({self.registry}, cascade=True)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4214, in _configure_registries
++    _do_configure_registries(registries, cascade)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
++    mapper._post_configure_properties()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2418, in _post_configure_properties
++    prop.init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/interfaces.py", line 589, in init
++    self.do_init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1656, in do_init
++    self._setup_entity()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1866, in _setup_entity
++    self._clsregistry_resolve_name(argument)(),
++    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 516, in _resolve_name
++    rval = d[token]
++           ~^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_collections.py", line 345, in __missing__
++    self[key] = val = self.creator(key)
++                      ^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 463, in _access_cls
++    return _determine_container(key, decl_class_registry[key])
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 409, in _determine_container
++    value = value.attempt_get([], key)
++            ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 219, in attempt_get
++    raise exc.InvalidRequestError(
++sqlalchemy.exc.InvalidRequestError: Multiple classes found for path "AdminActionLog" in the registry of this declarative base. Please use a fully module-qualified path.
++2025-09-18 10:13:46,384 - __main__ - INFO - main:255 - Cerrando bot...
++2025-09-18 10:13:46,384 - __main__ - ERROR - main:261 - Error durante el cierre: cannot access local variable 'task_manager' where it is not associated with a value
++Traceback (most recent call last):
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 149, in main
++    await init_db()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
++    await populate_initial_shop_items()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
++    result = await session.execute(select(ShopItem))
++             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
++    result = await greenlet_spawn(
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
++    result = context.switch(value)
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
++    return self._execute_internal(
++           ^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
++    result: Result[Any] = compile_state_cls.orm_execute_statement(
++                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
++    result = conn.execute(
++             ^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
++    return meth(
++           ^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
++    return connection._execute_clauseelement(
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1629, in _execute_clauseelement
++    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
++                                                ^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 711, in _compile_w_cache
++    compiled_sql = self._compiler(
++                   ^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 320, in _compiler
++    return dialect.statement_compiler(dialect, self, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
++    Compiled.__init__(self, dialect, statement, **kwargs)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
++    self.string = self.process(self.statement, **compile_kwargs)
++                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
++    return obj._compiler_dispatch(self, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
++    return meth(self, **kw)  # type: ignore  # noqa: E501
++           ^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4728, in visit_select
++    compile_state = select_stmt._compile_state_factory(
++                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 687, in create_for_statement
++    return klass.create_for_statement(statement, compiler, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
++    return cls._create_orm_context(
++           ^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
++    _QueryEntity.to_compile_state(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
++    _MapperEntity(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
++    entity._post_inspect
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
++    obj.__dict__[self.__name__] = result = self.fget(obj)
++                                           ^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
++    self._check_configure()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
++    _configure_registries({self.registry}, cascade=True)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4214, in _configure_registries
++    _do_configure_registries(registries, cascade)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
++    mapper._post_configure_properties()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2418, in _post_configure_properties
++    prop.init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/interfaces.py", line 589, in init
++    self.do_init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1656, in do_init
++    self._setup_entity()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1866, in _setup_entity
++    self._clsregistry_resolve_name(argument)(),
++    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 516, in _resolve_name
++    rval = d[token]
++           ~^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_collections.py", line 345, in __missing__
++    self[key] = val = self.creator(key)
++                      ^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 463, in _access_cls
++    return _determine_container(key, decl_class_registry[key])
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 409, in _determine_container
++    value = value.attempt_get([], key)
++            ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 219, in attempt_get
++    raise exc.InvalidRequestError(
++sqlalchemy.exc.InvalidRequestError: Multiple classes found for path "AdminActionLog" in the registry of this declarative base. Please use a fully module-qualified path.
++
++During handling of the above exception, another exception occurred:
++
++Traceback (most recent call last):
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 257, in main
++    await task_manager.shutdown()
++          ^^^^^^^^^^^^
++UnboundLocalError: cannot access local variable 'task_manager' where it is not associated with a value
++2025-09-18 10:13:46,387 - root - CRITICAL - <module>:270 - Error fatal: Multiple classes found for path "AdminActionLog" in the registry of this declarative base. Please use a fully module-qualified path.
++Traceback (most recent call last):
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 266, in <module>
++    asyncio.run(main())
++  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 195, in run
++    return runner.run(main)
++           ^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/runners.py", line 118, in run
++    return self._loop.run_until_complete(task)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
++    return future.result()
++           ^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/bot.py", line 149, in main
++    await init_db()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 89, in init_db
++    await populate_initial_shop_items()
++  File "/data/data/com.termux/files/home/repos/bolt_ok/mybot/database/setup.py", line 121, in populate_initial_shop_items
++    result = await session.execute(select(ShopItem))
++             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/ext/asyncio/session.py", line 463, in execute
++    result = await greenlet_spawn(
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_concurrency_py3k.py", line 203, in greenlet_spawn
++    result = context.switch(value)
++             ^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2365, in execute
++    return self._execute_internal(
++           ^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/session.py", line 2251, in _execute_internal
++    result: Result[Any] = compile_state_cls.orm_execute_statement(
++                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 306, in orm_execute_statement
++    result = conn.execute(
++             ^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1415, in execute
++    return meth(
++           ^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 523, in _execute_on_connection
++    return connection._execute_clauseelement(
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/engine/base.py", line 1629, in _execute_clauseelement
++    compiled_sql, extracted_params, cache_hit = elem._compile_w_cache(
++                                                ^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 711, in _compile_w_cache
++    compiled_sql = self._compiler(
++                   ^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/elements.py", line 320, in _compiler
++    return dialect.statement_compiler(dialect, self, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 1446, in __init__
++    Compiled.__init__(self, dialect, statement, **kwargs)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 886, in __init__
++    self.string = self.process(self.statement, **compile_kwargs)
++                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 932, in process
++    return obj._compiler_dispatch(self, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/visitors.py", line 141, in _compiler_dispatch
++    return meth(self, **kw)  # type: ignore  # noqa: E501
++           ^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/compiler.py", line 4728, in visit_select
++    compile_state = select_stmt._compile_state_factory(
++                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/sql/base.py", line 687, in create_for_statement
++    return klass.create_for_statement(statement, compiler, **kw)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 447, in create_for_statement
++    return cls._create_orm_context(
++           ^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 1175, in _create_orm_context
++    _QueryEntity.to_compile_state(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2628, in to_compile_state
++    _MapperEntity(
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/context.py", line 2708, in __init__
++    entity._post_inspect
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/langhelpers.py", line 1338, in __get__
++    obj.__dict__[self.__name__] = result = self.fget(obj)
++                                           ^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2724, in _post_inspect
++    self._check_configure()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2401, in _check_configure
++    _configure_registries({self.registry}, cascade=True)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4214, in _configure_registries
++    _do_configure_registries(registries, cascade)
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 4255, in _do_configure_registries
++    mapper._post_configure_properties()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/mapper.py", line 2418, in _post_configure_properties
++    prop.init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/interfaces.py", line 589, in init
++    self.do_init()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1656, in do_init
++    self._setup_entity()
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/relationships.py", line 1866, in _setup_entity
++    self._clsregistry_resolve_name(argument)(),
++    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 516, in _resolve_name
++    rval = d[token]
++           ~^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/util/_collections.py", line 345, in __missing__
++    self[key] = val = self.creator(key)
++                      ^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 463, in _access_cls
++    return _determine_container(key, decl_class_registry[key])
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 409, in _determine_container
++    value = value.attempt_get([], key)
++            ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "/data/data/com.termux/files/usr/lib/python3.12/site-packages/sqlalchemy/orm/clsregistry.py", line 219, in attempt_get
++    raise exc.InvalidRequestError(
++sqlalchemy.exc.InvalidRequestError: Multiple classes found for path "AdminActionLog" in the registry of this declarative base. Please use a fully module-qualified path.

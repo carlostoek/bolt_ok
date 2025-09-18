@@ -80,6 +80,22 @@ except ImportError:
     TRIVIA_ADMIN_AVAILABLE = False
     logging.warning("Trivia admin handlers not available")
 
+# Import enhanced VIP handlers with availability detection
+try:
+    from .enhanced_vip_handlers import router as enhanced_vip_router
+    ENHANCED_VIP_AVAILABLE = True
+except ImportError:
+    ENHANCED_VIP_AVAILABLE = False
+    logging.warning("Enhanced VIP handlers not available")
+
+# Import channel admin service with availability detection
+try:
+    from services.channel_admin_service import ChannelAdminService
+    ENHANCED_CHANNEL_AVAILABLE = True
+except ImportError:
+    ENHANCED_CHANNEL_AVAILABLE = False
+    logging.warning("Enhanced channel admin service not available")
+
 # Include narrative admin handlers from root handlers directory
 from ..admin_narrative_handlers import router as narrative_handlers_router
 
@@ -112,14 +128,9 @@ if TRIVIA_ADMIN_AVAILABLE:
 if AUTOMATION_AVAILABLE:
     router.include_router(automation_router)
 
-# Include enhanced VIP handlers
-try:
-    from .enhanced_vip_handlers import router as enhanced_vip_router
+# Include enhanced VIP handlers if available
+if ENHANCED_VIP_AVAILABLE:
     router.include_router(enhanced_vip_router)
-    ENHANCED_VIP_AVAILABLE = True
-except ImportError:
-    ENHANCED_VIP_AVAILABLE = False
-    logging.warning("Enhanced VIP handlers not available")
 
 # Enhanced Admin Menu Creation Functions
 
@@ -157,7 +168,8 @@ async def create_enhanced_admin_menu(
                 "usuarios_vip": stats.get("vip_users", 0),
                 "ingresos_mes": f"${stats.get('monthly_revenue', 0)}",
                 "actividad_24h": stats.get("activity_24h", 0),
-                "automatizacion": "Activa" if AUTOMATION_AVAILABLE else "Deshabilitada"
+                "automatizacion": "Activa" if AUTOMATION_AVAILABLE else "Deshabilitada",
+                "vip_mejorado": "Activo" if ENHANCED_VIP_AVAILABLE else "Deshabilitado"
             },
             "sections": [
                 {
@@ -212,7 +224,8 @@ async def create_enhanced_admin_menu(
             menu_text += f"• Usuarios activos: {stats.get('active_users', 0)}\n"
             menu_text += f"• Usuarios VIP: {stats.get('vip_users', 0)}\n"
             menu_text += f"• Actividad 24h: {stats.get('activity_24h', 0)}\n"
-            menu_text += f"• Automatización: {'✅' if AUTOMATION_AVAILABLE else '❌'}\n\n"
+            menu_text += f"• Automatización: {'✅' if AUTOMATION_AVAILABLE else '❌'}\n"
+            menu_text += f"• VIP Mejorado: {'✅' if ENHANCED_VIP_AVAILABLE else '❌'}\n\n"
             menu_text += "**Selecciona una opción para continuar:**"
 
         # Get enhanced keyboard
@@ -268,6 +281,9 @@ async def get_enhanced_admin_statistics(session: AsyncSession) -> Dict[str, Any]
         # Automation status
         stats["automation_active"] = AUTOMATION_AVAILABLE
 
+        # Enhanced VIP status
+        stats["enhanced_vip_active"] = ENHANCED_VIP_AVAILABLE
+
         return stats
 
     except Exception as e:
@@ -279,74 +295,63 @@ async def get_enhanced_admin_statistics(session: AsyncSession) -> Dict[str, Any]
             "activity_24h": 0,
             "monthly_revenue": 0,
             "system_health": "Unknown",
-            "automation_active": False
+            "automation_active": False,
+            "enhanced_vip_active": False
         }
 
 def get_enhanced_admin_main_kb() -> InlineKeyboardMarkup:
     """
-    Create enhanced admin main keyboard with automation support.
+    Create enhanced admin main keyboard with improved layout and additional features.
 
     Returns:
-        Enhanced inline keyboard markup
+        Enhanced inline keyboard markup with better organization
     """
     from aiogram.utils.keyboard import InlineKeyboardBuilder
 
     builder = InlineKeyboardBuilder()
 
     # Row 1: Core channel management
-    builder.button(text="💎 Canal VIP", callback_data="admin_vip")
-    builder.button(text="💬 Canal Free", callback_data="admin_free")
+    builder.button(text="💎 VIP Premium", callback_data="admin_vip")
+    builder.button(text="💬 Comunidad", callback_data="admin_free")
 
     # Row 2: Content and entertainment
-    builder.button(text="🎮 Gamificación", callback_data="admin_kinky_game")
-    builder.button(text="🛒 Tienda", callback_data="admin_shop_main")
+    builder.button(text="🎮 Misiones", callback_data="admin_kinky_game")
+    builder.button(text="🛍️ Marketplace", callback_data="admin_shop_main")
 
     # Row 3: Content management
-    builder.button(text="📚 Narrativa", callback_data="admin_narrative_main")
-    builder.button(text="📈 Analytics", callback_data="admin_analytics_main")
+    builder.button(text="📖 Contenido", callback_data="admin_narrative_main")
+    builder.button(text="📊 Métricas", callback_data="admin_analytics_main")
 
-    # Row 4: Additional game features (if available)
-    row4_added = False
+    # Row 4: Additional features (enhanced)
+    row4_buttons = []
     if AUCTION_ADMIN_AVAILABLE:
         builder.button(text="🎯 Subastas", callback_data="admin_auction_main")
-        row4_added = True
+        row4_buttons.append("auction")
     if TRIVIA_ADMIN_AVAILABLE:
         builder.button(text="🧠 Trivias", callback_data="list_trivias")
-        row4_added = True
+        row4_buttons.append("trivia")
 
-    # Fill row 4 if no special features available
-    if not row4_added:
-        if ENHANCED_ANALYTICS_AVAILABLE:
-            builder.button(text="📊 Analytics+", callback_data="enhanced_analytics_main")
+    # Always include tools button in enhanced version
+    if len(row4_buttons) == 0:
+        builder.button(text="🔧 Herramientas", callback_data="admin_tools")
+        builder.button(text="📈 Reportes", callback_data="enhanced_analytics_main")
+    elif len(row4_buttons) == 1:
         builder.button(text="🔧 Herramientas", callback_data="admin_tools")
 
-    # Row 5: Automation and system
+    # Row 5: System and automation
     if AUTOMATION_AVAILABLE:
-        builder.button(text="🤖 Automatización", callback_data="automation")
+        builder.button(text="🤖 Auto-Tasks", callback_data="automation")
+        builder.button(text="⚙️ Sistema", callback_data="admin_config")
+    else:
+        builder.button(text="📊 Dashboard", callback_data="admin_stats")
         builder.button(text="⚙️ Config", callback_data="admin_config")
-    else:
-        builder.button(text="⚙️ Configuración", callback_data="admin_config")
-        builder.button(text="📊 Sistema", callback_data="admin_stats")
 
-    # Row 6: Statistics and navigation
-    if AUTOMATION_AVAILABLE:
-        builder.button(text="📊 Estadísticas", callback_data="admin_stats")
-        builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
-    else:
-        builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
-        builder.button(text="↩️ Volver", callback_data="admin_back")
+    # Row 6: Navigation and refresh
+    builder.button(text="🔄 Refrescar", callback_data="admin_main_menu")
+    builder.button(text="🏠 Inicio", callback_data="admin_back")
 
-    # Adjust layout based on available features
-    if row4_added:
-        if AUTOMATION_AVAILABLE:
-            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows of 2 buttons each
-        else:
-            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows of 2 buttons each
-    else:
-        if AUTOMATION_AVAILABLE:
-            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows
-        else:
-            builder.adjust(2, 2, 2, 2, 2, 2)  # 6 rows
+    # Enhanced layout: 6 rows of 2 buttons each
+    builder.adjust(2, 2, 2, 2, 2, 2)
 
     return builder.as_markup()
 
@@ -473,7 +478,8 @@ async def admin_stats(callback: CallbackQuery, session: AsyncSession):
             "engagement": {
                 "salud_sistema": enhanced_stats.get("system_health", "Unknown"),
                 "uptime": enhanced_stats.get("uptime", "N/A"),
-                "automatizacion": "Activa" if AUTOMATION_AVAILABLE else "Inactiva"
+                "automatizacion": "Activa" if AUTOMATION_AVAILABLE else "Inactiva",
+                "vip_mejorado": "Activo" if ENHANCED_VIP_AVAILABLE else "Inactivo"
             }
         }
 
@@ -499,6 +505,7 @@ async def admin_stats(callback: CallbackQuery, session: AsyncSession):
                 f"• Salud del sistema: {enhanced_stats.get('system_health', 'Unknown')}",
                 f"• Uptime: {enhanced_stats.get('uptime', 'N/A')}",
                 f"• Automatización: {'✅ Activa' if AUTOMATION_AVAILABLE else '❌ Inactiva'}",
+                f"• VIP Mejorado: {'✅ Activo' if ENHANCED_VIP_AVAILABLE else '❌ Inactivo'}",
                 ""
             ]
 
@@ -572,20 +579,31 @@ async def admin_tools(callback: CallbackQuery, session: AsyncSession):
 
 @router.callback_query(F.data == "admin_back")
 async def admin_back(callback: CallbackQuery, session: AsyncSession):
-    """Enhanced back navigation for admin."""
+    """Enhanced back navigation for admin - returns to enhanced main menu."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
     try:
-        # Use menu manager's back functionality
-        success = await menu_manager.go_back(callback, session, "admin_main")
-        if not success:
-            # Fallback to main admin menu
-            text, keyboard = await menu_factory.create_menu("admin_main", callback.from_user.id, session, callback.bot)
-            await menu_manager.update_menu(callback, text, keyboard, session, "admin_main")
+        # Always return to the enhanced admin main menu
+        menu_text, keyboard = await create_enhanced_admin_menu(session, callback.from_user.id, callback.bot)
+
+        # Use HTML formatting if available
+        parse_mode = "HTML" if HTML_AVAILABLE else "Markdown"
+
+        await menu_manager.update_menu(
+            callback,
+            menu_text,
+            keyboard,
+            session,
+            "admin_main",
+            parse_mode=parse_mode
+        )
+
+        logger.debug(f"Admin {callback.from_user.id} returned to enhanced main menu")
+
     except Exception as e:
         logger.error(f"Error in admin back navigation: {e}")
-        await callback.answer("Error en la navegación", show_alert=True)
+        await callback.answer("Error al regresar al menú principal", show_alert=True)
 
     await callback.answer()
 
@@ -632,16 +650,9 @@ async def back_to_admin_main(callback: CallbackQuery, session: AsyncSession):
             parse_mode=parse_mode
         )
 
-        # Perform automatic cleanup (Requirement 1.1 - message cleanup)
-        try:
-            await menu_manager.cleanup_with_retry(
-                user_id=callback.from_user.id,
-                bot=callback.bot,
-                max_retries=2,
-                backoff_factor=0.5
-            )
-        except Exception as cleanup_error:
-            logger.debug(f"Menu cleanup failed (non-critical): {cleanup_error}")
+        # Skip cleanup when updating menu to prevent deleting the current menu
+        # Cleanup is performed by menu_manager internally when needed
+        logger.debug("Menu updated successfully, skipping aggressive cleanup")
 
     except Exception as e:
         logger.error(f"Error returning to enhanced admin main: {e}")
