@@ -658,9 +658,10 @@ class TriviaUserAnswer(Base):
     is_correct = Column(Boolean, default=False)
 
 
-class AdminActionLog(Base):
-    """Log of administrative actions for auditing and compliance."""
-
+class BasicAdminActionLog(Base):
+    """Basic log of administrative actions for auditing and compliance.
+    This is a simplified version to be phased out in favor of AdminActionLog from admin_models.py"""
+    
     __tablename__ = "admin_action_logs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
