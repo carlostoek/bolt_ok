@@ -88,12 +88,20 @@ except ImportError:
     ENHANCED_VIP_AVAILABLE = False
     logging.warning("Enhanced VIP handlers not available")
 
-# Import channel admin service with availability detection
+# Import enhanced channel features with availability detection
 try:
-    from services.channel_admin_service import ChannelAdminService
+    from handlers.admin.channel_admin import show_enhanced_channel_menu
     ENHANCED_CHANNEL_AVAILABLE = True
 except ImportError:
     ENHANCED_CHANNEL_AVAILABLE = False
+    logging.warning("Enhanced channel handlers not available")
+
+# Import channel admin service with availability detection
+try:
+    from services.channel_admin_service import ChannelAdminService
+    CHANNEL_ADMIN_SERVICE_AVAILABLE = True
+except ImportError:
+    CHANNEL_ADMIN_SERVICE_AVAILABLE = False
     logging.warning("Enhanced channel admin service not available")
 
 # Include narrative admin handlers from root handlers directory
