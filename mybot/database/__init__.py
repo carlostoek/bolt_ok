@@ -3,7 +3,7 @@ from .models import User
 from .narrative_models import UserNarrativeState
 from .emotional_models import (
     UserEmotionalProfile,
-    EmotionalInteraction, 
+    EmotionalInteraction,
     ConversationMemory,
     EmotionalTrigger,
     EmotionalAnalysisSession,
@@ -11,16 +11,28 @@ from .emotional_models import (
     EmotionalState,
     InteractionType
 )
+from .admin_models import (
+    AdminActionLog as AdminActionLogV2,
+    AdminSession,
+    AdminOperationBatch,
+    AdminActionType,
+    AdminActionStatus
+)
 
 __all__ = [
-    'User', 
+    'User',
     'UserNarrativeState',
     'UserEmotionalProfile',
     'EmotionalInteraction',
-    'ConversationMemory', 
+    'ConversationMemory',
     'EmotionalTrigger',
     'EmotionalAnalysisSession',
     'ArchetypeClassification',
     'EmotionalState',
-    'InteractionType'
+    'InteractionType',
+    'AdminActionLogV2',
+    'AdminSession',
+    'AdminOperationBatch',
+    'AdminActionType',
+    'AdminActionStatus'
 ]

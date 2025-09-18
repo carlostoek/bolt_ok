@@ -12,6 +12,8 @@ from sqlalchemy import (
     Float,
     UniqueConstraint,
     Enum,
+    Numeric,
+    Index,
 )
 from sqlalchemy.orm import relationship
 from uuid import uuid4
@@ -29,6 +31,12 @@ class AuctionStatus(enum.Enum):
     ACTIVE = "active"
     ENDED = "ended"
     CANCELLED = "cancelled"
+
+
+class SubscriptionStatus(enum.Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    SUSPENDED = "suspended"
 
 
 
@@ -236,9 +244,33 @@ class Level(Base):
 
 class VipSubscription(Base):
     __tablename__ = "vip_subscriptions"
-    user_id = Column(BigInteger, primary_key=True)
-    expires_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=func.now())
+
+    # Enhanced VIP subscription fields as per modulo-admon requirements
+    id = Column(String, primary_key=True, default=lambda: str(uuid4()))
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    start_date = Column(DateTime, default=func.now(), nullable=False)
+    expiration_date = Column(DateTime, nullable=True)  # Renamed from expires_at for consistency
+    tariff_id = Column(Integer, ForeignKey("tariffs.id"), nullable=True)  # References tariff for subscription plan
+    status = Column(Enum(SubscriptionStatus), default=SubscriptionStatus.ACTIVE, nullable=False)
+    auto_renewal = Column(Boolean, default=False, nullable=False)
+    created_by_admin_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
+    reminder_sent_dates = Column(JSON, default=list, nullable=False)  # List of datetime strings for tracking reminders
+    revenue_generated = Column(Numeric(precision=10, scale=2), default=0.0, nullable=False)
+    created_at = Column(DateTime, default=func.now(), nullable=False)
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id])
+    tariff = relationship("Tariff", foreign_keys=[tariff_id])
+    created_by_admin = relationship("User", foreign_keys=[created_by_admin_id])
+
+    # Table constraints and indexes for performance
+    __table_args__ = (
+        UniqueConstraint("user_id", "id", name="uix_vip_subscription_user"),
+        Index("idx_vip_subscription_status", "status"),
+        Index("idx_vip_subscription_expiration", "expiration_date"),
+        Index("idx_vip_subscription_user_status", "user_id", "status"),
+    )
 
 
 class UserStats(Base):

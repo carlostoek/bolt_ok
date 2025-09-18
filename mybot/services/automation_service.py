@@ -228,6 +228,57 @@ class AutomationService:
             max_retries=3
         )
 
+        # Enhanced automated cleanup tasks for requirements 6.3 and 6.4
+        self.register_task(
+            task_id="user_departure_monitoring",
+            name="User Departure Monitoring",
+            description="Monitor and process user departures from channels within 5 minutes (Requirement 6.3)",
+            task_function=self._handle_user_departure_monitoring,
+            schedule_interval=300,  # Every 5 minutes for requirement compliance
+            priority=TaskPriority.HIGH,
+            max_retries=3
+        )
+
+        self.register_task(
+            task_id="user_session_cleanup",
+            name="User Session Data Cleanup",
+            description="Clean up expired user sessions, menu states, and temporary data",
+            task_function=self._handle_user_session_cleanup,
+            schedule_interval=3600,  # Every hour
+            priority=TaskPriority.NORMAL,
+            max_retries=2
+        )
+
+        self.register_task(
+            task_id="comprehensive_inactive_user_cleanup",
+            name="Comprehensive Inactive User Cleanup",
+            description="Enhanced inactive user detection with configurable criteria and cleanup actions",
+            task_function=self._handle_comprehensive_inactive_cleanup,
+            schedule_interval=43200,  # Every 12 hours
+            priority=TaskPriority.NORMAL,
+            max_retries=2
+        )
+
+        self.register_task(
+            task_id="admin_notification_cleanup",
+            name="Administrative Notification Cleanup",
+            description="Send periodic administrative reports and clean up notification backlogs",
+            task_function=self._handle_admin_notification_cleanup,
+            schedule_interval=86400,  # Every 24 hours
+            priority=TaskPriority.LOW,
+            max_retries=2
+        )
+
+        self.register_task(
+            task_id="database_maintenance_cleanup",
+            name="Database Maintenance Cleanup",
+            description="Perform database maintenance tasks and optimize performance",
+            task_function=self._handle_database_maintenance,
+            schedule_interval=604800,  # Every 7 days
+            priority=TaskPriority.LOW,
+            max_retries=1
+        )
+
     def register_task(
         self,
         task_id: str,
