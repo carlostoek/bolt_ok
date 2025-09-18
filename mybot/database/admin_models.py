@@ -228,7 +228,7 @@ class AdminActionLog(Base):
     admin_user = relationship("User", foreign_keys=[admin_user_id], lazy="selectin")
     target_user = relationship("User", foreign_keys=[target_user_id], lazy="selectin")
     parent_action = relationship("AdminActionLog", foreign_keys=[parent_action_id], remote_side=[id])
-    child_actions = relationship("AdminActionLog", foreign_keys=[parent_action_id], cascade="all, delete-orphan")
+    child_actions = relationship("AdminActionLog", foreign_keys=[parent_action_id], cascade="all, delete-orphan", overlaps="parent_action")
 
     def __repr__(self):
         return (

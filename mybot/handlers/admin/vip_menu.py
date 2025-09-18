@@ -424,8 +424,8 @@ async def vip_profile(callback: CallbackQuery, session: AsyncSession):
     profile_text = await get_profile_message(user, missions, session)
     sub_service = SubscriptionService(session)
     sub = await sub_service.get_subscription(user_id)
-    if sub and sub.expires_at:
-        profile_text += f"\n\nVIP hasta: {sub.expires_at.strftime('%d/%m/%Y')}"
+    if sub and sub.expiration_date:
+        profile_text += f"\n\nVIP hasta: {sub.expiration_date.strftime('%d/%m/%Y')}"
     await callback.message.answer(profile_text)
     await callback.answer()
 

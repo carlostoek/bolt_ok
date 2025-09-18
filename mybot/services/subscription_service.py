@@ -24,19 +24,19 @@ class SubscriptionService:
 
     async def is_user_vip(self, user_id: int) -> bool:
         subscription = await self.get_subscription(user_id)
-        if subscription and subscription.expires_at:
+        if subscription and subscription.expiration_date:
             from datetime import datetime
-            return subscription.expires_at > datetime.utcnow()
+            return subscription.expiration_date > datetime.utcnow()
         return False
 
     async def create_subscription(
-        self, user_id: int, expires_at: datetime | None = None
+        self, user_id: int, expiration_date: datetime | None = None
     ) -> VipSubscription:
-        sub = VipSubscription(user_id=user_id, expires_at=expires_at)
+        sub = VipSubscription(user_id=user_id, expiration_date=expiration_date)
         self.session.add(sub)
         await self.session.commit()
         await self.session.refresh(sub)
-        logger.info(f"Created VIP subscription for user {user_id}, expires: {expires_at}")
+        logger.info(f"Created VIP subscription for user {user_id}, expires: {expiration_date}")
         return sub
 
     async def get_statistics(self) -> tuple[int, int, int]:
@@ -48,16 +48,16 @@ class SubscriptionService:
             select(func.count())
             .select_from(VipSubscription)
             .where(
-                (VipSubscription.expires_at.is_(None))
-                | (VipSubscription.expires_at > now)
+                (VipSubscription.expiration_date.is_(None))
+                | (VipSubscription.expiration_date > now)
             )
         )
         expired_stmt = (
             select(func.count())
             .select_from(VipSubscription)
             .where(
-                VipSubscription.expires_at.is_not(None),
-                VipSubscription.expires_at <= now,
+                VipSubscription.expiration_date.is_not(None),
+                VipSubscription.expiration_date <= now,
             )
         )
 
@@ -75,7 +75,7 @@ class SubscriptionService:
         """Return list of currently active subscriptions."""
         now = datetime.utcnow()
         stmt = select(VipSubscription).where(
-            (VipSubscription.expires_at.is_(None)) | (VipSubscription.expires_at > now)
+            (VipSubscription.expiration_date.is_(None)) | (VipSubscription.expiration_date > now)
         )
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
@@ -89,12 +89,12 @@ class SubscriptionService:
         new_exp = now + timedelta(days=days)
         
         if sub:
-            if sub.expires_at and sub.expires_at > now:
-                sub.expires_at = sub.expires_at + timedelta(days=days)
+            if sub.expiration_date and sub.expiration_date > now:
+                sub.expiration_date = sub.expiration_date + timedelta(days=days)
             else:
-                sub.expires_at = new_exp
+                sub.expiration_date = new_exp
         else:
-            sub = VipSubscription(user_id=user_id, expires_at=new_exp)
+            sub = VipSubscription(user_id=user_id, expiration_date=new_exp)
             self.session.add(sub)
 
         # Update user record as well
@@ -116,7 +116,7 @@ class SubscriptionService:
         now = datetime.utcnow()
         sub = await self.get_subscription(user_id)
         if sub:
-            sub.expires_at = now
+            sub.expiration_date = now
 
         user = await self.session.get(User, user_id)
         if user:
@@ -137,29 +137,29 @@ class SubscriptionService:
         logger.info(f"Revoked VIP subscription for user {user_id}")
 
     async def set_subscription_expiration(
-        self, user_id: int, expires_at: datetime | None
+        self, user_id: int, expiration_date: datetime | None
     ) -> VipSubscription:
         """Set or create subscription with specific expiration date."""
         sub = await self.get_subscription(user_id)
         if sub:
-            sub.expires_at = expires_at
+            sub.expiration_date = expiration_date
         else:
-            sub = VipSubscription(user_id=user_id, expires_at=expires_at)
+            sub = VipSubscription(user_id=user_id, expiration_date=expiration_date)
             self.session.add(sub)
 
         user = await self.session.get(User, user_id)
         if user:
-            if expires_at is None or expires_at > datetime.utcnow():
+            if expiration_date is None or expiration_date > datetime.utcnow():
                 user.role = "vip"
-                user.vip_expires_at = expires_at
+                user.vip_expires_at = expiration_date
                 user.last_reminder_sent_at = None
             else:
                 user.role = "free"
-                user.vip_expires_at = expires_at
+                user.vip_expires_at = expiration_date
 
         await self.session.commit()
         logger.info(
-            "Set VIP expiration for user %s to %s", user_id, expires_at
+            "Set VIP expiration for user %s to %s", user_id, expiration_date
         )
         return sub
 
@@ -169,7 +169,7 @@ class SubscriptionService:
         if not sub:
             return False
         
-        expires_at = getattr(sub, 'expires_at', None)
+        expires_at = getattr(sub, 'expiration_date', None)
         if expires_at is None:
             return True
         

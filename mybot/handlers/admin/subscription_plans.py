@@ -93,7 +93,7 @@ async def start_edit_tariff(callback: CallbackQuery, state: FSMContext, session:
 
 
 @router.callback_query(AdminTariffStates.editing_tariff_duration)
-async def edit_tariff_duration(callback: CallbackQuery, state: FSMContext):
+async def edit_tariff_duration(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
 
@@ -108,7 +108,7 @@ async def edit_tariff_duration(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminTariffStates.editing_tariff_price)
-async def edit_tariff_price(message: Message, state: FSMContext):
+async def edit_tariff_price(message: Message, state: FSMContext, session: AsyncSession):
     if not await is_admin(message.from_user.id, session):
         return
 
@@ -169,7 +169,7 @@ async def finish_edit_tariff(message: Message, state: FSMContext, session: Async
 
 
 @router.callback_query(F.data == "tarifa_new")
-async def start_new_tarifa(callback: CallbackQuery, state: FSMContext):
+async def start_new_tarifa(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     
@@ -183,7 +183,7 @@ async def start_new_tarifa(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(Command("admin_configure_tariffs"))
-async def admin_configure_tariffs(message: Message, state: FSMContext):
+async def admin_configure_tariffs(message: Message, state: FSMContext, session: AsyncSession):
     if not await is_admin(message.from_user.id, session):
         return
     await state.set_state(AdminTariffStates.waiting_for_tariff_duration)
@@ -191,7 +191,7 @@ async def admin_configure_tariffs(message: Message, state: FSMContext):
 
 
 @router.callback_query(AdminTariffStates.waiting_for_tariff_duration)
-async def tariff_duration_selected(callback: CallbackQuery, state: FSMContext):
+async def tariff_duration_selected(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     
@@ -207,7 +207,7 @@ async def tariff_duration_selected(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminTariffStates.waiting_for_tariff_price)
-async def tariff_price(message: Message, state: FSMContext):
+async def tariff_price(message: Message, state: FSMContext, session: AsyncSession):
     if not await is_admin(message.from_user.id, session):
         return
     

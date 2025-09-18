@@ -11,9 +11,7 @@ from .trivia_admin import router as trivia_admin_router
 from .shop_admin import router as shop_admin_router
 from .lore_admin_handlers import router as lore_admin_router
 
-# Asegúrate de incluir todos los admin routers:
-admin_router.include_router(trivia_admin_router)
-# lore_admin_router is included in admin_menu.py
+# All routers are included in admin_menu.py with proper error handling
 
 __all__ = [
     "admin_router",

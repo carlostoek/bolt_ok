@@ -190,7 +190,6 @@ async def main() -> None:
         routers = [
             ("setup", setup_handlers.router),
             ("admin", admin_router),
-            ("auction_admin", auction_admin_router),
             ("start_token", start_token),
             ("start", start.router),
             ("main_menu", main_menu_router),
@@ -199,7 +198,6 @@ async def main() -> None:
             ("info", info_router),
             ("free_channel_admin", free_channel_admin_router),
             ("publication_test", publication_test_router),
-            ("vip_menu", vip.router),
             ("auction_user", auction_user_router),
             ("reaction_callback", reaction_callback_router),
             ("daily_gift", daily_gift.router),
