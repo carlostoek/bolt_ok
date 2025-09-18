@@ -374,8 +374,8 @@ class AdminOperationBatch(Base):
     # Relationships
     admin_user = relationship("User", foreign_keys=[admin_user_id], lazy="selectin")
     related_actions = relationship(
-        "AdminActionLog",
-        primaryjoin="AdminOperationBatch.id == foreign(AdminActionLog.correlation_id)",
+        lambda: AdminActionLog,
+        primaryjoin="AdminOperationBatch.id == AdminActionLog.correlation_id",
         foreign_keys="[AdminActionLog.correlation_id]",
         viewonly=True
     )
