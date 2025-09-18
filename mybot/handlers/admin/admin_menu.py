@@ -3,10 +3,10 @@ Enhanced admin menu with improved navigation, multi-tenant support, and HTML for
 Implements requirements 1.1 (Enhanced Administrative Menu System) and 1.5 (Administrative Analysis and Reports).
 """
 from aiogram import Router, F, Bot
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup
 from aiogram.filters import CommandStart, Command
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from datetime import datetime
 
 from keyboards.admin_main_kb import get_admin_main_kb
