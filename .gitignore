@@ -33,3 +33,4 @@ MANIFEST
 # Other
 
 .pytest_cache/
+.aider*

@@ -253,3 +253,385 @@
 
 # 2025-09-16 14:43:43.511698
 +/run source ../mybot/venv/bin/activate
+
+# 2025-09-17 22:05:05.477244
++Recientemente se hizo la integración de un sistema más robusto de narrativa, que comprende desde la funcionalidad como tal de narrativa, como con el usuario, y principalmente con el administrador. Se integró un menú bastante generoso en opciones de analítica, de gestión de contenido, una gran cantidad de opciones que usar. El problema es que hay demasiada inconsistencia. Los botones de acción no funcionan. Sí se puede navegar en el menú, se puede ir y regresar entre las opciones, pero ya para ejecutar un botón de acción no están funcionando. Quiero que me ayudes a revisarlo, por favor.
+
+# 2025-09-17 22:08:24.722506
++/add  utils/k
+
+# 2025-09-17 22:08:43.825637
++N
+
+# 2025-09-17 22:13:03.890392
++/add mybot/handlers/main_menu.py
+
+# 2025-09-17 22:15:18.974489
++/add handlers/admin/admin_menu.py
+
+# 2025-09-17 22:17:05.300431
++N
+
+# 2025-09-17 22:17:24.021898
++/add mybot/handlers/admin/lore_admin_handlers.py
+
+# 2025-09-17 22:20:00.756945
++a ver esos
+
+# 2025-09-17 22:40:55.582974
++Tengo problema con este bot que no está mostrando el menú principal al administrador cuando se envía El comando start
+
+# 2025-09-17 22:52:08.416793
++/run export LOG_LEVEL=DEBUG
+
+# 2025-09-17 22:52:08.416895
++/run export LOG_LEVEL=DEBUG
+
+# 2025-09-17 22:52:08.726379
++/run python -m mybot.main
+
+# 2025-09-17 22:52:08.726502
++/run python -m mybot.main
+
+# 2025-09-17 23:22:18.570658
++Se me cerró la sesión en la que estábamos trabajando porque estamos revisando el menú de mi bot porque tiene varias inconsistencias y la implementaste un sistema de logging más concreto más específico me imagino y este es el resultado
++
++2025-09-17 23:17:42,730 - __main__ - INFO - main:148 - Inicializando base de datos...
++2025-09-17 23:17:42,730 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
++2025-09-17 23:17:42,746 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
++2025-09-17 23:17:42,767 - database.setup - INFO - init_db:81 - Creando tablas restantes...
++2025-09-17 23:17:42,773 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
++2025-09-17 23:17:42,841 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
++2025-09-17 23:17:42,842 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
++2025-09-17 23:17:42,842 - __main__ - INFO - main:157 - Configurando bot...
++2025-09-17 23:17:42,888 - __main__ - INFO - main:186 - Registrando handlers...
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router setup registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router admin registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router auction_admin registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router start_token registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router start registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router main_menu registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router backpack registrado
++2025-09-17 23:17:42,888 - __main__ - INFO - main:220 - Router missions registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router info registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router free_channel_admin registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router publication_test registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router vip_menu registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router auction_user registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router reaction_callback registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router daily_gift registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router minigames registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router gamification registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router free_user registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router lore registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router combinar_pistas registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router channel_access registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router narrative registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router test_evaluation registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:220 - Router shop registrado
++2025-09-17 23:17:42,889 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
++2025-09-17 23:17:42,890 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
++2025-09-17 23:17:42,890 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
++2025-09-17 23:17:42,892 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
++2025-09-17 23:17:42,893 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
++2025-09-17 23:17:42,893 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
++2025-09-17 23:17:42,894 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
++2025-09-17 23:17:42,912 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
++2025-09-17 23:17:43,282 - utils.user_roles - INFO - is_admin:34 - User 6181290784 admin status from DB: False
++2025-09-17 23:17:43,285 - utils.user_roles - INFO - is_admin:34 - User 6181290784 admin status from DB: False
++2025-09-17 23:17:43,285 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
++2025-09-17 23:17:43,286 - utils.user_roles - INFO - is_admin:34 - User 6181290784 admin status from DB: False
++2025-09-17 23:17:43,290 - utils.user_roles - INFO - is_admin:34 - User 6181290784 admin status from DB: False
++2025-09-17 23:17:43,290 - handlers.start - INFO - cmd_start:71 - User 6181290784 admin status: False
++2025-09-17 23:17:43,290 - handlers.start - INFO - cmd_start:110 - Regular user 6181290784 accessing start command
++2025-09-17 23:17:43,293 - utils.user_roles - INFO - is_admin:34 - User 6181290784 admin status from DB: False
++2025-09-17 23:17:43,326 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state main, role vip
++2025-09-17 23:17:43,326 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role vip: text length 136
++2025-09-17 23:17:43,389 - services.point_service - INFO - add_points:135 - User 6181290784 gained 2 points (base 1, x2). Total: 26.0
++2025-09-17 23:17:43,417 - services.point_service - INFO - add_points:135 - User 6181290784 gained 2 points (base 1, x2). Total: 26.0
++ú2025-09-17 23:18:47,858 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:47,858 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
++2025-09-17 23:18:47,859 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:47,859 - handlers.start - INFO - cmd_start:71 - User 1280444712 admin status: True
++2025-09-17 23:18:47,859 - handlers.start - INFO - cmd_start:74 - Admin user 1280444712 accessing start command
++2025-09-17 23:18:47,859 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:47,859 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:18:47,860 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 132
++2025-09-17 23:18:47,860 - handlers.start - INFO - cmd_start:79 - Menu factory returned text length: 132, keyboard type: <class 'aiogram.types.inline_keyboard_markup.InlineKeyboardMarkup'>
++2025-09-17 23:18:48,157 - handlers.start - INFO - cmd_start:93 - Menu manager show_menu result: message_id=1241 date=datetime.datetime(2025, 9, 17, 23, 18, 47, tzinfo=TzInfo(UTC)) chat=Chat(id=1280444712, type='private', title=None, username='Corther1', first_name='Corther', last_name=None, is_forum=None, is_direct_messages=None, accent_color_id=None, active_usernames=None, available_reactions=None, background_custom_emoji_id=None, bio=None, birthdate=None, business_intro=None, business_location=None, business_opening_hours=None, can_set_sticker_set=None, custom_emoji_sticker_set_name=None, description=None, emoji_status_custom_emoji_id=None, emoji_status_expiration_date=None, has_aggressive_anti_spam_enabled=None, has_hidden_members=None, has_private_forwards=None, has_protected_content=None, has_restricted_voice_and_video_messages=None, has_visible_history=None, invite_link=None, join_by_request=None, join_to_send_messages=None, linked_chat_id=None, location=None, message_auto_delete_time=None, permissions=None, personal_chat=None, photo=None, pinned_message=None, profile_accent_color_id=None, profile_background_custom_emoji_id=None, slow_mode_delay=None, sticker_set_name=None, unrestrict_boost_count=None) message_thread_id=None direct_messages_topic=None from_user=User(id=7570619877, is_bot=True, first_name='Testing2', last_name=None, username='Testing2testbot', language_code=None, is_premium=None, added_to_attachment_menu=None, can_join_groups=None, can_read_all_group_messages=None, supports_inline_queries=None, can_connect_to_business=None, has_main_web_app=None) sender_chat=None sender_boost_count=None sender_business_bot=None business_connection_id=None forward_origin=None is_topic_message=None is_automatic_forward=None reply_to_message=None external_reply=None quote=None reply_to_story=None reply_to_checklist_task_id=None via_bot=None edit_date=None has_protected_content=None is_from_offline=None is_paid_post=None media_group_id=None author_signature=None paid_star_count=None text='👑 ¡Bienvenido, Administrador!\n\nBienvenido al centro de control del bot. Desde aquí puedes gestionar todos los aspectos del sistema.' entities=None link_preview_options=None suggested_post_info=None effect_id=None animation=None audio=None document=None paid_media=None photo=None sticker=None story=None video=None video_note=None voice=None caption=None caption_entities=None show_caption_above_media=None has_media_spoiler=None checklist=None contact=None dice=None game=None poll=None venue=None location=None new_chat_members=None left_chat_member=None new_chat_title=None new_chat_photo=None delete_chat_photo=None group_chat_created=None supergroup_chat_created=None channel_chat_created=None message_auto_delete_timer_changed=None migrate_to_chat_id=None migrate_from_chat_id=None pinned_message=None invoice=None successful_payment=None refunded_payment=None users_shared=None chat_shared=None gift=None unique_gift=None connected_website=None write_access_allowed=None passport_data=None proximity_alert_triggered=None boost_added=None chat_background_set=None checklist_tasks_done=None checklist_tasks_added=None direct_message_price_changed=None forum_topic_created=None forum_topic_edited=None forum_topic_closed=None forum_topic_reopened=None general_forum_topic_hidden=None general_forum_topic_unhidden=None giveaway_created=None giveaway=None giveaway_winners=None giveaway_completed=None paid_message_price_changed=None suggested_post_approved=None suggested_post_approval_failed=None suggested_post_declined=None suggested_post_paid=None suggested_post_refunded=None video_chat_scheduled=None video_chat_started=None video_chat_ended=None video_chat_participants_invited=None web_app_data=None reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='💎 Canal VIP', url=None, callback_data='admin_vip', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='💬 Canal Free', url=None, callback_data='admin_free', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🎮 Juego Kinky', url=None, callback_data='admin_kinky_game', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='🛒 Tienda', url=None, callback_data='admin_shop_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📚 Narrativa', url=None, callback_data='admin_narrative_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='📈 Análisis', url=None, callback_data='admin_analytics_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📊 Estadísticas', url=None, callback_data='admin_stats', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='⚙️ Configuración', url=None, callback_data='admin_config', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🔄 Actualizar', url=None, callback_data='admin_main_menu', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='↩️ Volver', url=None, callback_data='admin_back', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)]]) forward_date=None forward_from=None forward_from_chat=None forward_from_message_id=None forward_sender_name=None forward_signature=None user_shared=None
++2025-09-17 23:18:52,275 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:52,449 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:18:53,673 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:53,673 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:53,673 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:53,673 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:18:53,675 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 132
++2025-09-17 23:18:55,044 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:55,214 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:18:55,990 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:18:55,992 - handlers.admin.lore_admin_handlers - ERROR - show_lore_management_menu:82 - Error showing lore management menu for user 1280444712: type object 'UserLorePiece' has no attribute 'c'
++2025-09-17 23:18:58,776 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:19:00,504 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++2025-09-17 23:19:00,704 - handlers.admin_narrative_handlers - INFO - start_fragment_creation:401 - Fragment creation started by admin 1280444712
++2025-09-17 23:19:01,748 - utils.user_roles - INFO - is_admin:24 - User 1280444712 found in static ADMIN_IDS
++
++
+
+# 2025-09-17 23:28:46.204872
++el nuevo log ython bot.py
++2025-09-17 23:26:32,019 - __main__ - INFO - main:148 - Inicializando base de datos...
++2025-09-17 23:26:32,019 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
++2025-09-17 23:26:32,033 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
++2025-09-17 23:26:32,054 - database.setup - INFO - init_db:81 - Creando tablas restantes...
++2025-09-17 23:26:32,064 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
++2025-09-17 23:26:32,128 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
++2025-09-17 23:26:32,128 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
++2025-09-17 23:26:32,128 - __main__ - INFO - main:157 - Configurando bot...
++2025-09-17 23:26:32,168 - __main__ - INFO - main:186 - Registrando handlers...
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router setup registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router admin registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router auction_admin registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router start_token registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router start registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router main_menu registrado
++2025-09-17 23:26:32,168 - __main__ - INFO - main:220 - Router backpack registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router missions registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router info registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router free_channel_admin registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router publication_test registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router vip_menu registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router auction_user registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router reaction_callback registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router daily_gift registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router minigames registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router gamification registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router free_user registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router lore registrado
++2025-09-17 23:26:32,169 - __main__ - INFO - main:220 - Router combinar_pistas registrado
++2025-09-17 23:26:32,170 - __main__ - INFO - main:220 - Router channel_access registrado
++2025-09-17 23:26:32,170 - __main__ - INFO - main:220 - Router narrative registrado
++2025-09-17 23:26:32,170 - __main__ - INFO - main:220 - Router test_evaluation registrado
++2025-09-17 23:26:32,170 - __main__ - INFO - main:220 - Router shop registrado
++2025-09-17 23:26:32,170 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
++2025-09-17 23:26:32,170 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
++2025-09-17 23:26:32,171 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
++2025-09-17 23:26:32,172 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
++2025-09-17 23:26:32,173 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
++2025-09-17 23:26:32,174 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
++2025-09-17 23:26:32,175 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
++2025-09-17 23:26:32,202 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
++2025-09-17 23:26:50,772 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
++2025-09-17 23:26:50,772 - handlers.start - INFO - cmd_start:71 - User 1280444712 admin status: True
++2025-09-17 23:26:50,772 - handlers.start - INFO - cmd_start:74 - Admin user 1280444712 accessing start command
++2025-09-17 23:26:50,773 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:26:50,774 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 132
++2025-09-17 23:26:50,774 - handlers.start - INFO - cmd_start:79 - Menu factory returned text length: 132, keyboard type: <class 'aiogram.types.inline_keyboard_markup.InlineKeyboardMarkup'>
++2025-09-17 23:26:51,092 - handlers.start - INFO - cmd_start:93 - Menu manager show_menu result: message_id=1244 date=datetime.datetime(2025, 9, 17, 23, 26, 50, tzinfo=TzInfo(UTC)) chat=Chat(id=1280444712, type='private', title=None, username='Corther1', first_name='Corther', last_name=None, is_forum=None, is_direct_messages=None, accent_color_id=None, active_usernames=None, available_reactions=None, background_custom_emoji_id=None, bio=None, birthdate=None, business_intro=None, business_location=None, business_opening_hours=None, can_set_sticker_set=None, custom_emoji_sticker_set_name=None, description=None, emoji_status_custom_emoji_id=None, emoji_status_expiration_date=None, has_aggressive_anti_spam_enabled=None, has_hidden_members=None, has_private_forwards=None, has_protected_content=None, has_restricted_voice_and_video_messages=None, has_visible_history=None, invite_link=None, join_by_request=None, join_to_send_messages=None, linked_chat_id=None, location=None, message_auto_delete_time=None, permissions=None, personal_chat=None, photo=None, pinned_message=None, profile_accent_color_id=None, profile_background_custom_emoji_id=None, slow_mode_delay=None, sticker_set_name=None, unrestrict_boost_count=None) message_thread_id=None direct_messages_topic=None from_user=User(id=7570619877, is_bot=True, first_name='Testing2', last_name=None, username='Testing2testbot', language_code=None, is_premium=None, added_to_attachment_menu=None, can_join_groups=None, can_read_all_group_messages=None, supports_inline_queries=None, can_connect_to_business=None, has_main_web_app=None) sender_chat=None sender_boost_count=None sender_business_bot=None business_connection_id=None forward_origin=None is_topic_message=None is_automatic_forward=None reply_to_message=None external_reply=None quote=None reply_to_story=None reply_to_checklist_task_id=None via_bot=None edit_date=None has_protected_content=None is_from_offline=None is_paid_post=None media_group_id=None author_signature=None paid_star_count=None text='👑 ¡Bienvenido, Administrador!\n\nBienvenido al centro de control del bot. Desde aquí puedes gestionar todos los aspectos del sistema.' entities=None link_preview_options=None suggested_post_info=None effect_id=None animation=None audio=None document=None paid_media=None photo=None sticker=None story=None video=None video_note=None voice=None caption=None caption_entities=None show_caption_above_media=None has_media_spoiler=None checklist=None contact=None dice=None game=None poll=None venue=None location=None new_chat_members=None left_chat_member=None new_chat_title=None new_chat_photo=None delete_chat_photo=None group_chat_created=None supergroup_chat_created=None channel_chat_created=None message_auto_delete_timer_changed=None migrate_to_chat_id=None migrate_from_chat_id=None pinned_message=None invoice=None successful_payment=None refunded_payment=None users_shared=None chat_shared=None gift=None unique_gift=None connected_website=None write_access_allowed=None passport_data=None proximity_alert_triggered=None boost_added=None chat_background_set=None checklist_tasks_done=None checklist_tasks_added=None direct_message_price_changed=None forum_topic_created=None forum_topic_edited=None forum_topic_closed=None forum_topic_reopened=None general_forum_topic_hidden=None general_forum_topic_unhidden=None giveaway_created=None giveaway=None giveaway_winners=None giveaway_completed=None paid_message_price_changed=None suggested_post_approved=None suggested_post_approval_failed=None suggested_post_declined=None suggested_post_paid=None suggested_post_refunded=None video_chat_scheduled=None video_chat_started=None video_chat_ended=None video_chat_participants_invited=None web_app_data=None reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='💎 Canal VIP', url=None, callback_data='admin_vip', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='💬 Canal Free', url=None, callback_data='admin_free', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🎮 Juego Kinky', url=None, callback_data='admin_kinky_game', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='🛒 Tienda', url=None, callback_data='admin_shop_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📚 Narrativa', url=None, callback_data='admin_narrative_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='📈 Análisis', url=None, callback_data='admin_analytics_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📊 Estadísticas', url=None, callback_data='admin_stats', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='⚙️ Configuración', url=None, callback_data='admin_config', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🔄 Actualizar', url=None, callback_data='admin_main_menu', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='↩️ Volver', url=None, callback_data='admin_back', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)]]) forward_date=None forward_from=None forward_from_chat=None forward_from_message_id=None forward_sender_name=None forward_signature=None user_shared=None
++2025-09-17 23:26:53,397 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for
+
+# 2025-09-17 23:37:17.874403
++lSí, ya se siente más estable, de hecho.
++Bueno log
++
++2025-09-17 23:31:30,921 - __main__ - INFO - main:148 - Inicializando base de datos...
++2025-09-17 23:31:30,921 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
++2025-09-17 23:31:30,936 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
++2025-09-17 23:31:30,959 - database.setup - INFO - init_db:81 - Creando tablas restantes...
++2025-09-17 23:31:30,964 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
++2025-09-17 23:31:31,023 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
++2025-09-17 23:31:31,023 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
++2025-09-17 23:31:31,023 - __main__ - INFO - main:157 - Configurando bot...
++2025-09-17 23:31:31,065 - __main__ - INFO - main:186 - Registrando handlers...
++2025-09-17 23:31:31,065 - __main__ - INFO - main:220 - Router setup registrado
++2025-09-17 23:31:31,065 - __main__ - INFO - main:220 - Router admin registrado
++2025-09-17 23:31:31,065 - __main__ - INFO - main:220 - Router auction_admin registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router start_token registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router start registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router main_menu registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router backpack registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router missions registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router info registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router free_channel_admin registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router publication_test registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router vip_menu registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router auction_user registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router reaction_callback registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router daily_gift registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router minigames registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router gamification registrado
++2025-09-17 23:31:31,066 - __main__ - INFO - main:220 - Router free_user registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router lore registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router combinar_pistas registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router channel_access registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router narrative registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router test_evaluation registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:220 - Router shop registrado
++2025-09-17 23:31:31,067 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
++2025-09-17 23:31:31,067 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
++2025-09-17 23:31:31,068 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
++2025-09-17 23:31:31,070 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
++2025-09-17 23:31:31,071 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
++2025-09-17 23:31:31,072 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
++2025-09-17 23:31:31,073 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
++2025-09-17 23:31:31,097 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
++2025-09-17 23:31:44,971 - handlers.start - INFO - cmd_start:29 - Start command received from user 6181290784
++2025-09-17 23:31:44,972 - handlers.start - INFO - cmd_start:71 - User 6181290784 admin status: False
++2025-09-17 23:31:44,972 - handlers.start - INFO - cmd_start:107 - Regular user 6181290784 accessing start command
++2025-09-17 23:31:45,007 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state main, role vip
++2025-09-17 23:31:45,008 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role vip: text length 136
++2025-09-17 23:31:47,773 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state missions, role vip
++2025-09-17 23:31:49,044 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state main, role vip
++2025-09-17 23:31:49,045 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role vip: text length 136
++2025-09-17 23:31:50,871 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state ranking, role vip
++2025-09-17 23:31:52,083 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 6181290784, state main, role vip
++2025-09-17 23:31:52,084 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role vip: text length 136
++2025-09-17 23:31:54,339 - handlers.shop_handlers - INFO - show_shop:26 - Shop access requested by user 6181290784
++2025-09-17 23:31:54,339 - services.shop_cache_service - INFO - __init__:60 - ShopCacheService initialized with 15min TTL
++2025-09-17 23:31:54,342 - services.shop_cache_service - INFO - get_active_items:117 - Cached 4 active items
++2025-09-17 23:31:54,343 - services.shop_cache_service - INFO - get_user_available_items:219 - Cached 3 available items for user 6181290784 (VIP: False)
++2025-09-17 23:31:54,343 - handlers.shop_handlers - INFO - show_shop:40 - Retrieved 3 cached items for user 6181290784
++2025-09-17 23:31:56,401 - handlers.shop_handlers - INFO - show_item_details:221 - Item details requested for item 4 by user 6181290784
++2025-09-17 23:31:56,418 - services.shop_service - INFO - get_item_details:466 - Retrieved detailed information for item 4 for user 6181290784
++2025-09-17 23:31:57,697 - handlers.shop_handlers - INFO - show_category_list:68 - Category list requested by user 6181290784
++2025-09-17 23:31:57,697 - services.shop_cache_service - INFO - __init__:60 - ShopCacheService initialized with 15min TTL
++2025-09-17 23:31:57,700 - services.shop_cache_service - INFO - get_active_items:117 - Cached 4 active items
++2025-09-17 23:31:57,700 - services.shop_cache_service - INFO - get_user_available_items:219 - Cached 3 available items for user 6181290784 (VIP: False)
++2025-09-17 23:31:57,702 - services.shop_cache_service - INFO - get_active_categories:181 - Cached 0 active categories
++2025-09-17 23:31:58,993 - handlers.shop_handlers - INFO - show_category_items:148 - Category 'Sin Categoría' requested by user 6181290784
++2025-09-17 23:31:58,993 - services.shop_cache_service - INFO - __init__:60 - ShopCacheService initialized with 15min TTL
++2025-09-17 23:31:58,995 - services.shop_cache_service - INFO - get_active_items:117 - Cached 4 active items
++2025-09-17 23:31:58,996 - services.shop_cache_service - INFO - get_user_available_items:219 - Cached 3 available items for user 6181290784 (VIP: False)
++2025-09-17 23:31:58,997 - services.shop_cache_service - INFO - get_active_categories:181 - Cached 0 active categories
++2025-09-17 23:32:00,263 - handlers.shop_handlers - INFO - show_category_list:68 - Category list requested by user 6181290784
++2025-09-17 23:32:00,263 - services.shop_cache_service - INFO - __init__:60 - ShopCacheService initialized with 15min TTL
++2025-09-17 23:32:00,265 - services.shop_cache_service - INFO - get_active_items:117 - Cached 4 active items
++2025-09-17 23:32:00,265 - services.shop_cache_service - INFO - get_user_available_items:219 - Cached 3 available items for user 6181290784 (VIP: False)
++2025-09-17 23:32:00,266 - services.shop_cache_service - INFO - get_active_categories:181 - Cached 0 active categories
++2025-09-17 23:32:14,460 - handlers.start - INFO - cmd_start:29 - Start command received from user 1280444712
++2025-09-17 23:32:14,460 - handlers.start - INFO - cmd_start:71 - User 1280444712 admin status: True
++2025-09-17 23:32:14,460 - handlers.start - INFO - cmd_start:74 - Admin user 1280444712 accessing start command
++2025-09-17 23:32:14,461 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:32:14,462 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:32:14,462 - handlers.start - INFO - cmd_start:79 - Menu factory returned text length: 135, keyboard type: <class 'aiogram.types.inline_keyboard_markup.InlineKeyboardMarkup'>
++2025-09-17 23:32:14,750 - handlers.start - INFO - cmd_start:90 - Menu manager show_menu result: message_id=1250 date=datetime.datetime(2025, 9, 17, 23, 32, 14, tzinfo=TzInfo(UTC)) chat=Chat(id=1280444712, type='private', title=None, username='Corther1', first_name='Corther', last_name=None, is_forum=None, is_direct_messages=None, accent_color_id=None, active_usernames=None, available_reactions=None, background_custom_emoji_id=None, bio=None, birthdate=None, business_intro=None, business_location=None, business_opening_hours=None, can_set_sticker_set=None, custom_emoji_sticker_set_name=None, description=None, emoji_status_custom_emoji_id=None, emoji_status_expiration_date=None, has_aggressive_anti_spam_enabled=None, has_hidden_members=None, has_private_forwards=None, has_protected_content=None, has_restricted_voice_and_video_messages=None, has_visible_history=None, invite_link=None, join_by_request=None, join_to_send_messages=None, linked_chat_id=None, location=None, message_auto_delete_time=None, permissions=None, personal_chat=None, photo=None, pinned_message=None, profile_accent_color_id=None, profile_background_custom_emoji_id=None, slow_mode_delay=None, sticker_set_name=None, unrestrict_boost_count=None) message_thread_id=None direct_messages_topic=None from_user=User(id=7570619877, is_bot=True, first_name='Testing2', last_name=None, username='Testing2testbot', language_code=None, is_premium=None, added_to_attachment_menu=None, can_join_groups=None, can_read_all_group_messages=None, supports_inline_queries=None, can_connect_to_business=None, has_main_web_app=None) sender_chat=None sender_boost_count=None sender_business_bot=None business_connection_id=None forward_origin=None is_topic_message=None is_automatic_forward=None reply_to_message=None external_reply=None quote=None reply_to_story=None reply_to_checklist_task_id=None via_bot=None edit_date=None has_protected_content=None is_from_offline=None is_paid_post=None media_group_id=None author_signature=None paid_star_count=None text='👑 ¡Bienvenido, Administrador!\n\nBienvenido al centro de control del bot. Desde aquí puedes gestionar todos los aspectos del sistema.' entities=None link_preview_options=None suggested_post_info=None effect_id=None animation=None audio=None document=None paid_media=None photo=None sticker=None story=None video=None video_note=None voice=None caption=None caption_entities=None show_caption_above_media=None has_media_spoiler=None checklist=None contact=None dice=None game=None poll=None venue=None location=None new_chat_members=None left_chat_member=None new_chat_title=None new_chat_photo=None delete_chat_photo=None group_chat_created=None supergroup_chat_created=None channel_chat_created=None message_auto_delete_timer_changed=None migrate_to_chat_id=None migrate_from_chat_id=None pinned_message=None invoice=None successful_payment=None refunded_payment=None users_shared=None chat_shared=None gift=None unique_gift=None connected_website=None write_access_allowed=None passport_data=None proximity_alert_triggered=None boost_added=None chat_background_set=None checklist_tasks_done=None checklist_tasks_added=None direct_message_price_changed=None forum_topic_created=None forum_topic_edited=None forum_topic_closed=None forum_topic_reopened=None general_forum_topic_hidden=None general_forum_topic_unhidden=None giveaway_created=None giveaway=None giveaway_winners=None giveaway_completed=None paid_message_price_changed=None suggested_post_approved=None suggested_post_approval_failed=None suggested_post_declined=None suggested_post_paid=None suggested_post_refunded=None video_chat_scheduled=None video_chat_started=None video_chat_ended=None video_chat_participants_invited=None web_app_data=None reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text='💎 Canal VIP', url=None, callback_data='admin_vip', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='💬 Canal Free', url=None, callback_data='admin_free', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🎮 Juego Kinky', url=None, callback_data='admin_kinky_game', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='🛒 Tienda', url=None, callback_data='admin_shop_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📚 Narrativa', url=None, callback_data='admin_narrative_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='📈 Análisis', url=None, callback_data='admin_analytics_main', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='📊 Estadísticas', url=None, callback_data='admin_stats', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='⚙️ Configuración', url=None, callback_data='admin_config', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)], [InlineKeyboardButton(text='🔄 Actualizar', url=None, callback_data='admin_main_menu', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None), InlineKeyboardButton(text='↩️ Volver', url=None, callback_data='admin_back', web_app=None, login_url=None, switch_inline_query=None, switch_inline_query_current_chat=None, switch_inline_query_chosen_chat=None, copy_text=None, callback_game=None, pay=None)]]) forward_date=None forward_from=None forward_from_chat=None forward_from_message_id=None forward_sender_name=None forward_signature=None user_shared=None
++2025-09-17 23:32:17,511 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:32:17,513 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:32:18,594 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:32:19,513 - handlers.admin.lore_admin_handlers - ERROR - show_lore_management_menu:83 - Error showing lore management menu for user 1280444712: type object 'UserLorePiece' has no attribute 'id'
++2025-09-17 23:32:23,539 - handlers.admin_narrative_handlers - INFO - start_fragment_creation:401 - Fragment creation started by admin 1280444712
++2025-09-17 23:32:28,045 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:32:28,057 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:32:28,212 - handlers.admin_narrative_handlers - INFO - show_fragment_connections:707 - Fragment connections analysis performed by admin 1280444712
++2025-09-17 23:32:30,248 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:32:31,676 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:32:31,681 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:32:31,837 - handlers.admin.admin_menu - INFO - validate_narrative_system:580 - Narrative validation performed by admin 1280444712: issues_found
++2025-09-17 23:32:34,690 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:32:38,137 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:32:38,138 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:32:41,368 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_narrative_main, role admin
++2025-09-17 23:32:41,368 - utils.menu_factory - WARNING - _create_specific_menu:263 - Unknown specific menu state: admin_narrative_main. Falling back to main menu for role: admin
++2025-09-17 23:32:44,309 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:32:44,311 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:32:46,735 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_gamification_main, role admin
++2025-09-17 23:32:50,793 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:32:51,820 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:32:51,827 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:32:51,981 - handlers.admin.admin_menu - INFO - validate_narrative_system:580 - Narrative validation performed by admin 1280444712: issues_found
++2025-09-17 23:32:53,053 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:32:54,161 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:32:54,167 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:32:54,323 - handlers.admin.admin_menu - INFO - validate_narrative_system:580 - Narrative validation performed by admin 1280444712: issues_found
++2025-09-17 23:32:58,440 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:33:01,048 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:33:05,666 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:33:05,668 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:33:07,282 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:33:10,651 - services.analytics_service - INFO - get_comprehensive_dashboard_data:2399 - Getting comprehensive dashboard data
++2025-09-17 23:33:10,652 - services.analytics_service - INFO - generate_user_segment_analysis:813 - Generating user segment analysis...
++2025-09-17 23:33:10,653 - services.analytics_service - INFO - analyze_choice_distribution_patterns:619 - Analyzing choice distribution patterns
++2025-09-17 23:33:10,656 - services.analytics_service - INFO - identify_narrative_bottlenecks:693 - Identifying narrative bottlenecks
++2025-09-17 23:33:10,657 - services.analytics_service - INFO - track_conversion_funnel_metrics:872 - Tracking conversion funnel metrics
++2025-09-17 23:33:10,660 - services.analytics_service - INFO - get_character_voice_analytics:1431 - Getting character voice analytics
++2025-09-17 23:33:10,679 - services.analytics_service - INFO - generate_user_segment_analysis:865 - User segmentation analysis complete: {'whales': 0, 'explorers': 0, 'highly_engaged': 1, 'stalled': 0, 'new_users': 2, 'inactive': 1}
++2025-09-17 23:33:10,681 - services.analytics_service - ERROR - track_conversion_funnel_metrics:978 - Error tracking conversion funnel metrics: 'UserJourneyAnalytics' object has no attribute 'total_besitos_earned'
++2025-09-17 23:33:10,851 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:33:16,633 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:33:17,548 - services.analytics_service - INFO - generate_user_segment_analysis:813 - Generating user segment analysis...
++2025-09-17 23:33:17,554 - services.analytics_service - INFO - generate_user_segment_analysis:865 - User segmentation analysis complete: {'whales': 0, 'explorers': 0, 'highly_engaged': 1, 'stalled': 0, 'new_users': 2, 'inactive': 1}
++2025-09-17 23:33:23,838 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:33:44,334 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++
+
+# 2025-09-17 23:46:39.778756
++Excelente. Cada vez funciona mejor. Puedo entrar a más opciones, fluye con más seguridad, pero sigue habiendo botones que fallan todavía.
++
++bot.py
++2025-09-17 23:44:21,645 - __main__ - INFO - main:148 - Inicializando base de datos...
++2025-09-17 23:44:21,646 - database.setup - INFO - init_db:61 - Inicializando motor de base de datos SQLite...
++2025-09-17 23:44:21,661 - database.setup - INFO - init_db:76 - Creando tablas en orden definido...
++2025-09-17 23:44:21,683 - database.setup - INFO - init_db:81 - Creando tablas restantes...
++2025-09-17 23:44:21,688 - database.setup - INFO - init_db:86 - Todas las tablas creadas exitosamente.
++2025-09-17 23:44:21,752 - __main__ - INFO - main:151 - Aplicando parches de seguridad...
++2025-09-17 23:44:21,752 - __main__ - INFO - main:156 - VIP channel ID: -1001468184215
++2025-09-17 23:44:21,752 - __main__ - INFO - main:157 - Configurando bot...
++2025-09-17 23:44:21,798 - __main__ - INFO - main:186 - Registrando handlers...
++2025-09-17 23:44:21,798 - __main__ - INFO - main:220 - Router setup registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router admin registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router auction_admin registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router start_token registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router start registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router main_menu registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router backpack registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router missions registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router info registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router free_channel_admin registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router publication_test registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router vip_menu registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router auction_user registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router reaction_callback registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router daily_gift registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router minigames registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router gamification registrado
++2025-09-17 23:44:21,799 - __main__ - INFO - main:220 - Router free_user registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router lore registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router combinar_pistas registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router channel_access registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router narrative registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router test_evaluation registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:220 - Router shop registrado
++2025-09-17 23:44:21,800 - __main__ - INFO - main:225 - Iniciando tareas en segundo plano...
++2025-09-17 23:44:21,800 - __main__ - INFO - main:248 - Bot iniciado correctamente. Comenzando polling...
++2025-09-17 23:44:21,801 - root - INFO - channel_request_scheduler:28 - Channel request scheduler started
++2025-09-17 23:44:21,802 - root - INFO - vip_subscription_scheduler:125 - VIP subscription scheduler started
++2025-09-17 23:44:21,803 - root - INFO - vip_membership_scheduler:145 - VIP membership scheduler started
++2025-09-17 23:44:21,803 - root - INFO - auction_monitor_scheduler:177 - Auction monitor scheduler started
++2025-09-17 23:44:21,804 - root - INFO - free_channel_cleanup_scheduler:204 - Free channel cleanup scheduler started
++2025-09-17 23:44:21,824 - services.free_channel_service - INFO - cleanup_old_requests:440 - Cleaned up 0 old channel requests
++2025-09-17 23:44:29,512 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:44:29,514 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:44:30,886 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:44:32,018 - services.analytics_service - INFO - get_comprehensive_dashboard_data:2399 - Getting comprehensive dashboard data
++2025-09-17 23:44:32,018 - services.analytics_service - INFO - generate_user_segment_analysis:813 - Generating user segment analysis...
++2025-09-17 23:44:32,020 - services.analytics_service - INFO - analyze_choice_distribution_patterns:619 - Analyzing choice distribution patterns
++2025-09-17 23:44:32,022 - services.analytics_service - INFO - identify_narrative_bottlenecks:693 - Identifying narrative bottlenecks
++2025-09-17 23:44:32,023 - services.analytics_service - INFO - track_conversion_funnel_metrics:872 - Tracking conversion funnel metrics
++2025-09-17 23:44:32,028 - services.analytics_service - INFO - get_character_voice_analytics:1431 - Getting character voice analytics
++2025-09-17 23:44:32,050 - services.analytics_service - INFO - generate_user_segment_analysis:865 - User segmentation analysis complete: {'whales': 0, 'explorers': 0, 'highly_engaged': 1, 'stalled': 0, 'new_users': 2, 'inactive': 1}
++2025-09-17 23:44:32,052 - services.analytics_service - ERROR - track_conversion_funnel_metrics:978 - Error tracking conversion funnel metrics: 'UserJourneyAnalytics' object has no attribute 'total_besitos_earned'
++2025-09-17 23:44:32,219 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:44:33,262 - services.analytics_service - INFO - generate_user_segment_analysis:813 - Generating user segment analysis...
++2025-09-17 23:44:33,268 - services.analytics_service - INFO - generate_user_segment_analysis:865 - User segmentation analysis complete: {'whales': 0, 'explorers': 0, 'highly_engaged': 1, 'stalled': 0, 'new_users': 2, 'inactive': 1}
++2025-09-17 23:44:41,233 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:44:46,655 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:44:52,577 - handlers.admin.analytics_handlers - INFO - show_analytics_admin_menu:96 - Analytics admin menu displayed for admin 1280444712
++2025-09-17 23:44:54,627 - utils.menu_factory - INFO - create_menu:58 - Creating menu for user 1280444712, state admin_main, role admin
++2025-09-17 23:44:54,628 - utils.menu_factory - INFO - create_menu:67 - Main menu created for role admin: text length 135
++2025-09-17 23:44:56,623 - handlers.admin.admin_menu - INFO - show_narrative_admin_main:437 - Narrative admin main menu displayed for admin 1280444712
++2025-09-17 23:45:09,442 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:45:09,451 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:45:09,610 - handlers.admin_narrative_handlers - INFO - show_fragment_connections:707 - Fragment connections analysis performed by admin 1280444712
++2025-09-17 23:45:12,996 - utils.menu_manager - ERROR - update_menu:171 - Error updating menu for user 1280444712: Telegram server says - Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 552
++2025-09-17 23:45:14,295 - services.narrative_admin_service - INFO - validate_narrative_consistency:243 - Starting narrative consistency validation...
++2025-09-17 23:45:14,301 - services.narrative_admin_service - WARNING - validate_narrative_consistency:334 - Narrative consistency validation finished. Issues found: {'total_fragments': 37, 'reachable_fragments': 36, 'orphaned_count': 1, 'dead_end_count': 0, 'broken_link_count': 19}
++2025-09-17 23:45:14,459 - handlers.admin_narrative_handlers - INFO - show_fragment_connections:707 - Fragment connections analysis performed by admin 1280444712                        2025-09-17 23:45:24,604 - utils.menu_manager - ERROR - update_menu:171 - Error updating menu for user 1280444712: Telegram server says - Bad Request: can't parse entities: Can't find end of the entity starting at byte offset 552

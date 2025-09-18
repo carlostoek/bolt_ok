@@ -305,6 +305,9 @@ class Token(Base):
     activated_at = Column(DateTime, nullable=True)
     is_used = Column(Boolean, default=False)
 
+    # Relationship to Tariff
+    tariff = relationship("Tariff", foreign_keys=[tariff_id])
+
 
 class Tariff(Base):
     __tablename__ = "tariffs"
@@ -378,6 +381,9 @@ class ButtonReaction(Base):
     user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
     reaction_type = Column(String, nullable=False)
     created_at = Column(DateTime, default=func.now())
+
+    # Relationship to User
+    user = relationship("User", foreign_keys=[user_id])
 
 
 # NEW AUCTION SYSTEM MODELS
@@ -618,3 +624,44 @@ class TriviaUserAnswer(Base):
     question_id = Column(Integer, ForeignKey("trivia_questions.id"), nullable=False)
     user_answer = Column(Text, nullable=True)
     is_correct = Column(Boolean, default=False)
+
+
+class AdminActionLog(Base):
+    """Log of administrative actions for auditing and compliance."""
+
+    __tablename__ = "admin_action_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    admin_user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    action_type = Column(String(100), nullable=False)  # e.g., "user_departure", "vip_notification"
+    action_details = Column(JSON, nullable=True)  # Additional action metadata
+    target_user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)
+    target_entity_type = Column(String(50), nullable=True)  # e.g., "user", "message", "subscription"
+    target_entity_id = Column(String(100), nullable=True)
+    timestamp = Column(DateTime, default=func.now())
+    status = Column(String(20), default="completed")  # completed, failed, pending
+    error_message = Column(Text, nullable=True)
+
+    # Relationships
+    admin_user = relationship("User", foreign_keys=[admin_user_id])
+    target_user = relationship("User", foreign_keys=[target_user_id])
+
+
+class MessageCleanupLog(Base):
+    """Log of message cleanup operations for monitoring and compliance."""
+
+    __tablename__ = "message_cleanup_logs"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=True)  # None for system-wide cleanup
+    cleanup_type = Column(String(50), nullable=False)  # e.g., "temporary_messages", "old_messages"
+    messages_cleaned = Column(Integer, default=0)
+    max_age_hours = Column(Integer, nullable=True)
+    batch_size = Column(Integer, nullable=True)
+    timestamp = Column(DateTime, default=func.now())
+    execution_time_seconds = Column(Float, nullable=True)
+    status = Column(String(20), default="completed")  # completed, failed, partial
+    error_message = Column(Text, nullable=True)
+
+    # Relationship
+    user = relationship("User", foreign_keys=[user_id])
