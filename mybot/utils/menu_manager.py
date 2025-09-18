@@ -122,7 +122,7 @@ class MenuManager:
             await set_user_menu_state(session, user_id, menu_state)
             
             # Update navigation history
-            self._update_nav_history(user_id, menu_state)
+            self._update_nav_history(user_id, menu_state, parse_mode)
             
             # Delete the original command message if requested
             if delete_origin_message and message.message_id:
@@ -176,17 +176,17 @@ class MenuManager:
             await set_user_menu_state(session, user_id, menu_state)
             
             # Update navigation history
-            self._update_nav_history(user_id, menu_state)
+            self._update_nav_history(user_id, menu_state, parse_mode)
             
             return True
         except TelegramBadRequest as e:
             if "message is not modified" in str(e).lower():
                 return True  # No change needed
             logger.error(f"Error updating menu for user {user_id}: {e}")
-            return False
+            return await self._recover_to_main_admin_menu(callback, session)
         except Exception as e:
             logger.error(f"Error updating menu for user {user_id}: {e}")
-            return False
+            return await self._recover_to_main_admin_menu(callback, session)
     
     async def send_temporary_message(
         self,
@@ -227,11 +227,47 @@ class MenuManager:
             logger.error(f"Error sending temporary message for user {user_id}: {e}")
             raise
     
+    async def _recover_to_main_admin_menu(self, query: CallbackQuery, session: AsyncSession) -> bool:
+        """
+        Recovers user to the main admin menu after a failure.
+        Sends a temporary message and updates the menu.
+        """
+        user_id = query.from_user.id
+        try:
+            from utils.menu_factory import menu_factory
+            
+            await self.send_temporary_message(
+                query.message,
+                "⚠️ Hubo un error al cargar el menú. Volviendo al menú principal.",
+                auto_delete_seconds=7
+            )
+
+            main_menu_state = "admin_main_menu"
+            text, keyboard = await menu_factory.create_menu(main_menu_state, user_id, session, query.bot)
+
+            # We are recovering, so we directly edit the message to avoid recursion
+            await safe_edit(
+                query.message,
+                text,
+                reply_markup=keyboard,
+                parse_mode="HTML"
+            )
+            # And manually update the state
+            self._active_menus[user_id] = (query.message.chat.id, query.message.message_id)
+            await set_user_menu_state(session, user_id, main_menu_state)
+            self._update_nav_history(user_id, main_menu_state, parse_mode="HTML")
+            
+            return True
+        except Exception as fallback_e:
+            logger.critical(f"CRITICAL: Fallback recovery to main admin menu failed for user {user_id}: {fallback_e}")
+            return False
+
     async def go_back(
         self,
         callback: CallbackQuery,
         session: AsyncSession,
-        default_menu_state: str = "main"
+        default_menu_state: str = "main",
+        default_parse_mode: str = "Markdown"
     ) -> bool:
         """
         Navigate back to the previous menu in the history.
@@ -239,19 +275,22 @@ class MenuManager:
         user_id = callback.from_user.id
         history = self._nav_history.get(user_id, [])
         
+        previous_state = default_menu_state
+        previous_parse_mode = default_parse_mode
+
         # Ensure we always have at least one state (the current one) if history is not empty
         if len(history) > 1:
             # Remove current state
             history.pop() 
-            previous_state = history[-1]
+            previous_state, previous_parse_mode = history[-1]
         elif len(history) == 1:
             # If only one item, it means we are at the "root" of the history for this session.
             # We should try to go back to it, but not pop it.
-            previous_state = history[0] # Stay at the current state
-            logger.debug(f"User {user_id} is at the start of navigation history. Staying at '{previous_state}'.")
+            previous_state, previous_parse_mode = history[0] # Stay at the current state
+            logger.debug(f"User {user_id} is at the start of navigation history. Staying at '{(previous_state, previous_parse_mode)}'.")
         else:
             previous_state = default_menu_state
-            logger.debug(f"User {user_id} has no navigation history. Falling back to default: '{default_menu_state}'.")
+            logger.debug(f"User {user_id} has no navigation history. Falling back to default: '{(default_menu_state, default_parse_mode)}'.")
         
         # Import here to avoid circular imports
         from utils.menu_factory import menu_factory # Usa la instancia global si existe
@@ -260,10 +299,12 @@ class MenuManager:
             # create_menu necesita 'bot' para ciertas lógicas de texto/teclado.
             # Pasamos callback.bot
             text, keyboard = await menu_factory.create_menu(previous_state, callback.from_user.id, session, callback.bot)
-            return await self.update_menu(callback, text, keyboard, session, previous_state)
+            return await self.update_menu(
+                callback, text, keyboard, session, previous_state, parse_mode=previous_parse_mode
+            )
         except Exception as e:
             logger.error(f"Error going back for user {user_id}: {e}")
-            return False
+            return await self._recover_to_main_admin_menu(callback, session)
     
     async def clear_user_data(self, user_id: int, bot) -> None:
         """
@@ -637,16 +678,18 @@ class MenuManager:
                 auto_delete_seconds=auto_delete_seconds
             )
 
-    def _update_nav_history(self, user_id: int, menu_state: str) -> None:
+    def _update_nav_history(self, user_id: int, menu_state: str, parse_mode: str = "Markdown") -> None:
         """Update navigation history for back button functionality."""
         if user_id not in self._nav_history:
             self._nav_history[user_id] = []
         
         history = self._nav_history[user_id]
         
+        nav_entry = (menu_state, parse_mode)
+        
         # Don't add duplicate consecutive states
-        if not history or history[-1] != menu_state:
-            history.append(menu_state)
+        if not history or history[-1] != nav_entry:
+            history.append(nav_entry)
             
             # Limit history size to prevent memory issues
             if len(history) > 10: # Keep a reasonable history length

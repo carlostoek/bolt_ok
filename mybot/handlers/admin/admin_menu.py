@@ -628,6 +628,48 @@ async def enhanced_analytics_main(callback: CallbackQuery, session: AsyncSession
 
     await callback.answer()
 
+@router.callback_query(F.data == "admin_analytics_enhanced")
+async def admin_analytics_enhanced(callback: CallbackQuery, session: AsyncSession):
+    """Enhanced analytics access callback handler."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    try:
+        # Route to enhanced analytics when available
+        if ENHANCED_ANALYTICS_AVAILABLE:
+            from .enhanced_analytics import show_enhanced_analytics_main
+            await show_enhanced_analytics_main(callback, session)
+        else:
+            # Fallback to basic analytics menu
+            from .analytics_handlers import show_analytics_admin_menu
+            await show_analytics_admin_menu(callback, session)
+    except Exception as e:
+        logger.error(f"Error loading enhanced analytics menu: {e}")
+        await callback.answer("Error al cargar el menú de analytics mejorado", show_alert=True)
+
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_vip_enhanced")
+async def admin_vip_enhanced(callback: CallbackQuery, session: AsyncSession):
+    """Enhanced VIP access callback handler."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    try:
+        # Route to enhanced VIP handlers when available
+        if ENHANCED_VIP_AVAILABLE:
+            from .enhanced_vip_handlers import show_enhanced_vip_menu
+            await show_enhanced_vip_menu(callback, session)
+        else:
+            # Fallback to regular VIP menu
+            from .vip_menu import admin_vip
+            await admin_vip(callback, session)
+    except Exception as e:
+        logger.error(f"Error loading enhanced VIP menu: {e}")
+        await callback.answer("Error al cargar el menú VIP mejorado", show_alert=True)
+
+    await callback.answer()
+
 @router.callback_query(F.data == "admin_main_menu")
 async def back_to_admin_main(callback: CallbackQuery, session: AsyncSession):
     """Return to enhanced main admin menu with automatic cleanup."""
@@ -753,6 +795,100 @@ async def admin_bot_config(callback: CallbackQuery, session: AsyncSession):
         logger.error(f"Error showing bot config: {e}")
         await callback.answer("Error al cargar la configuración", show_alert=True)
     
+    await callback.answer()
+
+@router.callback_query(F.data == "admin_channel_enhanced")
+async def admin_channel_enhanced(callback: CallbackQuery, session: AsyncSession):
+    """Enhanced channel management callback handler."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    try:
+        # Route to enhanced channel admin service functionality
+        if ENHANCED_CHANNEL_AVAILABLE:
+            from services.channel_admin_service import ChannelAdminService
+            channel_service = ChannelAdminService(session)
+
+            # Get comprehensive channel analytics and status
+            vip_channel_id = await channel_service.config_service.get_vip_channel_id()
+            free_channel_id = await channel_service.config_service.get_free_channel_id()
+
+            # Generate analytics report for both channels
+            analytics_report = await channel_service.generate_channel_analytics_report(
+                period_days=30,
+                report_type="comprehensive"
+            )
+
+            # Build enhanced channel management menu
+            menu_text = "🏢 **Gestión Avanzada de Canales**\n\n"
+            menu_text += "Centro de control integral para administración de canales con analytics en tiempo real.\n\n"
+
+            # Channel status overview
+            menu_text += "📊 **Estado de Canales:**\n"
+            menu_text += f"• Canal VIP: {'✅ Configurado' if vip_channel_id else '❌ No configurado'}\n"
+            menu_text += f"• Canal Free: {'✅ Configurado' if free_channel_id else '❌ No configurado'}\n\n"
+
+            # Analytics summary if available
+            if analytics_report.get("status") == "success":
+                financial_metrics = analytics_report.get("financial_metrics", {}).get("financial_metrics", {})
+                if financial_metrics:
+                    revenue = financial_metrics.get("revenue_summary", {}).get("total_revenue", 0)
+                    active_subs = financial_metrics.get("subscription_metrics", {}).get("active_subscriptions", 0)
+                    menu_text += f"💰 **Métricas (30 días):**\n"
+                    menu_text += f"• Ingresos totales: {revenue} besitos\n"
+                    menu_text += f"• Suscripciones activas: {active_subs}\n\n"
+
+            menu_text += "**🚀 Funciones Avanzadas:**\n"
+            menu_text += "• Gestión VIP y permisos de canal\n"
+            menu_text += "• Publicación de contenido protegido\n"
+            menu_text += "• Analytics de engagement y financieros\n"
+            menu_text += "• Configuración de protección de contenido\n"
+            menu_text += "• Operaciones masivas de usuarios\n\n"
+
+            menu_text += "**Selecciona una opción para continuar:**"
+
+            # Create enhanced channel management keyboard
+            from aiogram.utils.keyboard import InlineKeyboardBuilder
+            builder = InlineKeyboardBuilder()
+
+            # Row 1: Core channel operations
+            builder.button(text="💎 Gestión VIP", callback_data="admin_vip")
+            builder.button(text="💬 Gestión Free", callback_data="admin_free")
+
+            # Row 2: Content and analytics
+            builder.button(text="📊 Analytics Plus", callback_data="channel_analytics_enhanced")
+            builder.button(text="🛡️ Protección", callback_data="channel_content_protection")
+
+            # Row 3: Advanced operations (prominent bulk operations)
+            builder.button(text="⚡ Ops. Masivas", callback_data="channel_bulk_operations")
+            builder.button(text="⚡ Batch VIP", callback_data="channel_bulk_vip_access")
+
+            # Row 4: Navigation
+            builder.button(text="🔄 Actualizar", callback_data="admin_channel_enhanced")
+            builder.button(text="↩️ Volver", callback_data="admin_main_menu")
+
+            builder.adjust(2, 2, 2, 2)
+            keyboard = builder.as_markup()
+
+            await menu_manager.update_menu(
+                callback,
+                menu_text,
+                keyboard,
+                session,
+                "admin_channel_enhanced"
+            )
+
+            logger.info(f"Enhanced channel management accessed by admin {callback.from_user.id}")
+
+        else:
+            # Fallback to regular channel admin
+            from .channel_admin import admin_channel_menu
+            await admin_channel_menu(callback, session)
+
+    except Exception as e:
+        logger.error(f"Error loading enhanced channel management: {e}")
+        await callback.answer("Error al cargar gestión avanzada de canales", show_alert=True)
+
     await callback.answer()
 
 # Enhanced token generation with better UX

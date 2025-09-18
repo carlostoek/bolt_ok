@@ -375,8 +375,33 @@ async def generate_batch_tokens(callback: CallbackQuery, session: AsyncSession):
             await callback.answer("❌ Máximo 50 tokens por lote", show_alert=True)
             return
 
-        # Show loading message
-        await callback.answer("🔄 Generando tokens...", show_alert=False)
+        # Show progress feedback by updating the menu
+        loading_menu_data = {
+            "title": "📦 Generando Tokens en Lote...",
+            "description": f"Por favor, espere mientras se generan {quantity} tokens. Esta operación puede tardar unos segundos.",
+            "sections": [{"title": "Progreso", "options": [{"icon": "⏳", "text": "Operación en curso..."}]}]
+        }
+        if HTML_AVAILABLE:
+            loading_text = HTMLMessageFormatter.format_admin_menu(loading_menu_data)
+            parse_mode = "HTML"
+        else:
+            loading_text = f"📦 **Generando Tokens en Lote...**\n\nPor favor, espere mientras se generan {quantity} tokens."
+            parse_mode = "Markdown"
+
+        await menu_manager.update_menu(
+            callback,
+            loading_text,
+            None,
+            session,
+            "vip_batch_generating",
+            parse_mode=parse_mode
+        )
+
+        # Add a small delay to make the loading message visible on fast operations
+        if quantity <= 10:
+            await asyncio.sleep(1.5)
+        else:
+            await asyncio.sleep(3)
 
         # Generate tokens using enhanced service
         vip_service = EnhancedVIPService(session, callback.bot)

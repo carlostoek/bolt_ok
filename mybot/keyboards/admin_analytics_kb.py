@@ -28,14 +28,17 @@ def get_analytics_admin_main_kb():
     # Fila 5: Herramientas avanzadas
     builder.button(text="📋 Generar Reportes", callback_data="admin_analytics_reports")
     builder.button(text="📤 Exportar Datos", callback_data="admin_analytics_export_options")
+    builder.button(text="📁 Exportar Datos", callback_data="analytics_export_data")
+
+    # Fila 6: Configuración
     builder.button(text="⚙️ Configuración", callback_data="admin_analytics_config")
 
-    # Fila 6: Navegación
+    # Fila 7: Navegación
     builder.button(text="🔄 Actualizar", callback_data="admin_analytics_main")
     builder.button(text="↩️ Volver", callback_data="admin_main_menu")
 
-    # Distribución: 3x3, luego 3x3, luego 3x2
-    builder.adjust(3, 3, 3, 3, 3, 2)
+    # Distribución: 3x3, luego 3x3, luego 3x1, luego 2
+    builder.adjust(3, 3, 3, 3, 3, 1, 2)
     return builder.as_markup()
 
 
