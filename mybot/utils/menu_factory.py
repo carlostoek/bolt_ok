@@ -3,7 +3,7 @@ Enhanced Menu factory for creating consistent menus based on user role and state
 Centralizes menu creation logic for better maintainability.
 Enhanced with HTML formatting support and improved administrative features.
 """
-from typing import Tuple, Optional, Dict, Any, Union
+from typing import Tuple, Optional, Dict, Any, Union, List
 from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
