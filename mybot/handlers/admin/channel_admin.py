@@ -183,7 +183,7 @@ async def show_enhanced_channel_menu(callback: CallbackQuery, session: AsyncSess
     Connects to existing channel_admin_service functionality.
     """
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer()
+        return await callback.answer("Acceso denegado", show_alert=True)
 
     # Initialize enhanced channel admin service
     channel_admin_service = ChannelAdminService(session)
