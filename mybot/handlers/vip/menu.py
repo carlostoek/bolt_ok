@@ -9,10 +9,8 @@ from datetime import datetime
 from utils.user_roles import get_user_role
 from utils.menu_utils import send_menu, update_menu, send_temporary_reply
 from keyboards.common import get_back_kb
-from utils.keyboard_utils import (
-    get_main_menu_keyboard,
-    get_missions_keyboard,
-)
+from keyboards.main_menu_kb import get_main_menu_keyboard
+from keyboards.missions_kb import get_missions_keyboard
 from keyboards.vip_main_kb import get_vip_main_kb
 from utils.messages import BOT_MESSAGES
 from utils.message_utils import get_profile_message

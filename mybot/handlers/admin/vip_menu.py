@@ -19,10 +19,8 @@ from keyboards.admin_vip_config_kb import (
 )
 from keyboards.admin_vip_channel_kb import get_admin_vip_channel_kb
 from keyboards.common import get_back_kb
-from utils.keyboard_utils import (
-    get_main_menu_keyboard,
-    get_post_confirmation_keyboard,
-)
+from keyboards.main_menu_kb import get_main_menu_keyboard
+from keyboards.post_confirmation_kb import get_post_confirmation_keyboard
 from services import (
     SubscriptionService,
     ConfigService,
