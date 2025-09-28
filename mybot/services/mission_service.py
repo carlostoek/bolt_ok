@@ -159,7 +159,7 @@ class MissionService:
 
         if bot:
             from utils.message_utils import get_mission_completed_message
-            from utils.keyboard_utils import get_mission_completed_keyboard
+            from keyboards.mission_completed_kb import get_mission_completed_keyboard
 
             text = await get_mission_completed_message(mission)
             await bot.send_message(
@@ -247,7 +247,7 @@ class MissionService:
                 await self.point_service.add_points(user_id, mission.reward_points, bot=bot)
                 if bot:
                     from utils.message_utils import get_mission_completed_message
-                    from utils.keyboard_utils import get_mission_completed_keyboard
+                    from keyboards.mission_completed_kb import get_mission_completed_keyboard
 
                     text = await get_mission_completed_message(mission)
                     await bot.send_message(

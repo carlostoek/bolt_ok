@@ -6,12 +6,10 @@ from typing import Tuple
 from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.ext.asyncio import AsyncSession
 from database.models import User
-from utils.keyboard_utils import (
-    get_profile_keyboard,
-    get_missions_keyboard,
-    get_reward_keyboard,
-    get_ranking_keyboard
-)
+from keyboards.profile_kb import get_profile_keyboard
+from keyboards.missions_kb import get_missions_keyboard
+from keyboards.reward_kb import get_reward_keyboard
+from keyboards.ranking_kb import get_ranking_keyboard
 from utils.message_utils import get_profile_message, get_ranking_message
 from services.mission_service import MissionService
 from services.reward_service import RewardService

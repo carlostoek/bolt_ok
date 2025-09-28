@@ -15,14 +15,12 @@ from keyboards.common import get_back_kb
 from keyboards.admin_content_badges_kb import get_admin_content_badges_keyboard
 from keyboards.admin_content_levels_kb import get_admin_content_levels_keyboard
 from keyboards.admin_content_rewards_kb import get_admin_content_rewards_keyboard
-from utils.keyboard_utils import (
-    get_admin_users_list_keyboard,
-    get_admin_content_auctions_keyboard,
-    get_admin_content_daily_gifts_keyboard,
-    get_admin_content_minigames_keyboard,
-    get_badge_selection_keyboard,
-    get_reward_type_keyboard,
-)
+from keyboards.admin_content_auctions_kb import get_admin_content_auctions_keyboard
+from keyboards.admin_content_daily_gifts_kb import get_admin_content_daily_gifts_keyboard
+from keyboards.admin_content_minigames_kb import get_admin_content_minigames_keyboard
+from keyboards.admin_users_list_kb import get_admin_users_list_keyboard
+from keyboards.badge_selection_kb import get_badge_selection_keyboard
+from keyboards.reward_type_kb import get_reward_type_keyboard
 from utils.admin_state import (
     AdminUserStates,
     AdminMissionStates,
