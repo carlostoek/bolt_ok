@@ -42,6 +42,7 @@ from utils.admin_state import (
     AdminVipSubscriberStates,
 )
 from aiogram.fsm.context import FSMContext
+from utils.menu_factory import menu_factory
 from utils.menu_utils import (
     update_menu,
     send_temporary_reply,
@@ -62,13 +63,16 @@ async def vip_none(callback: CallbackQuery):
 
 
 @router.callback_query(F.data == "admin_vip")
-async def vip_menu(callback: CallbackQuery, session: AsyncSession):
+async def vip_menu(callback: CallbackQuery, session: AsyncSession, bot: Bot):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
+    text, keyboard = await menu_factory.create_menu(
+        "admin_vip", callback.from_user.id, session, bot
+    )
     await update_menu(
         callback,
-        "🔐 Administración Canal VIP",
-        get_admin_vip_channel_kb(),
+        text,
+        keyboard,
         session,
         "admin_vip",
     )

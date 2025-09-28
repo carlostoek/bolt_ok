@@ -1,5 +1,6 @@
-from aiogram import Router, F
+from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery
+from utils.menu_factory import menu_factory
 from sqlalchemy.ext.asyncio import AsyncSession
 from utils.user_roles import is_admin
 from utils.menu_utils import update_menu
@@ -10,16 +11,17 @@ router = Router()
 
 
 @router.callback_query(F.data == "admin_free")
-async def free_menu(callback: CallbackQuery, session: AsyncSession):
+async def free_menu(callback: CallbackQuery, session: AsyncSession, bot: Bot):
     """Free channel admin menu."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
-    # TODO: Implement logic to check if channel is configured
-    channel_configured = True  # Placeholder for now
+    text, keyboard = await menu_factory.create_menu(
+        "admin_free", callback.from_user.id, session, bot
+    )
     await update_menu(
         callback,
-        "Men\u00fa de Administraci\u00f3n de Canal Gratuito",
-        get_free_channel_admin_kb(channel_configured=channel_configured),
+        text,
+        keyboard,
         session,
         "admin_free",
     )

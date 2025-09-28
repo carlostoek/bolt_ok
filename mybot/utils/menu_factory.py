@@ -9,6 +9,9 @@ from utils.user_roles import get_user_role
 from keyboards.admin_main_kb import get_admin_main_kb
 from keyboards.vip_main_kb import get_vip_main_kb
 from keyboards.subscription_kb import get_free_main_menu_kb
+from keyboards.admin_vip_channel_kb import get_admin_vip_channel_kb
+from keyboards.free_channel_admin_kb import get_free_channel_admin_kb
+from services import ConfigService
 from keyboards.setup_kb import (
     get_setup_main_kb, 
     get_setup_channels_kb, 
@@ -251,6 +254,10 @@ class MenuFactory:
             # Aunque el handler directo lo gestiona, si por alguna razón menu_factory
             # necesita crear este menú, podemos redirigirlo al panel admin principal
             return self._create_main_menu("admin") # O puedes definir un texto y teclado específico aquí
+        elif menu_state == "admin_vip":
+            return self._create_admin_vip_menu()
+        elif menu_state == "admin_free":
+            return await self._create_admin_free_menu(session)
         else:
             logger.warning(f"Unknown specific menu state: {menu_state}. Falling back to main menu for role: {role}")
             return self._create_main_menu(role)
@@ -281,6 +288,23 @@ class MenuFactory:
 *¿Te atreves a comenzar esta aventura?*"""
         
         return text, get_narrative_stats_keyboard()
+
+    def _create_admin_vip_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
+        """Creates the admin VIP channel management menu."""
+        return (
+            "🔐 Administración Canal VIP",
+            get_admin_vip_channel_kb(),
+        )
+
+    async def _create_admin_free_menu(self, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
+        """Creates the admin free channel management menu."""
+        config_service = ConfigService(session)
+        channel_id = await config_service.get_value("FREE_CHANNEL_ID")
+        channel_configured = channel_id is not None
+        return (
+            "Menú de Administración de Canal Gratuito",
+            get_free_channel_admin_kb(channel_configured=channel_configured),
+        )
     
     def _create_fallback_menu(self, role: str = "free") -> Tuple[str, InlineKeyboardMarkup]:
         """
