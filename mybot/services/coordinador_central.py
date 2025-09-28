@@ -14,6 +14,7 @@ try:
     from .point_service import PointService
     from .emotional_analysis_service import EmotionalAnalysisService
     from .character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
+    from .archetype_integration_service import ArchetypeIntegrationService
 except ImportError:
     # Fallback to absolute imports for standalone usage
     from services.integration.channel_engagement_service import ChannelEngagementService
@@ -23,6 +24,7 @@ except ImportError:
     from services.point_service import PointService
     from services.emotional_analysis_service import EmotionalAnalysisService
     from services.character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
+    from services.archetype_integration_service import ArchetypeIntegrationService
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +40,7 @@ class AccionUsuario(enum.Enum):
     COMPRAR_ITEM = "comprar_item"
     AGREGAR_A_MOCHILA = "agregar_a_mochila"
     VERIFICAR_ACCESO_NIVEL = "verificar_acceso_nivel"
+    ANALISIS_ARQUETIPO_L1 = "analisis_arquetipo_l1"
 
 class CoordinadorCentral:
     """
@@ -66,7 +69,14 @@ class CoordinadorCentral:
         except Exception as e:
             logger.warning(f"EmotionalAnalysisService no disponible: {str(e)}")
             self.emotional_analysis = None
-        
+
+        # Servicio de integración de arquetipos (con graceful degradation)
+        try:
+            self.archetype_integration = ArchetypeIntegrationService(session)
+        except Exception as e:
+            logger.warning(f"ArchetypeIntegrationService no disponible: {str(e)}")
+            self.archetype_integration = None
+
         # Servicio de voces de personajes (siempre disponible)
         self.character_voice = CharacterVoiceService()
     
@@ -104,6 +114,8 @@ class CoordinadorCentral:
                 return await self._flujo_agregar_a_mochila(user_id, **kwargs)
             elif accion == AccionUsuario.VERIFICAR_ACCESO_NIVEL:
                 return await self._flujo_verificar_acceso_nivel(user_id, **kwargs)
+            elif accion == AccionUsuario.ANALISIS_ARQUETIPO_L1:
+                return await self._flujo_analisis_arquetipo_l1(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -827,6 +839,7 @@ class CoordinadorCentral:
                 
                 # Realizar análisis emocional del timing de respuesta
                 emotional_context = None
+                archetype_analysis = None
                 if self.emotional_analysis:
                     try:
                         # Usar el servicio de análisis emocional para evaluar timing
@@ -835,6 +848,21 @@ class CoordinadorCentral:
                         )
                     except Exception as e:
                         logger.debug(f"Análisis emocional de test falló para usuario {user_id}: {str(e)}")
+
+                # Integrar análisis de arquetipos si está disponible
+                if self.archetype_integration:
+                    try:
+                        # Preparar datos de elección para análisis de arquetipo
+                        choice_data = {
+                            'choice_id': option_selected,
+                            'response_time': response_time,
+                            'timestamp': datetime.datetime.utcnow(),
+                            'context': 'test_evaluation'
+                        }
+                        # Iniciar análisis de arquetipo L1 basado en la respuesta del test
+                        archetype_analysis = await self.archetype_integration.integrate_with_emotional_system(user_id)
+                    except Exception as e:
+                        logger.debug(f"Análisis de arquetipo de test falló para usuario {user_id}: {str(e)}")
                 
                 # Clasificar usuario según timing de respuesta
                 user_type = self._classify_user_by_response_time(response_time)
@@ -879,7 +907,8 @@ class CoordinadorCentral:
                     "response_time": response_time,
                     "option_selected": option_selected,
                     "emotional_context": emotional_context,
-                    "vulnerability_assessment": vulnerability_assessment
+                    "vulnerability_assessment": vulnerability_assessment,
+                    "archetype_analysis": archetype_analysis
                 }
             
             else:
@@ -978,3 +1007,155 @@ class CoordinadorCentral:
                 base_message += "\n\n✨ *Tu estabilidad emocional te permite explorar con confianza.*"
         
         return base_message
+
+    async def _flujo_analisis_arquetipo_l1(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para análisis de arquetipo al completar Level 1.
+
+        Este flujo se ejecuta cuando un usuario completa las interacciones del Level 1
+        y realiza análisis completo de arquetipo basado en sus elecciones y patrones.
+
+        Args:
+            user_id: ID único del usuario
+            **kwargs: Datos de elecciones y contexto (choices_data, completion_context)
+
+        Returns:
+            Dict con resultados del análisis de arquetipo y recomendaciones
+        """
+        try:
+            if not self.archetype_integration:
+                logger.warning(f"Servicio de arquetipos no disponible para usuario {user_id}")
+                return {
+                    "success": False,
+                    "message": "Servicio de análisis de arquetipos no disponible",
+                    "action": "archetype_analysis_unavailable"
+                }
+
+            # Obtener datos de elecciones del Level 1
+            choices_data = kwargs.get("choices_data", [])
+            completion_context = kwargs.get("completion_context", {})
+
+            if not choices_data:
+                logger.warning(f"No hay datos de elecciones para análisis de arquetipo de usuario {user_id}")
+                return {
+                    "success": False,
+                    "message": "Datos insuficientes para análisis de arquetipo",
+                    "action": "insufficient_data"
+                }
+
+            # Verificar si ya existe una clasificación reciente
+            confidence_check = await self.archetype_integration.check_classification_confidence(user_id)
+
+            if confidence_check.get('can_use_ramificado', False):
+                logger.info(f"Usuario {user_id} ya tiene clasificación de alta confianza")
+                # Usuario ya clasificado con alta confianza
+                existing_classification = confidence_check
+
+                # Evaluar activación del sistema ramificado
+                ramificado_decision = await self.archetype_integration.evaluate_ramificado_activation(user_id)
+
+                if ramificado_decision.activate_ramificado:
+                    # Activar sistema ramificado
+                    activation_success = await self.archetype_integration.activate_archetype_branching(user_id)
+
+                    if activation_success:
+                        # Generar mensaje con Diana sobre activación de sistema avanzado
+                        activation_message = self.character_voice.get_character_response(
+                            CharacterType.DIANA,
+                            EmotionalContext.USUARIO_AVANZADO,
+                            "ramificado_activated"
+                        ) if self.character_voice else "✨ Sistema avanzado activado para ti"
+
+                        return {
+                            "success": True,
+                            "action": "ramificado_activated",
+                            "message": f"{activation_message}",
+                            "classification": existing_classification,
+                            "ramificado_enabled": True,
+                            "recommended_branch": ramificado_decision.recommended_narrative_branch
+                        }
+
+            # Realizar nuevo análisis de arquetipo con los datos L1
+            logger.info(f"Iniciando análisis de arquetipo L1 para usuario {user_id}")
+
+            # Integrar con sistema emocional existente
+            integrated_analysis = await self.archetype_integration.integrate_with_emotional_system(user_id)
+
+            # Verificar confianza después del análisis
+            post_analysis_confidence = await self.archetype_integration.get_archetype_confidence(user_id)
+
+            # Determinar contexto emocional para la respuesta
+            emotional_context_enum = EmotionalContext.NUEVO_USUARIO
+            if post_analysis_confidence and post_analysis_confidence >= 0.7:
+                emotional_context_enum = EmotionalContext.USUARIO_AVANZADO
+            elif post_analysis_confidence and post_analysis_confidence >= 0.5:
+                emotional_context_enum = EmotionalContext.VULNERABILIDAD_BAJA
+
+            # Generar respuesta personalizada según el resultado del análisis
+            if integrated_analysis.get('integration_status') == 'success':
+                archetype_data = integrated_analysis.get('archetype_classification', {})
+                primary_archetype = archetype_data.get('primary_archetype', 'explorer')
+
+                # Diana responde según el arquetipo detectado
+                analysis_message = self.character_voice.get_character_response(
+                    CharacterType.DIANA,
+                    emotional_context_enum,
+                    f"archetype_detected_{primary_archetype}",
+                    archetype_data
+                ) if self.character_voice else f"He detectado tu arquetipo principal: {primary_archetype}"
+
+                # Obtener fallback para compatibilidad
+                fallback_archetype = await self.archetype_integration.get_fallback_archetype(user_id)
+
+                return {
+                    "success": True,
+                    "action": "archetype_analysis_completed",
+                    "message": analysis_message,
+                    "classification": integrated_analysis,
+                    "primary_archetype": primary_archetype,
+                    "fallback_archetype": fallback_archetype,
+                    "confidence_score": post_analysis_confidence,
+                    "ramificado_eligible": post_analysis_confidence and post_analysis_confidence >= 0.8
+                }
+            else:
+                # Análisis falló, usar sistema estándar
+                fallback_archetype = await self.archetype_integration.get_fallback_archetype(user_id)
+
+                fallback_message = self.character_voice.get_character_response(
+                    CharacterType.LUCIEN,
+                    EmotionalContext.PAUSA_REFLEXIVA,
+                    "archetype_analysis_fallback"
+                ) if self.character_voice else "Usaremos el sistema estándar por ahora"
+
+                return {
+                    "success": True,
+                    "action": "archetype_fallback",
+                    "message": fallback_message,
+                    "fallback_archetype": fallback_archetype,
+                    "confidence_score": 0.0,
+                    "ramificado_eligible": False,
+                    "error": integrated_analysis.get('error')
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en análisis de arquetipo L1 para usuario {user_id}: {str(e)}")
+
+            # Fallback completo en caso de error
+            try:
+                fallback_archetype = await self.archetype_integration.get_fallback_archetype(user_id) if self.archetype_integration else 'explorer'
+            except:
+                fallback_archetype = 'explorer'
+
+            error_message = self.character_voice.get_character_response(
+                CharacterType.LUCIEN,
+                EmotionalContext.PAUSA_REFLEXIVA,
+                "system_error"
+            ) if self.character_voice else "Ha ocurrido un error en el análisis"
+
+            return {
+                "success": False,
+                "action": "archetype_analysis_error",
+                "message": error_message,
+                "fallback_archetype": fallback_archetype,
+                "error": str(e)
+            }

@@ -13,7 +13,7 @@ from keyboards.admin_config_kb import (
     get_config_done_kb,
     get_reaction_confirm_kb,
 )
-from utils.keyboard_utils import get_back_keyboard
+from keyboards.common import get_back_kb
 from services.config_service import ConfigService
 from services.channel_service import ChannelService
 from services.scheduler import run_channel_request_check, run_vip_subscription_check
@@ -31,7 +31,7 @@ async def config_menu(callback: CallbackQuery, session: AsyncSession):
         return await callback.answer()
     await update_menu(
         callback,
-        "Configuraci\u00f3n del bot",
+        "Configuración del bot",
         get_admin_config_kb(),
         session,
         "admin_config",
@@ -45,7 +45,7 @@ async def prompt_reaction_buttons(callback: CallbackQuery, session: AsyncSession
         return await callback.answer()
     await callback.message.edit_text(
         "Envía el emoji para la primera reacción:",
-        reply_markup=get_back_keyboard("admin_config"),
+        reply_markup=get_back_kb("admin_config"),
     )
     await state.update_data(reactions=[], reaction_points=[])
     await state.set_state(AdminConfigStates.waiting_for_reaction_buttons)
@@ -139,7 +139,7 @@ async def prompt_channel_type(callback: CallbackQuery, state: FSMContext, sessio
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
-        "\u00bfQu\u00e9 tipo de canales deseas configurar?",
+        "¿Qué tipo de canales deseas configurar?",
         reply_markup=get_channel_type_kb(),
     )
     await state.set_state(AdminConfigStates.waiting_for_channel_choice)
@@ -153,7 +153,7 @@ async def channel_mode_vip(callback: CallbackQuery, state: FSMContext, session: 
     await state.update_data(mode="vip_only")
     await callback.message.edit_text(
         "Por favor reenvía un mensaje desde tu canal VIP para detectar el ID.",
-        reply_markup=get_back_keyboard("admin_config"),
+        reply_markup=get_back_kb("admin_config"),
     )
     await state.set_state(AdminConfigStates.waiting_for_vip_channel_id)
     await callback.answer()
@@ -166,7 +166,7 @@ async def channel_mode_free(callback: CallbackQuery, state: FSMContext, session:
     await state.update_data(mode="free_only")
     await callback.message.edit_text(
         "Por favor reenvía un mensaje desde tu canal FREE para detectar el ID.",
-        reply_markup=get_back_keyboard("admin_config"),
+        reply_markup=get_back_kb("admin_config"),
     )
     await state.set_state(AdminConfigStates.waiting_for_free_channel_id)
     await callback.answer()
@@ -179,7 +179,7 @@ async def channel_mode_both(callback: CallbackQuery, state: FSMContext, session:
     await state.update_data(mode="both")
     await callback.message.edit_text(
         "Primero, reenvía un mensaje desde tu canal VIP para detectar el ID.",
-        reply_markup=get_back_keyboard("admin_config"),
+        reply_markup=get_back_kb("admin_config"),
     )
     await state.set_state(AdminConfigStates.waiting_for_vip_channel_id)
     await callback.answer()
@@ -191,7 +191,7 @@ async def prompt_channel_interval(callback: CallbackQuery, state: FSMContext, se
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa el intervalo en segundos para revisar solicitudes de canal:",
-        reply_markup=get_back_keyboard("config_scheduler"),
+        reply_markup=get_back_kb("config_scheduler"),
     )
     await state.set_state(AdminConfigStates.waiting_for_channel_interval)
     await callback.answer()
@@ -203,7 +203,7 @@ async def prompt_vip_interval(callback: CallbackQuery, state: FSMContext, sessio
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa el intervalo en segundos para revisar suscripciones VIP:",
-        reply_markup=get_back_keyboard("config_scheduler"),
+        reply_markup=get_back_kb("config_scheduler"),
     )
     await state.set_state(AdminConfigStates.waiting_for_vip_interval)
     await callback.answer()
@@ -244,22 +244,22 @@ async def receive_vip_channel(message: Message, state: FSMContext, session: Asyn
         try:
             chat_id = int(message.text.strip())
         except (TypeError, ValueError):
-            await message.answer("ID inv\u00e1lido. Intenta de nuevo.")
+            await message.answer("ID inválido. Intenta de nuevo.")
             return
     await state.update_data(vip_channel_id=chat_id)
-    await message.answer(f"\u2705 ID del canal detectado: {chat_id}.")
+    await message.answer(f"✅ ID del canal detectado: {chat_id}.")
     data = await state.get_data()
     mode = data.get("mode")
     if mode == "vip_only":
         config = ConfigService(session)
         await config.set_vip_channel_id(chat_id)
         await ChannelService(session).add_channel(chat_id)
-        await message.answer("\u2705 Configuraci\u00f3n guardada correctamente.", reply_markup=get_config_done_kb())
+        await message.answer("✅ Configuración guardada correctamente.", reply_markup=get_config_done_kb())
         await state.clear()
     else:
         await message.answer(
-            "Ahora reenv\u00eda un mensaje desde tu canal FREE.",
-            reply_markup=get_back_keyboard("admin_config"),
+            "Ahora reenvía un mensaje desde tu canal FREE.",
+            reply_markup=get_back_kb("admin_config"),
         )
         await state.set_state(AdminConfigStates.waiting_for_free_channel_id)
 
@@ -275,7 +275,7 @@ async def receive_free_channel(message: Message, state: FSMContext, session: Asy
         try:
             chat_id = int(message.text.strip())
         except (TypeError, ValueError):
-            await message.answer("ID inv\u00e1lido. Intenta de nuevo.")
+            await message.answer("ID inválido. Intenta de nuevo.")
             return
     data = await state.get_data()
     mode = data.get("mode")
@@ -294,7 +294,7 @@ async def receive_free_channel(message: Message, state: FSMContext, session: Asy
         await config.set_free_channel_id(chat_id)
         await ChannelService(session).add_channel(chat_id)
     await message.answer(
-        "\u2705 Configuraci\u00f3n guardada correctamente.",
+        "✅ Configuración guardada correctamente.",
         reply_markup=get_config_done_kb(),
     )
     await state.clear()

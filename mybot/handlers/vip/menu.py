@@ -8,8 +8,8 @@ from datetime import datetime
 
 from utils.user_roles import get_user_role
 from utils.menu_utils import send_menu, update_menu, send_temporary_reply
+from keyboards.common import get_back_kb
 from utils.keyboard_utils import (
-    get_back_keyboard,
     get_main_menu_keyboard,
     get_missions_keyboard,
 )
@@ -97,7 +97,7 @@ async def vip_subscription(callback: CallbackQuery, session: AsyncSession):
             text = f"Fecha de inicio: {join_date}\nSin fecha de término"
 
     await callback.message.edit_text(
-        text, reply_markup=get_back_keyboard("vip_menu")
+        text, reply_markup=get_back_kb("vip_menu")
     )
     await callback.answer()
 
@@ -232,7 +232,7 @@ async def game_profile(callback: CallbackQuery, session: AsyncSession):
     profile_message += f"\n\nVIP: {vip_status}"
 
     await callback.message.edit_text(
-        profile_message, reply_markup=get_back_keyboard("vip_game")
+        profile_message, reply_markup=get_back_kb("vip_game")
     )
     await callback.answer()
 
@@ -255,6 +255,6 @@ async def gain_points(callback: CallbackQuery, session: AsyncSession):
             "gain_points_instructions",
             "Participa en misiones y actividades para ganar puntos."
         ),
-        reply_markup=get_back_keyboard("vip_game")
+        reply_markup=get_back_kb("vip_game")
     )
     await callback.answer()
