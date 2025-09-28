@@ -122,33 +122,6 @@ async def wait_time_menu(callback: CallbackQuery, session: AsyncSession):
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("wait_"))
-async def set_wait_time(callback: CallbackQuery, session: AsyncSession):
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer()
-    minutes = int(callback.data.split("_")[1])
-    config = await session.get(BotConfig, 1)
-    if not config:
-        config = BotConfig(id=1)
-        session.add(config)
-    config.free_channel_wait_time_minutes = minutes
-    await session.commit()
-    service = ChannelService(session)
-    channels = await service.list_channels()
-    if channels:
-        lines = [f"- {c.title or c.id} (<code>{c.id}</code>)" for c in channels]
-        text = f"Tiempo actualizado a {minutes} minutos.\n\n" + "\n".join(lines)
-    else:
-        text = f"Tiempo actualizado a {minutes} minutos."
-    await update_menu(
-        callback,
-        text,
-        get_admin_channels_kb(channels),
-        session,
-        "admin_channels",
-    )
-    await callback.answer()
-
 
 @router.callback_query(F.data.startswith("remove_channel_"))
 async def remove_channel(callback: CallbackQuery, session: AsyncSession):

@@ -66,7 +66,7 @@ async def free_channel_admin_menu(callback: CallbackQuery, session: AsyncSession
 
 
 @router.callback_query(F.data == "configure_free_channel")
-async def configure_free_channel(callback: CallbackQuery, state: FSMContext):
+async def configure_free_channel(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     """Iniciar configuración del canal gratuito."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
@@ -212,7 +212,7 @@ async def create_invite_link(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "send_to_free_channel")
-async def send_to_free_channel_menu(callback: CallbackQuery, state: FSMContext):
+async def send_to_free_channel_menu(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     """Menú para enviar contenido al canal gratuito."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
@@ -229,7 +229,7 @@ async def send_to_free_channel_menu(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(FreeChannelStates.waiting_for_post_text)
-async def process_post_text(message: Message, state: FSMContext):
+async def process_post_text(message: Message, state: FSMContext, session: AsyncSession):
     """Procesar texto del post."""
     if not await is_admin(message.from_user.id, session):
         return
@@ -246,7 +246,7 @@ async def process_post_text(message: Message, state: FSMContext):
 
 
 @router.callback_query(FreeChannelStates.waiting_for_media_files, F.data == "add_media")
-async def add_media_prompt(callback: CallbackQuery):
+async def add_media_prompt(callback: CallbackQuery, session: AsyncSession):
     """Solicitar archivos multimedia."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
@@ -262,7 +262,7 @@ async def add_media_prompt(callback: CallbackQuery):
 
 
 @router.message(FreeChannelStates.waiting_for_media_files)
-async def process_media_files(message: Message, state: FSMContext):
+async def process_media_files(message: Message, state: FSMContext, session: AsyncSession):
     """Procesar archivos multimedia."""
     if not await is_admin(message.from_user.id, session):
         return
@@ -306,7 +306,7 @@ async def process_media_files(message: Message, state: FSMContext):
 
 
 @router.callback_query(FreeChannelStates.waiting_for_media_files, F.data == "continue_without_media")
-async def continue_without_media(callback: CallbackQuery, state: FSMContext):
+async def continue_without_media(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     """Continuar sin multimedia."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
