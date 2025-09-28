@@ -945,3 +945,151 @@ class NarrativeLoader:
             await self.upsert_fragment(fragment_data)
 
         logger.info("Narrativa por defecto cargada exitosamente")
+
+    async def load_enhanced_l1f1(self) -> Dict[str, Any]:
+        """
+        Carga el fragmento L1F1 mejorado para detección de arquetipos.
+
+        Carga la estructura de datos del fragmento L1F1 optimizado para análisis
+        psicológico desde data/fragments/enhanced_l1f1.py. Este fragmento incluye
+        pesos de arquetipo integrados en cada opción de elección para permitir
+        la clasificación de usuarios durante su primera interacción.
+
+        Returns:
+            Diccionario con estructura completa del fragmento L1F1 mejorado:
+            - fragment_id: Identificador único del fragmento
+            - content: Texto narrativo de Diana con enfoque en detección de arquetipos
+            - character: Personaje (Diana)
+            - level: Nivel del fragmento (1)
+            - choices: Lista de opciones con pesos psicológicos integrados
+            - archetype_tracking: Configuración de seguimiento de arquetipos
+            - followup_fragments: Fragmentos de seguimiento por elección
+
+        Raises:
+            ImportError: Si no se puede importar el módulo enhanced_l1f1
+            Exception: Si hay errores en la validación de la estructura de datos
+        """
+        try:
+            # Importar datos del fragmento mejorado
+            from data.fragments.enhanced_l1f1 import ENHANCED_L1F1
+
+            # Validar estructura de datos
+            await self._validate_enhanced_l1f1_structure(ENHANCED_L1F1)
+
+            logger.info("Fragmento L1F1 mejorado cargado exitosamente")
+            return ENHANCED_L1F1
+
+        except ImportError as e:
+            logger.error(f"No se pudo importar enhanced_l1f1: {e}")
+            # Retornar fragmento básico como fallback
+            return await self._get_fallback_l1f1()
+
+        except Exception as e:
+            logger.error(f"Error cargando fragmento L1F1 mejorado: {e}")
+            # Retornar fragmento básico como fallback
+            return await self._get_fallback_l1f1()
+
+    async def _validate_enhanced_l1f1_structure(self, fragment_data: Dict[str, Any]) -> None:
+        """
+        Valida la estructura del fragmento L1F1 mejorado.
+
+        Verifica que el fragmento contenga todos los campos requeridos para
+        el análisis de arquetipos y que las opciones incluyan los pesos
+        psicológicos necesarios.
+
+        Args:
+            fragment_data: Diccionario con datos del fragmento a validar
+
+        Raises:
+            ValueError: Si la estructura no es válida
+        """
+        # Campos requeridos en el fragmento principal
+        required_fields = ['fragment_id', 'content', 'character', 'choices']
+        for field in required_fields:
+            if field not in fragment_data:
+                raise ValueError(f"Campo requerido '{field}' faltante en enhanced_l1f1")
+
+        # Validar que existan elecciones
+        choices = fragment_data.get('choices', [])
+        if not choices or len(choices) < 3:
+            raise ValueError("Enhanced L1F1 debe tener al menos 3 opciones de elección")
+
+        # Validar pesos de arquetipo en cada elección
+        for i, choice in enumerate(choices):
+            if 'archetype_weights' not in choice:
+                raise ValueError(f"Elección {i} no tiene archetype_weights")
+
+            if 'sub_archetype_weights' not in choice:
+                raise ValueError(f"Elección {i} no tiene sub_archetype_weights")
+
+            # Verificar que los pesos sean numéricos
+            archetype_weights = choice['archetype_weights']
+            if not isinstance(archetype_weights, dict):
+                raise ValueError(f"archetype_weights en elección {i} debe ser un diccionario")
+
+            for archetype, weight in archetype_weights.items():
+                if not isinstance(weight, (int, float)):
+                    raise ValueError(f"Peso de arquetipo '{archetype}' debe ser numérico")
+
+        # Validar configuración de seguimiento si existe
+        if 'archetype_tracking' in fragment_data:
+            tracking = fragment_data['archetype_tracking']
+            if not isinstance(tracking, dict):
+                raise ValueError("archetype_tracking debe ser un diccionario")
+
+        logger.info("Estructura del fragmento L1F1 mejorado validada correctamente")
+
+    async def _get_fallback_l1f1(self) -> Dict[str, Any]:
+        """
+        Retorna un fragmento L1F1 básico como fallback.
+
+        Proporciona un fragmento L1F1 simple sin pesos de arquetipo cuando
+        el fragmento mejorado no está disponible. Mantiene compatibilidad
+        básica con el sistema narrativo existente.
+
+        Returns:
+            Diccionario con fragmento L1F1 básico compatible
+        """
+        fallback_fragment = {
+            "fragment_id": "diana_basic_l1f1",
+            "content": """🌸 **Diana:** *Una figura elegante emerge de las sombras*
+
+Bienvenido a mi mundo... Soy Diana, y me complace conocerte. *Sonríe misteriosamente*
+
+Cada persona que llega aquí es única, y me encanta descubrir qué los hace especiales. ¿Cómo prefieres comenzar esta experiencia?""",
+
+            "character": "Diana",
+            "level": 1,
+            "required_besitos": 0,
+            "reward_besitos": 10,
+
+            "choices": [
+                {
+                    "text": "🌟 Quiero conocerte mejor",
+                    "destination_key": "main_salon",
+                    "archetype_weights": {},
+                    "sub_archetype_weights": {}
+                },
+                {
+                    "text": "🎭 Estoy listo para la aventura",
+                    "destination_key": "mansion_entrance",
+                    "archetype_weights": {},
+                    "sub_archetype_weights": {}
+                },
+                {
+                    "text": "💫 Dime qué me recomiendas",
+                    "destination_key": "info_1",
+                    "archetype_weights": {},
+                    "sub_archetype_weights": {}
+                }
+            ],
+
+            "archetype_tracking": {
+                "enabled": False,
+                "captures_response_time": False,
+                "analyzes_choice_progression": False
+            }
+        }
+
+        logger.info("Usando fragmento L1F1 básico como fallback")
+        return fallback_fragment

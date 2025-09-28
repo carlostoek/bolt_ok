@@ -16,7 +16,7 @@ from database.models import Tariff, Token
 from uuid import uuid4
 from sqlalchemy import select
 from utils.messages import BOT_MESSAGES
-from utils.keyboard_utils import get_admin_manage_content_keyboard # Importar la función del teclado
+from keyboards.admin_manage_content_kb import get_admin_manage_content_keyboard
 from backpack import desbloquear_pista_narrativa
 
 import logging

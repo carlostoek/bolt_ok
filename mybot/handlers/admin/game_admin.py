@@ -8,15 +8,15 @@ import datetime
 
 from utils.user_roles import is_admin
 from utils.menu_utils import update_menu, send_temporary_reply
+from keyboards.admin_manage_users_kb import get_admin_manage_users_keyboard
+from keyboards.admin_manage_content_kb import get_admin_manage_content_keyboard
+from keyboards.admin_content_missions_kb import get_admin_content_missions_keyboard
+from keyboards.common import get_back_kb
+from keyboards.admin_content_badges_kb import get_admin_content_badges_keyboard
+from keyboards.admin_content_levels_kb import get_admin_content_levels_keyboard
+from keyboards.admin_content_rewards_kb import get_admin_content_rewards_keyboard
 from utils.keyboard_utils import (
-    get_admin_manage_users_keyboard,
     get_admin_users_list_keyboard,
-    get_back_keyboard,
-    get_admin_manage_content_keyboard,
-    get_admin_content_missions_keyboard,
-    get_admin_content_badges_keyboard,
-    get_admin_content_levels_keyboard,
-    get_admin_content_rewards_keyboard,
     get_admin_content_auctions_keyboard,
     get_admin_content_daily_gifts_keyboard,
     get_admin_content_minigames_keyboard,
@@ -108,7 +108,7 @@ async def admin_user_add(callback: CallbackQuery, state: FSMContext):
     await state.update_data(points_operation="add", target_user=user_id)
     await callback.message.answer(
         f"Ingresa la cantidad de puntos a sumar a {user_id}:",
-        reply_markup=get_back_keyboard("admin_manage_users"),
+        reply_markup=get_back_kb("admin_manage_users"),
     )
     await state.set_state(AdminUserStates.assigning_points_amount)
     await callback.answer()
@@ -122,7 +122,7 @@ async def admin_user_deduct(callback: CallbackQuery, state: FSMContext):
     await state.update_data(points_operation="deduct", target_user=user_id)
     await callback.message.answer(
         f"Ingresa la cantidad de puntos a restar a {user_id}:",
-        reply_markup=get_back_keyboard("admin_manage_users"),
+        reply_markup=get_back_kb("admin_manage_users"),
     )
     await state.set_state(AdminUserStates.assigning_points_amount)
     await callback.answer()
@@ -170,7 +170,7 @@ async def admin_search_user(callback: CallbackQuery, state: FSMContext):
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa un ID o nombre de usuario:",
-        reply_markup=get_back_keyboard("admin_manage_users"),
+        reply_markup=get_back_kb("admin_manage_users"),
     )
     await state.set_state(AdminUserStates.search_user_query)
     await callback.answer()
@@ -237,7 +237,7 @@ async def admin_start_create_mission(callback: CallbackQuery, state: FSMContext)
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa el nombre de la misión:",
-        reply_markup=get_back_keyboard("admin_content_missions"),
+        reply_markup=get_back_kb("admin_content_missions"),
     )
     await state.set_state(AdminMissionStates.creating_mission_name)
     await callback.answer()
@@ -408,7 +408,7 @@ async def admin_view_active_missions(callback: CallbackQuery, session: AsyncSess
         text += "\n" + "\n".join(lines)
     await callback.message.edit_text(
         text,
-        reply_markup=get_back_keyboard("admin_content_missions"),
+        reply_markup=get_back_kb("admin_content_missions"),
     )
     await callback.answer()
 
@@ -484,7 +484,7 @@ async def admin_create_badge(callback: CallbackQuery, state: FSMContext):
         return await callback.answer()
     await callback.message.edit_text(
         "📛 Nombre de la insignia:",
-        reply_markup=get_back_keyboard("admin_content_badges"),
+        reply_markup=get_back_kb("admin_content_badges"),
     )
     await state.set_state(AdminBadgeStates.creating_badge_name)
     await callback.answer()
@@ -549,7 +549,7 @@ async def admin_view_badges(callback: CallbackQuery, session: AsyncSession):
         text = "\n".join(lines)
     else:
         text = "No hay insignias definidas."
-    await callback.message.edit_text(text, reply_markup=get_back_keyboard("admin_content_badges"))
+    await callback.message.edit_text(text, reply_markup=get_back_kb("admin_content_badges"))
     await callback.answer()
 
 
@@ -723,7 +723,7 @@ async def configure_daily_gift(callback: CallbackQuery, session: AsyncSession, s
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa la cantidad de puntos para el regalo diario:",
-        reply_markup=get_back_keyboard("admin_content_daily_gifts"),
+        reply_markup=get_back_kb("admin_content_daily_gifts"),
     )
     await state.set_state(AdminDailyGiftStates.waiting_for_amount)
     await callback.answer()
@@ -742,8 +742,7 @@ async def save_daily_gift_amount(message: Message, state: FSMContext, session: A
     await service.set_value("daily_gift_points", str(amount))
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="🔙 Volver", callback_data="admin_content_daily_gifts")]
-        ]
+            [InlineKeyboardButton(text="🔙 Volver", callback_data="admin_content_daily_gifts")]]
     )
     await message.answer(
         "Regalo diario actualizado.", reply_markup=keyboard
@@ -759,7 +758,7 @@ async def admin_reward_add(callback: CallbackQuery, state: FSMContext):
         return await callback.answer()
     await callback.message.edit_text(
         BOT_MESSAGES["enter_reward_name"],
-        reply_markup=get_back_keyboard("admin_content_rewards"),
+        reply_markup=get_back_kb("admin_content_rewards"),
     )
     await state.set_state(AdminRewardStates.creating_reward_name)
     await callback.answer()
@@ -924,7 +923,7 @@ async def start_edit_reward(callback: CallbackQuery, session: AsyncSession, stat
     await state.update_data(reward_id=reward_id)
     await callback.message.edit_text(
         BOT_MESSAGES["enter_reward_name"],
-        reply_markup=get_back_keyboard("admin_reward_edit"),
+        reply_markup=get_back_kb("admin_reward_edit"),
     )
     await state.set_state(AdminRewardStates.editing_reward_name)
     await callback.answer()
@@ -1004,7 +1003,7 @@ async def admin_levels_view(callback: CallbackQuery, session: AsyncSession):
         text = "\n".join(lines)
     else:
         text = "No hay niveles definidos."
-    await callback.message.edit_text(text, reply_markup=get_back_keyboard("admin_content_levels"))
+    await callback.message.edit_text(text, reply_markup=get_back_kb("admin_content_levels"))
     await callback.answer()
 
 
@@ -1013,7 +1012,7 @@ async def admin_level_add(callback: CallbackQuery, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
-        "Número del nivel:", reply_markup=get_back_keyboard("admin_content_levels")
+        "Número del nivel:", reply_markup=get_back_kb("admin_content_levels")
     )
     await state.set_state(AdminLevelStates.creating_level_number)
     await callback.answer()
@@ -1122,7 +1121,7 @@ async def start_edit_level(callback: CallbackQuery, state: FSMContext, session: 
         return
     await state.update_data(level_id=lvl_id)
     await callback.message.edit_text(
-        "Nuevo número de nivel:", reply_markup=get_back_keyboard("admin_level_edit")
+        "Nuevo número de nivel:", reply_markup=get_back_kb("admin_level_edit")
     )
     await state.set_state(AdminLevelStates.editing_level_number)
     await callback.answer()
@@ -1458,7 +1457,7 @@ async def lore_piece_create_start(callback: CallbackQuery, state: FSMContext):
         return await callback.answer()
     await callback.message.edit_text(
         "Ingresa el code_name de la pista:",
-        reply_markup=get_back_keyboard("admin_content_lore_pieces"),
+        reply_markup=get_back_kb("admin_content_lore_pieces"),
     )
     await state.set_state(LorePieceAdminStates.creating_code_name)
     await callback.answer()
@@ -1573,7 +1572,7 @@ async def save_text_content(message: Message, state: FSMContext, session: AsyncS
     )
     await message.answer(
         "✅ Pista creada correctamente",
-        reply_markup=get_back_keyboard("admin_content_lore_pieces"),
+        reply_markup=get_back_kb("admin_content_lore_pieces"),
     )
     await state.clear()
 
@@ -1629,7 +1628,7 @@ async def edit_lore_title_start(callback: CallbackQuery, state: FSMContext):
     data = await state.get_data()
     code = data.get("edit_lore_code")
     await callback.message.edit_text(
-        "Nuevo título:", reply_markup=get_back_keyboard(f"lore_piece_edit:{code}")
+        "Nuevo título:", reply_markup=get_back_kb(f"lore_piece_edit:{code}")
     )
     await state.set_state(LorePieceAdminStates.editing_title)
     await callback.answer()
@@ -1658,7 +1657,7 @@ async def edit_lore_description_start(callback: CallbackQuery, state: FSMContext
     code = data.get("edit_lore_code")
     await callback.message.edit_text(
         "Nueva descripción ('-' para vaciar):",
-        reply_markup=get_back_keyboard(f"lore_piece_edit:{code}")
+        reply_markup=get_back_kb(f"lore_piece_edit:{code}")
     )
     await state.set_state(LorePieceAdminStates.editing_description)
     await callback.answer()
@@ -1690,7 +1689,7 @@ async def edit_lore_category_start(callback: CallbackQuery, state: FSMContext):
     code = data.get("edit_lore_code")
     await callback.message.edit_text(
         "Nueva categoría ('-' para ninguna):",
-        reply_markup=get_back_keyboard(f"lore_piece_edit:{code}")
+        reply_markup=get_back_kb(f"lore_piece_edit:{code}")
     )
     await state.set_state(LorePieceAdminStates.editing_category)
     await callback.answer()
@@ -1868,6 +1867,6 @@ async def save_file_content(message: Message, state: FSMContext, session: AsyncS
     )
     await message.answer(
         "✅ Pista creada correctamente",
-        reply_markup=get_back_keyboard("admin_content_lore_pieces"),
+        reply_markup=get_back_kb("admin_content_lore_pieces"),
     )
     await state.clear()

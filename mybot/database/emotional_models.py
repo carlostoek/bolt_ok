@@ -199,14 +199,41 @@ class ArchetypeClassification(Base):
     primary_archetype = Column(String(50))                    # explorer, romantic, seeker, etc.
     archetype_confidence = Column(Float, default=0.5)         # 0.0 - 1.0
     
+    # Primary Archetype Scores
+    intellectual_score = Column(Float, default=0.0, index=True)
+    emotional_score = Column(Float, default=0.0, index=True)
+    exploratory_score = Column(Float, default=0.0, index=True)
+    vulnerable_score = Column(Float, default=0.0, index=True)
+    philosophical_score = Column(Float, default=0.0, index=True)
+    direct_score = Column(Float, default=0.0, index=True)
+    patient_score = Column(Float, default=0.0, index=True)
+    reciprocal_score = Column(Float, default=0.0, index=True)
+
+    # Sub-Archetype Scores
+    romantic_intellectual_score = Column(Float, default=0.0)
+    skeptical_thinker_score = Column(Float, default=0.0)
+    hedonist_philosopher_score = Column(Float, default=0.0)
+    pure_theorist_score = Column(Float, default=0.0)
+    empathetic_emotional_score = Column(Float, default=0.0)
+    passionate_emotional_score = Column(Float, default=0.0)
+    wounded_healer_score = Column(Float, default=0.0)
+    adventure_seeker_score = Column(Float, default=0.0)
+    collector_explorer_score = Column(Float, default=0.0)
+    freedom_lover_score = Column(Float, default=0.0)
+
     # Secondary Traits
     secondary_traits = Column(Text)                           # JSON array of secondary traits
     trait_strengths = Column(Text)                            # JSON mapping trait -> strength
     
+    # Cognitive Style Tracking
+    cognitive_style = Column(String(50), nullable=True)       # Timing analysis results
+    response_consistency = Column(Float, default=0.5)         # Timing pattern consistency
+    temporal_pattern = Column(String(50), nullable=True)      # Progression detection
+
     # Evolution Tracking
     archetype_stability = Column(Float, default=0.5)          # How stable classification is
     last_classification_change = Column(DateTime)
-    
+
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

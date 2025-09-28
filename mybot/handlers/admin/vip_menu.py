@@ -18,8 +18,8 @@ from keyboards.admin_vip_config_kb import (
     get_vip_messages_kb,
 )
 from keyboards.admin_vip_channel_kb import get_admin_vip_channel_kb
+from keyboards.common import get_back_kb
 from utils.keyboard_utils import (
-    get_back_keyboard,
     get_main_menu_keyboard,
     get_post_confirmation_keyboard,
 )
@@ -221,7 +221,7 @@ async def vip_manual_badge(callback: CallbackQuery, state: FSMContext, session: 
         return await callback.answer()
     await callback.message.edit_text(
         "👤 Ingresa el ID o username del usuario:",
-        reply_markup=get_back_keyboard("admin_vip"),
+        reply_markup=get_back_kb("admin_vip"),
     )
     await state.set_state(AdminManualBadgeStates.waiting_for_user)
     await callback.answer()
@@ -249,7 +249,7 @@ async def process_manual_badge_user(message: Message, state: FSMContext, session
         await send_temporary_reply(
             message,
             "❌ No hay insignias disponibles.",
-            reply_markup=get_back_keyboard("admin_vip"),
+            reply_markup=get_back_kb("admin_vip"),
         )
         await state.clear()
         return
@@ -294,7 +294,7 @@ async def vip_send_channel_post(callback: CallbackQuery, state: FSMContext, sess
     await send_clean_message(
         callback.message,
         "📝 Envía el texto que deseas publicar en el canal VIP:",
-        reply_markup=get_back_keyboard("admin_vip"),
+        reply_markup=get_back_kb("admin_vip"),
     )
     await state.set_state(AdminContentStates.waiting_for_channel_post_text)
     await callback.answer()
@@ -399,7 +399,7 @@ async def vip_add_days(callback: CallbackQuery, state: FSMContext, session: Asyn
     await state.update_data(target_user=user_id)
     await callback.message.answer(
         "Ingresa la cantidad de días a agregar:",
-        reply_markup=get_back_keyboard("vip_manage"),
+        reply_markup=get_back_kb("vip_manage"),
     )
     await state.set_state(AdminVipSubscriberStates.waiting_for_days)
     await callback.answer()
@@ -442,7 +442,7 @@ async def vip_edit(callback: CallbackQuery, state: FSMContext, session: AsyncSes
     await state.update_data(target_user=user_id)
     await callback.message.answer(
         "Ingresa la nueva fecha de expiración (DD/MM/AAAA) o 0 para ilimitado:",
-        reply_markup=get_back_keyboard("vip_manage"),
+        reply_markup=get_back_kb("vip_manage"),
     )
     await state.set_state(AdminVipSubscriberStates.waiting_for_new_date)
     await callback.answer()
@@ -526,7 +526,7 @@ async def prompt_vip_reminder(callback: CallbackQuery, state: FSMContext, sessio
     current = await config.get_value("vip_reminder_message") or "Tu suscripción VIP expira pronto."
     await callback.message.edit_text(
         f"📝 **Mensaje de recordatorio actual:**\n{current}\n\nEnvía el nuevo mensaje:",
-        reply_markup=get_back_keyboard("vip_config_messages"),
+        reply_markup=get_back_kb("vip_config_messages"),
     )
     await state.set_state(AdminVipMessageStates.waiting_for_reminder_message)
     await callback.answer()
@@ -557,7 +557,7 @@ async def prompt_vip_welcome(callback: CallbackQuery, state: FSMContext, session
     
     await callback.message.edit_text(
         f"📝 **Mensaje de bienvenida actual:**\n{current}\n\nEnvía el nuevo mensaje:",
-        reply_markup=get_back_keyboard("vip_config_messages")
+        reply_markup=get_back_kb("vip_config_messages")
     )
     await state.set_state(AdminVipMessageStates.waiting_for_welcome_message)
     await callback.answer()
@@ -588,7 +588,7 @@ async def prompt_vip_expired(callback: CallbackQuery, state: FSMContext, session
     
     await callback.message.edit_text(
         f"📝 **Mensaje de expiración actual:**\n{current}\n\nEnvía el nuevo mensaje:",
-        reply_markup=get_back_keyboard("vip_config_messages")
+        reply_markup=get_back_kb("vip_config_messages")
     )
     await state.set_state(AdminVipMessageStates.waiting_for_expired_message)
     await callback.answer()

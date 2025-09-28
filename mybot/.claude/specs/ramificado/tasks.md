@@ -38,7 +38,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 1: Core Data Structures and Models
 
-- [ ] 1. Create ArchetypeScores dataclass in services/archetype_analyzer.py
+- [x] 1. Create ArchetypeScores dataclass in services/archetype_analyzer.py
   - File: services/archetype_analyzer.py (new)
   - Define dataclass with 8 primary variables: intellectual, emotional, exploratory, vulnerable, philosophical, direct, patient, reciprocal
   - Set default values to 0.0 for all fields
@@ -46,7 +46,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Establish primary archetype scoring structure for analysis
   - _Requirements: 4.1_
 
-- [ ] 2. Create SubArchetypeScores dataclass in services/archetype_analyzer.py
+- [x] 2. Create SubArchetypeScores dataclass in services/archetype_analyzer.py
   - File: services/archetype_analyzer.py (continue from task 1)
   - Define dataclass with 10 sub-archetype variables: romantic_intellectual, skeptical_thinker, hedonist_philosopher, pure_theorist, empathetic_emotional, passionate_emotional, wounded_healer, adventure_seeker, collector_explorer, freedom_lover
   - Set default values to 0.0 for all fields
@@ -54,7 +54,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Create secondary classification structure for granular profiling
   - _Requirements: 4.3, 4.5_
 
-- [ ] 3. Extend ArchetypeClassification model in database/emotional_models.py with primary score fields
+- [x] 3. Extend ArchetypeClassification model in database/emotional_models.py with primary score fields
   - File: database/emotional_models.py
   - Add 8 new columns: intellectual_score, emotional_score, exploratory_score, vulnerable_score, philosophical_score, direct_score, patient_score, reciprocal_score
   - Use Column(Float, default=0.0) for all new fields
@@ -63,7 +63,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing ArchetypeClassification model structure_
   - _Requirements: 1.8, 4.7_
 
-- [ ] 4. Extend ArchetypeClassification model in database/emotional_models.py with sub-archetype score fields
+- [x] 4. Extend ArchetypeClassification model in database/emotional_models.py with sub-archetype score fields
   - File: database/emotional_models.py (continue from task 3)
   - Add 10 sub-archetype columns: romantic_intellectual_score, skeptical_thinker_score, hedonist_philosopher_score, pure_theorist_score, empathetic_emotional_score, passionate_emotional_score, wounded_healer_score, adventure_seeker_score, collector_explorer_score, freedom_lover_score
   - Use Column(Float, default=0.0) for all sub-archetype fields
@@ -71,7 +71,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing ArchetypeClassification model patterns_
   - _Requirements: 4.3, 4.7_
 
-- [ ] 5. Add cognitive style tracking fields to ArchetypeClassification model in database/emotional_models.py
+- [x] 5. Add cognitive style tracking fields to ArchetypeClassification model in database/emotional_models.py
   - File: database/emotional_models.py (continue from task 4)
   - Add cognitive_style Column(String(50), nullable=True) for timing analysis results
   - Add response_consistency Column(Float, default=0.5) for timing pattern consistency
@@ -82,7 +82,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 2: Response Time Analysis Component
 
-- [ ] 6. Create ResponseTimeAnalyzer class in services/response_time_analyzer.py
+- [x] 6. Create ResponseTimeAnalyzer class in services/response_time_analyzer.py
   - File: services/response_time_analyzer.py (new)
   - Create class with __init__ method setting timing thresholds dictionary
   - Define threshold constants: quick_intuitive (0-10s), thoughtful (10-30s), deliberate (30s+)
@@ -90,7 +90,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Establish response timing analysis component foundation
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 7. Implement analyze_response_pattern method in ResponseTimeAnalyzer class
+- [x] 7. Implement analyze_response_pattern method in ResponseTimeAnalyzer class
   - File: services/response_time_analyzer.py (continue from task 6)
   - Create method taking List[float] timings parameter
   - Calculate average time, classify style based on thresholds
@@ -99,7 +99,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Core timing analysis algorithm for cognitive style detection
   - _Requirements: 3.1, 3.4_
 
-- [ ] 8. Implement _calculate_consistency method in ResponseTimeAnalyzer class
+- [x] 8. Implement _calculate_consistency method in ResponseTimeAnalyzer class
   - File: services/response_time_analyzer.py (continue from task 7)
   - Create private method calculating coefficient of variation for timing consistency
   - Handle edge case of less than 2 timings (return 1.0)
@@ -108,7 +108,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Measure response timing consistency for behavioral analysis
   - _Requirements: 3.4_
 
-- [ ] 9. Implement _detect_pattern method in ResponseTimeAnalyzer class
+- [x] 9. Implement _detect_pattern method in ResponseTimeAnalyzer class
   - File: services/response_time_analyzer.py (continue from task 8)
   - Create method detecting acceleration/deceleration in response times
   - Calculate differences between consecutive timings
@@ -119,7 +119,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 3: Core ArchetypeAnalyzer Implementation
 
-- [ ] 10. Create ArchetypeAnalyzer class foundation in services/archetype_analyzer.py
+- [x] 10. Create ArchetypeAnalyzer class foundation in services/archetype_analyzer.py
   - File: services/archetype_analyzer.py (continue from tasks 1-2)
   - Create class with __init__ method taking AsyncSession parameter
   - Initialize ResponseTimeAnalyzer instance
@@ -129,7 +129,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing service patterns from EmotionalAnalysisService_
   - _Requirements: 1.1, 4.1_
 
-- [ ] 11. Implement analyze_l1_choices method signature in ArchetypeAnalyzer class
+- [x] 11. Implement analyze_l1_choices method signature in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 10)
   - Create async method with parameters: user_id (int), choices (List[Dict]), timings (List[float])
   - Initialize ArchetypeScores and SubArchetypeScores instances
@@ -138,7 +138,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Define main entry point for L1 choice analysis
   - _Requirements: 1.1, 4.1_
 
-- [ ] 12. Implement _process_choice_weights method in ArchetypeAnalyzer class
+- [x] 12. Implement _process_choice_weights method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 11)
   - Create async method processing individual choice with archetype_weights
   - Extract archetype_weights and sub_archetype_weights from choice Dict
@@ -147,7 +147,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Apply choice-specific archetype weights to user scores
   - _Requirements: 2.2, 2.5, 2.6_
 
-- [ ] 13. Implement _apply_timing_modifiers method in ArchetypeAnalyzer class
+- [x] 13. Implement _apply_timing_modifiers method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 12)
   - Create async method modifying scores based on response timing
   - Apply timing rules: <10s increment direct/passionate_emotional, 10-30s increment philosophical/intellectual, >30s increment philosophical/skeptical_thinker/patient
@@ -155,7 +155,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Apply timing-based score modifications for cognitive style detection
   - _Requirements: 1.2, 1.3, 3.1, 3.2, 3.3_
 
-- [ ] 14. Implement _calculate_primary_archetype method in ArchetypeAnalyzer class
+- [x] 14. Implement _calculate_primary_archetype method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 13)
   - Create async method determining highest-scoring primary dimension
   - Calculate composite scores with weighted combinations
@@ -164,7 +164,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Determine user's primary psychological archetype from scores
   - _Requirements: 4.2_
 
-- [ ] 15. Implement _determine_sub_archetype method in ArchetypeAnalyzer class
+- [x] 15. Implement _determine_sub_archetype method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 14)
   - Create async method mapping primary archetype to relevant sub-archetypes
   - Define sub-archetype mappings for intellectual, emotional, and exploratory primaries
@@ -173,7 +173,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Determine granular sub-classification within primary archetype
   - _Requirements: 4.3, 4.5_
 
-- [ ] 16. Implement _calculate_confidence method in ArchetypeAnalyzer class
+- [x] 16. Implement _calculate_confidence method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 15)
   - Create async method calculating classification confidence
   - Consider score separation, response consistency, and data completeness
@@ -182,7 +182,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Determine reliability of archetype classification for branching decisions
   - _Requirements: 4.6, 4.8_
 
-- [ ] 17. Complete analyze_l1_choices method implementation in ArchetypeAnalyzer class
+- [x] 17. Complete analyze_l1_choices method implementation in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 16)
   - Implement full method logic calling _process_choice_weights and _apply_timing_modifiers for each choice
   - Call _calculate_primary_archetype, _determine_sub_archetype, and _calculate_confidence
@@ -193,7 +193,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 4: Database Integration and Storage
 
-- [ ] 18. Implement store_classification_results method in ArchetypeAnalyzer class
+- [x] 18. Implement store_classification_results method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 17)
   - Create async method storing classification results in ArchetypeClassification model
   - Handle both new users and existing classification updates
@@ -203,7 +203,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing ArchetypeClassification model, async session patterns_
   - _Requirements: 1.8, 4.7, 6.4_
 
-- [ ] 19. Implement get_user_classification method in ArchetypeAnalyzer class
+- [x] 19. Implement get_user_classification method in ArchetypeAnalyzer class
   - File: services/archetype_analyzer.py (continue from task 18)
   - Create async method retrieving existing user classification from database
   - Return None if no classification exists
@@ -213,7 +213,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing database query patterns from EmotionalAnalysisService_
   - _Requirements: 6.2, 6.4_
 
-- [ ] 20. Create database migration script for ArchetypeClassification model extensions
+- [x] 20. Create database migration script for ArchetypeClassification model extensions
   - File: database/migrations/add_expanded_archetype_fields.py (new)
   - Create Alembic migration adding 8 primary score columns
   - Add 10 sub-archetype score columns with proper defaults
@@ -225,7 +225,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 5: Enhanced L1F1 Fragment Implementation
 
-- [ ] 21. Create enhanced L1F1 fragment data structure in data/fragments/enhanced_l1f1.py
+- [x] 21. Create enhanced L1F1 fragment data structure in data/fragments/enhanced_l1f1.py
   - File: data/fragments/enhanced_l1f1.py (new)
   - Define ENHANCED_L1F1 dictionary with Diana's archetype detection content
   - Include 5 choices with embedded archetype_weights and sub_archetype_weights
@@ -235,7 +235,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing fragment structure patterns_
   - _Requirements: 2.1, 2.2, 2.7_
 
-- [ ] 22. Implement load_enhanced_l1f1 function in services/narrative_loader.py
+- [x] 22. Implement load_enhanced_l1f1 function in services/narrative_loader.py
   - File: services/narrative_loader.py
   - Create function loading enhanced L1F1 fragment data
   - Handle fragment validation and error cases
@@ -245,7 +245,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing narrative loading functions in narrative_loader.py_
   - _Requirements: 2.1, 2.7_
 
-- [ ] 23. Update narrative_handler.py to use enhanced L1F1 for new users
+- [x] 23. Update narrative_handler.py to use enhanced L1F1 for new users
   - File: handlers/narrative_handler.py
   - Modify start_narrative_command to load enhanced L1F1 for new users
   - Preserve existing L1F1 for users already in progress
@@ -255,7 +255,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing narrative handler patterns, start_narrative_command function_
   - _Requirements: 2.1, 6.1, 6.8_
 
-- [ ] 24. Implement choice tracking enhancement in narrative_handler.py
+- [x] 24. Implement choice tracking enhancement in narrative_handler.py
   - File: handlers/narrative_handler.py (continue from task 23)
   - Enhance handle_narrative_choice to capture response timing data
   - Store choice timing in user session or temporary storage
@@ -267,7 +267,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 6: Service Integration and Orchestration
 
-- [ ] 25. Create ArchetypeIntegrationService in services/archetype_integration_service.py
+- [x] 25. Create ArchetypeIntegrationService in services/archetype_integration_service.py
   - File: services/archetype_integration_service.py (new)
   - Create service class bridging ArchetypeAnalyzer and existing systems
   - Add methods for activating archetype branching and checking confidence
@@ -276,7 +276,7 @@ L **Bad Examples (Too Broad)**:
   - _Leverage: existing service patterns from EmotionalAnalysisService_
   - _Requirements: 6.1, 6.5, 6.8_
 
-- [ ] 26. Implement activate_archetype_branching method in ArchetypeIntegrationService
+- [x] 26. Implement activate_archetype_branching method in ArchetypeIntegrationService
   - File: services/archetype_integration_service.py (continue from task 25)
   - Create async method enabling archetype-based narrative branching for user
   - Check classification confidence thresholds (>0.8 for activation)
@@ -285,7 +285,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Enable personalized narrative branching when archetype is sufficiently confident
   - _Requirements: 1.7, 4.6_
 
-- [ ] 27. Implement get_archetype_confidence method in ArchetypeIntegrationService
+- [x] 27. Implement get_archetype_confidence method in ArchetypeIntegrationService
   - File: services/archetype_integration_service.py (continue from task 26)
   - Create async method retrieving user's current archetype confidence score
   - Return confidence float or None if no classification exists
@@ -293,7 +293,7 @@ L **Bad Examples (Too Broad)**:
   - Purpose: Check archetype classification stability for branching decisions
   - _Requirements: 4.6, 6.1_
 
-- [ ] 28. Integrate ArchetypeAnalyzer with CoordinadorCentral workflows
+- [x] 28. Integrate ArchetypeAnalyzer with CoordinadorCentral workflows
   - File: services/coordinador_central.py
   - Add archetype analysis integration to existing AccionUsuario.TEST_EVALUACION_EMOCIONAL workflow
   - Create new workflow for L1 completion archetype analysis
@@ -304,7 +304,7 @@ L **Bad Examples (Too Broad)**:
 
 ### Phase 7: Testing and Validation
 
-- [ ] 29. Create unit tests for ArchetypeScores and SubArchetypeScores dataclasses
+- [x] 29. Create unit tests for ArchetypeScores and SubArchetypeScores dataclasses
   - File: tests/test_archetype_data_structures.py (new)
   - Test dataclass instantiation with default values
   - Verify field types and value ranges

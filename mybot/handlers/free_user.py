@@ -10,7 +10,7 @@ from utils.menu_manager import menu_manager
 from keyboards.subscription_kb import get_free_main_menu_kb, get_vip_explore_kb
 from keyboards.packs_kb import get_packs_list_kb, get_pack_detail_kb
 from utils.messages import BOT_MESSAGES
-from utils.keyboard_utils import get_back_keyboard
+from keyboards.common import get_back_kb
 from utils.notify_admins import notify_admins
 
 router = Router()
@@ -57,7 +57,7 @@ async def cb_free_gift(callback: CallbackQuery, session: AsyncSession):
     await asyncio.sleep(1)
     await message.answer(
         BOT_MESSAGES["gift_unlocked"],
-        reply_markup=get_back_keyboard("free_main_menu"),
+        reply_markup=get_back_kb("free_main_menu"),
     )
     await callback.answer()
 
@@ -91,7 +91,7 @@ async def cb_free_custom(callback: CallbackQuery, session: AsyncSession):
     await menu_manager.update_menu(
         callback,
         BOT_MESSAGES.get("FREE_CUSTOM_TEXT", "Contenido personalizado"),
-        get_back_keyboard("free_main_menu"),
+        get_back_kb("free_main_menu"),
         session,
         "free_custom",
     )
@@ -103,7 +103,7 @@ async def cb_free_game(callback: CallbackQuery, session: AsyncSession):
     await menu_manager.update_menu(
         callback,
         BOT_MESSAGES.get("FREE_GAME_TEXT", "Mini juego"),
-        get_back_keyboard("free_main_menu"),
+        get_back_kb("free_main_menu"),
         session,
         "free_game",
     )
@@ -115,7 +115,7 @@ async def cb_free_follow(callback: CallbackQuery, session: AsyncSession):
     await menu_manager.update_menu(
         callback,
         BOT_MESSAGES.get("FREE_FOLLOW_TEXT", "Dónde seguirme"),
-        get_back_keyboard("free_main_menu"),
+        get_back_kb("free_main_menu"),
         session,
         "free_follow",
     )

@@ -701,7 +701,7 @@ async def handle_admin_kinky_game_button(callback: CallbackQuery, session: Async
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
     
-    from utils.keyboard_utils import get_admin_manage_content_keyboard # Asegurarse de la importación
+    from keyboards.admin_manage_content_kb import get_admin_manage_content_keyboard
     
     text = "🎲 **Panel de Gestión de Gamificación Kinky**\n\n" \
            "¡Bienvenido al centro de control de todos tus juegos y actividades! " \
