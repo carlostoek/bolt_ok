@@ -559,7 +559,7 @@ async def handle_reanalysis(callback: CallbackQuery, session: AsyncSession):
     await callback.answer()
 
 
-@router.command(Command("archetype_user"))
+@router.message(Command("archetype_user"))
 async def archetype_user_command(message: Message, session: AsyncSession):
     """Command to manage specific user archetype."""
     if not await is_admin(message.from_user.id, session):
