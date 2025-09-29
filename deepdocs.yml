@@ -1,0 +1,6 @@
+target:
+  - url: "mybot/docs/"
+
+include:  []
+
+reinit: "a-random-string"
