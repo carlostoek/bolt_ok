@@ -8,6 +8,7 @@ monitoring system performance, and triggering manual re-analysis.
 
 import logging
 from datetime import datetime, timedelta
+from typing import Dict, Any
 from aiogram import Router, F
 from aiogram.filters import StateFilter, Command
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton
