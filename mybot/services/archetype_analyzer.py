@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from datetime import datetime
 import json
+import logging
 
 try:
     from .response_time_analyzer import ResponseTimeAnalyzer
@@ -18,6 +19,8 @@ except ImportError:
     # Fallback to absolute imports for standalone usage
     from services.response_time_analyzer import ResponseTimeAnalyzer
     from database.emotional_models import ArchetypeClassification
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -138,7 +141,13 @@ class ArchetypeAnalyzer:
                     acceso a datos de usuario, interacciones y análisis previos
         """
         self.session = session
-        self.response_time_analyzer = ResponseTimeAnalyzer(session)
+        try:
+            self.response_time_analyzer = ResponseTimeAnalyzer(session)
+            logger.info("ArchetypeAnalyzer initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to initialize ResponseTimeAnalyzer: {e}")
+            # Create a fallback response time analyzer
+            self.response_time_analyzer = None
 
     async def analyze_l1_choices(
         self,
@@ -170,69 +179,143 @@ class ArchetypeAnalyzer:
             - confidence_score: Nivel de confianza en la clasificación (0.0-1.0)
             - behavioral_indicators: Lista de indicadores comportamentales detectados
         """
-        # Inicializar estructuras de puntuación
-        archetype_scores = ArchetypeScores()
-        sub_archetype_scores = SubArchetypeScores()
+        try:
+            logger.info(f"Starting archetype analysis for user {user_id} with {len(choices)} choices")
 
-        # Procesar cada elección y su timing correspondiente
-        for i, choice in enumerate(choices):
-            # Aplicar pesos de la elección
-            await self._process_choice_weights(choice, archetype_scores, sub_archetype_scores)
+            # Validate input parameters
+            if not isinstance(user_id, int) or user_id <= 0:
+                raise ValueError(f"Invalid user_id: {user_id}")
 
-            # Aplicar modificadores de timing si disponible
-            if i < len(timings):
-                await self._apply_timing_modifiers(timings[i], archetype_scores)
+            if not isinstance(choices, list):
+                raise ValueError(f"Choices must be a list, got {type(choices)}")
 
-        # Aplicar timing modifiers para sub-arquetipos basado en tiempos promedio
-        if timings:
-            avg_timing = sum(timings) / len(timings)
-            # Aplicar modificadores de sub-arquetipos según timing promedio
-            if avg_timing < 10.0:
-                sub_archetype_scores.passionate_emotional += 0.3
-            elif avg_timing > 30.0:
-                sub_archetype_scores.skeptical_thinker += 0.4
+            if not isinstance(timings, list):
+                raise ValueError(f"Timings must be a list, got {type(timings)}")
 
-        # Calcular arquetipo primario
-        primary_archetype = await self._calculate_primary_archetype(archetype_scores)
+            # Inicializar estructuras de puntuación
+            archetype_scores = ArchetypeScores()
+            sub_archetype_scores = SubArchetypeScores()
 
-        # Determinar sub-arquetipo
-        sub_archetype = await self._determine_sub_archetype(primary_archetype, sub_archetype_scores)
+            # Procesar cada elección y su timing correspondiente
+            for i, choice in enumerate(choices):
+                try:
+                    # Aplicar pesos de la elección
+                    await self._process_choice_weights(choice, archetype_scores, sub_archetype_scores)
+                    logger.debug(f"Processed choice {i} for user {user_id}")
+                except Exception as e:
+                    logger.warning(f"Error processing choice {i} for user {user_id}: {e}")
+                    # Continue with next choice instead of failing completely
+                    continue
 
-        # Calcular confianza
-        confidence_score = await self._calculate_confidence(archetype_scores, choices, primary_archetype)
+                # Aplicar modificadores de timing si disponible
+                if i < len(timings):
+                    try:
+                        await self._apply_timing_modifiers(timings[i], archetype_scores)
+                    except Exception as e:
+                        logger.warning(f"Error applying timing modifiers for choice {i}, user {user_id}: {e}")
+                        # Continue without timing modifiers for this choice
 
-        # Integrar análisis temporal del ResponseTimeAnalyzer
-        timing_analysis = await self.response_time_analyzer.analyze_cognitive_style(user_id, timings)
+            # Aplicar timing modifiers para sub-arquetipos basado en tiempos promedio
+            if timings:
+                try:
+                    avg_timing = sum(timings) / len(timings)
+                    # Aplicar modificadores de sub-arquetipos según timing promedio
+                    if avg_timing < 10.0:
+                        sub_archetype_scores.passionate_emotional += 0.3
+                    elif avg_timing > 30.0:
+                        sub_archetype_scores.skeptical_thinker += 0.4
+                except (ZeroDivisionError, TypeError) as e:
+                    logger.warning(f"Error calculating average timing for user {user_id}: {e}")
 
-        # Preparar indicadores comportamentales
-        behavioral_indicators = []
-        if confidence_score >= 0.8:
-            behavioral_indicators.append("high_confidence_classification")
-        if confidence_score >= 0.7:
-            behavioral_indicators.append("valid_archetype_pattern")
-        if len(choices) >= 3:
-            behavioral_indicators.append("sufficient_data_points")
-        if timings and max(timings) > 30.0:
-            behavioral_indicators.append("reflective_thinking_pattern")
-        if timings and min(timings) < 10.0:
-            behavioral_indicators.append("intuitive_response_pattern")
+            # Calcular arquetipo primario
+            try:
+                primary_archetype = await self._calculate_primary_archetype(archetype_scores)
+            except Exception as e:
+                logger.error(f"Error calculating primary archetype for user {user_id}: {e}")
+                primary_archetype = 'intellectual'  # Safe fallback
 
-        # Retornar análisis completo
-        return {
-            'primary_scores': archetype_scores,
-            'sub_scores': sub_archetype_scores,
-            'timing_analysis': timing_analysis,
-            'dominant_archetype': primary_archetype,
-            'sub_archetype': sub_archetype,
-            'confidence_score': confidence_score,
-            'behavioral_indicators': behavioral_indicators,
-            'analysis_metadata': {
-                'total_choices': len(choices),
-                'total_timings': len(timings),
-                'avg_response_time': sum(timings) / len(timings) if timings else 0.0,
-                'classification_timestamp': None  # Se establecerá al almacenar
+            # Determinar sub-arquetipo
+            try:
+                sub_archetype = await self._determine_sub_archetype(primary_archetype, sub_archetype_scores)
+            except Exception as e:
+                logger.warning(f"Error determining sub-archetype for user {user_id}: {e}")
+                sub_archetype = 'undefined'  # Safe fallback
+
+            # Calcular confianza
+            try:
+                confidence_score = await self._calculate_confidence(archetype_scores, choices, primary_archetype)
+            except Exception as e:
+                logger.warning(f"Error calculating confidence for user {user_id}: {e}")
+                confidence_score = 0.3  # Low confidence fallback
+
+            # Integrar análisis temporal del ResponseTimeAnalyzer
+            timing_analysis = {}
+            if self.response_time_analyzer:
+                try:
+                    timing_analysis = await self.response_time_analyzer.analyze_cognitive_style(user_id, timings)
+                except Exception as e:
+                    logger.warning(f"Error in timing analysis for user {user_id}: {e}")
+                    # Provide fallback timing analysis
+                    timing_analysis = {
+                        'cognitive_style': 'balanced',
+                        'consistency_score': 0.5,
+                        'temporal_pattern': 'stable'
+                    }
+            else:
+                logger.warning(f"ResponseTimeAnalyzer not available for user {user_id}, using fallback")
+                timing_analysis = {
+                    'cognitive_style': 'balanced',
+                    'consistency_score': 0.5,
+                    'temporal_pattern': 'stable'
+                }
+
+            # Preparar indicadores comportamentales
+            behavioral_indicators = []
+            try:
+                if confidence_score >= 0.8:
+                    behavioral_indicators.append("high_confidence_classification")
+                if confidence_score >= 0.7:
+                    behavioral_indicators.append("valid_archetype_pattern")
+                if len(choices) >= 3:
+                    behavioral_indicators.append("sufficient_data_points")
+                if timings:
+                    if max(timings) > 30.0:
+                        behavioral_indicators.append("reflective_thinking_pattern")
+                    if min(timings) < 10.0:
+                        behavioral_indicators.append("intuitive_response_pattern")
+            except Exception as e:
+                logger.warning(f"Error preparing behavioral indicators for user {user_id}: {e}")
+
+            # Calculate average response time safely
+            avg_response_time = 0.0
+            try:
+                avg_response_time = sum(timings) / len(timings) if timings else 0.0
+            except (ZeroDivisionError, TypeError) as e:
+                logger.warning(f"Error calculating average response time for user {user_id}: {e}")
+
+            logger.info(f"Successfully completed archetype analysis for user {user_id}: {primary_archetype} (confidence: {confidence_score:.2f})")
+
+            # Retornar análisis completo
+            return {
+                'primary_scores': archetype_scores,
+                'sub_scores': sub_archetype_scores,
+                'timing_analysis': timing_analysis,
+                'dominant_archetype': primary_archetype,
+                'sub_archetype': sub_archetype,
+                'confidence_score': confidence_score,
+                'behavioral_indicators': behavioral_indicators,
+                'analysis_metadata': {
+                    'total_choices': len(choices),
+                    'total_timings': len(timings),
+                    'avg_response_time': avg_response_time,
+                    'classification_timestamp': datetime.utcnow()
+                }
             }
-        }
+
+        except Exception as e:
+            logger.error(f"Critical error in archetype analysis for user {user_id}: {e}")
+            # Return safe fallback result
+            return self._get_fallback_analysis_result(user_id, choices, timings)
 
     async def _process_choice_weights(
         self,
@@ -254,25 +337,65 @@ class ArchetypeAnalyzer:
             archetype_scores: Instancia de ArchetypeScores a actualizar
             sub_archetype_scores: Instancia de SubArchetypeScores a actualizar
         """
-        # Procesar pesos de arquetipos primarios
-        archetype_weights = choice.get('archetype_weights', {})
-        for archetype_name, weight in archetype_weights.items():
-            # Verificar que el arquetipo existe en la estructura de datos
-            if hasattr(archetype_scores, archetype_name):
-                # Obtener valor actual y agregar peso
-                current_value = getattr(archetype_scores, archetype_name)
-                new_value = current_value + weight
-                setattr(archetype_scores, archetype_name, new_value)
+        try:
+            # Validate choice structure
+            if not isinstance(choice, dict):
+                logger.warning(f"Invalid choice type: {type(choice)}, expected dict")
+                return
 
-        # Procesar pesos de sub-arquetipos
-        sub_archetype_weights = choice.get('sub_archetype_weights', {})
-        for sub_archetype_name, weight in sub_archetype_weights.items():
-            # Verificar que el sub-arquetipo existe en la estructura de datos
-            if hasattr(sub_archetype_scores, sub_archetype_name):
-                # Obtener valor actual y agregar peso
-                current_value = getattr(sub_archetype_scores, sub_archetype_name)
-                new_value = current_value + weight
-                setattr(sub_archetype_scores, sub_archetype_name, new_value)
+            # Procesar pesos de arquetipos primarios
+            archetype_weights = choice.get('archetype_weights', {})
+            if not isinstance(archetype_weights, dict):
+                logger.warning(f"Invalid archetype_weights type: {type(archetype_weights)}, expected dict")
+                archetype_weights = {}
+
+            for archetype_name, weight in archetype_weights.items():
+                try:
+                    # Validate weight is numeric
+                    if not isinstance(weight, (int, float)):
+                        logger.warning(f"Invalid weight type for {archetype_name}: {type(weight)}, expected numeric")
+                        continue
+
+                    # Verificar que el arquetipo existe en la estructura de datos
+                    if hasattr(archetype_scores, archetype_name):
+                        # Obtener valor actual y agregar peso
+                        current_value = getattr(archetype_scores, archetype_name)
+                        new_value = current_value + weight
+                        setattr(archetype_scores, archetype_name, new_value)
+                    else:
+                        logger.warning(f"Unknown archetype: {archetype_name}")
+                except Exception as e:
+                    logger.warning(f"Error processing archetype weight {archetype_name}: {e}")
+                    continue
+
+            # Procesar pesos de sub-arquetipos
+            sub_archetype_weights = choice.get('sub_archetype_weights', {})
+            if not isinstance(sub_archetype_weights, dict):
+                logger.warning(f"Invalid sub_archetype_weights type: {type(sub_archetype_weights)}, expected dict")
+                sub_archetype_weights = {}
+
+            for sub_archetype_name, weight in sub_archetype_weights.items():
+                try:
+                    # Validate weight is numeric
+                    if not isinstance(weight, (int, float)):
+                        logger.warning(f"Invalid weight type for {sub_archetype_name}: {type(weight)}, expected numeric")
+                        continue
+
+                    # Verificar que el sub-arquetipo existe en la estructura de datos
+                    if hasattr(sub_archetype_scores, sub_archetype_name):
+                        # Obtener valor actual y agregar peso
+                        current_value = getattr(sub_archetype_scores, sub_archetype_name)
+                        new_value = current_value + weight
+                        setattr(sub_archetype_scores, sub_archetype_name, new_value)
+                    else:
+                        logger.warning(f"Unknown sub-archetype: {sub_archetype_name}")
+                except Exception as e:
+                    logger.warning(f"Error processing sub-archetype weight {sub_archetype_name}: {e}")
+                    continue
+
+        except Exception as e:
+            logger.error(f"Critical error in _process_choice_weights: {e}")
+            # Don't re-raise, just log and continue with defaults
 
     async def _apply_timing_modifiers(
         self,
@@ -295,21 +418,39 @@ class ArchetypeAnalyzer:
             timing: Tiempo de respuesta en segundos para la elección
             archetype_scores: Instancia de ArchetypeScores a modificar
         """
-        if timing < 10.0:
-            # Respuesta rápida: procesamiento emocional/intuitivo
-            archetype_scores.direct += 0.5
-            # Note: passionate_emotional es sub-arquetipo, se maneja en análisis posterior
+        try:
+            # Validate timing value
+            if not isinstance(timing, (int, float)):
+                logger.warning(f"Invalid timing type: {type(timing)}, expected numeric")
+                return
 
-        elif 10.0 <= timing <= 30.0:
-            # Respuesta moderada: procesamiento analítico balanceado
-            archetype_scores.philosophical += 0.4
-            archetype_scores.intellectual += 0.3
+            if timing < 0:
+                logger.warning(f"Negative timing value: {timing}, using absolute value")
+                timing = abs(timing)
 
-        else:  # timing > 30.0
-            # Respuesta lenta: procesamiento reflexivo profundo
-            archetype_scores.philosophical += 0.6
-            archetype_scores.patient += 0.5
-            # Note: skeptical_thinker es sub-arquetipo, se maneja en análisis posterior
+            if timing > 300:  # 5 minutes seems unreasonable
+                logger.warning(f"Extremely high timing value: {timing}s, capping at 300s")
+                timing = 300.0
+
+            if timing < 10.0:
+                # Respuesta rápida: procesamiento emocional/intuitivo
+                archetype_scores.direct += 0.5
+                # Note: passionate_emotional es sub-arquetipo, se maneja en análisis posterior
+
+            elif 10.0 <= timing <= 30.0:
+                # Respuesta moderada: procesamiento analítico balanceado
+                archetype_scores.philosophical += 0.4
+                archetype_scores.intellectual += 0.3
+
+            else:  # timing > 30.0
+                # Respuesta lenta: procesamiento reflexivo profundo
+                archetype_scores.philosophical += 0.6
+                archetype_scores.patient += 0.5
+                # Note: skeptical_thinker es sub-arquetipo, se maneja en análisis posterior
+
+        except Exception as e:
+            logger.error(f"Error applying timing modifiers for timing {timing}: {e}")
+            # Don't re-raise, just log and continue without timing modifiers
 
     async def _calculate_primary_archetype(
         self,
@@ -352,7 +493,7 @@ class ArchetypeAnalyzer:
                 return archetype
 
         # Fallback en caso de todas las puntuaciones siendo 0
-        return 'intellectual'  # Default alfabéticamente primero
+        return 'intellectual'  # Default por especificación
 
     async def _determine_sub_archetype(
         self,
@@ -480,11 +621,53 @@ class ArchetypeAnalyzer:
 
         return total_confidence
 
+    def _get_fallback_analysis_result(
+        self,
+        user_id: int,
+        choices: List[Dict[str, Any]],
+        timings: List[float]
+    ) -> Dict[str, Any]:
+        """
+        Provide a safe fallback result when analysis fails.
+
+        Returns a minimal but valid analysis result to ensure the system
+        continues functioning even when errors occur.
+        """
+        logger.warning(f"Using fallback analysis result for user {user_id}")
+
+        # Safe calculation of metadata
+        avg_response_time = 0.0
+        try:
+            avg_response_time = sum(timings) / len(timings) if timings else 0.0
+        except:
+            pass
+
+        return {
+            'primary_scores': ArchetypeScores(),
+            'sub_scores': SubArchetypeScores(),
+            'timing_analysis': {
+                'cognitive_style': 'balanced',
+                'consistency_score': 0.5,
+                'temporal_pattern': 'stable'
+            },
+            'dominant_archetype': 'intellectual',  # Safe default
+            'sub_archetype': 'undefined',
+            'confidence_score': 0.1,  # Very low confidence
+            'behavioral_indicators': ['fallback_analysis', 'error_occurred'],
+            'analysis_metadata': {
+                'total_choices': len(choices) if isinstance(choices, list) else 0,
+                'total_timings': len(timings) if isinstance(timings, list) else 0,
+                'avg_response_time': avg_response_time,
+                'classification_timestamp': datetime.utcnow(),
+                'error_fallback': True
+            }
+        }
+
     async def store_classification_results(
         self,
         user_id: int,
         analysis_results: Dict[str, Any]
-    ) -> ArchetypeClassification:
+    ) -> Optional[ArchetypeClassification]:
         """
         Almacena los resultados de clasificación de arquetipo en la base de datos.
 
@@ -502,106 +685,145 @@ class ArchetypeAnalyzer:
         Raises:
             SQLAlchemy exceptions si hay errores de base de datos
         """
-        # Extraer datos del análisis
-        primary_scores = analysis_results.get('primary_scores')
-        sub_scores = analysis_results.get('sub_scores')
-        timing_analysis = analysis_results.get('timing_analysis', {})
-        confidence_score = analysis_results.get('confidence_score', 0.0)
-        dominant_archetype = analysis_results.get('dominant_archetype')
-        sub_archetype = analysis_results.get('sub_archetype')
-        behavioral_indicators = analysis_results.get('behavioral_indicators', [])
+        try:
+            logger.info(f"Storing classification results for user {user_id}")
 
-        # Buscar clasificación existente
-        stmt = select(ArchetypeClassification).where(ArchetypeClassification.user_id == user_id)
-        result = await self.session.execute(stmt)
-        classification = result.scalar_one_or_none()
+            # Validate input parameters
+            if not isinstance(user_id, int) or user_id <= 0:
+                raise ValueError(f"Invalid user_id: {user_id}")
 
-        if classification:
-            # Actualizar clasificación existente
-            classification.primary_archetype = dominant_archetype
-            classification.archetype_confidence = confidence_score
+            if not isinstance(analysis_results, dict):
+                raise ValueError(f"Analysis results must be a dict, got {type(analysis_results)}")
 
-            # Actualizar puntuaciones primarias
-            classification.intellectual_score = primary_scores.intellectual
-            classification.emotional_score = primary_scores.emotional
-            classification.exploratory_score = primary_scores.exploratory
-            classification.vulnerable_score = primary_scores.vulnerable
-            classification.philosophical_score = primary_scores.philosophical
-            classification.direct_score = primary_scores.direct
-            classification.patient_score = primary_scores.patient
-            classification.reciprocal_score = primary_scores.reciprocal
+            # Extraer datos del análisis con validación
+            primary_scores = analysis_results.get('primary_scores')
+            if not primary_scores:
+                logger.error(f"Missing primary_scores in analysis results for user {user_id}")
+                return None
 
-            # Actualizar puntuaciones de sub-arquetipos
-            classification.romantic_intellectual_score = sub_scores.romantic_intellectual
-            classification.skeptical_thinker_score = sub_scores.skeptical_thinker
-            classification.hedonist_philosopher_score = sub_scores.hedonist_philosopher
-            classification.pure_theorist_score = sub_scores.pure_theorist
-            classification.empathetic_emotional_score = sub_scores.empathetic_emotional
-            classification.passionate_emotional_score = sub_scores.passionate_emotional
-            classification.wounded_healer_score = sub_scores.wounded_healer
-            classification.adventure_seeker_score = sub_scores.adventure_seeker
-            classification.collector_explorer_score = sub_scores.collector_explorer
-            classification.freedom_lover_score = sub_scores.freedom_lover
+            sub_scores = analysis_results.get('sub_scores')
+            if not sub_scores:
+                logger.error(f"Missing sub_scores in analysis results for user {user_id}")
+                return None
 
-            # Actualizar datos de estilo cognitivo
-            classification.cognitive_style = timing_analysis.get('cognitive_style', 'balanced')
-            classification.response_consistency = timing_analysis.get('consistency_score', 0.5)
-            classification.temporal_pattern = timing_analysis.get('temporal_pattern', 'stable')
+            timing_analysis = analysis_results.get('timing_analysis', {})
+            confidence_score = analysis_results.get('confidence_score', 0.0)
+            dominant_archetype = analysis_results.get('dominant_archetype')
+            sub_archetype = analysis_results.get('sub_archetype', 'undefined')
+            behavioral_indicators = analysis_results.get('behavioral_indicators', [])
 
-            # Actualizar metadatos
-            classification.secondary_traits = json.dumps([sub_archetype] if sub_archetype != 'undefined' else [])
-            classification.trait_strengths = json.dumps(behavioral_indicators)
-            classification.updated_at = datetime.utcnow()
+            # Validate extracted data
+            if not isinstance(confidence_score, (int, float)):
+                logger.warning(f"Invalid confidence_score type for user {user_id}: {type(confidence_score)}")
+                confidence_score = 0.0
 
-        else:
-            # Crear nueva clasificación
-            classification = ArchetypeClassification(
-                user_id=user_id,
-                primary_archetype=dominant_archetype,
-                archetype_confidence=confidence_score,
+            if not dominant_archetype:
+                logger.warning(f"Missing dominant_archetype for user {user_id}, using fallback")
+                dominant_archetype = 'intellectual'
 
-                # Puntuaciones primarias
-                intellectual_score=primary_scores.intellectual,
-                emotional_score=primary_scores.emotional,
-                exploratory_score=primary_scores.exploratory,
-                vulnerable_score=primary_scores.vulnerable,
-                philosophical_score=primary_scores.philosophical,
-                direct_score=primary_scores.direct,
-                patient_score=primary_scores.patient,
-                reciprocal_score=primary_scores.reciprocal,
+            # Buscar clasificación existente
+            stmt = select(ArchetypeClassification).where(ArchetypeClassification.user_id == user_id)
+            result = await self.session.execute(stmt)
+            classification = result.scalar_one_or_none()
 
-                # Puntuaciones de sub-arquetipos
-                romantic_intellectual_score=sub_scores.romantic_intellectual,
-                skeptical_thinker_score=sub_scores.skeptical_thinker,
-                hedonist_philosopher_score=sub_scores.hedonist_philosopher,
-                pure_theorist_score=sub_scores.pure_theorist,
-                empathetic_emotional_score=sub_scores.empathetic_emotional,
-                passionate_emotional_score=sub_scores.passionate_emotional,
-                wounded_healer_score=sub_scores.wounded_healer,
-                adventure_seeker_score=sub_scores.adventure_seeker,
-                collector_explorer_score=sub_scores.collector_explorer,
-                freedom_lover_score=sub_scores.freedom_lover,
+            if classification:
+                # Actualizar clasificación existente
+                classification.primary_archetype = dominant_archetype
+                classification.archetype_confidence = confidence_score
 
-                # Datos de estilo cognitivo
-                cognitive_style=timing_analysis.get('cognitive_style', 'balanced'),
-                response_consistency=timing_analysis.get('consistency_score', 0.5),
-                temporal_pattern=timing_analysis.get('temporal_pattern', 'stable'),
+                # Actualizar puntuaciones primarias
+                classification.intellectual_score = primary_scores.intellectual
+                classification.emotional_score = primary_scores.emotional
+                classification.exploratory_score = primary_scores.exploratory
+                classification.vulnerable_score = primary_scores.vulnerable
+                classification.philosophical_score = primary_scores.philosophical
+                classification.direct_score = primary_scores.direct
+                classification.patient_score = primary_scores.patient
+                classification.reciprocal_score = primary_scores.reciprocal
 
-                # Metadatos
-                secondary_traits=json.dumps([sub_archetype] if sub_archetype != 'undefined' else []),
-                trait_strengths=json.dumps(behavioral_indicators),
-                archetype_stability=confidence_score,  # Usar confianza como estabilidad inicial
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow()
-            )
+                # Actualizar puntuaciones de sub-arquetipos
+                classification.romantic_intellectual_score = sub_scores.romantic_intellectual
+                classification.skeptical_thinker_score = sub_scores.skeptical_thinker
+                classification.hedonist_philosopher_score = sub_scores.hedonist_philosopher
+                classification.pure_theorist_score = sub_scores.pure_theorist
+                classification.empathetic_emotional_score = sub_scores.empathetic_emotional
+                classification.passionate_emotional_score = sub_scores.passionate_emotional
+                classification.wounded_healer_score = sub_scores.wounded_healer
+                classification.adventure_seeker_score = sub_scores.adventure_seeker
+                classification.collector_explorer_score = sub_scores.collector_explorer
+                classification.freedom_lover_score = sub_scores.freedom_lover
 
-            self.session.add(classification)
+                # Actualizar datos de estilo cognitivo
+                classification.cognitive_style = timing_analysis.get('cognitive_style', 'balanced')
+                classification.response_consistency = timing_analysis.get('consistency_score', 0.5)
+                classification.temporal_pattern = timing_analysis.get('temporal_pattern', 'stable')
 
-        # Confirmar cambios
-        await self.session.commit()
-        await self.session.refresh(classification)
+                # Actualizar metadatos
+                classification.secondary_traits = json.dumps([sub_archetype] if sub_archetype != 'undefined' else [])
+                classification.trait_strengths = json.dumps(behavioral_indicators)
+                classification.updated_at = datetime.utcnow()
 
-        return classification
+            else:
+                # Crear nueva clasificación
+                classification = ArchetypeClassification(
+                    user_id=user_id,
+                    primary_archetype=dominant_archetype,
+                    archetype_confidence=confidence_score,
+
+                    # Puntuaciones primarias
+                    intellectual_score=primary_scores.intellectual,
+                    emotional_score=primary_scores.emotional,
+                    exploratory_score=primary_scores.exploratory,
+                    vulnerable_score=primary_scores.vulnerable,
+                    philosophical_score=primary_scores.philosophical,
+                    direct_score=primary_scores.direct,
+                    patient_score=primary_scores.patient,
+                    reciprocal_score=primary_scores.reciprocal,
+
+                    # Puntuaciones de sub-arquetipos
+                    romantic_intellectual_score=sub_scores.romantic_intellectual,
+                    skeptical_thinker_score=sub_scores.skeptical_thinker,
+                    hedonist_philosopher_score=sub_scores.hedonist_philosopher,
+                    pure_theorist_score=sub_scores.pure_theorist,
+                    empathetic_emotional_score=sub_scores.empathetic_emotional,
+                    passionate_emotional_score=sub_scores.passionate_emotional,
+                    wounded_healer_score=sub_scores.wounded_healer,
+                    adventure_seeker_score=sub_scores.adventure_seeker,
+                    collector_explorer_score=sub_scores.collector_explorer,
+                    freedom_lover_score=sub_scores.freedom_lover,
+
+                    # Datos de estilo cognitivo
+                    cognitive_style=timing_analysis.get('cognitive_style', 'balanced'),
+                    response_consistency=timing_analysis.get('consistency_score', 0.5),
+                    temporal_pattern=timing_analysis.get('temporal_pattern', 'stable'),
+
+                    # Metadatos
+                    secondary_traits=json.dumps([sub_archetype] if sub_archetype != 'undefined' else []),
+                    trait_strengths=json.dumps(behavioral_indicators),
+                    archetype_stability=confidence_score,  # Usar confianza como estabilidad inicial
+                    created_at=datetime.utcnow(),
+                    updated_at=datetime.utcnow()
+                )
+
+                self.session.add(classification)
+
+            # Confirmar cambios
+            await self.session.commit()
+            await self.session.refresh(classification)
+
+            logger.info(f"Successfully stored classification for user {user_id}: {dominant_archetype}")
+            return classification
+
+        except Exception as e:
+            logger.error(f"Error storing classification results for user {user_id}: {e}")
+            try:
+                await self.session.rollback()
+                logger.info(f"Database transaction rolled back for user {user_id}")
+            except Exception as rollback_error:
+                logger.error(f"Error during rollback for user {user_id}: {rollback_error}")
+
+            # Return None to indicate failure, allowing calling code to handle gracefully
+            return None
 
     async def get_user_classification(self, user_id: int) -> Optional[Dict[str, Any]]:
         """
@@ -633,12 +855,20 @@ class ArchetypeAnalyzer:
             SQLAlchemy exceptions si hay errores de base de datos
         """
         try:
+            logger.debug(f"Retrieving classification for user {user_id}")
+
+            # Validate user_id
+            if not isinstance(user_id, int) or user_id <= 0:
+                logger.warning(f"Invalid user_id provided: {user_id}")
+                return None
+
             # Buscar clasificación existente
             stmt = select(ArchetypeClassification).where(ArchetypeClassification.user_id == user_id)
             result = await self.session.execute(stmt)
             classification = result.scalar_one_or_none()
 
             if not classification:
+                logger.debug(f"No classification found for user {user_id}")
                 return None
 
             # Construir puntuaciones primarias
@@ -700,7 +930,7 @@ class ArchetypeAnalyzer:
             }
 
         except Exception as e:
+            logger.error(f"Error retrieving classification for user {user_id}: {e}")
             # Log error gracefully and return None instead of raising
             # This allows the system to continue with fallback behavior
-            # In production, this would log to a proper logging system
             return None

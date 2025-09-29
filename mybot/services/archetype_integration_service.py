@@ -524,3 +524,353 @@ class ArchetypeIntegrationService:
         except Exception as e:
             logger.error(f"Error obteniendo confianza de arquetipo para usuario {user_id}: {e}")
             return None
+
+    async def ensure_fallback_compatibility(self, user_id: int) -> Dict[str, Any]:
+        """
+        Ensures seamless fallback compatibility with the existing 5-archetype system.
+
+        This method provides comprehensive fallback integration when the expanded
+        archetype analysis fails or doesn't meet confidence thresholds. It maps
+        expanded archetyp classifications to legacy 5-archetype categories and
+        provides appropriate behavioral recommendations.
+
+        Args:
+            user_id: ID único del usuario
+
+        Returns:
+            Dictionary with fallback integration results:
+            - fallback_archetype: 5-archetype system classification
+            - integration_mode: 'expanded', 'fallback', or 'error'
+            - recommendations: Behavioral and narrative recommendations
+            - error_recovery: Error recovery actions if applicable
+        """
+        try:
+            logger.info(f"Ensuring fallback compatibility for user {user_id}")
+
+            # Try to get expanded archetype classification
+            expanded_classification = await self.archetype_analyzer.get_user_classification(user_id)
+
+            if expanded_classification:
+                confidence = expanded_classification.get('archetype_confidence', 0.0)
+                primary_archetype = expanded_classification.get('primary_archetype')
+
+                # High confidence - can use expanded system
+                if confidence >= self.confidence_thresholds['ramificado_activation']:
+                    logger.info(f"User {user_id} using expanded system (confidence: {confidence:.2f})")
+                    return {
+                        'integration_mode': 'expanded',
+                        'primary_archetype': primary_archetype,
+                        'confidence_score': confidence,
+                        'fallback_archetype': await self.get_fallback_archetype(user_id),
+                        'recommendations': [
+                            'use_ramificado_system',
+                            'enable_personalized_narratives',
+                            'track_detailed_engagement'
+                        ],
+                        'error_recovery': None
+                    }
+
+                # Medium confidence - use enhanced standard system
+                elif confidence >= self.confidence_thresholds['valid_classification']:
+                    fallback_archetype = await self.get_fallback_archetype(user_id)
+                    logger.info(f"User {user_id} using enhanced fallback: {primary_archetype} -> {fallback_archetype}")
+
+                    return {
+                        'integration_mode': 'enhanced_fallback',
+                        'primary_archetype': primary_archetype,
+                        'confidence_score': confidence,
+                        'fallback_archetype': fallback_archetype,
+                        'recommendations': [
+                            'use_5_archetype_system',
+                            'apply_basic_personalization',
+                            'consider_reclassification'
+                        ],
+                        'error_recovery': None
+                    }
+
+            # No valid classification - use default fallback
+            fallback_archetype = await self.get_fallback_archetype(user_id)
+            logger.warning(f"User {user_id} using basic fallback: {fallback_archetype}")
+
+            return {
+                'integration_mode': 'basic_fallback',
+                'primary_archetype': None,
+                'confidence_score': 0.0,
+                'fallback_archetype': fallback_archetype,
+                'recommendations': [
+                    'use_default_experience',
+                    'collect_more_data',
+                    'schedule_l1f1_assessment'
+                ],
+                'error_recovery': 'perform_basic_assessment'
+            }
+
+        except Exception as e:
+            logger.error(f"Critical error in fallback compatibility for user {user_id}: {e}")
+
+            # Emergency fallback
+            return {
+                'integration_mode': 'error_fallback',
+                'primary_archetype': None,
+                'confidence_score': 0.0,
+                'fallback_archetype': 'explorer',  # Safe default
+                'recommendations': [
+                    'use_safe_default_experience',
+                    'log_error_for_analysis',
+                    'retry_later'
+                ],
+                'error_recovery': 'restart_classification_process',
+                'error_details': str(e)
+            }
+
+    async def handle_analysis_failure(self, user_id: int, error_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Handles graceful fallback when archetype analysis fails.
+
+        Provides intelligent error recovery and fallback behavior to ensure
+        users continue to have a good experience even when the expanded
+        archetype system encounters errors or data issues.
+
+        Args:
+            user_id: ID único del usuario
+            error_context: Context information about the failure
+
+        Returns:
+            Dictionary with fallback behavior and recovery plan
+        """
+        try:
+            logger.warning(f"Handling analysis failure for user {user_id}: {error_context}")
+
+            # Determine error type and appropriate fallback
+            error_type = error_context.get('error_type', 'unknown')
+            severity = error_context.get('severity', 'medium')
+
+            # Try to recover from partial data
+            partial_recovery = await self._attempt_partial_recovery(user_id, error_context)
+
+            if partial_recovery['success']:
+                logger.info(f"Partial recovery successful for user {user_id}")
+                return {
+                    'fallback_strategy': 'partial_recovery',
+                    'archetype_classification': partial_recovery['classification'],
+                    'user_experience': 'enhanced_standard',
+                    'recovery_actions': partial_recovery['actions'],
+                    'monitor_flags': ['recovered_from_failure']
+                }
+
+            # Full fallback to 5-archetype system
+            fallback_archetype = await self.get_fallback_archetype(user_id)
+
+            # Determine user experience based on error severity
+            if severity == 'high':
+                user_experience = 'safe_minimal'
+                experience_features = ['basic_content', 'no_personalization']
+            elif severity == 'medium':
+                user_experience = 'standard_fallback'
+                experience_features = ['5_archetype_personalization', 'basic_tracking']
+            else:  # low severity
+                user_experience = 'enhanced_fallback'
+                experience_features = ['improved_5_archetype_experience', 'partial_tracking']
+
+            recovery_plan = await self._create_recovery_plan(user_id, error_type, severity)
+
+            return {
+                'fallback_strategy': 'full_system_fallback',
+                'archetype_classification': {
+                    'type': '5_archetype_fallback',
+                    'archetype': fallback_archetype,
+                    'confidence': 0.5,  # Default moderate confidence
+                    'source': 'fallback_mapping'
+                },
+                'user_experience': user_experience,
+                'experience_features': experience_features,
+                'recovery_plan': recovery_plan,
+                'monitor_flags': ['analysis_failure', f'severity_{severity}', f'error_{error_type}']
+            }
+
+        except Exception as e:
+            logger.error(f"Critical error in failure handling for user {user_id}: {e}")
+
+            # Emergency safe mode
+            return {
+                'fallback_strategy': 'emergency_safe_mode',
+                'archetype_classification': {
+                    'type': 'emergency_default',
+                    'archetype': 'explorer',
+                    'confidence': 0.1,
+                    'source': 'emergency_fallback'
+                },
+                'user_experience': 'minimal_safe',
+                'experience_features': ['basic_content_only'],
+                'recovery_plan': {'immediate': 'log_critical_error', 'later': 'full_system_check'},
+                'monitor_flags': ['critical_failure', 'emergency_mode']
+            }
+
+    async def _attempt_partial_recovery(self, user_id: int, error_context: Dict[str, Any]) -> Dict[str, Any]:
+        """
+        Attempts to recover usable archetype data from partial or corrupted analysis.
+
+        Args:
+            user_id: ID único del usuario
+            error_context: Context about the analysis failure
+
+        Returns:
+            Dictionary with recovery attempt results
+        """
+        try:
+            # Try to get any existing classification data
+            existing_data = await self.archetype_analyzer.get_user_classification(user_id)
+
+            if existing_data:
+                # Check if we can salvage primary archetype
+                primary_archetype = existing_data.get('primary_archetype')
+                confidence = existing_data.get('archetype_confidence', 0.0)
+
+                if primary_archetype and confidence > 0.3:  # Minimum usable confidence
+                    logger.info(f"Recovered partial data for user {user_id}: {primary_archetype} ({confidence:.2f})")
+
+                    return {
+                        'success': True,
+                        'classification': {
+                            'type': 'recovered_partial',
+                            'primary_archetype': primary_archetype,
+                            'confidence': max(confidence, 0.5),  # Boost confidence slightly
+                            'fallback_archetype': await self.get_fallback_archetype(user_id)
+                        },
+                        'actions': ['use_partial_data', 'schedule_full_reanalysis']
+                    }
+
+            # Try to infer from emotional analysis system
+            emotional_profile = await self.emotional_service.get_user_emotional_profile(user_id)
+
+            if emotional_profile:
+                inferred_archetype = await self._infer_archetype_from_emotional_data(emotional_profile)
+                logger.info(f"Inferred archetype from emotional data for user {user_id}: {inferred_archetype}")
+
+                return {
+                    'success': True,
+                    'classification': {
+                        'type': 'emotional_inference',
+                        'primary_archetype': inferred_archetype,
+                        'confidence': 0.4,  # Low but usable
+                        'fallback_archetype': await self.get_fallback_archetype(user_id)
+                    },
+                    'actions': ['use_emotional_inference', 'schedule_archetype_assessment']
+                }
+
+            return {'success': False, 'reason': 'no_recoverable_data'}
+
+        except Exception as e:
+            logger.error(f"Error in partial recovery for user {user_id}: {e}")
+            return {'success': False, 'reason': 'recovery_error', 'error': str(e)}
+
+    async def _infer_archetype_from_emotional_data(self, emotional_profile: Dict[str, Any]) -> str:
+        """
+        Infers a likely archetype from emotional analysis data.
+
+        Args:
+            emotional_profile: Emotional analysis data
+
+        Returns:
+            Inferred primary archetype name
+        """
+        try:
+            vulnerability_level = emotional_profile.get('vulnerability_level', 0.0)
+            engagement_pattern = emotional_profile.get('engagement_pattern', 'neutral')
+            emotional_intensity = emotional_profile.get('emotional_intensity', 0.0)
+
+            # Simple inference rules based on emotional patterns
+            if engagement_pattern == 'vulnerable' or vulnerability_level > 0.7:
+                return 'vulnerable'
+            elif engagement_pattern == 'engaged' and emotional_intensity > 0.7:
+                return 'emotional'
+            elif engagement_pattern == 'erratic':
+                return 'exploratory'
+            elif emotional_intensity < 0.3:
+                return 'intellectual'
+            else:
+                return 'direct'  # Default for unclear patterns
+
+        except Exception as e:
+            logger.warning(f"Error inferring archetype from emotional data: {e}")
+            return 'intellectual'  # Safe default
+
+    async def _create_recovery_plan(self, user_id: int, error_type: str, severity: str) -> Dict[str, Any]:
+        """
+        Creates a recovery plan for failed archetype analysis.
+
+        Args:
+            user_id: ID único del usuario
+            error_type: Type of error encountered
+            severity: Severity level of the error
+
+        Returns:
+            Dictionary with recovery actions and timeline
+        """
+        try:
+            recovery_plan = {
+                'immediate_actions': [],
+                'short_term_actions': [],
+                'long_term_actions': [],
+                'monitoring_requirements': []
+            }
+
+            # Immediate actions based on error type
+            if error_type == 'data_corruption':
+                recovery_plan['immediate_actions'].extend([
+                    'clear_corrupted_data',
+                    'use_backup_classification',
+                    'flag_for_data_recovery'
+                ])
+            elif error_type == 'timing_analysis_failure':
+                recovery_plan['immediate_actions'].extend([
+                    'use_choice_weights_only',
+                    'disable_timing_modifiers',
+                    'mark_timing_system_error'
+                ])
+            elif error_type == 'database_error':
+                recovery_plan['immediate_actions'].extend([
+                    'use_cached_classification',
+                    'log_database_issue',
+                    'attempt_retry_with_delay'
+                ])
+
+            # Short-term actions (within 24 hours)
+            if severity in ['medium', 'high']:
+                recovery_plan['short_term_actions'].extend([
+                    'schedule_manual_assessment',
+                    'notify_admin_team',
+                    'prepare_detailed_error_report'
+                ])
+
+            recovery_plan['short_term_actions'].extend([
+                'retry_full_analysis',
+                'validate_system_components',
+                'update_user_experience_flags'
+            ])
+
+            # Long-term actions (within 7 days)
+            recovery_plan['long_term_actions'].extend([
+                'perform_comprehensive_reanalysis',
+                'update_fallback_mappings',
+                'review_error_patterns'
+            ])
+
+            # Monitoring requirements
+            recovery_plan['monitoring_requirements'].extend([
+                'track_fallback_effectiveness',
+                'monitor_user_engagement',
+                'log_recovery_success_rate'
+            ])
+
+            return recovery_plan
+
+        except Exception as e:
+            logger.error(f"Error creating recovery plan for user {user_id}: {e}")
+            return {
+                'immediate_actions': ['use_safe_defaults'],
+                'short_term_actions': ['retry_analysis'],
+                'long_term_actions': ['full_system_review'],
+                'monitoring_requirements': ['basic_error_tracking'],
+                'error': str(e)
+            }

@@ -12,14 +12,15 @@ def get_admin_main_kb():
     # Fila 2: Entretenimiento y juegos
     builder.button(text="🎮 Juego Kinky", callback_data="admin_kinky_game")
     builder.button(text="📊 Estadísticas", callback_data="admin_stats")
-    
-    # Fila 3: Configuración y navegación
+
+    # Fila 3: Sistema de arquetipos
+    builder.button(text="🎭 Arquetipos", callback_data="archetype_admin")
     builder.button(text="⚙️ Configuración", callback_data="admin_config")
-    builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
-    
+
     # Fila 4: Navegación
+    builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
     builder.button(text="↩️ Volver", callback_data="admin_back")
-    
-    # Distribución: 2x2, luego 2x1, luego 1
-    builder.adjust(2, 2, 2, 1)
+
+    # Distribución: 2x2x2x2
+    builder.adjust(2, 2, 2, 2)
     return builder.as_markup()
