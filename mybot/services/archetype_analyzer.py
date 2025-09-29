@@ -487,13 +487,17 @@ class ArchetypeAnalyzer:
         # Encontrar la puntuación máxima
         max_score = max(score_dict.values())
 
+        # Fallback en caso de todas las puntuaciones siendo 0
+        if max_score == 0.0:
+            return 'intellectual'  # Default por especificación
+
         # En caso de empate, seleccionar alfabéticamente el primero
         for archetype in sorted(score_dict.keys()):
             if score_dict[archetype] == max_score:
                 return archetype
 
-        # Fallback en caso de todas las puntuaciones siendo 0
-        return 'intellectual'  # Default por especificación
+        # Fallback adicional (no debería llegarse aquí)
+        return 'intellectual'
 
     async def _determine_sub_archetype(
         self,
