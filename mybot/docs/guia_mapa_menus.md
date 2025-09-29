@@ -29,11 +29,19 @@ Este documento resume los archivos clave que generan los menús de administraci�
 ## 4. Submenú "Gestión de Gamificación"
 
 - **Descripción**: Panel para administrar las funciones de gamificación (misiones, insignias, etc.). Accedido a través del botón "Juego Kinky" en el menú principal de admin.
-- **Archivos de Teclado Recientes**: 
+- **Archivos de Teclado**: 
   - `keyboards/admin_manage_content_kb.py`
   - `keyboards/admin_content_missions_kb.py`
   - `keyboards/admin_content_badges_kb.py`
   - `keyboards/admin_content_levels_kb.py`
 - **Funciones Clave**: `get_admin_manage_content_keyboard()`, etc.
 - **Activación**: Se dispara desde `handlers/admin/game_admin.py` y `handlers/admin/admin_menu.py`.
-- **Patrón**: `Handler -> Builder` (Inconsistente). Este es uno de los sistemas de menús que necesita ser refactorizado para usar `MenuFactory` y centralizar la lógica, como se detalla en `docs/refactoring_report.md`.
+- **Patrón**: `Handler -> Builder` (Inconsistente). Este sistema está pendiente de refactorización.
+
+## 5. Submenú "Juego Kinky"
+
+- **Descripción**: Acceso directo al panel completo de gamificación desde el menú principal.
+- **Archivo del Teclado**: `keyboards/admin_manage_content_kb.py`
+- **Función Clave**: `get_admin_manage_content_keyboard()`
+- **Activación**: Callback `admin_kinky_game` definido en `handlers/admin/admin_menu.py` (`handle_kinky_game_button_from_main`).
+- **Patrón**: `Handler -> Builder` (Consistente con el anterior).
