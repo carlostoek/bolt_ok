@@ -88,8 +88,9 @@ No hay productos en la tienda.
             vip = "👑" if item.is_vip_only else "🆓"
             unlock = "🔓" if item.unlocks_lore_piece_id else "📦"
             temporal = "⏰" if (item.available_from or item.available_until) else ""
+            locked = "🔐" if item.unlock_requirements else ""
             lines.append(
-                f"{status} {vip} {unlock} {temporal} **{item.name}**\n"
+                f"{status} {vip} {unlock} {temporal} {locked} **{item.name}**\n"
                 f"   💰 {item.price} besitos"
             )
         text = "\n".join(lines)
