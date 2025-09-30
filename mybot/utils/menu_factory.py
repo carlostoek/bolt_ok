@@ -41,35 +41,39 @@ class MenuFactory:
     """
     Factory class for creating menus based on user state and role.
     Centralizes menu logic and ensures consistency.
+    All admin menus are designed to use message editing for clean navigation.
     """
-    
+
     async def create_menu(
-        self, 
-        menu_state: str, 
-        user_id: int, 
+        self,
+        menu_state: str,
+        user_id: int,
         session: AsyncSession,
         bot=None # Asegúrate de que el objeto bot siempre se pase desde los handlers
     ) -> Tuple[str, InlineKeyboardMarkup]:
         """
         Create a menu based on the current state and user role.
-        
+
+        For admin users, menus are designed to be edited in place rather than
+        sending new messages, keeping the chat clean.
+
         Returns:
             Tuple[str, InlineKeyboardMarkup]: (text, keyboard)
         """
         try:
             role = await get_user_role(bot, user_id, session=session)
-            
+
             # Handle setup flow for new installations
             if menu_state.startswith("setup_") or menu_state == "admin_setup_choice": # Añadido admin_setup_choice aquí
                 return await self._create_setup_menu(menu_state, user_id, session)
-            
+
             # Handle role-based main menus
             if menu_state in ["main", "admin_main", "vip_main", "free_main"]:
                 return self._create_main_menu(role)
-            
+
             # Handle specific menu states
             return await self._create_specific_menu(menu_state, user_id, session, role)
-            
+
         except Exception as e:
             logger.error(f"Error creating menu for state {menu_state}, user {user_id}: {e}")
             return self._create_fallback_menu(role) 

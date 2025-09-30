@@ -3,6 +3,8 @@ Coordinador Central para orquestar la integración entre todos los módulos del 
 """
 import logging
 import enum
+import json
+from pathlib import Path
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -27,6 +29,38 @@ except ImportError:
     from services.archetype_integration_service import ArchetypeIntegrationService
 
 logger = logging.getLogger(__name__)
+
+# Path to decision requirements configuration
+_DECISION_REQUIREMENTS_PATH = Path(__file__).parent.parent / "config" / "decision_requirements.json"
+
+
+def _load_decision_requirements() -> Dict[int, str]:
+    """
+    Load decision requirements from JSON configuration file.
+    Returns a dictionary mapping decision_id (int) to item_name (str).
+    Falls back to hardcoded defaults if file doesn't exist.
+    """
+    if not _DECISION_REQUIREMENTS_PATH.exists():
+        logger.warning(f"Decision requirements file not found at {_DECISION_REQUIREMENTS_PATH}, using defaults")
+        # Return hardcoded defaults
+        return {
+            1: "📖 Diario Secreto",
+            15: "📓 Diario Íntimo",
+        }
+
+    try:
+        with open(_DECISION_REQUIREMENTS_PATH, "r", encoding="utf-8") as f:
+            config = json.load(f)
+            # Convert string keys to integers
+            return {int(k): v for k, v in config.items()}
+    except Exception as e:
+        logger.error(f"Error loading decision requirements from {_DECISION_REQUIREMENTS_PATH}: {e}")
+        # Return hardcoded defaults on error
+        return {
+            1: "📖 Diario Secreto",
+            15: "📓 Diario Íntimo",
+        }
+
 
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
@@ -321,22 +355,21 @@ class CoordinadorCentral:
     async def _flujo_tomar_decision(self, user_id: int, decision_id: int, bot=None) -> Dict[str, Any]:
         """
         Flujo para manejar decisiones narrativas del usuario.
-        
+
         Args:
             user_id: ID del usuario
             decision_id: ID de la decisión tomada
             bot: Instancia del bot para enviar mensajes
-            
+
         Returns:
             Dict con resultados y mensajes
         """
-        # Define which decisions require which items
-        decision_requirements = {
-            1: "📖 Diario Secreto",  # First decision requires the diary
-            15: "📓 Diario Íntimo",  # Diary intimate choice requires the intimate diary
-            # Add more decision IDs and their required items here
-        }
-        
+        # Load decision requirements from JSON configuration
+        # This is now managed through the admin panel (Admin → Tienda → Gestionar Desbloqueos)
+        decision_requirements = _load_decision_requirements()
+
+        logger.debug(f"Loaded decision requirements: {decision_requirements}")
+
         # Check if this decision requires an item
         required_item = decision_requirements.get(decision_id)
         if required_item:

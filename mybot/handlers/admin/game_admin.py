@@ -99,28 +99,34 @@ async def admin_users_page(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data.startswith("admin_user_add_"))
-async def admin_user_add(callback: CallbackQuery, state: FSMContext):
+async def admin_user_add(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     user_id = int(callback.data.split("_")[-1])
     await state.update_data(points_operation="add", target_user=user_id)
-    await callback.message.answer(
+    await update_menu(
+        callback,
         f"Ingresa la cantidad de puntos a sumar a {user_id}:",
-        reply_markup=get_back_kb("admin_manage_users"),
+        get_back_kb("admin_manage_users"),
+        session,
+        "admin_user_add_points"
     )
     await state.set_state(AdminUserStates.assigning_points_amount)
     await callback.answer()
 
 
 @router.callback_query(F.data.startswith("admin_user_deduct_"))
-async def admin_user_deduct(callback: CallbackQuery, state: FSMContext):
+async def admin_user_deduct(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     user_id = int(callback.data.split("_")[-1])
     await state.update_data(points_operation="deduct", target_user=user_id)
-    await callback.message.answer(
+    await update_menu(
+        callback,
         f"Ingresa la cantidad de puntos a restar a {user_id}:",
-        reply_markup=get_back_kb("admin_manage_users"),
+        get_back_kb("admin_manage_users"),
+        session,
+        "admin_user_deduct_points"
     )
     await state.set_state(AdminUserStates.assigning_points_amount)
     await callback.answer()
