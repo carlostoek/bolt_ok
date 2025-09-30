@@ -191,3 +191,20 @@ class AdminVipSubscriberStates(StatesGroup):
 
     waiting_for_days = State()
     waiting_for_new_date = State()
+
+
+class AdminShopStates(StatesGroup):
+    """States for shop management."""
+    creating_name = State()
+    creating_description = State()
+    creating_price = State()
+    creating_vip_only = State()
+    selecting_unlock = State()
+    confirming_creation = State()
+
+    editing_name = State()
+    editing_description = State()
+    editing_price = State()
+
+    configuring_decision_id = State()
+    configuring_teaser_fragment = State()

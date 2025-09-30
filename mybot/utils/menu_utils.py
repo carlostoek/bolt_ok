@@ -80,7 +80,16 @@ async def update_menu(
     session: AsyncSession,
     state: str,
 ) -> None:
-    """Edit the previous menu message or send a new one."""
+    """
+    Edit the menu message in place for clean navigation.
+
+    This function ensures that admin menus stay in a single message,
+    editing the content instead of sending new messages. This keeps
+    the chat clean and provides a better UX.
+
+    If editing fails (e.g., content unchanged), it handles the error gracefully.
+    If the message cannot be edited, it falls back to sending a new message.
+    """
     user_id = callback.from_user.id
     bot = callback.bot
     msg = callback.message
@@ -90,8 +99,10 @@ async def update_menu(
         MENU_CACHE[user_id] = (msg.chat.id, msg.message_id)
     except TelegramBadRequest as exc:
         if "message is not modified" in str(exc).lower():
+            # Message content is the same, no need to edit
             pass
         else:
+            # Editing failed, try deleting and sending new message
             try:
                 await bot.delete_message(msg.chat.id, msg.message_id)
             except TelegramBadRequest:
