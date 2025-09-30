@@ -26,7 +26,29 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
             # Make sure build_shop_keyboard is imported
             from keyboards.common import build_shop_keyboard
             keyboard = build_shop_keyboard(items)
-            await callback.message.edit_text("🛒 Tienda - Elige un artículo:", reply_markup=keyboard)
+
+            # Check if any item has an image to display
+            # For now, we'll show a gallery of items with images first
+            items_with_images = [item for item in items if item.get('image_file_id')]
+
+            if items_with_images:
+                # Send images as a media group first
+                from aiogram.types import InputMediaPhoto
+                media_group = []
+                for item in items_with_images[:10]:  # Telegram limit: 10 photos per media group
+                    caption = f"{item['name']} - {item['price']} besitos"
+                    media_group.append(
+                        InputMediaPhoto(
+                            media=item['image_file_id'],
+                            caption=caption
+                        )
+                    )
+
+                if media_group:
+                    await callback.message.answer_media_group(media=media_group)
+
+            # Then send the shop menu
+            await callback.message.answer("🛒 Tienda - Elige un artículo:", reply_markup=keyboard)
         else:
             await callback.answer(f"❌ {result.get('message', 'Error al acceder a la tienda')}", show_alert=True)
     except Exception as e:

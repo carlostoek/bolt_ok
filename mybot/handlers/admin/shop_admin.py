@@ -87,8 +87,9 @@ No hay productos en la tienda.
             status = "✅" if item.is_active else "❌"
             vip = "👑" if item.is_vip_only else "🆓"
             unlock = "🔓" if item.unlocks_lore_piece_id else "📦"
+            temporal = "⏰" if (item.available_from or item.available_until) else ""
             lines.append(
-                f"{status} {vip} {unlock} **{item.name}**\n"
+                f"{status} {vip} {unlock} {temporal} **{item.name}**\n"
                 f"   💰 {item.price} besitos"
             )
         text = "\n".join(lines)
@@ -142,6 +143,40 @@ async def admin_shop_view_item(callback: CallbackQuery, session: AsyncSession):
         if lore_piece:
             unlock_info = f"🔓 Desbloquea: **{lore_piece.title}**\n   📜 `{lore_piece.code_name}`"
 
+    # Build availability info
+    avail_info = "♾️ Siempre disponible"
+    if item.available_from or item.available_until:
+        avail_info = "⏰ Temporal"
+        if item.available_from and item.available_until:
+            avail_info += f" ({item.available_from.strftime('%d/%m/%Y')} - {item.available_until.strftime('%d/%m/%Y')})"
+        elif item.available_from:
+            avail_info += f" (desde {item.available_from.strftime('%d/%m/%Y')})"
+        elif item.available_until:
+            avail_info += f" (hasta {item.available_until.strftime('%d/%m/%Y')})"
+
+    # Build stock info
+    stock_info = "♾️ Ilimitado"
+    if item.stock_limit is not None:
+        purchases_result = await session.execute(
+            select(func.count(UserPurchase.id)).where(UserPurchase.shop_item_id == item_id)
+        )
+        total_purchases = purchases_result.scalar() or 0
+        remaining = item.stock_limit - total_purchases
+        stock_info = f"📦 {item.stock_limit} unidades ({remaining} restantes)"
+
+    # Build max purchases info
+    max_purch = item.max_purchases_per_user
+    max_purch_info = '♾️ Sin límite' if max_purch == 0 else f"{max_purch} {'vez' if max_purch == 1 else 'veces'}"
+
+    # Build requirements info
+    if item.unlock_requirements:
+        from services.condition_checker import ConditionChecker
+        checker = ConditionChecker(session)
+        req_info = await checker.get_requirements_summary(item.unlock_requirements)
+        requirements_text = f"🔐 **Requisitos:**\n{req_info}\n\n"
+    else:
+        requirements_text = ""
+
     text = f"""📦 **{item.name}**
 
 **Descripción:**
@@ -152,8 +187,11 @@ async def admin_shop_view_item(callback: CallbackQuery, session: AsyncSession):
 • 👑 Solo VIP: {'Sí' if item.is_vip_only else 'No'}
 • ✅ Estado: {'Activo' if item.is_active else 'Inactivo'}
 • 📊 Ventas: {sales_count}
+• 📦 Stock: {stock_info}
+• 🔢 Límite/usuario: {max_purch_info}
+• 📅 Disponibilidad: {avail_info}
 
-**Desbloqueo:**
+{requirements_text}**Desbloqueo:**
 {unlock_info}
 
 **Acciones:**"""
@@ -330,7 +368,7 @@ async def admin_shop_create_price(message: Message, state: FSMContext, session: 
 
 @router.callback_query(AdminShopStates.creating_vip_only, F.data.startswith("shop_create_vip_"))
 async def admin_shop_create_vip(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Process VIP-only setting."""
+    """Process VIP-only setting and ask about image."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
@@ -345,7 +383,552 @@ async def admin_shop_create_vip(callback: CallbackQuery, state: FSMContext, sess
 ✅ Precio: {data['price']} besitos
 ✅ Acceso: {'👑 Solo VIP' if is_vip_only else '🆓 Para Todos'}
 
-🔓 **Paso 5: Desbloqueo de Contenido**
+🖼️ **Paso 5: Imagen del Producto** (Opcional)
+
+¿Deseas agregar una imagen para este producto?
+(Los productos pueden funcionar sin imagen)"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📸 Sí, agregar imagen", callback_data="shop_create_image_yes")
+    builder.button(text="⏭️ Omitir (sin imagen)", callback_data="shop_create_image_skip")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.uploading_image)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.uploading_image, F.data == "shop_create_image_skip")
+async def admin_shop_create_skip_image(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Skip image upload and proceed to unlock configuration."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    # Store null for image
+    await state.update_data(image_file_id=None)
+
+    data = await state.get_data()
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Acceso: {'👑 Solo VIP' if data['is_vip_only'] else '🆓 Para Todos'}
+✅ Imagen: Sin imagen
+
+📦 **Paso 6: Stock del Producto** (Opcional)
+
+¿Este producto tiene stock limitado?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📦 Sí, tiene stock limitado", callback_data="shop_create_stock_yes")
+    builder.button(text="♾️ Stock ilimitado", callback_data="shop_create_stock_unlimited")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_stock)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.uploading_image, F.data == "shop_create_image_yes")
+async def admin_shop_create_request_image(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request image upload from admin."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    text = """➕ **Crear Producto**
+
+🖼️ **Enviar Imagen del Producto**
+
+Por favor, envía una imagen para este producto.
+
+💡 Tips:
+• Formatos soportados: JPG, PNG, GIF
+• Tamaño recomendado: máximo 5MB
+• La imagen se mostrará en la tienda
+
+⚠️ Envía la imagen como foto (no como archivo)"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data="shop_create_image_skip")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    # Stay in uploading_image state to receive the photo
+    await callback.answer()
+
+
+@router.message(AdminShopStates.uploading_image, F.photo)
+async def admin_shop_create_receive_image(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive and store the product image."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    # Get the largest photo size
+    photo = message.photo[-1]
+    file_id = photo.file_id
+
+    # Store the file_id
+    await state.update_data(image_file_id=file_id)
+
+    data = await state.get_data()
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Acceso: {'👑 Solo VIP' if data['is_vip_only'] else '🆓 Para Todos'}
+✅ Imagen: Recibida ✓
+
+📦 **Paso 6: Stock del Producto** (Opcional)
+
+¿Este producto tiene stock limitado?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📦 Sí, tiene stock limitado", callback_data="shop_create_stock_yes")
+    builder.button(text="♾️ Stock ilimitado", callback_data="shop_create_stock_unlimited")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_stock)
+
+
+@router.callback_query(AdminShopStates.configuring_stock, F.data == "shop_create_stock_unlimited")
+async def admin_shop_create_stock_unlimited(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set stock to unlimited and proceed to max purchases."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    # Store unlimited stock (NULL)
+    await state.update_data(stock_limit=None)
+
+    data = await state.get_data()
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: ♾️ Ilimitado
+
+🔢 **Paso 7: Límite por Usuario**
+
+¿Cuántas veces puede comprar este producto cada usuario?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="1️⃣ Una vez (único)", callback_data="shop_create_maxpurch_1")
+    builder.button(text="♾️ Sin límite", callback_data="shop_create_maxpurch_unlimited")
+    builder.button(text="✏️ Otro número", callback_data="shop_create_maxpurch_custom")
+    builder.adjust(2, 1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_max_purchases)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.configuring_stock, F.data == "shop_create_stock_yes")
+async def admin_shop_create_stock_request(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request stock amount."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    text = """➕ **Crear Producto**
+
+📦 **Configurar Stock Limitado**
+
+Ingresa el número de unidades disponibles:
+
+💡 Ejemplos:
+• 10 - Para productos exclusivos
+• 50 - Para ediciones limitadas
+• 100 - Para stock moderado
+
+⚠️ Una vez agotado, el producto dejará de aparecer en tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data="shop_create_stock_unlimited")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    # Stay in configuring_stock state to receive the number
+    await callback.answer()
+
+
+@router.message(AdminShopStates.configuring_stock)
+async def admin_shop_create_stock_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive stock number."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    try:
+        stock_limit = int(message.text.strip())
+        if stock_limit <= 0:
+            await message.answer("❌ El stock debe ser un número positivo. Intenta de nuevo:")
+            return
+    except ValueError:
+        await message.answer("❌ Por favor ingresa un número válido:")
+        return
+
+    # Store stock limit
+    await state.update_data(stock_limit=stock_limit)
+
+    data = await state.get_data()
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: 📦 {stock_limit} unidades
+
+🔢 **Paso 7: Límite por Usuario**
+
+¿Cuántas veces puede comprar este producto cada usuario?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="1️⃣ Una vez (único)", callback_data="shop_create_maxpurch_1")
+    builder.button(text="♾️ Sin límite", callback_data="shop_create_maxpurch_unlimited")
+    builder.button(text="✏️ Otro número", callback_data="shop_create_maxpurch_custom")
+    builder.adjust(2, 1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_max_purchases)
+
+
+@router.callback_query(AdminShopStates.configuring_max_purchases, F.data == "shop_create_maxpurch_1")
+async def admin_shop_create_maxpurch_one(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set max purchases to 1."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    await state.update_data(max_purchases_per_user=1)
+    await proceed_to_availability_config(callback, state, session)
+
+
+@router.callback_query(AdminShopStates.configuring_max_purchases, F.data == "shop_create_maxpurch_unlimited")
+async def admin_shop_create_maxpurch_unlimited(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set max purchases to unlimited (0)."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    await state.update_data(max_purchases_per_user=0)
+    await proceed_to_availability_config(callback, state, session)
+
+
+@router.callback_query(AdminShopStates.configuring_max_purchases, F.data == "shop_create_maxpurch_custom")
+async def admin_shop_create_maxpurch_request(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request custom max purchases number."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    text = """➕ **Crear Producto**
+
+🔢 **Configurar Límite por Usuario**
+
+Ingresa el número máximo de veces que cada usuario puede comprar este producto:
+
+💡 Ejemplos:
+• 1 - Solo pueden comprar una vez
+• 3 - Hasta 3 compras por usuario
+• 5 - Hasta 5 compras por usuario"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data="shop_create_maxpurch_unlimited")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    # Stay in configuring_max_purchases state to receive the number
+    await callback.answer()
+
+
+@router.message(AdminShopStates.configuring_max_purchases)
+async def admin_shop_create_maxpurch_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive max purchases number."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    try:
+        max_purchases = int(message.text.strip())
+        if max_purchases <= 0:
+            await message.answer("❌ El límite debe ser un número positivo. Intenta de nuevo:")
+            return
+    except ValueError:
+        await message.answer("❌ Por favor ingresa un número válido:")
+        return
+
+    await state.update_data(max_purchases_per_user=max_purchases)
+
+    data = await state.get_data()
+
+    stock_text = '♾️ Ilimitado' if data.get('stock_limit') is None else f"📦 {data['stock_limit']} unidades"
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: {stock_text}
+✅ Límite por usuario: {max_purchases} compras
+
+📅 **Paso 8: Disponibilidad Temporal** (Opcional)
+
+¿Este producto estará disponible solo por tiempo limitado?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⏰ Sí, es temporal", callback_data="shop_create_availability_yes")
+    builder.button(text="♾️ Siempre disponible", callback_data="shop_create_availability_no")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_availability)
+
+
+@router.callback_query(AdminShopStates.configuring_availability, F.data == "shop_create_availability_no")
+async def admin_shop_create_availability_none(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set no availability limits (always available)."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    # Store null for both dates
+    await state.update_data(available_from=None, available_until=None)
+    await proceed_to_unlock_config(callback, state, session)
+
+
+@router.callback_query(AdminShopStates.configuring_availability, F.data == "shop_create_availability_yes")
+async def admin_shop_create_availability_request(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request availability dates."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    text = """➕ **Crear Producto**
+
+📅 **Configurar Disponibilidad Temporal**
+
+Este producto estará disponible solo en un período específico.
+
+**¿Desde cuándo estará disponible?**
+
+Ingresa la fecha de inicio (formato: DD/MM/AAAA)
+Ejemplo: 01/12/2025
+
+💡 Deja vacío si quieres que esté disponible desde ahora.
+Escribe "ahora" para disponibilidad inmediata."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⏭️ Desde ahora", callback_data="shop_avail_from_now")
+    builder.button(text="❌ Cancelar", callback_data="shop_create_availability_no")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.entering_available_from)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.entering_available_from, F.data == "shop_avail_from_now")
+async def admin_shop_avail_from_now(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set available_from to None (immediate availability)."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    await state.update_data(available_from=None)
+
+    text = """➕ **Crear Producto**
+
+📅 **Configurar Disponibilidad Temporal**
+
+✅ Disponible desde: **Ahora**
+
+**¿Hasta cuándo estará disponible?**
+
+Ingresa la fecha de finalización (formato: DD/MM/AAAA)
+Ejemplo: 31/12/2025
+
+⚠️ Después de esta fecha, el producto dejará de aparecer en la tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data="shop_create_availability_no")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.entering_available_until)
+    await callback.answer()
+
+
+@router.message(AdminShopStates.entering_available_from)
+async def admin_shop_avail_from_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive available_from date."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    from datetime import datetime
+
+    date_str = message.text.strip().lower()
+
+    if date_str == "ahora":
+        await state.update_data(available_from=None)
+    else:
+        try:
+            # Parse date DD/MM/YYYY
+            available_from = datetime.strptime(date_str, "%d/%m/%Y")
+            await state.update_data(available_from=available_from)
+        except ValueError:
+            await message.answer("❌ Formato de fecha inválido. Usa DD/MM/AAAA (ej: 01/12/2025):")
+            return
+
+    data = await state.get_data()
+    avail_from = data.get('available_from')
+    from_text = "Ahora" if avail_from is None else avail_from.strftime('%d/%m/%Y')
+
+    text = f"""➕ **Crear Producto**
+
+📅 **Configurar Disponibilidad Temporal**
+
+✅ Disponible desde: **{from_text}**
+
+**¿Hasta cuándo estará disponible?**
+
+Ingresa la fecha de finalización (formato: DD/MM/AAAA)
+Ejemplo: 31/12/2025
+
+⚠️ Después de esta fecha, el producto dejará de aparecer en la tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data="shop_create_availability_no")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.entering_available_until)
+
+
+@router.message(AdminShopStates.entering_available_until)
+async def admin_shop_avail_until_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive available_until date."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    from datetime import datetime
+
+    date_str = message.text.strip()
+
+    try:
+        # Parse date DD/MM/YYYY
+        available_until = datetime.strptime(date_str, "%d/%m/%Y")
+
+        # Validate that until is after from (if from exists)
+        data = await state.get_data()
+        avail_from = data.get('available_from')
+
+        if avail_from and available_until < avail_from:
+            await message.answer("❌ La fecha de finalización debe ser posterior a la fecha de inicio. Intenta de nuevo:")
+            return
+
+        await state.update_data(available_until=available_until)
+
+        # Show summary and proceed to unlock config
+        avail_from_text = "Ahora" if avail_from is None else avail_from.strftime('%d/%m/%Y')
+        avail_until_text = available_until.strftime('%d/%m/%Y')
+
+        data = await state.get_data()
+        stock_text = '♾️ Ilimitado' if data.get('stock_limit') is None else f"📦 {data['stock_limit']} unidades"
+        max_purch = data.get('max_purchases_per_user', 1)
+        max_purch_text = '♾️ Sin límite' if max_purch == 0 else f"{max_purch} {'vez' if max_purch == 1 else 'veces'}"
+
+        text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: {stock_text}
+✅ Límite por usuario: {max_purch_text}
+✅ Disponible: ⏰ {avail_from_text} - {avail_until_text}
+
+🔓 **Paso 9: Desbloqueo de Contenido**
+
+¿Este producto desbloquea contenido narrativo?"""
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✅ Sí, desbloquea contenido", callback_data="shop_create_unlock_yes")
+        builder.button(text="❌ No desbloquea nada", callback_data="shop_create_unlock_no")
+        builder.adjust(1)
+
+        await message.answer(text, reply_markup=builder.as_markup())
+        await state.set_state(AdminShopStates.selecting_unlock)
+
+    except ValueError:
+        await message.answer("❌ Formato de fecha inválido. Usa DD/MM/AAAA (ej: 31/12/2025):")
+        return
+
+
+async def proceed_to_availability_config(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Helper function to proceed to availability configuration."""
+    data = await state.get_data()
+
+    stock_text = '♾️ Ilimitado' if data.get('stock_limit') is None else f"📦 {data['stock_limit']} unidades"
+    max_purch = data.get('max_purchases_per_user', 1)
+    max_purch_text = '♾️ Sin límite' if max_purch == 0 else f"{max_purch} {'vez' if max_purch == 1 else 'veces'}"
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: {stock_text}
+✅ Límite por usuario: {max_purch_text}
+
+📅 **Paso 8: Disponibilidad Temporal** (Opcional)
+
+¿Este producto estará disponible solo por tiempo limitado?"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⏰ Sí, es temporal", callback_data="shop_create_availability_yes")
+    builder.button(text="♾️ Siempre disponible", callback_data="shop_create_availability_no")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_availability)
+    await callback.answer()
+
+
+async def proceed_to_unlock_config(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Helper function to proceed to unlock configuration."""
+    data = await state.get_data()
+
+    stock_text = '♾️ Ilimitado' if data.get('stock_limit') is None else f"📦 {data['stock_limit']} unidades"
+    max_purch = data.get('max_purchases_per_user', 1)
+    max_purch_text = '♾️ Sin límite' if max_purch == 0 else f"{max_purch} {'vez' if max_purch == 1 else 'veces'}"
+
+    # Availability text
+    avail_from = data.get('available_from')
+    avail_until = data.get('available_until')
+    if avail_from or avail_until:
+        avail_text = "⏰ Temporal"
+        if avail_from and avail_until:
+            avail_text += f" ({avail_from.strftime('%d/%m/%Y')} - {avail_until.strftime('%d/%m/%Y')})"
+        elif avail_from:
+            avail_text += f" (desde {avail_from.strftime('%d/%m/%Y')})"
+        elif avail_until:
+            avail_text += f" (hasta {avail_until.strftime('%d/%m/%Y')})"
+    else:
+        avail_text = "♾️ Siempre"
+
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Stock: {stock_text}
+✅ Límite por usuario: {max_purch_text}
+✅ Disponibilidad: {avail_text}
+
+🔓 **Paso 9: Desbloqueo de Contenido**
 
 ¿Este producto desbloquea contenido narrativo?"""
 
@@ -374,6 +957,11 @@ async def admin_shop_create_no_unlock(callback: CallbackQuery, state: FSMContext
         description=data['description'],
         price=data['price'],
         is_vip_only=data['is_vip_only'],
+        image_file_id=data.get('image_file_id'),
+        stock_limit=data.get('stock_limit'),
+        max_purchases_per_user=data.get('max_purchases_per_user', 1),
+        available_from=data.get('available_from'),
+        available_until=data.get('available_until'),
         is_active=True,
         unlocks_lore_piece_id=None
     )
@@ -480,6 +1068,11 @@ async def admin_shop_create_with_unlock(callback: CallbackQuery, state: FSMConte
         description=data['description'],
         price=data['price'],
         is_vip_only=data['is_vip_only'],
+        image_file_id=data.get('image_file_id'),
+        stock_limit=data.get('stock_limit'),
+        max_purchases_per_user=data.get('max_purchases_per_user', 1),
+        available_from=data.get('available_from'),
+        available_until=data.get('available_until'),
         is_active=True,
         unlocks_lore_piece_id=lore_piece_id
     )
@@ -553,9 +1146,14 @@ async def admin_shop_edit_start(callback: CallbackQuery, state: FSMContext, sess
     builder.button(text="📄 Descripción", callback_data=f"edit_field:description:{item_id}")
     builder.button(text="💰 Precio", callback_data=f"edit_field:price:{item_id}")
     builder.button(text="👑 Acceso VIP", callback_data=f"edit_field:vip:{item_id}")
+    builder.button(text="🖼️ Imagen", callback_data=f"edit_field:image:{item_id}")
+    builder.button(text="📦 Stock", callback_data=f"edit_field:stock:{item_id}")
+    builder.button(text="🔢 Límite Usuario", callback_data=f"edit_field:maxpurch:{item_id}")
+    builder.button(text="📅 Disponibilidad", callback_data=f"edit_field:availability:{item_id}")
+    builder.button(text="🔐 Requisitos", callback_data=f"edit_field:requirements:{item_id}")
     builder.button(text="🔓 Desbloqueo", callback_data=f"edit_field:unlock:{item_id}")
     builder.button(text="🔙 Volver", callback_data=f"admin_shop_view:{item_id}")
-    builder.adjust(2, 2, 1, 1)
+    builder.adjust(2, 2, 2, 2, 2, 1, 1)
 
     await update_menu(
         callback,
@@ -842,6 +1440,1104 @@ El estado VIP ha sido actualizado exitosamente."""
         session,
         f"admin_shop_vip_updated_{item_id}"
     )
+
+
+@router.callback_query(F.data.startswith("edit_field:image:"))
+async def admin_shop_edit_image_start(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start editing product image."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Store item_id in state
+    await state.update_data(editing_item_id=item_id)
+
+    image_status = "✅ Tiene imagen" if item.image_file_id else "❌ Sin imagen"
+
+    text = f"""✏️ **Editar Imagen**
+
+**Producto:** {item.name}
+**Estado actual:** {image_status}
+
+**Opciones:**"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+
+    if item.image_file_id:
+        builder.button(text="👁️ Ver Imagen Actual", callback_data=f"view_image:{item_id}")
+        builder.button(text="🔄 Cambiar Imagen", callback_data=f"change_image:{item_id}")
+        builder.button(text="🗑️ Eliminar Imagen", callback_data=f"remove_image:{item_id}")
+    else:
+        builder.button(text="➕ Agregar Imagen", callback_data=f"add_image:{item_id}")
+
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_image_{item_id}"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("view_image:"))
+async def admin_shop_view_image(callback: CallbackQuery, session: AsyncSession):
+    """Show the current product image."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item or not item.image_file_id:
+        await callback.answer("Imagen no encontrada", show_alert=True)
+        return
+
+    # Send the image
+    from aiogram import Bot
+    bot: Bot = callback.bot
+
+    await bot.send_photo(
+        chat_id=callback.from_user.id,
+        photo=item.image_file_id,
+        caption=f"🖼️ Imagen de: **{item.name}**"
+    )
+
+    await callback.answer("✅ Imagen enviada")
+
+
+@router.callback_query(F.data.startswith("add_image:"))
+async def admin_shop_add_image(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request image upload for product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_item_id=item_id)
+
+    text = """✏️ **Agregar Imagen**
+
+🖼️ **Enviar Imagen del Producto**
+
+Por favor, envía una imagen para este producto.
+
+💡 Tips:
+• Formatos soportados: JPG, PNG, GIF
+• Tamaño recomendado: máximo 5MB
+• La imagen se mostrará en la tienda
+
+⚠️ Envía la imagen como foto (no como archivo)"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:image:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_add_image_{item_id}"
+    )
+    await state.set_state(AdminShopStates.editing_image)
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("change_image:"))
+async def admin_shop_change_image(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request new image upload for product."""
+    # Same as add_image
+    await admin_shop_add_image(callback, state, session)
+
+
+@router.callback_query(F.data.startswith("remove_image:"))
+async def admin_shop_remove_image(callback: CallbackQuery, session: AsyncSession):
+    """Remove product image."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    item.image_file_id = None
+    await session.commit()
+
+    text = f"""✅ **Imagen Eliminada**
+
+**Producto:** {item.name}
+
+La imagen ha sido eliminada exitosamente.
+El producto ahora se mostrará sin imagen."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_image_removed_{item_id}"
+    )
+    await callback.answer("✅ Imagen eliminada")
+
+
+@router.message(AdminShopStates.editing_image, F.photo)
+async def admin_shop_edit_image_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive new image for product."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    item_id = data.get('editing_item_id')
+
+    if not item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await message.answer("❌ Producto no encontrado")
+        await state.clear()
+        return
+
+    # Get the largest photo size
+    photo = message.photo[-1]
+    file_id = photo.file_id
+
+    # Update the image
+    item.image_file_id = file_id
+    await session.commit()
+
+    text = f"""✅ **Imagen Actualizada**
+
+**Producto:** {item.name}
+
+La imagen ha sido actualizada exitosamente."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.clear()
+
+
+@router.callback_query(F.data.startswith("edit_field:stock:"))
+async def admin_shop_edit_stock_start(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start editing product stock."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Store item_id in state
+    await state.update_data(editing_item_id=item_id)
+
+    stock_status = f"♾️ Ilimitado" if item.stock_limit is None else f"📦 {item.stock_limit} unidades"
+
+    text = f"""✏️ **Editar Stock**
+
+**Producto:** {item.name}
+**Stock actual:** {stock_status}
+
+**Opciones:**"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+
+    if item.stock_limit is not None:
+        builder.button(text="📦 Cambiar Cantidad", callback_data=f"change_stock:{item_id}")
+        builder.button(text="♾️ Hacer Ilimitado", callback_data=f"unlimited_stock:{item_id}")
+    else:
+        builder.button(text="📦 Establecer Límite", callback_data=f"set_stock:{item_id}")
+
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_stock_{item_id}"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith(("set_stock:", "change_stock:")))
+async def admin_shop_request_stock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request stock amount."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_item_id=item_id)
+
+    text = """✏️ **Configurar Stock**
+
+📦 Ingresa el número de unidades disponibles:
+
+💡 Ejemplos:
+• 10 - Para productos exclusivos
+• 50 - Para ediciones limitadas
+• 100 - Para stock moderado
+
+⚠️ Una vez agotado, el producto dejará de aparecer en tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:stock:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_request_stock_{item_id}"
+    )
+    await state.set_state(AdminShopStates.editing_stock)
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("unlimited_stock:"))
+async def admin_shop_unlimited_stock(callback: CallbackQuery, session: AsyncSession):
+    """Set stock to unlimited."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    item.stock_limit = None
+    await session.commit()
+
+    text = f"""✅ **Stock Actualizado**
+
+**Producto:** {item.name}
+
+El stock ahora es **♾️ Ilimitado**.
+El producto siempre estará disponible en la tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_stock_unlimited_{item_id}"
+    )
+    await callback.answer("✅ Stock ilimitado")
+
+
+@router.message(AdminShopStates.editing_stock)
+async def admin_shop_edit_stock_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive new stock amount."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    item_id = data.get('editing_item_id')
+
+    if not item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    try:
+        stock_limit = int(message.text.strip())
+        if stock_limit <= 0:
+            await message.answer("❌ El stock debe ser un número positivo. Intenta de nuevo:")
+            return
+    except ValueError:
+        await message.answer("❌ Por favor ingresa un número válido:")
+        return
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await message.answer("❌ Producto no encontrado")
+        await state.clear()
+        return
+
+    # Update stock
+    item.stock_limit = stock_limit
+    await session.commit()
+
+    text = f"""✅ **Stock Actualizado**
+
+**Producto:** {item.name}
+
+Stock configurado a: **📦 {stock_limit} unidades**
+
+El producto dejará de aparecer en tienda cuando se agoten las {stock_limit} unidades."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.clear()
+
+
+@router.callback_query(F.data.startswith("edit_field:maxpurch:"))
+async def admin_shop_edit_maxpurch_start(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start editing max purchases per user."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Store item_id in state
+    await state.update_data(editing_item_id=item_id)
+
+    max_purch = item.max_purchases_per_user
+    max_purch_text = '♾️ Sin límite' if max_purch == 0 else f"{max_purch} {'vez' if max_purch == 1 else 'veces'}"
+
+    text = f"""✏️ **Editar Límite por Usuario**
+
+**Producto:** {item.name}
+**Límite actual:** {max_purch_text}
+
+**Opciones:**"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="1️⃣ Una vez (único)", callback_data=f"set_maxpurch:1:{item_id}")
+    builder.button(text="♾️ Sin límite", callback_data=f"set_maxpurch:0:{item_id}")
+    builder.button(text="✏️ Otro número", callback_data=f"custom_maxpurch:{item_id}")
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
+    builder.adjust(2, 1, 1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_maxpurch_{item_id}"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("set_maxpurch:"))
+async def admin_shop_set_maxpurch(callback: CallbackQuery, session: AsyncSession):
+    """Set max purchases directly."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    parts = callback.data.split(":")
+    max_purchases = int(parts[1])
+    item_id = int(parts[2])
+
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    item.max_purchases_per_user = max_purchases
+    await session.commit()
+
+    max_purch_text = '♾️ Sin límite' if max_purchases == 0 else f"{max_purchases} {'vez' if max_purchases == 1 else 'veces'}"
+
+    text = f"""✅ **Límite por Usuario Actualizado**
+
+**Producto:** {item.name}
+
+Límite configurado a: **{max_purch_text}**
+
+Cada usuario podrá comprar este producto {'sin límite' if max_purchases == 0 else max_purch_text}."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_maxpurch_updated_{item_id}"
+    )
+    await callback.answer("✅ Límite actualizado")
+
+
+@router.callback_query(F.data.startswith("custom_maxpurch:"))
+async def admin_shop_request_maxpurch(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request custom max purchases number."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_item_id=item_id)
+
+    text = """✏️ **Configurar Límite por Usuario**
+
+🔢 Ingresa el número máximo de veces que cada usuario puede comprar este producto:
+
+💡 Ejemplos:
+• 1 - Solo pueden comprar una vez
+• 3 - Hasta 3 compras por usuario
+• 5 - Hasta 5 compras por usuario"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:maxpurch:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_request_maxpurch_{item_id}"
+    )
+    await state.set_state(AdminShopStates.editing_max_purchases)
+    await callback.answer()
+
+
+@router.message(AdminShopStates.editing_max_purchases)
+async def admin_shop_edit_maxpurch_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive new max purchases number."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    item_id = data.get('editing_item_id')
+
+    if not item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    try:
+        max_purchases = int(message.text.strip())
+        if max_purchases <= 0:
+            await message.answer("❌ El límite debe ser un número positivo. Intenta de nuevo:")
+            return
+    except ValueError:
+        await message.answer("❌ Por favor ingresa un número válido:")
+        return
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await message.answer("❌ Producto no encontrado")
+        await state.clear()
+        return
+
+    # Update max purchases
+    item.max_purchases_per_user = max_purchases
+    await session.commit()
+
+    text = f"""✅ **Límite por Usuario Actualizado**
+
+**Producto:** {item.name}
+
+Límite configurado a: **{max_purchases} {'vez' if max_purchases == 1 else 'veces'}**
+
+Cada usuario podrá comprar este producto hasta {max_purchases} {'vez' if max_purchases == 1 else 'veces'}."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await message.answer(text, reply_markup=builder.as_markup())
+    await state.clear()
+
+
+@router.callback_query(F.data.startswith("edit_field:availability:"))
+async def admin_shop_edit_availability_start(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start editing product availability dates."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Store item_id in state
+    await state.update_data(editing_item_id=item_id)
+
+    # Get current availability
+    avail_from = item.available_from
+    avail_until = item.available_until
+
+    if avail_from or avail_until:
+        avail_text = "⏰ Temporal"
+        if avail_from and avail_until:
+            avail_text += f" ({avail_from.strftime('%d/%m/%Y')} - {avail_until.strftime('%d/%m/%Y')})"
+        elif avail_from:
+            avail_text += f" (desde {avail_from.strftime('%d/%m/%Y')})"
+        elif avail_until:
+            avail_text += f" (hasta {avail_until.strftime('%d/%m/%Y')})"
+    else:
+        avail_text = "♾️ Siempre disponible"
+
+    text = f"""✏️ **Editar Disponibilidad**
+
+**Producto:** {item.name}
+**Disponibilidad actual:** {avail_text}
+
+**Opciones:**"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+
+    if avail_from or avail_until:
+        builder.button(text="📅 Cambiar Fechas", callback_data=f"change_availability:{item_id}")
+        builder.button(text="♾️ Hacer Permanente", callback_data=f"permanent_availability:{item_id}")
+    else:
+        builder.button(text="⏰ Establecer Período", callback_data=f"set_availability:{item_id}")
+
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_availability_{item_id}"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("permanent_availability:"))
+async def admin_shop_permanent_availability(callback: CallbackQuery, session: AsyncSession):
+    """Set availability to permanent (always available)."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    item.available_from = None
+    item.available_until = None
+    await session.commit()
+
+    text = f"""✅ **Disponibilidad Actualizada**
+
+**Producto:** {item.name}
+
+El producto ahora está **♾️ Siempre Disponible**.
+Aparecerá en la tienda sin restricciones temporales."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_availability_permanent_{item_id}"
+    )
+    await callback.answer("✅ Disponibilidad permanente")
+
+
+@router.callback_query(F.data.startswith(("set_availability:", "change_availability:")))
+async def admin_shop_request_availability(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request availability dates for editing."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_item_id=item_id)
+
+    text = """✏️ **Configurar Disponibilidad Temporal**
+
+Este producto estará disponible solo en un período específico.
+
+**¿Desde cuándo estará disponible?**
+
+Ingresa la fecha de inicio (formato: DD/MM/AAAA)
+Ejemplo: 01/12/2025
+
+💡 Deja vacío si quieres que esté disponible desde ahora.
+Escribe "ahora" para disponibilidad inmediata."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⏭️ Desde ahora", callback_data=f"edit_avail_from_now:{item_id}")
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:availability:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_request_availability_{item_id}"
+    )
+    await state.set_state(AdminShopStates.editing_availability)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.editing_availability, F.data.startswith("edit_avail_from_now:"))
+async def admin_shop_edit_avail_from_now(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set available_from to None (immediate) when editing."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_avail_from=None)
+
+    text = """✏️ **Configurar Disponibilidad Temporal**
+
+✅ Disponible desde: **Ahora**
+
+**¿Hasta cuándo estará disponible?**
+
+Ingresa la fecha de finalización (formato: DD/MM/AAAA)
+Ejemplo: 31/12/2025
+
+⚠️ Después de esta fecha, el producto dejará de aparecer en la tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:availability:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_avail_until_{item_id}"
+    )
+    # Stay in editing_availability state to receive the until date
+    await callback.answer()
+
+
+@router.message(AdminShopStates.editing_availability)
+async def admin_shop_edit_availability_receive(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive availability dates when editing."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    item_id = data.get('editing_item_id')
+
+    if not item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await message.answer("❌ Producto no encontrado")
+        await state.clear()
+        return
+
+    from datetime import datetime
+
+    date_str = message.text.strip().lower()
+
+    # Check if we're setting the "from" date or "until" date
+    if 'editing_avail_from' not in data:
+        # Setting the "from" date
+        if date_str == "ahora":
+            await state.update_data(editing_avail_from=None)
+            from_text = "Ahora"
+        else:
+            try:
+                available_from = datetime.strptime(date_str, "%d/%m/%Y")
+                await state.update_data(editing_avail_from=available_from)
+                from_text = available_from.strftime('%d/%m/%Y')
+            except ValueError:
+                await message.answer("❌ Formato de fecha inválido. Usa DD/MM/AAAA (ej: 01/12/2025):")
+                return
+
+        text = f"""✏️ **Configurar Disponibilidad Temporal**
+
+✅ Disponible desde: **{from_text}**
+
+**¿Hasta cuándo estará disponible?**
+
+Ingresa la fecha de finalización (formato: DD/MM/AAAA)
+Ejemplo: 31/12/2025
+
+⚠️ Después de esta fecha, el producto dejará de aparecer en la tienda."""
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="❌ Cancelar", callback_data=f"edit_field:availability:{item_id}")
+        builder.adjust(1)
+
+        await message.answer(text, reply_markup=builder.as_markup())
+        # Stay in editing_availability state to receive the until date
+    else:
+        # Setting the "until" date
+        try:
+            available_until = datetime.strptime(date_str, "%d/%m/%Y")
+
+            # Validate that until is after from (if from exists)
+            avail_from = data.get('editing_avail_from')
+
+            if avail_from and available_until < avail_from:
+                await message.answer("❌ La fecha de finalización debe ser posterior a la fecha de inicio. Intenta de nuevo:")
+                return
+
+            # Update the item
+            item.available_from = avail_from
+            item.available_until = available_until
+            await session.commit()
+
+            # Build success message
+            from_text = "Ahora" if avail_from is None else avail_from.strftime('%d/%m/%Y')
+            until_text = available_until.strftime('%d/%m/%Y')
+
+            text = f"""✅ **Disponibilidad Actualizada**
+
+**Producto:** {item.name}
+
+Disponibilidad configurada:
+⏰ **{from_text} - {until_text}**
+
+El producto solo aparecerá en la tienda durante este período."""
+
+            from aiogram.utils.keyboard import InlineKeyboardBuilder
+            builder = InlineKeyboardBuilder()
+            builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+            builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+            builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+            builder.adjust(1)
+
+            await message.answer(text, reply_markup=builder.as_markup())
+            await state.clear()
+
+        except ValueError:
+            await message.answer("❌ Formato de fecha inválido. Usa DD/MM/AAAA (ej: 31/12/2025):")
+            return
+
+
+@router.callback_query(F.data.startswith("edit_field:requirements:"))
+async def admin_shop_edit_requirements_start(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start editing unlock requirements for a product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    item = await session.get(ShopItem, item_id)
+
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    await state.update_data(editing_item_id=item_id)
+
+    # Get current requirements summary
+    from services.condition_checker import ConditionChecker
+    checker = ConditionChecker(session)
+    req_summary = await checker.get_requirements_summary(item.unlock_requirements)
+
+    text = f"""🔐 **Editar Requisitos de Desbloqueo**
+
+**Producto:** {item.name}
+
+**Requisitos actuales:**
+{req_summary}
+
+**Plantillas Rápidas:**
+Selecciona una plantilla o configura manualmente."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+
+    # Quick templates
+    builder.button(text="👑 Solo VIP", callback_data=f"req_template:vip:{item_id}")
+    builder.button(text="⭐ Nivel 5+", callback_data=f"req_template:level5:{item_id}")
+    builder.button(text="💎 VIP + Nivel 10", callback_data=f"req_template:vip_level10:{item_id}")
+    builder.button(text="❌ Sin Requisitos", callback_data=f"req_template:none:{item_id}")
+    builder.button(text="⚙️ Manual (JSON)", callback_data=f"req_manual:{item_id}")
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
+    builder.adjust(2, 2, 1, 1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_edit_requirements_{item_id}"
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("req_template:"))
+async def admin_shop_apply_requirement_template(callback: CallbackQuery, session: AsyncSession):
+    """Apply a requirement template to a product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    parts = callback.data.split(":")
+    template = parts[1]
+    item_id = int(parts[2])
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Apply template
+    if template == "none":
+        item.unlock_requirements = None
+        template_name = "Sin requisitos"
+    elif template == "vip":
+        item.unlock_requirements = {
+            "operator": "AND",
+            "conditions": [
+                {"type": "vip_status", "value": True}
+            ]
+        }
+        template_name = "👑 Solo VIP"
+    elif template == "level5":
+        item.unlock_requirements = {
+            "operator": "AND",
+            "conditions": [
+                {"type": "level", "value": 5, "comparison": ">="}
+            ]
+        }
+        template_name = "⭐ Nivel 5+"
+    elif template == "vip_level10":
+        item.unlock_requirements = {
+            "operator": "AND",
+            "conditions": [
+                {"type": "vip_status", "value": True},
+                {"type": "level", "value": 10, "comparison": ">="}
+            ]
+        }
+        template_name = "💎 VIP + Nivel 10"
+    else:
+        await callback.answer("Plantilla no válida", show_alert=True)
+        return
+
+    await session.commit()
+
+    text = f"""✅ **Requisitos Actualizados**
+
+**Producto:** {item.name}
+
+**Plantilla aplicada:** {template_name}
+
+Los usuarios ahora deben cumplir estos requisitos para ver este producto en la tienda."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_requirements_updated_{item_id}"
+    )
+    await callback.answer("✅ Requisitos aplicados")
+
+
+@router.callback_query(F.data.startswith("req_manual:"))
+async def admin_shop_manual_requirements(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request manual JSON requirements configuration."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+    await state.update_data(editing_item_id=item_id)
+
+    text = """🔐 **Configuración Manual de Requisitos**
+
+Envía un JSON con la estructura de requisitos.
+
+**Ejemplo - Solo VIP:**
+```json
+{
+  "operator": "AND",
+  "conditions": [
+    {"type": "vip_status", "value": true}
+  ]
+}
+```
+
+**Ejemplo - Nivel 5 + 100 puntos:**
+```json
+{
+  "operator": "AND",
+  "conditions": [
+    {"type": "level", "value": 5, "comparison": ">="},
+    {"type": "points", "value": 100, "comparison": ">="}
+  ]
+}
+```
+
+**Tipos soportados:**
+• `level` - Nivel del usuario
+• `vip_status` - Estado VIP (true/false)
+• `owns_item` - Posee item (ID o nombre)
+• `points` - Cantidad de puntos
+• `owns_lore_piece` - Desbloque narrativo
+• `completed_mission` - Misión completada
+
+**Operadores:** `AND`, `OR`
+**Comparaciones:** `>=`, `>`, `==`, `<`, `<=`"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="❌ Cancelar", callback_data=f"edit_field:requirements:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"admin_shop_manual_requirements_{item_id}"
+    )
+    await state.set_state(AdminShopStates.editing_requirements)
+    await callback.answer()
+
+
+@router.message(AdminShopStates.editing_requirements)
+async def admin_shop_receive_manual_requirements(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive and validate manual JSON requirements."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    item_id = data.get('editing_item_id')
+
+    if not item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await message.answer("❌ Producto no encontrado")
+        await state.clear()
+        return
+
+    import json
+
+    try:
+        # Parse JSON
+        requirements = json.loads(message.text)
+
+        # Basic validation
+        if not isinstance(requirements, dict):
+            await message.answer("❌ El JSON debe ser un objeto ({})")
+            return
+
+        if "operator" not in requirements or "conditions" not in requirements:
+            await message.answer("❌ El JSON debe tener 'operator' y 'conditions'")
+            return
+
+        if requirements["operator"] not in ["AND", "OR"]:
+            await message.answer("❌ El operador debe ser 'AND' o 'OR'")
+            return
+
+        if not isinstance(requirements["conditions"], list):
+            await message.answer("❌ 'conditions' debe ser una lista")
+            return
+
+        # Update item
+        item.unlock_requirements = requirements
+        await session.commit()
+
+        # Get summary
+        from services.condition_checker import ConditionChecker
+        checker = ConditionChecker(session)
+        summary = await checker.get_requirements_summary(requirements)
+
+        text = f"""✅ **Requisitos Actualizados**
+
+**Producto:** {item.name}
+
+**Requisitos configurados:**
+{summary}
+
+Los requisitos han sido aplicados exitosamente."""
+
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
+        builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
+        builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+        builder.adjust(1)
+
+        await message.answer(text, reply_markup=builder.as_markup())
+        await state.clear()
+
+    except json.JSONDecodeError as e:
+        await message.answer(f"❌ JSON inválido: {str(e)}\n\nAsegúrate de usar comillas dobles (\") y formato JSON válido.")
+    except Exception as e:
+        logger.error(f"Error setting requirements: {e}")
+        await message.answer(f"❌ Error: {str(e)}")
 
 
 @router.callback_query(F.data.startswith("edit_field:unlock:"))

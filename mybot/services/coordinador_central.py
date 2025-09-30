@@ -719,11 +719,27 @@ class CoordinadorCentral:
             # and can be used in the keyboard builder
             items_data = []
             for item in items:
+                # Calculate remaining stock if applicable
+                stock_info = None
+                if item.stock_limit is not None:
+                    # Count total purchases
+                    from sqlalchemy import func, select
+                    from database.models import UserPurchase
+                    purchases_stmt = select(func.count(UserPurchase.id)).where(
+                        UserPurchase.shop_item_id == item.id
+                    )
+                    purchases_result = await self.session.execute(purchases_stmt)
+                    total_purchases = purchases_result.scalar() or 0
+                    remaining = item.stock_limit - total_purchases
+                    stock_info = {'total': item.stock_limit, 'remaining': remaining}
+
                 items_data.append({
                     'id': item.id,
                     'name': item.name,
                     'price': item.price,
-                    'is_vip_only': item.is_vip_only
+                    'is_vip_only': item.is_vip_only,
+                    'image_file_id': item.image_file_id,
+                    'stock': stock_info
                 })
             
             return {

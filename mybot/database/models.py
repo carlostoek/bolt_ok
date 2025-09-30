@@ -471,16 +471,22 @@ class LorePiece(Base):
 
 class ShopItem(Base):
     __tablename__ = "shop_items"
-    
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
     description = Column(Text)
     price = Column(Integer, nullable=False)  # Price in besitos
     is_vip_only = Column(Boolean, default=False)
     unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
+    image_file_id = Column(String(255), nullable=True)  # Optional Telegram file_id for product image
+    stock_limit = Column(Integer, nullable=True)  # NULL = unlimited stock
+    max_purchases_per_user = Column(Integer, default=1)  # Maximum times a user can purchase this item
+    available_from = Column(DateTime, nullable=True)  # NULL = available immediately
+    available_until = Column(DateTime, nullable=True)  # NULL = available forever
+    unlock_requirements = Column(JSON, nullable=True)  # Compound conditions for unlock (NULL = no requirements)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
-    
+
     lore_piece = relationship("LorePiece")
 
 class UserPurchase(Base):

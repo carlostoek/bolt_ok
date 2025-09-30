@@ -19,12 +19,13 @@ def build_shop_keyboard(items):
     """
     Build a keyboard for the shop with available items.
     Handles both ShopItem objects and dictionaries.
+    Shows stock information if available.
     """
     from aiogram.types import InlineKeyboardButton
     from aiogram.utils.keyboard import InlineKeyboardBuilder
-    
+
     builder = InlineKeyboardBuilder()
-    
+
     for item in items:
         try:
             # Handle both object and dictionary
@@ -33,16 +34,29 @@ def build_shop_keyboard(items):
                 item_name = item.name
                 item_price = item.price
                 item_id = item.id
+                stock_info = None
             elif isinstance(item, dict):
                 # It's a dictionary
                 item_name = item.get('name')
                 item_price = item.get('price')
                 item_id = item.get('id')
+                stock_info = item.get('stock')
             else:
                 continue
-                
+
+            # Build button text with stock info if available
+            button_text = f"{item_name} - {item_price} besitos"
+            if stock_info and stock_info.get('remaining') is not None:
+                remaining = stock_info['remaining']
+                if remaining <= 5:
+                    # Show urgent stock warning
+                    button_text = f"{item_name} - {item_price} besitos [¡Solo {remaining}!]"
+                elif remaining <= 10:
+                    # Show low stock warning
+                    button_text = f"{item_name} - {item_price} besitos [{remaining} restantes]"
+
             builder.button(
-                text=f"{item_name} - {item_price} besitos",
+                text=button_text,
                 callback_data=f"buy_item:{item_id}"
             )
         except (AttributeError, KeyError) as e:
@@ -50,7 +64,7 @@ def build_shop_keyboard(items):
             import logging
             logger = logging.getLogger(__name__)
             logger.error(f"Invalid item structure: {item}, error: {e}")
-    
+
     builder.button(text="🔙 Volver", callback_data="menu_principal")
     builder.adjust(1)
     return builder.as_markup()
