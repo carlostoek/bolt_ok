@@ -18,33 +18,86 @@ class ShopService:
         self.subscription_service = SubscriptionService(session)
 
     async def get_available_items(self, user_id: int) -> List[ShopItem]:
-        """Get available shop items for the user, considering VIP status"""
+        """Get available shop items for the user, considering VIP status and stock"""
         try:
             # Ensure the "Diario de Diana" item exists
             await self._ensure_diario_diana_item_exists()
             # Ensure the "Diario Íntimo" item exists
             await self._ensure_diario_intimo_item_exists()
-            
+
             # Check if user is VIP by getting their subscription
             subscription = await self.subscription_service.get_subscription(user_id)
             is_vip = subscription is not None and (subscription.expires_at is None or subscription.expires_at > func.now())
-            
+
             stmt = select(ShopItem).where(ShopItem.is_active == True)
             result = await self.session.execute(stmt)
             all_items = result.scalars().all()
-            
+
             # Log all found items for debugging
             logger.info(f"Found {len(all_items)} active shop items")
             for item in all_items:
                 logger.info(f"Shop item: {item.name} (VIP: {item.is_vip_only})")
-            
-            # Filter VIP-only items if user is not VIP
-            if not is_vip:
-                non_vip_items = [item for item in all_items if not item.is_vip_only]
-                logger.info(f"Showing {len(non_vip_items)} non-VIP items to user {user_id}")
-                return non_vip_items
-            logger.info(f"Showing all {len(all_items)} items to VIP user {user_id}")
-            return all_items
+
+            # Filter items based on stock, VIP status, and availability dates
+            available_items = []
+            now = datetime.now()
+
+            for item in all_items:
+                # Filter VIP-only items if user is not VIP
+                if item.is_vip_only and not is_vip:
+                    continue
+
+                # Check date availability
+                if item.available_from is not None and now < item.available_from:
+                    logger.info(f"Item {item.name} not yet available (starts {item.available_from})")
+                    continue
+
+                if item.available_until is not None and now > item.available_until:
+                    logger.info(f"Item {item.name} no longer available (ended {item.available_until})")
+                    continue
+
+                # Check stock availability
+                if item.stock_limit is not None:
+                    # Count total purchases
+                    purchases_stmt = select(func.count(UserPurchase.id)).where(
+                        UserPurchase.shop_item_id == item.id
+                    )
+                    purchases_result = await self.session.execute(purchases_stmt)
+                    total_purchases = purchases_result.scalar() or 0
+
+                    # Skip if sold out
+                    if total_purchases >= item.stock_limit:
+                        logger.info(f"Item {item.name} is sold out ({total_purchases}/{item.stock_limit})")
+                        continue
+
+                # Check if user has reached their purchase limit
+                if item.max_purchases_per_user > 0:
+                    user_purchases_stmt = select(func.count(UserPurchase.id)).where(
+                        UserPurchase.user_id == user_id,
+                        UserPurchase.shop_item_id == item.id
+                    )
+                    user_purchases_result = await self.session.execute(user_purchases_stmt)
+                    user_purchases = user_purchases_result.scalar() or 0
+
+                    # Skip if user has reached their limit
+                    if user_purchases >= item.max_purchases_per_user:
+                        logger.info(f"User {user_id} has reached purchase limit for {item.name} ({user_purchases}/{item.max_purchases_per_user})")
+                        continue
+
+                # Check unlock requirements (compound conditions)
+                if item.unlock_requirements is not None:
+                    from services.condition_checker import ConditionChecker
+                    checker = ConditionChecker(self.session)
+                    meets_requirements, _ = await checker.check_requirements(user_id, item.unlock_requirements)
+
+                    if not meets_requirements:
+                        logger.info(f"User {user_id} does not meet requirements for {item.name}")
+                        continue
+
+                available_items.append(item)
+
+            logger.info(f"Showing {len(available_items)} available items to user {user_id}")
+            return available_items
         except Exception as e:
             logger.error(f"Error getting available items for user {user_id}: {str(e)}")
             return []
@@ -151,27 +204,87 @@ class ShopService:
             stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
-            
+
             if not item:
                 return {"success": False, "message": "Item not found"}
-            
+
             # Check if user is VIP for VIP-only items
             if item.is_vip_only:
                 is_vip = await self.subscription_service.is_user_vip(user_id)
                 if not is_vip:
                     return {"success": False, "message": "VIP subscription required"}
-            
+
+            # Check date availability
+            now = datetime.now()
+            if item.available_from is not None and now < item.available_from:
+                return {
+                    "success": False,
+                    "message": f"❌ {item.name} aún no está disponible. Estará disponible desde {item.available_from.strftime('%d/%m/%Y')}."
+                }
+
+            if item.available_until is not None and now > item.available_until:
+                return {
+                    "success": False,
+                    "message": f"❌ {item.name} ya no está disponible. Estuvo disponible hasta {item.available_until.strftime('%d/%m/%Y')}."
+                }
+
+            # Check unlock requirements
+            if item.unlock_requirements is not None:
+                from services.condition_checker import ConditionChecker
+                checker = ConditionChecker(self.session)
+                meets_requirements, failed_conditions = await checker.check_requirements(user_id, item.unlock_requirements)
+
+                if not meets_requirements:
+                    # Build error message with failed conditions
+                    conditions_text = "\n• ".join(failed_conditions)
+                    return {
+                        "success": False,
+                        "message": f"❌ No cumples los requisitos para {item.name}:\n\n• {conditions_text}"
+                    }
+
+            # Check stock availability
+            if item.stock_limit is not None:
+                # Count total purchases for this item
+                total_purchases_stmt = select(func.count(UserPurchase.id)).where(
+                    UserPurchase.shop_item_id == item_id
+                )
+                total_purchases_result = await self.session.execute(total_purchases_stmt)
+                total_purchases = total_purchases_result.scalar() or 0
+
+                if total_purchases >= item.stock_limit:
+                    return {
+                        "success": False,
+                        "message": f"❌ {item.name} agotado. Solo había {item.stock_limit} unidades disponibles."
+                    }
+
+            # Check max purchases per user
+            if item.max_purchases_per_user > 0:
+                # Count purchases by this user
+                user_purchases_stmt = select(func.count(UserPurchase.id)).where(
+                    UserPurchase.user_id == user_id,
+                    UserPurchase.shop_item_id == item_id
+                )
+                user_purchases_result = await self.session.execute(user_purchases_stmt)
+                user_purchases = user_purchases_result.scalar() or 0
+
+                if user_purchases >= item.max_purchases_per_user:
+                    times_text = "vez" if item.max_purchases_per_user == 1 else "veces"
+                    return {
+                        "success": False,
+                        "message": f"❌ Ya compraste {item.name} el máximo de {item.max_purchases_per_user} {times_text} permitido."
+                    }
+
             # Check user points
             user = await self.session.get(User, user_id)
             if user is None:
                 return {"success": False, "message": "User not found"}
-                
+
             if user.points < item.price:
                 return {"success": False, "message": "Insufficient points"}
-            
+
             # Deduct points
             user.points -= item.price
-            
+
             # Record purchase
             purchase = UserPurchase(
                 user_id=user_id,
@@ -179,16 +292,16 @@ class ShopService:
                 price_paid=item.price
             )
             self.session.add(purchase)
-            
+
             # Unlock lore piece if applicable
             unlocked_lore = False
             if item.unlocks_lore_piece_id:
                 # Add to user's lore pieces (backpack) directly
                 unlocked_lore = await self._add_to_backpack(user_id, item_id, item)
-            
+
             await self.session.commit()
             return {
-                "success": True, 
+                "success": True,
                 "message": "Purchase successful",
                 "unlocked_lore": unlocked_lore
             }

@@ -199,12 +199,28 @@ class AdminShopStates(StatesGroup):
     creating_description = State()
     creating_price = State()
     creating_vip_only = State()
+    uploading_image = State()  # Optional image upload step
+    configuring_stock = State()  # Configure stock limit
+    configuring_max_purchases = State()  # Configure max purchases per user
+    configuring_availability = State()  # Configure availability dates
+    entering_available_from = State()  # Enter start date
+    entering_available_until = State()  # Enter end date
     selecting_unlock = State()
     confirming_creation = State()
 
     editing_name = State()
     editing_description = State()
     editing_price = State()
+    editing_image = State()  # Edit/add/remove image
+    editing_stock = State()  # Edit stock limit
+    editing_max_purchases = State()  # Edit max purchases per user
+    editing_availability = State()  # Edit availability dates
+    editing_requirements = State()  # Edit unlock requirements
 
     configuring_decision_id = State()
     configuring_teaser_fragment = State()
+
+    # Compound requirements configuration
+    configuring_requirements = State()
+    selecting_requirement_type = State()
+    entering_requirement_value = State()
