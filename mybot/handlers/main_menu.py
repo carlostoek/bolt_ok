@@ -42,7 +42,56 @@ async def handle_help_button(message: Message, session: AsyncSession):
 
 @router.message(F.text == "📖 Historia")
 async def handle_narrative_button(message: Message, session: AsyncSession):
-    await start_narrative_command(message, session)
+    """Continúa la narrativa desde donde se quedó el usuario o inicia si es nuevo."""
+    from services.narrative_service import NarrativeService
+    from services.coordinador_central import CoordinadorCentral, AccionUsuario
+    from handlers.narrative_handler import _display_narrative_fragment
+    import logging
+
+    logger = logging.getLogger(__name__)
+    user_id = message.from_user.id
+
+    try:
+        service = NarrativeService(session, message.bot)
+
+        # Check if user has a shop redirect fragment to return to
+        user_state = await service._get_or_create_user_state(user_id)
+        logger.info(f"[HISTORIA_BUTTON_DEBUG] User {user_id} state: shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}, current_fragment={user_state.current_fragment_key}")
+
+        # First, check if there's a pending decision to process (e.g., after shop purchase)
+        if user_state.shop_redirect_fragment_key and user_state.pending_decision_id:
+            logger.info(f"[HISTORIA_BUTTON_DEBUG] Processing pending decision {user_state.pending_decision_id}")
+            coordinador = CoordinadorCentral(session)
+
+            result = await coordinador.ejecutar_flujo(
+                user_id,
+                AccionUsuario.TOMAR_DECISION,
+                decision_id=user_state.pending_decision_id
+            )
+
+            if result["success"] and result.get("fragment"):
+                # Clear flags and show the unlocked fragment
+                user_state.shop_redirect_fragment_key = None
+                user_state.pending_decision_id = None
+                await session.commit()
+                logger.info(f"[HISTORIA_BUTTON_DEBUG] Showing unlocked fragment: {result['fragment'].key}")
+                await _display_narrative_fragment(message, result["fragment"], session)
+                return
+
+        # Try to get current fragment (where user left off)
+        current_fragment = await service.get_user_current_fragment(user_id)
+
+        if current_fragment:
+            logger.info(f"[HISTORIA_BUTTON_DEBUG] Continuing from fragment: {current_fragment.key}")
+            await _display_narrative_fragment(message, current_fragment, session)
+        else:
+            # New user - start narrative from beginning
+            logger.info(f"[HISTORIA_BUTTON_DEBUG] Starting new narrative for user {user_id}")
+            await start_narrative_command(message, session)
+
+    except Exception as e:
+        logger.error(f"Error in historia button for user {user_id}: {e}", exc_info=True)
+        await message.answer("❌ Error al cargar la historia. Intenta nuevamente.")
 
 @router.message(F.text == "🔓 Nivel de Muestra")
 async def handle_sample_level_button(message: Message, session: AsyncSession):

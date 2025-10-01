@@ -5,7 +5,7 @@ Maneja la lógica de fragmentos, decisiones y progresión de historia.
 import logging
 from typing import Optional, Dict, Any, List
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from database.models import User, Achievement
 from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
 from services.point_service import PointService

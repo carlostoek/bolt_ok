@@ -380,21 +380,37 @@ class CoordinadorCentral:
             if not has_item:
                 # Store the pending decision in user state to process after purchase
                 user_state = await self.narrative_service._get_or_create_user_state(user_id)
-                user_state.shop_redirect_fragment_key = user_state.current_fragment_key
+
+                logger.info(f"[DECISION_BLOCK_DEBUG] User {user_id} attempting decision {decision_id} without item {required_item}")
+                logger.info(f"[DECISION_BLOCK_DEBUG] Current state: current_fragment={user_state.current_fragment_key}, shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}")
+
+                # Only set shop_redirect_fragment_key if not already set
+                if not user_state.shop_redirect_fragment_key:
+                    user_state.shop_redirect_fragment_key = user_state.current_fragment_key
+                    logger.info(f"[DECISION_BLOCK_DEBUG] Set shop_redirect_fragment_key to {user_state.current_fragment_key}")
+                else:
+                    logger.info(f"[DECISION_BLOCK_DEBUG] Preserving existing shop_redirect_fragment_key: {user_state.shop_redirect_fragment_key}")
+
                 # Store the decision_id to process later
                 user_state.pending_decision_id = decision_id
+                logger.info(f"[DECISION_BLOCK_DEBUG] Set pending_decision_id to {decision_id}")
+
                 await self.session.commit()
-                
+                logger.info(f"[DECISION_BLOCK_DEBUG] Committed state for user {user_id}")
+
                 # For diary intimate decision, redirect to teaser fragment instead of blocking
                 if decision_id == 15:  # Diary intimate decision
                     # Process decision to teaser fragment instead
                     teaser_fragment = await self.narrative_service._get_fragment_by_key("diana_diary_tease")
                     if teaser_fragment:
+                        logger.info(f"[DECISION_BLOCK_DEBUG] Redirecting to teaser fragment: {teaser_fragment.key}")
                         # Update user state to teaser fragment
                         user_state.current_fragment_key = teaser_fragment.key
                         user_state.fragments_visited = (user_state.fragments_visited or 0) + 1
                         await self.narrative_service._process_fragment_rewards(user_id, teaser_fragment)
                         await self.session.commit()
+
+                        logger.info(f"[DECISION_BLOCK_DEBUG] After teaser redirect - current_fragment={user_state.current_fragment_key}, shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}")
 
                         return {
                             "success": True,

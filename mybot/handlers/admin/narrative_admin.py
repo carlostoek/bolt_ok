@@ -473,13 +473,13 @@ Ahora puedes añadir decisiones a este fragmento para crear el flujo narrativo."
 
 
 @router.callback_query(F.data == "narrative_create_cancel")
-async def cancel_create_fragment(callback: CallbackQuery, state: FSMContext):
+async def cancel_create_fragment(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Cancela la creación de fragmento"""
     await state.clear()
     await callback.answer("❌ Creación cancelada")
 
     # Volver al listado de fragmentos
-    await show_fragments_management(callback, callback.message.bot.get("session"))
+    await show_fragments_management(callback, session)
 
 
 # ==================== EDICIÓN DE FRAGMENTOS ====================
