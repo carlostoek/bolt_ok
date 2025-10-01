@@ -382,9 +382,7 @@ class CoordinadorCentral:
                 user_state = await self.narrative_service._get_or_create_user_state(user_id)
                 user_state.shop_redirect_fragment_key = user_state.current_fragment_key
                 # Store the decision_id to process later
-                if not hasattr(user_state, 'pending_decision_id'):
-                    # If we need to store additional data, we can use JSON field
-                    user_state.pending_decision_id = decision_id
+                user_state.pending_decision_id = decision_id
                 await self.session.commit()
                 
                 # For diary intimate decision, redirect to teaser fragment instead of blocking
