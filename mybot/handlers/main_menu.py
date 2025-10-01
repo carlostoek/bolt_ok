@@ -5,6 +5,7 @@ from handlers.lore_handlers import show_lore_backpack
 from handlers.missions_handler import show_available_missions
 from handlers.narrative_handler import start_narrative_command
 from keyboards.main_menu_kb import get_main_menu_keyboard
+from utils.localization import get_text
 import logging
 
 logger = logging.getLogger(__name__)
@@ -17,7 +18,7 @@ async def handle_backpack_button(message: Message, session: AsyncSession):
 
 @router.message(F.text == "💰 Billetera")
 async def handle_wallet_button(message: Message, session: AsyncSession):
-    await message.answer("💰 **Tu Billetera**\n\nFuncionalidad en desarrollo...")
+    await message.answer(get_text("main_menu_handler.wallet_in_development"))
 
 @router.message(F.text == "🎯 Misiones")
 async def handle_missions_button(message: Message, session: AsyncSession):
@@ -36,11 +37,11 @@ async def handle_missions_button(message: Message, session: AsyncSession):
 
 @router.message(F.text == "⚙️ Configuración")
 async def handle_config_button(message: Message, session: AsyncSession):
-    await message.answer("⚙️ **Configuración**\n\nOpciones de usuario...")
+    await message.answer(get_text("main_menu_handler.config_in_development"))
 
 @router.message(F.text == "❓ Ayuda")
 async def handle_help_button(message: Message, session: AsyncSession):
-    await message.answer("❓ **Ayuda**\n\nGuía de uso del bot...")
+    await message.answer(get_text("main_menu_handler.help_in_development"))
 
 @router.message(F.text == "📖 Historia")
 async def handle_narrative_button(message: Message, session: AsyncSession):
@@ -97,7 +98,7 @@ async def handle_narrative_button(message: Message, session: AsyncSession):
 
     except Exception as e:
         logger.error(f"Error in historia button for user {user_id}: {e}", exc_info=True)
-        await message.answer("❌ Error al cargar la historia. Intenta nuevamente.")
+        await message.answer(get_text("main_menu_handler.story_load_error"))
 
 @router.message(F.text == "🔓 Nivel de Muestra")
 async def handle_sample_level_button(message: Message, session: AsyncSession):
@@ -112,10 +113,11 @@ async def handle_sample_level_button(message: Message, session: AsyncSession):
     )
     
     if result.get("access_granted"):
-        await message.answer("🔓 **Acceso Concedido al Nivel de Muestra**\n\n¡Bienvenido al contenido exclusivo del Diario de Diana!")
+        await message.answer(get_text("main_menu_handler.sample_level_granted"))
         # Here you would start the actual narrative level
     else:
-        await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")
+        reason = result.get('message', get_text("main_menu_handler.default_access_denied"))
+        await message.answer(get_text("main_menu_handler.access_restricted", reason=reason))
 
 @router.message(F.text == "📓 Diario Íntimo")
 async def handle_diario_intimo_button(message: Message, session: AsyncSession):
@@ -130,10 +132,11 @@ async def handle_diario_intimo_button(message: Message, session: AsyncSession):
     )
 
     if result.get("access_granted"):
-        await message.answer("🔓 **Acceso Concedido al Diario Íntimo**\n\nLas páginas del diario se abren, revelando secretos íntimos de Diana...")
+        await message.answer(get_text("main_menu_handler.diary_level_granted"))
         # Here you would start the actual narrative level
     else:
-        await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")
+        reason = result.get('message', get_text("main_menu_handler.default_access_denied"))
+        await message.answer(get_text("main_menu_handler.access_restricted", reason=reason))
 
 @router.callback_query(F.data == "narrative_main_menu")
 async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
@@ -159,7 +162,7 @@ async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
         logger.error(f"Error returning to main menu for user {user_id}: {e}", exc_info=True)
         # Fallback to simple menu
         await callback.message.edit_text(
-            "🏠 **Menú Principal**\n\n¿Qué deseas hacer?",
+            f"{get_text('main_menu_handler.main_menu_fallback_title')}\n\n{get_text('main_menu_handler.main_menu_fallback_prompt')}",
             reply_markup=get_main_menu_keyboard()
         )
         await callback.answer()
