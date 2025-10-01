@@ -298,6 +298,20 @@ class ShopService:
                 # Add to user's lore pieces (backpack) directly
                 unlocked_lore = await self._add_to_backpack(user_id, item_id, item)
 
+            # Clear any pending decision state after successful purchase
+            from database.narrative_models import UserNarrativeState
+            from sqlalchemy import select
+            
+            # Get user's narrative state
+            stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
+            result = await self.session.execute(stmt)
+            user_narrative_state = result.scalar_one_or_none()
+            
+            if user_narrative_state and user_narrative_state.pending_decision_id:
+                logger.info(f"Clearing pending decision {user_narrative_state.pending_decision_id} for user {user_id} after purchase")
+                user_narrative_state.pending_decision_id = None
+                # Note: We don't clear shop_redirect_fragment_key here because we want to return to the narrative
+            
             await self.session.commit()
             return {
                 "success": True,
