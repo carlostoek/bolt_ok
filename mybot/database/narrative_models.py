@@ -82,6 +82,7 @@ class UserNarrativeState(Base):
     
     # Para redirección desde la tienda
     shop_redirect_fragment_key = Column(String(50), nullable=True)
+    pending_decision_id = Column(Integer, nullable=True)  # Store decision to process after purchase
 
     user = relationship(
         "User", 
