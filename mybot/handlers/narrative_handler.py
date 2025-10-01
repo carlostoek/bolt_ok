@@ -27,6 +27,19 @@ async def start_narrative_command(message: Message, session: AsyncSession):
     try:
         service = NarrativeService(session, message.bot)
 
+        # First, check if user has a shop redirect fragment to return to
+        user_state = await service._get_or_create_user_state(user_id)
+        if user_state.shop_redirect_fragment_key:
+            # Return to the fragment where user was redirected to shop
+            return_fragment = await service._get_fragment_by_key(user_state.shop_redirect_fragment_key)
+            if return_fragment:
+                # Clear the redirect flag and set as current fragment
+                user_state.current_fragment_key = user_state.shop_redirect_fragment_key
+                user_state.shop_redirect_fragment_key = None
+                await session.commit()
+                await _display_narrative_fragment(message, return_fragment, session)
+                return
+
         # Obtener fragmento actual o iniciar narrativa
         current_fragment = await service.get_user_current_fragment(user_id)
 
@@ -95,6 +108,11 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
                 # Check if this is the "Go to shop" special action from teaser
                 if "🛒" in selected_choice.text and ("tienda" in selected_choice.text.lower() or "shop" in selected_choice.text.lower()):
                     logger.info(f"User {user_id} selecting 'Go to Shop' from narrative teaser")
+                    # Store the current fragment key in user state to return later
+                    user_state = await service._get_or_create_user_state(user_id)
+                    user_state.shop_redirect_fragment_key = current_fragment.key
+                    await session.commit()
+                    
                     # Show shop directly instead of going to next fragment
                     from handlers.shop_handlers import show_shop
 
