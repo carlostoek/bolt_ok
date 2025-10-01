@@ -108,11 +108,12 @@ class NarrativeService:
             user_state.choices_made = []
         
         user_state.choices_made.append({
-            "fragment_key": source_fragment_key,
+            "source_fragment_key": source_fragment_key,
+            "destination_fragment_key": next_fragment.key,
             "choice_text": decision.text,
             "timestamp": datetime.utcnow().isoformat()
         })
-        
+
         user_state.current_fragment_key = next_fragment.key
         user_state.fragments_visited = (user_state.fragments_visited or 0) + 1
         user_state.last_activity_at = datetime.utcnow()
@@ -124,19 +125,57 @@ class NarrativeService:
         logger.info(f"Usuario {user_id} avanzó de {source_fragment_key} a {next_fragment.key}")
         return next_fragment
 
+    async def go_back_to_previous_fragment(self, user_id: int) -> Optional[StoryFragment]:
+        """Navega al fragmento anterior en el historial del usuario."""
+        user_state = await self._get_or_create_user_state(user_id)
+
+        if not user_state.choices_made or len(user_state.choices_made) == 0:
+            logger.warning(f"Usuario {user_id} no tiene historial para retroceder")
+            return None
+
+        # Obtener el último elemento del historial
+        last_choice = user_state.choices_made[-1]
+        previous_fragment_key = last_choice.get("source_fragment_key")
+
+        if not previous_fragment_key:
+            logger.warning(f"No se encontró fragmento anterior en el historial para usuario {user_id}")
+            return None
+
+        # Obtener el fragmento anterior
+        previous_fragment = await self._get_fragment_by_key(previous_fragment_key)
+        if not previous_fragment:
+            logger.error(f"Fragmento anterior no encontrado: {previous_fragment_key}")
+            return None
+
+        # Actualizar estado: remover última decisión y regresar al fragmento anterior
+        user_state.choices_made.pop()
+        user_state.current_fragment_key = previous_fragment_key
+        user_state.last_activity_at = datetime.utcnow()
+
+        await self.session.commit()
+
+        logger.info(f"Usuario {user_id} retrocedió a fragmento {previous_fragment_key}")
+        return previous_fragment
+
+    async def can_go_back(self, user_id: int) -> bool:
+        """Verifica si el usuario puede retroceder en la narrativa."""
+        user_state = await self._get_or_create_user_state(user_id)
+        return bool(user_state.choices_made and len(user_state.choices_made) > 0)
+
     async def get_user_narrative_stats(self, user_id: int) -> Dict[str, Any]:
         """Obtiene estadísticas narrativas del usuario."""
         user_state = await self._get_or_create_user_state(user_id)
-        
+
         total_fragments = await self._count_accessible_fragments(user_id)
         progress_percentage = ((user_state.fragments_visited or 0) / max(total_fragments, 1)) * 100
-        
+
         return {
             "current_fragment": user_state.current_fragment_key,
             "fragments_visited": user_state.fragments_visited or 0,
             "total_accessible": total_fragments,
             "progress_percentage": min(progress_percentage, 100),
-            "choices_made": user_state.choices_made or []
+            "choices_made": user_state.choices_made or [],
+            "can_go_back": await self.can_go_back(user_id)
         }
 
     async def _get_or_create_user_state(self, user_id: int) -> UserNarrativeState:

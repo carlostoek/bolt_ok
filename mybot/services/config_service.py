@@ -34,21 +34,35 @@ class ConfigService:
         return entry
 
     async def get_vip_channel_id(self) -> int | None:
+        """Get VIP channel ID from database, with fallback to environment variable."""
         value = await self.get_value(self.VIP_CHANNEL_KEY)
-        try:
-            return int(value) if value is not None else None
-        except (TypeError, ValueError):
-            return None
+
+        if value is not None:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                pass
+
+        # Fallback to environment variable if not in database
+        from utils.config import VIP_CHANNEL_ID
+        return VIP_CHANNEL_ID if VIP_CHANNEL_ID != 0 else None
 
     async def set_vip_channel_id(self, chat_id: int) -> ConfigEntry:
         return await self.set_value(self.VIP_CHANNEL_KEY, str(chat_id))
 
     async def get_free_channel_id(self) -> int | None:
+        """Get free channel ID from database, with fallback to environment variable."""
         value = await self.get_value(self.FREE_CHANNEL_KEY)
-        try:
-            return int(value) if value is not None else None
-        except (TypeError, ValueError):
-            return None
+
+        if value is not None:
+            try:
+                return int(value)
+            except (TypeError, ValueError):
+                pass
+
+        # Fallback to environment variable if not in database
+        from utils.config import FREE_CHANNEL_ID
+        return FREE_CHANNEL_ID if FREE_CHANNEL_ID != 0 else None
 
     async def set_free_channel_id(self, chat_id: int) -> ConfigEntry:
         return await self.set_value(self.FREE_CHANNEL_KEY, str(chat_id))

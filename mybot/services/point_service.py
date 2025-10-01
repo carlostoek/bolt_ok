@@ -38,9 +38,13 @@ class PointService:
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                from services.notification_service import NotificationService
+                await NotificationService.send_achievement(
+                    bot=bot,
+                    user_id=user_id,
+                    achievement_name=badge.name,
+                    icon=badge.icon or "🏅",
+                    description=None
                 )
         return progress
 
@@ -53,9 +57,13 @@ class PointService:
         for badge in new_badges:
             await ach_service.award_badge(user.id, badge.id)
             if bot:
-                await bot.send_message(
-                    user.id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                from services.notification_service import NotificationService
+                await NotificationService.send_achievement(
+                    bot=bot,
+                    user_id=user.id,
+                    achievement_name=badge.name,
+                    icon=badge.icon or "🏅",
+                    description=None
                 )
         return progress
 
@@ -66,9 +74,13 @@ class PointService:
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                from services.notification_service import NotificationService
+                await NotificationService.send_achievement(
+                    bot=bot,
+                    user_id=user_id,
+                    achievement_name=badge.name,
+                    icon=badge.icon or "🏅",
+                    description=None
                 )
         return progress
 
@@ -90,9 +102,13 @@ class PointService:
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                from services.notification_service import NotificationService
+                await NotificationService.send_achievement(
+                    bot=bot,
+                    user_id=user_id,
+                    achievement_name=badge.name,
+                    icon=badge.icon or "🏅",
+                    description=None
                 )
         return True, progress
 
@@ -128,20 +144,19 @@ class PointService:
         for badge in new_badges:
             await ach_service.award_badge(user_id, badge.id)
             if bot:
-                await bot.send_message(
-                    user_id,
-                    f"🏅 Has obtenido la insignia {badge.icon or ''} {badge.name}!",
+                from services.notification_service import NotificationService
+                await NotificationService.send_achievement(
+                    bot=bot,
+                    user_id=user_id,
+                    achievement_name=badge.name,
+                    icon=badge.icon or "🏅",
+                    description=None
                 )
         logger.info(
             f"User {user_id} gained {total} points (base {points}, x{multiplier}). Total: {user.points}"
         )
-        if bot and user.points - progress.last_notified_points >= 5:
-            await bot.send_message(
-                user_id,
-                f"Has acumulado {user.points:.1f} puntos en total",
-            )
-            progress.last_notified_points = user.points
-            await self.session.commit()
+        # REMOVIDO: Notificación automática cada 5 puntos
+        # Las notificaciones ahora las maneja cada handler específico a través de NotificationService
         return progress
 
     async def deduct_points(self, user_id: int, points: int) -> User | None:

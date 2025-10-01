@@ -1,25 +1,36 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 def get_main_menu_keyboard():
-    """Returns the main inline menu keyboard."""
+    """Returns the main inline menu keyboard with organized categories."""
     keyboard = [
+        # 🎭 NARRATIVA (Principal)
         [InlineKeyboardButton(text="📖 Historia", callback_data="start_narrative")],
-        [InlineKeyboardButton(text="💎 Mi Diván", callback_data="vip_subscription")],
-        [
-            InlineKeyboardButton(text="🎯 Misiones", callback_data="menu:missions"),
-            InlineKeyboardButton(text="🎁 Regalo Diario", callback_data="daily_gift")
-        ],
+
+        # 👤 PROGRESO PERSONAL
         [
             InlineKeyboardButton(text="🏆 Mi Perfil", callback_data="menu:profile"),
-            InlineKeyboardButton(text="🗺️ Mochila", callback_data="open_backpack")
+            InlineKeyboardButton(text="💎 Mi Diván", callback_data="vip_subscription")
         ],
+
+        # 🎯 ACTIVIDADES DIARIAS
         [
-            InlineKeyboardButton(text="💝 Recompensas", callback_data="menu:rewards"),
-            InlineKeyboardButton(text="👑 Ranking", callback_data="menu:ranking")
+            InlineKeyboardButton(text="🎯 Misiones", callback_data="menu:missions"),
+            InlineKeyboardButton(text="🎁 Regalo", callback_data="daily_gift")
         ],
+
+        # 🛍️ ECONOMÍA & TIENDA
         [
-            InlineKeyboardButton(text="🏛️ Subastas", callback_data="auction_main"),
-            InlineKeyboardButton(text="🛒 Tienda", callback_data="shop_access")
+            InlineKeyboardButton(text="🛒 Tienda", callback_data="shop_access"),
+            InlineKeyboardButton(text="🏛️ Subastas", callback_data="auction_main")
         ],
+
+        # 🎒 COLECCIONES
+        [
+            InlineKeyboardButton(text="🗺️ Mochila", callback_data="open_backpack"),
+            InlineKeyboardButton(text="💝 Recompensas", callback_data="menu:rewards")
+        ],
+
+        # 👥 SOCIAL
+        [InlineKeyboardButton(text="👑 Ranking", callback_data="menu:ranking")]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)

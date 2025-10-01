@@ -158,14 +158,16 @@ class MissionService:
         await self.session.refresh(user)
 
         if bot:
-            from utils.message_utils import get_mission_completed_message
+            from services.notification_service import NotificationService
             from keyboards.mission_completed_kb import get_mission_completed_keyboard
 
-            text = await get_mission_completed_message(mission)
-            await bot.send_message(
-                user_id,
-                text,
-                reply_markup=get_mission_completed_keyboard(),
+            # Enviar notificación consolidada a través del servicio
+            await NotificationService.send_mission_completed(
+                bot=bot,
+                user_id=user_id,
+                mission_name=mission.name,
+                reward_points=mission.reward_points,
+                reply_markup=get_mission_completed_keyboard()
             )
 
         logger.info(
@@ -244,16 +246,19 @@ class MissionService:
             if progress >= mission.target_value:
                 record.completed = True
                 record.completed_at = datetime.datetime.utcnow()
-                await self.point_service.add_points(user_id, mission.reward_points, bot=bot)
+                # Añadir puntos SIN enviar notificación
+                await self.point_service.add_points(user_id, mission.reward_points, bot=None)
                 if bot:
-                    from utils.message_utils import get_mission_completed_message
+                    from services.notification_service import NotificationService
                     from keyboards.mission_completed_kb import get_mission_completed_keyboard
 
-                    text = await get_mission_completed_message(mission)
-                    await bot.send_message(
-                        user_id,
-                        text,
-                        reply_markup=get_mission_completed_keyboard(),
+                    # Enviar UNA SOLA notificación consolidada
+                    await NotificationService.send_mission_completed(
+                        bot=bot,
+                        user_id=user_id,
+                        mission_name=mission.name,
+                        reward_points=mission.reward_points,
+                        reply_markup=get_mission_completed_keyboard()
                     )
         await self.session.commit()
 

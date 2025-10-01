@@ -65,18 +65,32 @@ async def handle_reaction_callback(
         return
 
     from services.point_service import PointService
+    from services.notification_service import NotificationService
 
     points_dict = await channel_service.get_reaction_points(channel_id)
     points = float(points_dict.get(reaction_type, 0.0))
 
-    await PointService(session).add_points(callback.from_user.id, points, bot=bot)
+    # Añadir puntos SIN enviar notificación (el NotificationService lo hará)
+    await PointService(session).add_points(callback.from_user.id, points, bot=None)
+
     from services.mission_service import MissionService
     mission_service = MissionService(session)
-    await mission_service.update_progress(callback.from_user.id, "reaction", bot=bot)
+    # Actualizar progreso SIN enviar notificación (el NotificationService lo hará)
+    await mission_service.update_progress(callback.from_user.id, "reaction", bot=None)
 
     await service.update_reaction_markup(chat_id, message_id)
-    await callback.answer(BOT_MESSAGES["reaction_registered_points"].format(points=points))
-    await bot.send_message(
-        callback.from_user.id,
-        BOT_MESSAGES["reaction_registered_points"].format(points=points),
+
+    # Solo answer() para confirmar el click, sin texto
+    await callback.answer()
+
+    # Enviar UNA SOLA notificación consolidada a través del servicio
+    from database.models import User
+    user = await session.get(User, callback.from_user.id)
+    await NotificationService.send_points_notification(
+        bot=bot,
+        user_id=callback.from_user.id,
+        points_gained=points,
+        total_points=user.points if user else 0,
+        multiplier=1.0,
+        context="reaction"
     )

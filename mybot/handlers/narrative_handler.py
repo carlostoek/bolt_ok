@@ -73,16 +73,16 @@ async def start_narrative_command(message: Message, session: AsyncSession):
 async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession):
     """Maneja las decisiones narrativas del usuario."""
     user_id = callback.from_user.id
-    
+
     try:
         # Extraer índice de la decisión
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
             await callback.answer("❌ Decisión inválida", show_alert=True)
             return
-        
+
         choice_index = int(choice_data[1])
-        
+
         service = NarrativeService(session, callback.bot)
 
         # Get current fragment and choices to check for special decisions
@@ -91,6 +91,27 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
             choices = await service._get_fragment_choices(current_fragment.id)
             if 0 <= choice_index < len(choices):
                 selected_choice = choices[choice_index]
+
+                # Check if this is the "Go to shop" special action from teaser
+                if "🛒" in selected_choice.text and ("tienda" in selected_choice.text.lower() or "shop" in selected_choice.text.lower()):
+                    logger.info(f"User {user_id} selecting 'Go to Shop' from narrative teaser")
+                    # Show shop directly instead of going to next fragment
+                    from handlers.shop_handlers import show_shop
+
+                    # Create a mock callback for shop handler
+                    class MockCallback:
+                        def __init__(self, original_callback):
+                            self.from_user = original_callback.from_user
+                            self.message = original_callback.message
+                            self.bot = original_callback.bot
+                            self._callback = original_callback
+
+                        async def answer(self, *args, **kwargs):
+                            await self._callback.answer(*args, **kwargs)
+
+                    mock_callback = MockCallback(callback)
+                    await show_shop(mock_callback, session)
+                    return
 
                 # Check if this is a special decision that requires item verification
                 if "diario íntimo" in selected_choice.text.lower():
@@ -121,7 +142,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
                 next_fragment = None
         else:
             next_fragment = None
-        
+
         if not next_fragment:
             await callback.answer(
                 "❌ No puedes tomar esta decisión ahora. "
@@ -129,11 +150,11 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
                 show_alert=True
             )
             return
-        
+
         # Mostrar siguiente fragmento
         await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
         await callback.answer()
-        
+
     except ValueError:
         await callback.answer("❌ Decisión inválida", show_alert=True)
     except Exception as e:
@@ -294,6 +315,28 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
         logger.error(f"Error continuando narrativa para usuario {user_id}: {e}")
         await callback.answer("❌ Error cargando la historia", show_alert=True)
 
+@router.callback_query(F.data == "narrative_go_back")
+async def go_back_narrative(callback: CallbackQuery, session: AsyncSession):
+    """Navega al fragmento anterior en la historia."""
+    user_id = callback.from_user.id
+
+    try:
+        service = NarrativeService(session, callback.bot)
+        previous_fragment = await service.go_back_to_previous_fragment(user_id)
+
+        if previous_fragment:
+            await _display_narrative_fragment(callback.message, previous_fragment, session, is_callback=True)
+            await callback.answer("⬅️ Regresaste al fragmento anterior")
+        else:
+            await callback.answer(
+                "❌ No puedes retroceder más. Estás al inicio de la historia.",
+                show_alert=True
+            )
+
+    except Exception as e:
+        logger.error(f"Error retrocediendo en narrativa para usuario {user_id}: {e}")
+        await callback.answer("❌ Error al retroceder", show_alert=True)
+
 @router.callback_query(F.data == "narrative_help")
 async def show_narrative_help(callback: CallbackQuery, session: AsyncSession):
     """Muestra ayuda sobre el sistema narrativo."""
@@ -313,8 +356,12 @@ async def show_narrative_help(callback: CallbackQuery, session: AsyncSession):
 • `/historia` - Continuar tu aventura
 • `/mi_historia` - Ver tu progreso
 
+🔄 **Navegación**:
+• Usa el botón ⬅️ Atrás para revisar decisiones previas
+• El botón 📊 Progreso muestra tu avance en la historia
+
 💡 **Consejo**: Presta atención a cada detalle, algunas pistas están ocultas en las reacciones y misiones."""
-    
+
     await callback.message.edit_text(
         help_text,
         reply_markup=get_narrative_stats_keyboard()
@@ -356,24 +403,42 @@ async def show_narrative_stats_callback(callback: CallbackQuery, session: AsyncS
         await callback.answer("❌ Error cargando estadísticas", show_alert=True)
 
 async def _display_narrative_fragment(
-    message: Message, 
-    fragment, 
-    session: AsyncSession, 
+    message: Message,
+    fragment,
+    session: AsyncSession,
     is_callback: bool = False
 ):
     """Muestra un fragmento narrativo con sus opciones."""
+    # Obtener user_id
+    user_id = message.from_user.id if hasattr(message, 'from_user') else (message.chat.id if hasattr(message, 'chat') else None)
+
+    # Obtener estadísticas de progreso
+    progress_info = ""
+    if user_id:
+        try:
+            service = NarrativeService(session)
+            stats = await service.get_user_narrative_stats(user_id)
+            fragments_visited = stats.get('fragments_visited', 0)
+            total_accessible = stats.get('total_accessible', 0)
+            progress_pct = stats.get('progress_percentage', 0)
+
+            # Crear indicador visual de progreso
+            progress_info = f"📍 **Fragmento {fragments_visited}/{total_accessible}** • Nivel {fragment.level} • {progress_pct:.0f}%\n\n"
+        except Exception as e:
+            logger.warning(f"No se pudo obtener progreso para usuario {user_id}: {e}")
+
     # Formatear el texto del fragmento
     character_emoji = "🎩" if fragment.character == "Lucien" else "🌸"
-    
-    fragment_text = f"{character_emoji} **{fragment.character}:**\n\n*{fragment.text}*"
-    
+
+    fragment_text = f"{progress_info}{character_emoji} **{fragment.character}:**\n\n*{fragment.text}*"
+
     # Agregar información de recompensas si las hay
     if fragment.reward_besitos > 0:
         fragment_text += f"\n\n✨ *Has ganado {fragment.reward_besitos} besitos*"
-    
-    # Crear teclado con opciones
-    keyboard = await get_narrative_keyboard(fragment, session)
-    
+
+    # Crear teclado con opciones (pasando user_id para navegación)
+    keyboard = await get_narrative_keyboard(fragment, session, user_id=user_id)
+
     # Mostrar el fragmento
     if is_callback:
         await safe_edit(message, fragment_text, reply_markup=keyboard)

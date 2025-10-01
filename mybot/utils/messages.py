@@ -14,10 +14,13 @@ BUTLER_MESSAGES = {
         "¿Desea continuar su travesía en *El Juego del Diván*?"
     ),
     "vip_activation_details": (
-        "Su membresía VIP ha sido activada por {duration} días.\n"
-        "Expira el: {expires_at}.\n\n"
-        "Si lo desea, puede unirse a nuestro canal VIP con el enlace a continuación:\n{invite_link}\n\n"
-        "Este enlace es personal y expirará en 24 horas."
+        "✨ Su membresía VIP ha sido activada por {duration} días.\n"
+        "📅 Expira el: {expires_at}\n\n"
+        "🔐 A continuación, le presento su invitación personal al Canal VIP.\n"
+        "Al hacer clic en el enlace, se unirá automáticamente y de inmediato:\n\n"
+        "{invite_link}\n\n"
+        "⚠️ Este enlace es exclusivo para usted y expirará en 24 horas.\n"
+        "¡Le doy la bienvenida al exclusivo mundo del Diván!"
     ),
     "vip_activation_no_link": (
         "Su membresía VIP ha sido activada por {duration} días.\n"
