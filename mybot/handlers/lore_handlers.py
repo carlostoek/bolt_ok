@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from database.models import LorePiece, UserLorePiece
+from utils.localization import get_text
 from aiogram import Bot
 
 
@@ -38,7 +39,7 @@ async def show_lore_backpack(message: Message, session: AsyncSession) -> None:
     purchase_records = result.all()
 
     if not lore_records and not purchase_records:
-        await message.answer("Tu mochila está vacía. ¡Compra ítems en la tienda o desbloquea pistas!")
+        await message.answer(get_text("backpack.empty_message_lore"))
         return
 
     # Prepare lore pieces
@@ -50,7 +51,7 @@ async def show_lore_backpack(message: Message, session: AsyncSession) -> None:
                 'type': 'lore',
                 'title': piece.title,
                 'code_name': piece.code_name,
-                'description': f"Pista: {piece.title}"
+                'description': get_text("backpack.lore_prefix", title=piece.title)
             })
 
     # Prepare purchased items
@@ -60,7 +61,7 @@ async def show_lore_backpack(message: Message, session: AsyncSession) -> None:
             'type': 'item',
             'title': shop_item.name,
             'item_id': shop_item.id,
-            'description': f"Comprado: {shop_item.name} ({shop_item.price} besitos)"
+            'description': get_text("backpack.item_prefix", name=shop_item.name, price=shop_item.price)
         })
 
     # Combine all items
@@ -71,17 +72,19 @@ async def show_lore_backpack(message: Message, session: AsyncSession) -> None:
     for item in all_items:
         if item['type'] == 'lore':
             keyboard_buttons.append(
-                [InlineKeyboardButton(text=f"📖 {item['title']}", callback_data=f"show_lore_piece:{item['code_name']}")]
+                [InlineKeyboardButton(text=get_text("backpack.lore_button_prefix", title=item['title']),
+                                  callback_data=f"show_lore_piece:{item['code_name']}")]
             )
         else:
             keyboard_buttons.append(
-                [InlineKeyboardButton(text=f"🛍️ {item['title']}", callback_data=f"show_purchased_item:{item['item_id']}")]
+                [InlineKeyboardButton(text=get_text("backpack.item_button_prefix", title=item['title']),
+                                  callback_data=f"show_purchased_item:{item['item_id']}")]
             )
 
     keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
     await message.answer(
-        "🎒 **Tu Mochila**\n\nAquí están todos tus ítems comprados y pistas desbloqueadas:",
+        f"{get_text('backpack.title')}\n\n{get_text('backpack.header')}",
         reply_markup=keyboard,
     )
 
@@ -95,7 +98,7 @@ async def show_lore_piece(callback: CallbackQuery, session: AsyncSession) -> Non
     piece = result.scalar_one_or_none()
 
     if not piece:
-        await callback.answer("Pista no encontrada", show_alert=True)
+        await callback.answer(get_text("backpack.lore_not_found"), show_alert=True)
         return
 
     try:
@@ -109,7 +112,7 @@ async def show_lore_piece(callback: CallbackQuery, session: AsyncSession) -> Non
             await callback.message.answer(piece.content)
     except Exception as exc:
         logger.error("Error sending lore piece %s: %s", code, exc)
-        await callback.answer("No se pudo mostrar la pista", show_alert=True)
+        await callback.answer(get_text("backpack.lore_display_error"), show_alert=True)
         return
 
     await callback.answer()
@@ -125,7 +128,7 @@ async def show_purchased_item(callback: CallbackQuery, session: AsyncSession) ->
     item = result.scalar_one_or_none()
 
     if not item:
-        await callback.answer("Ítem no encontrado", show_alert=True)
+        await callback.answer(get_text("backpack.item_not_found"), show_alert=True)
         return
 
     # Get purchase details
@@ -137,24 +140,26 @@ async def show_purchased_item(callback: CallbackQuery, session: AsyncSession) ->
     purchase = result.scalar_one_or_none()
 
     if not purchase:
-        await callback.answer("No tienes este ítem", show_alert=True)
+        await callback.answer(get_text("backpack.item_not_owned"), show_alert=True)
         return
 
     # Create a nice message about the purchased item
-    message = f"🛍️ **{item.name}**\n\n"
-    message += f"💎 Precio pagado: {purchase.price_paid} besitos\n"
-    message += f"📅 Comprado el: {purchase.purchased_at.strftime('%Y-%m-%d %H:%M')}\n\n"
+    message_parts = [
+        get_text("backpack.purchased_item_title", name=item.name),
+        get_text("backpack.price_paid", price=purchase.price_paid),
+        get_text("backpack.purchase_date", date=purchase.purchased_at.strftime('%Y-%m-%d %H:%M'))
+    ]
     
     if item.description:
-        message += f"📝 Descripción: {item.description}\n\n"
+        message_parts.append(get_text("backpack.description", description=item.description))
     
     if item.unlocks_lore_piece_id:
         from database.models import LorePiece
         lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
         if lore_piece:
-            message += f"✨ Desbloquea: {lore_piece.title}\n"
+            message_parts.append(get_text("backpack.unlocks", title=lore_piece.title))
     
-    message += "\n¡Gracias por tu compra! 💋"
+    message_parts.append(get_text("backpack.purchase_thanks"))
 
-    await callback.message.answer(message)
+    await callback.message.answer("\n".join(message_parts))
     await callback.answer()

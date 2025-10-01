@@ -13,6 +13,7 @@ from services.narrative_loader import NarrativeLoader
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
 from utils.user_roles import get_user_role
+from utils.localization import get_text
 import logging
 from aiogram import Bot
 
@@ -93,9 +94,7 @@ async def start_narrative_command(message: Message, session: AsyncSession):
                 # Add a message indicating they can now proceed
                 await safe_answer(
                     message,
-                    f"🛒 **Regresando de la Tienda**\n\n"
-                    f"Has adquirido el ítem necesario. Ahora puedes continuar con tu historia...\n\n"
-                    f"💡 *Si la decisión no se procesa automáticamente, selecciónala nuevamente.*"
+                    get_text("narrative.handler.shop_return_message")
                 )
                 await _display_narrative_fragment(message, return_fragment, session)
                 return
@@ -126,9 +125,7 @@ async def start_narrative_command(message: Message, session: AsyncSession):
             if not current_fragment:
                 await safe_answer(
                     message,
-                    "❌ **Historia No Disponible**\n\n"
-                    "No se pudo cargar la narrativa. Puede que necesites completar "
-                    "algunas misiones primero o que el sistema esté en mantenimiento."
+                    get_text("narrative.handler.story_not_available")
                 )
                 return
 
@@ -139,8 +136,7 @@ async def start_narrative_command(message: Message, session: AsyncSession):
         logger.error(f"Error en comando historia para usuario {user_id}: {e}")
         await safe_answer(
             message,
-            "❌ **Error Temporal**\n\n"
-            "Hubo un problema al cargar tu historia. Intenta nuevamente en unos momentos."
+            get_text("narrative.handler.story_load_error")
         )
 
 @router.callback_query(F.data.startswith("narrative_choice:"))
@@ -152,7 +148,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         # Extraer índice de la decisión
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
-            await callback.answer("❌ Decisión inválida", show_alert=True)
+            await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
             return
 
         choice_index = int(choice_data[1])
@@ -220,7 +216,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
                         next_fragment = result.get("fragment")
                     else:
                         logger.warning(f"[DECISION_DEBUG] Decision failed: {result.get('message')}")
-                        await callback.answer(result.get("message", "No puedes tomar esta decisión"), show_alert=True)
+                        await callback.answer(result.get("message", get_text("narrative.handler.cannot_make_decision")), show_alert=True)
                         return
                 else:
                     # Process normal decision using the actual decision ID, not the choice index
@@ -248,10 +244,10 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         await callback.answer()
 
     except ValueError:
-        await callback.answer("❌ Decisión inválida", show_alert=True)
+        await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
     except Exception as e:
         logger.error(f"Error procesando decisión narrativa para usuario {user_id}: {e}")
-        await callback.answer("❌ Error procesando tu decisión", show_alert=True)
+        await callback.answer(get_text("narrative.handler.processing_decision_error"), show_alert=True)
 
 @router.callback_query(F.data.startswith("enhanced_l1f1_choice:"))
 async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSession):
@@ -262,7 +258,7 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
         # Extraer índice de la elección
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
-            await callback.answer("❌ Decisión inválida", show_alert=True)
+            await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
             return
 
         choice_index = int(choice_data[1])
@@ -273,12 +269,12 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
         # Cargar datos del enhanced L1F1 para obtener la elección
         enhanced_fragment = await _try_load_enhanced_l1f1(session)
         if not enhanced_fragment:
-            await callback.answer("❌ Error procesando elección", show_alert=True)
+            await callback.answer(get_text("narrative.handler.processing_choice_error"), show_alert=True)
             return
 
         choices = enhanced_fragment.get('choices', [])
         if not (0 <= choice_index < len(choices)):
-            await callback.answer("❌ Elección inválida", show_alert=True)
+            await callback.answer(get_text("narrative.handler.invalid_choice"), show_alert=True)
             return
 
         selected_choice = choices[choice_index]
@@ -295,13 +291,13 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
         # Continuar a siguiente fragmento según la elección
         await _process_enhanced_l1f1_followup(callback, choice_index, enhanced_fragment, session)
 
-        await callback.answer("✨ Elección registrada")
+        await callback.answer(get_text("narrative.handler.choice_registered"))
 
     except ValueError:
-        await callback.answer("❌ Decisión inválida", show_alert=True)
+        await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
     except Exception as e:
         logger.error(f"Error procesando elección enhanced L1F1 para usuario {user_id}: {e}")
-        await callback.answer("❌ Error procesando tu elección", show_alert=True)
+        await callback.answer(get_text("narrative.handler.processing_choice_error"), show_alert=True)
 
 @router.callback_query(F.data == "narrative_auto_continue")
 async def handle_auto_continue(callback: CallbackQuery, session: AsyncSession):
@@ -325,15 +321,15 @@ async def handle_auto_continue(callback: CallbackQuery, session: AsyncSession):
                 
                 await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
             else:
-                await callback.answer("❌ Error en la continuación automática", show_alert=True)
+                await callback.answer(get_text("narrative.handler.auto_continue_error"), show_alert=True)
         else:
-            await callback.answer("❌ No hay continuación automática disponible", show_alert=True)
+            await callback.answer(get_text("narrative.handler.no_auto_continue"), show_alert=True)
         
         await callback.answer()
         
     except Exception as e:
         logger.error(f"Error en continuación automática para usuario {user_id}: {e}")
-        await callback.answer("❌ Error en la continuación", show_alert=True)
+        await callback.answer(get_text("narrative.handler.continue_error"), show_alert=True)
 
 @router.message(Command("mi_historia"))
 async def show_narrative_stats(message: Message, session: AsyncSession):
@@ -346,28 +342,29 @@ async def show_narrative_stats(message: Message, session: AsyncSession):
         
         # Crear mensaje de estadísticas
         if stats["current_fragment"]:
-            stats_text = f"""
-📖 **Tu Historia Personal**
-
-🎭 **Fragmento Actual**: {stats['current_fragment']}
-📊 **Progreso**: {stats['progress_percentage']:.1f}%
-🗺️ **Fragmentos Visitados**: {stats['fragments_visited']}
-🎯 **Total Accesible**: {stats['total_accessible']}
-
-🎪 **Decisiones Tomadas**: {len(stats['choices_made'])}"""
+            stats_text = (
+                f"{get_text('narrative.stats.title')}\n\n"
+                f"{get_text('narrative.stats.current_fragment', fragment=stats['current_fragment'])}\n"
+                f"{get_text('narrative.stats.progress', progress_percentage=stats['progress_percentage'])}\n"
+                f"{get_text('narrative.stats.fragments_visited', visited=stats['fragments_visited'])}\n"
+                f"{get_text('narrative.stats.total_accessible', total=stats['total_accessible'])}\n\n"
+                f"{get_text('narrative.stats.choices_made', count=len(stats['choices_made']))}"
+            )
 
             if stats['choices_made']:
-                stats_text += "\n\n🔍 **Últimas Decisiones**:"
+                stats_text += get_text('narrative.stats.last_choices_header')
                 for choice in stats['choices_made'][-3:]:  # Últimas 3 decisiones
-                    stats_text += f"\n• {choice.get('choice_text', 'Decisión desconocida')}"
+                    stats_text += get_text(
+                        'narrative.stats.last_choice_item',
+                        choice_text=choice.get('choice_text', get_text('narrative.stats.unknown_decision'))
+                    )
         else:
-            stats_text = """
-📖 **Tu Historia Personal**
-
-🌟 **Estado**: Historia no iniciada
-🎭 **Sugerencia**: Usa `/historia` para comenzar tu aventura
-
-*Lucien te está esperando...*"""
+            stats_text = (
+                f"{get_text('narrative.stats.title')}\n\n"
+                f"{get_text('narrative.stats.not_started_status')}\n"
+                f"{get_text('narrative.stats.not_started_suggestion')}\n\n"
+                f"{get_text('narrative.stats.not_started_footer')}"
+            )
         
         await safe_answer(
             message,
@@ -379,8 +376,7 @@ async def show_narrative_stats(message: Message, session: AsyncSession):
         logger.error(f"Error mostrando estadísticas narrativas para usuario {user_id}: {e}")
         await safe_answer(
             message,
-            "❌ **Error Temporal**\n\n"
-            "No se pudieron cargar tus estadísticas narrativas."
+            get_text("narrative.handler.stats_load_error")
         )
 
 @router.callback_query(F.data == "continue_narrative")
@@ -396,8 +392,7 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
             await _display_narrative_fragment(callback.message, current_fragment, session, is_callback=True)
         else:
             await callback.message.edit_text(
-                "❌ **Historia No Encontrada**\n\n"
-                "No se pudo cargar tu historia. Usa `/historia` para comenzar.",
+                get_text("narrative.handler.story_not_found"),
                 reply_markup=get_narrative_stats_keyboard()
             )
 
@@ -405,7 +400,7 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
 
     except Exception as e:
         logger.error(f"Error continuando narrativa para usuario {user_id}: {e}")
-        await callback.answer("❌ Error cargando la historia", show_alert=True)
+        await callback.answer(get_text("narrative.handler.load_story_error"), show_alert=True)
 
 @router.callback_query(F.data == "return_from_shop")
 async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
@@ -450,7 +445,7 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
                         if next_fragment:
                             logger.info(f"[SHOP_RETURN_DEBUG] Showing next fragment {next_fragment.key} to user {user_id}")
                             await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
-                            await callback.answer("✨ ¡Continuando tu historia!")
+                            await callback.answer(get_text("narrative.handler.continuing_story"))
                             return
                         else:
                             logger.warning(f"[SHOP_RETURN_DEBUG] No fragment returned from pending decision processing for user {user_id}")
@@ -476,7 +471,7 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
                 logger.info(f"[SHOP_RETURN_DEBUG] Cleared flags and set current_fragment to {user_state.current_fragment_key} for user {user_id}")
 
                 await _display_narrative_fragment(callback.message, return_fragment, session, is_callback=True)
-                await callback.answer("🛒 Regresando a tu historia...")
+                await callback.answer(get_text("narrative.handler.return_to_story"))
                 return
 
         # No shop redirect, just continue normally
@@ -486,15 +481,14 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
             await callback.answer()
         else:
             await callback.message.edit_text(
-                "❌ **Historia No Encontrada**\n\n"
-                "No se pudo cargar tu historia. Usa `/historia` para comenzar.",
+                get_text("narrative.handler.story_not_found"),
                 reply_markup=get_narrative_stats_keyboard()
             )
             await callback.answer()
 
     except Exception as e:
         logger.error(f"Error returning from shop for user {user_id}: {e}", exc_info=True)
-        await callback.answer("❌ Error al regresar a la historia", show_alert=True)
+        await callback.answer(get_text("narrative.handler.return_to_story_error"), show_alert=True)
 
 @router.callback_query(F.data == "narrative_go_back")
 async def go_back_narrative(callback: CallbackQuery, session: AsyncSession):
@@ -507,41 +501,37 @@ async def go_back_narrative(callback: CallbackQuery, session: AsyncSession):
 
         if previous_fragment:
             await _display_narrative_fragment(callback.message, previous_fragment, session, is_callback=True)
-            await callback.answer("⬅️ Regresaste al fragmento anterior")
+            await callback.answer(get_text("narrative.handler.returned_to_previous_fragment"))
         else:
             await callback.answer(
-                "❌ No puedes retroceder más. Estás al inicio de la historia.",
+                get_text("narrative.handler.cannot_go_back"),
                 show_alert=True
             )
 
     except Exception as e:
         logger.error(f"Error retrocediendo en narrativa para usuario {user_id}: {e}")
-        await callback.answer("❌ Error al retroceder", show_alert=True)
+        await callback.answer(get_text("narrative.handler.go_back_error"), show_alert=True)
 
 @router.callback_query(F.data == "narrative_help")
 async def show_narrative_help(callback: CallbackQuery, session: AsyncSession):
     """Muestra ayuda sobre el sistema narrativo."""
-    help_text = """
-📚 **Guía del Sistema Narrativo**
-
-🎭 **¿Cómo funciona?**
-• Cada decisión que tomes afecta tu historia
-• Gana besitos para desbloquear nuevos fragmentos
-• Algunos caminos requieren suscripción VIP
-
-🎪 **Personajes**:
-• **Lucien**: Tu guía y mayordomo
-• **Diana**: La misteriosa creadora
-
-🎯 **Comandos Útiles**:
-• `/historia` - Continuar tu aventura
-• `/mi_historia` - Ver tu progreso
-
-🔄 **Navegación**:
-• Usa el botón ⬅️ Atrás para revisar decisiones previas
-• El botón 📊 Progreso muestra tu avance en la historia
-
-💡 **Consejo**: Presta atención a cada detalle, algunas pistas están ocultas en las reacciones y misiones."""
+    help_text = (
+        f"{get_text('narrative.help.title')}\n\n"
+        f"{get_text('narrative.help.how_it_works_title')}\n"
+        f"{get_text('narrative.help.line_1')}\n"
+        f"{get_text('narrative.help.line_2')}\n"
+        f"{get_text('narrative.help.line_3')}\n\n"
+        f"{get_text('narrative.help.characters_title')}\n"
+        f"{get_text('narrative.help.char_1')}\n"
+        f"{get_text('narrative.help.char_2')}\n\n"
+        f"{get_text('narrative.help.commands_title')}\n"
+        f"{get_text('narrative.help.cmd_1')}\n"
+        f"{get_text('narrative.help.cmd_2')}\n\n"
+        f"{get_text('narrative.help.navigation_title')}\n"
+        f"{get_text('narrative.help.nav_1')}\n"
+        f"{get_text('narrative.help.nav_2')}\n\n"
+        f"{get_text('narrative.help.tip_title')}"
+    )
 
     await callback.message.edit_text(
         help_text,
@@ -559,19 +549,19 @@ async def show_narrative_stats_callback(callback: CallbackQuery, session: AsyncS
         stats = await service.get_user_narrative_stats(user_id)
         
         if stats["current_fragment"]:
-            stats_text = f"""
-📖 **Tu Historia Personal**
-
-🎭 **Fragmento Actual**: {stats['current_fragment']}
-📊 **Progreso**: {stats['progress_percentage']:.1f}%
-🗺️ **Fragmentos Visitados**: {stats['fragments_visited']}
-🎯 **Total Accesible**: {stats['total_accessible']}"""
+            stats_text = (
+                f"{get_text('narrative.stats.title')}\n\n"
+                f"{get_text('narrative.stats.current_fragment', fragment=stats['current_fragment'])}\n"
+                f"{get_text('narrative.stats.progress', progress_percentage=stats['progress_percentage'])}\n"
+                f"{get_text('narrative.stats.fragments_visited', visited=stats['fragments_visited'])}\n"
+                f"{get_text('narrative.stats.total_accessible', total=stats['total_accessible'])}"
+            )
         else:
-            stats_text = """
-📖 **Tu Historia Personal**
-
-🌟 **Estado**: Historia no iniciada
-🎭 **Sugerencia**: Usa "Continuar Historia" para comenzar"""
+            stats_text = (
+                f"{get_text('narrative.stats.title')}\n\n"
+                f"{get_text('narrative.stats.not_started_status')}\n"
+                f"{get_text('narrative.stats.not_started_suggestion_callback')}"
+            )
         
         await callback.message.edit_text(
             stats_text,
@@ -581,7 +571,7 @@ async def show_narrative_stats_callback(callback: CallbackQuery, session: AsyncS
         
     except Exception as e:
         logger.error(f"Error mostrando estadísticas narrativas para usuario {user_id}: {e}")
-        await callback.answer("❌ Error cargando estadísticas", show_alert=True)
+        await callback.answer(get_text("narrative.handler.stats_callback_error"), show_alert=True)
 
 async def _display_narrative_fragment(
     message: Message,
@@ -604,18 +594,29 @@ async def _display_narrative_fragment(
             progress_pct = stats.get('progress_percentage', 0)
 
             # Crear indicador visual de progreso
-            progress_info = f"📍 **Fragmento {fragments_visited}/{total_accessible}** • Nivel {fragment.level} • {progress_pct:.0f}%\n\n"
+            progress_info = get_text(
+                "narrative.display.fragment_progress",
+                visited=fragments_visited,
+                total=total_accessible,
+                level=fragment.level,
+                progress_pct=progress_pct
+            )
         except Exception as e:
             logger.warning(f"No se pudo obtener progreso para usuario {user_id}: {e}")
 
     # Formatear el texto del fragmento
     character_emoji = "🎩" if fragment.character == "Lucien" else "🌸"
 
-    fragment_text = f"{progress_info}{character_emoji} **{fragment.character}:**\n\n*{fragment.text}*"
+    fragment_text = progress_info + get_text(
+        "narrative.display.character_line",
+        emoji=character_emoji,
+        name=fragment.character,
+        text=fragment.text
+    )
 
     # Agregar información de recompensas si las hay
     if fragment.reward_besitos > 0:
-        fragment_text += f"\n\n✨ *Has ganado {fragment.reward_besitos} besitos*"
+        fragment_text += get_text("narrative.display.reward_line", reward=fragment.reward_besitos)
 
     # Crear teclado con opciones (pasando user_id para navegación)
     keyboard = await get_narrative_keyboard(fragment, session, user_id=user_id)
@@ -676,7 +677,7 @@ async def _display_narrative_fragment(
 @router.callback_query(F.data == "start_narrative")
 async def start_narrative_callback(callback: CallbackQuery, session: AsyncSession):
     """Handles the 'start_narrative' button click by calling the command handler."""
-    await callback.answer("Iniciando historia...")
+    await callback.answer(get_text("narrative.handler.starting_story"))
     await start_narrative_command(callback.message, session)
 
 # Enhanced L1F1 Helper Functions
@@ -798,9 +799,7 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
         # Fallback a mensaje de error
         await safe_answer(
             message,
-            "❌ **Error Temporal**\n\n"
-            "Hubo un problema cargando la experiencia personalizada. "
-            "Usa `/historia` para intentar con la narrativa estándar."
+            get_text("narrative.handler.enhanced_l1f1_load_error")
         )
 
 async def _get_enhanced_l1f1_keyboard(choices: list):
@@ -1083,9 +1082,7 @@ async def _process_enhanced_l1f1_followup(
 
         else:
             await callback.message.edit_text(
-                "❌ **Error en la Elección**\n\n"
-                "Hubo un problema procesando tu elección. "
-                "Usa `/historia` para continuar con la narrativa estándar."
+                get_text("narrative.handler.enhanced_l1f1_choice_error")
             )
 
     except Exception as e:
@@ -1179,7 +1176,7 @@ async def _get_enhanced_followup_keyboard(choices: list):
 
     # Agregar opción para continuar a narrativa estándar
     buttons.append([InlineKeyboardButton(
-        text="🎭 Continuar a la narrativa principal",
+        text=get_text("narrative.handler.continue_to_standard_narrative_button"),
         callback_data="continue_to_standard_narrative"
     )])
 
@@ -1195,15 +1192,12 @@ async def _fallback_to_standard_narrative(callback: CallbackQuery, session: Asyn
     """
     try:
         await callback.message.edit_text(
-            "✨ **Continúando tu Historia**\n\n"
-            "Gracias por compartir tus primeras impresiones conmigo. "
-            "Ahora, permíteme llevarte por el resto de mi mundo...\n\n"
-            "Usa `/historia` para continuar tu aventura."
+            get_text("narrative.handler.fallback_to_standard")
         )
 
     except Exception as e:
         logger.error(f"Error en fallback a narrativa estándar: {e}")
-        await callback.answer("❌ Error continuando la historia", show_alert=True)
+        await callback.answer(get_text("narrative.handler.continue_error"), show_alert=True)
 
 
 async def _show_requirements_message(callback: CallbackQuery, requirements_info: dict, session: AsyncSession):
@@ -1212,88 +1206,86 @@ async def _show_requirements_message(callback: CallbackQuery, requirements_info:
     """
     from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-    user_id = callback.from_user.id
-
     # Build message parts
-    message_parts = ["🚫 **Contenido Bloqueado**\n\n"]
-    message_parts.append("_Esta decisión requiere cumplir ciertos requisitos._\n\n")
-
-    # List missing requirements
-    message_parts.append("**📋 Requisitos:**\n")
+    message_parts = [get_text("narrative.requirements.blocked_title")]
+    message_parts.append(get_text("narrative.requirements.subtitle"))
+    message_parts.append(get_text("narrative.requirements.header"))
 
     has_requirements = False
 
     # Besitos requirement
     if requirements_info.get("required_besitos", 0) > 0:
         has_requirements = True
-        current = requirements_info.get("current_besitos", 0)
-        required = requirements_info.get("required_besitos", 0)
         missing = requirements_info.get("missing_besitos", 0)
-
         status_icon = "✅" if missing <= 0 else "❌"
-        message_parts.append(
-            f"{status_icon} **Besitos:** {current:.0f}/{required} "
-        )
+        
+        message_parts.append(get_text(
+            "narrative.requirements.besitos_req",
+            icon=status_icon,
+            current=requirements_info.get("current_besitos", 0),
+            required=requirements_info.get("required_besitos", 0)
+        ))
 
         if missing > 0:
-            message_parts.append(f"_(Te faltan {missing:.0f})_")
+            message_parts.append(get_text("narrative.requirements.besitos_missing", missing=missing))
+        else:
+            message_parts.append("\n")
 
-        message_parts.append("\n")
 
     # Role requirement
     if requirements_info.get("required_role"):
         has_requirements = True
-        current_role = requirements_info.get("current_role", "free")
-        required_role = requirements_info.get("required_role")
         missing_role = requirements_info.get("missing_role")
-
         status_icon = "✅" if not missing_role else "❌"
 
         role_names = {
-            "vip": "Membresía VIP",
-            "free": "Usuario Gratuito",
-            "admin": "Administrador"
+            "vip": get_text("narrative.requirements.role_vip"),
+            "free": get_text("narrative.requirements.role_free"),
+            "admin": get_text("narrative.requirements.role_admin")
         }
-
+        current_role = requirements_info.get("current_role", "free")
+        required_role = requirements_info.get("required_role")
         current_role_name = role_names.get(current_role, current_role)
         required_role_name = role_names.get(required_role, required_role)
 
-        message_parts.append(
-            f"{status_icon} **Acceso:** {current_role_name}\n"
-        )
+        message_parts.append(get_text(
+            "narrative.requirements.access_req",
+            icon=status_icon,
+            current_role=current_role_name
+        ))
 
         if missing_role:
-            message_parts.append(f"_Necesitas: {required_role_name}_\n")
+            message_parts.append(get_text("narrative.requirements.access_needed", required_role=required_role_name))
 
     if not has_requirements:
-        message_parts.append("_No hay requisitos específicos. Contacta al administrador._\n")
+        message_parts.append(get_text("narrative.requirements.no_specific_req"))
 
     # Add conversion teaser
-    message_parts.append("\n💡 **¿Cómo conseguirlo?**\n\n")
+    message_parts.append(get_text("narrative.requirements.how_to_get_it"))
 
     # Build keyboard with actions
     builder = InlineKeyboardBuilder()
 
     # If missing besitos, offer ways to earn them
     if requirements_info.get("missing_besitos", 0) > 0:
-        message_parts.append("💰 **Gana más besitos:**\n")
-        message_parts.append("• Completa otros fragmentos de la historia\n")
-        message_parts.append("• Participa en eventos y desafíos\n")
-        message_parts.append("• Visita la tienda para productos especiales\n\n")
+        message_parts.append(get_text("narrative.requirements.earn_besitos_title"))
+        message_parts.append(get_text("narrative.requirements.earn_besitos_1"))
+        message_parts.append(get_text("narrative.requirements.earn_besitos_2"))
+        message_parts.append(get_text("narrative.requirements.earn_besitos_3"))
 
-        builder.button(text="🛒 Visitar Tienda", callback_data="shop_access")
+        builder.button(text=get_text("narrative.requirements.visit_shop_button"), callback_data="shop_access")
 
     # If missing role (VIP), offer subscription
     if requirements_info.get("missing_role") == "vip":
-        message_parts.append("✨ **Hazte VIP:**\n")
-        message_parts.append("• Accede a contenido exclusivo\n")
-        message_parts.append("• Desbloquea decisiones especiales\n")
-        message_parts.append("• Gana el doble de besitos\n\n")
+        message_parts.append(get_text("narrative.requirements.get_vip_title"))
+        message_parts.append(get_text("narrative.requirements.get_vip_1"))
+        message_parts.append(get_text("narrative.requirements.get_vip_2"))
+        message_parts.append(get_text("narrative.requirements.get_vip_3"))
 
-        builder.button(text="👑 Información VIP", callback_data="vip_info")
+        builder.button(text=get_text("narrative.requirements.vip_info_button"), callback_data="vip_info")
 
     # Add back button
-    builder.button(text="🔙 Volver", callback_data="continue_narrative")
+    builder.button(text=get_text("narrative.requirements.back_button"), callback_data="continue_narrative")
     builder.adjust(1)
 
     message_text = "".join(message_parts)
@@ -1308,6 +1300,6 @@ async def _show_requirements_message(callback: CallbackQuery, requirements_info:
     except Exception as e:
         logger.error(f"Error showing requirements message: {e}")
         await callback.answer(
-            "❌ No cumples los requisitos para esta decisión",
+            get_text("narrative.requirements.unmet_req_error"),
             show_alert=True
         )

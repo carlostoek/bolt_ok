@@ -6,6 +6,7 @@ from aiogram.types import InlineKeyboardMarkup
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database.narrative_models import NarrativeChoice
+from utils.localization import get_text
 
 async def get_narrative_keyboard(fragment, session: AsyncSession, user_id: int = None) -> InlineKeyboardMarkup:
     """Crea el teclado de decisiones para un fragmento narrativo."""
@@ -29,12 +30,12 @@ async def get_narrative_keyboard(fragment, session: AsyncSession, user_id: int =
     if not choices:
         if fragment.auto_next_fragment_key:
             builder.button(
-                text="➡️ Continuar",
+                text=get_text("narrative.keyboard.continue_story"),
                 callback_data="narrative_auto_continue"
             )
         else:
             builder.button(
-                text="📖 Ver Mi Historia",
+                text=get_text("narrative.keyboard.view_my_story"),
                 callback_data="narrative_stats"
             )
 
@@ -48,18 +49,18 @@ async def get_narrative_keyboard(fragment, session: AsyncSession, user_id: int =
         can_go_back = await narrative_service.can_go_back(user_id)
 
         if can_go_back:
-            nav_row.append(("⬅️ Atrás", "narrative_go_back"))
+            nav_row.append((get_text("narrative.keyboard.go_back"), "narrative_go_back"))
 
     # Botón de progreso
-    nav_row.append(("📊 Progreso", "narrative_stats"))
+    nav_row.append((get_text("narrative.keyboard.progress"), "narrative_stats"))
 
     # Agregar fila de navegación
     for text, callback in nav_row:
         builder.button(text=text, callback_data=callback)
 
     # Fila de utilidades
-    builder.button(text="❓ Ayuda", callback_data="narrative_help")
-    builder.button(text="🏠 Menú", callback_data="narrative_main_menu")
+    builder.button(text=get_text("narrative.keyboard.help"), callback_data="narrative_help")
+    builder.button(text=get_text("narrative.keyboard.main_menu"), callback_data="narrative_main_menu")
 
     builder.adjust(1)  # Un botón por fila para mejor legibilidad
     return builder.as_markup()
@@ -68,9 +69,9 @@ def get_narrative_stats_keyboard() -> InlineKeyboardMarkup:
     """Teclado para las estadísticas narrativas."""
     builder = InlineKeyboardBuilder()
     
-    builder.button(text="📖 Continuar Historia", callback_data="continue_narrative")
-    builder.button(text="❓ Ayuda", callback_data="narrative_help")
-    builder.button(text="🏠 Menú Principal", callback_data="menu_principal")
+    builder.button(text=get_text("narrative.keyboard.continue_story_button"), callback_data="continue_narrative")
+    builder.button(text=get_text("narrative.keyboard.help"), callback_data="narrative_help")
+    builder.button(text=get_text("narrative.keyboard.main_menu_button"), callback_data="menu_principal")
     
     builder.adjust(1)
     return builder.as_markup()

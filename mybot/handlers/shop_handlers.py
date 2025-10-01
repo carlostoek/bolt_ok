@@ -19,6 +19,7 @@ from services.shop_service import ShopService
 from services.condition_checker import ConditionChecker
 from database.models import ShopItem, UserPurchase, LorePiece
 from keyboards.common import build_shop_keyboard
+from utils.localization import get_text
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -80,8 +81,8 @@ Selecciona un producto para ver sus detalles."""
             )
 
         # Add inventory and back buttons
-        builder.button(text="🎒 Mi Mochila", callback_data="view_inventory")
-        builder.button(text="🔙 Volver", callback_data="narrative_main_menu")
+        builder.button(text=get_text("backpack.title_alt"), callback_data="view_inventory")
+        builder.button(text=get_text("backpack.back_button"), callback_data="narrative_main_menu")
         builder.adjust(1)  # One button per row
 
         await callback.message.edit_text(
@@ -380,15 +381,11 @@ async def view_inventory(callback: CallbackQuery, session: AsyncSession):
         purchases = purchases_result.scalars().all()
 
         if not purchases:
-            text = """🎒 **Mi Mochila**
-
-Tu mochila está vacía.
-
-Visita la tienda para adquirir productos exclusivos."""
+            text = get_text("backpack.title_alt") + "\n\n" + get_text("backpack.empty_message_shop")
 
             builder = InlineKeyboardBuilder()
-            builder.button(text="🛒 Ir a la tienda", callback_data="shop_access")
-            builder.button(text="🔙 Volver", callback_data="narrative_main_menu")
+            builder.button(text=get_text("backpack.go_to_shop_button"), callback_data="shop_access")
+            builder.button(text=get_text("backpack.back_button"), callback_data="narrative_main_menu")
             builder.adjust(1)
 
             await callback.message.edit_text(
@@ -400,11 +397,8 @@ Visita la tienda para adquirir productos exclusivos."""
             return
 
         # Build inventory list
-        text = f"""🎒 **Mi Mochila**
-
-Tienes **{len(purchases)}** {'producto' if len(purchases) == 1 else 'productos'}:
-
-"""
+        product_plural = get_text("backpack.product") if len(purchases) == 1 else get_text("backpack.products")
+        text = get_text("backpack.title_alt") + "\n\n" + get_text("backpack.inventory_summary", count=len(purchases), product_plural=product_plural)
 
         # Group purchases by item
         from collections import defaultdict
@@ -425,14 +419,14 @@ Tienes **{len(purchases)}** {'producto' if len(purchases) == 1 else 'productos'}
             text += f"• {item.name}{count_text}\n"
 
             if item.unlocks_lore_piece_id:
-                text += f"  🔓 _Desbloquea contenido narrativo_\n"
+                text += get_text("backpack.unlocks_lore_info") + "\n"
 
-        text += "\n_Los productos que compraste permanecen contigo para siempre._"
+        text += get_text("backpack.persistent_item_note")
 
         # Build keyboard
         builder = InlineKeyboardBuilder()
-        builder.button(text="🛒 Ir a la tienda", callback_data="shop_access")
-        builder.button(text="🔙 Volver", callback_data="narrative_main_menu")
+        builder.button(text=get_text("backpack.go_to_shop_button"), callback_data="shop_access")
+        builder.button(text=get_text("backpack.back_button"), callback_data="narrative_main_menu")
         builder.adjust(1)
 
         await callback.message.edit_text(
@@ -444,10 +438,4 @@ Tienes **{len(purchases)}** {'producto' if len(purchases) == 1 else 'productos'}
 
     except Exception as e:
         logger.error(f"Error viewing inventory: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar mochila", show_alert=True)
-
-
-@router.callback_query(F.data == "noop")
-async def noop_handler(callback: CallbackQuery):
-    """No-operation handler for disabled buttons."""
-    await callback.answer()
+        await callback.answer(get_text("backpack.load_error"), show_alert=True)
