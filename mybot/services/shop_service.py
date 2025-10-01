@@ -25,9 +25,8 @@ class ShopService:
             # Ensure the "Diario Íntimo" item exists
             await self._ensure_diario_intimo_item_exists()
 
-            # Check if user is VIP by getting their subscription
-            subscription = await self.subscription_service.get_subscription(user_id)
-            is_vip = subscription is not None and (subscription.expires_at is None or subscription.expires_at > func.now())
+            # Check if user is VIP using the proper service method
+            is_vip = await self.subscription_service.is_subscription_active(user_id)
 
             stmt = select(ShopItem).where(ShopItem.is_active == True)
             result = await self.session.execute(stmt)
@@ -294,7 +293,7 @@ class ShopService:
             self.session.add(purchase)
 
             # Unlock lore piece if applicable
-            unlocked_lore = False
+            unlocked_lore = None
             if item.unlocks_lore_piece_id:
                 # Add to user's lore pieces (backpack) directly
                 unlocked_lore = await self._add_to_backpack(user_id, item_id, item)
@@ -303,20 +302,20 @@ class ShopService:
             return {
                 "success": True,
                 "message": "Purchase successful",
-                "unlocked_lore": unlocked_lore
+                "unlocked_lore": unlocked_lore  # Now returns dict or None
             }
         except Exception as e:
             await self.session.rollback()
             logger.error(f"Error purchasing item {item_id} for user {user_id}: {str(e)}")
             return {"success": False, "message": "Error processing purchase"}
 
-    async def _add_to_backpack(self, user_id: int, item_id: int, shop_item: ShopItem) -> bool:
-        """Add purchased item to user's backpack directly"""
+    async def _add_to_backpack(self, user_id: int, item_id: int, shop_item: ShopItem):
+        """Add purchased item to user's backpack directly and return lore piece info"""
         try:
             from database.models import UserLorePiece, LorePiece
             from datetime import datetime
             from sqlalchemy import select
-            
+
             # Check if the user already has this lore piece
             result = await self.session.execute(
                 select(UserLorePiece).where(
@@ -325,8 +324,11 @@ class ShopService:
                 )
             )
             existing = result.scalar_one_or_none()
-            
+
             if not existing:
+                # Get the lore piece details
+                lore_piece = await self.session.get(LorePiece, shop_item.unlocks_lore_piece_id)
+
                 # Add to user's lore pieces (backpack)
                 user_lore_piece = UserLorePiece(
                     user_id=user_id,
@@ -340,8 +342,16 @@ class ShopService:
                 )
                 self.session.add(user_lore_piece)
                 await self.session.flush()
-                return True
-            return False
+
+                # Return lore piece information as dictionary
+                if lore_piece:
+                    return {
+                        'title': lore_piece.title,
+                        'description': lore_piece.description or 'Nuevo contenido desbloqueado',
+                        'code_name': lore_piece.code_name
+                    }
+
+            return None
         except Exception as e:
             logger.error(f"Error adding item to backpack for user {user_id}: {str(e)}")
-            return False
+            return None

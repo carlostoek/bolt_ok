@@ -83,11 +83,12 @@ async def start_with_token(message: Message, command: CommandObject, session: As
     
     if vip_id:
         try:
-            # Create a single-use invite link
+            # Create a single-use invite link that allows immediate access without approval
             link = await bot.create_chat_invite_link(
-                vip_id, 
+                vip_id,
                 member_limit=1,
-                expire_date=datetime.utcnow() + timedelta(hours=24)  # Link expires in 24 hours
+                expire_date=datetime.utcnow() + timedelta(hours=24),  # Link expires in 24 hours
+                creates_join_request=False  # User joins immediately without needing approval
             )
             invite_link = link.invite_link
             logger.info(f"Generated VIP invite link for user {user_id}")

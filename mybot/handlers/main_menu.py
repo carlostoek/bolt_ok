@@ -1,9 +1,10 @@
 from aiogram import Router, F
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from sqlalchemy.ext.asyncio import AsyncSession
 from handlers.lore_handlers import show_lore_backpack
 from handlers.missions_handler import show_available_missions
 from handlers.narrative_handler import start_narrative_command
+from keyboards.main_menu_kb import get_main_menu_keyboard
 
 router = Router()
 
@@ -72,9 +73,23 @@ async def handle_diario_intimo_button(message: Message, session: AsyncSession):
         AccionUsuario.VERIFICAR_ACCESO_NIVEL,
         level_name="diario_intimo"
     )
-    
+
     if result.get("access_granted"):
         await message.answer("🔓 **Acceso Concedido al Diario Íntimo**\n\nLas páginas del diario se abren, revelando secretos íntimos de Diana...")
         # Here you would start the actual narrative level
     else:
         await message.answer(f"❌ **Acceso Restringido**\n\n{result.get('message', 'No puedes acceder a este nivel.')}")
+
+@router.callback_query(F.data == "narrative_main_menu")
+async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
+    """Regresa al menú principal desde la narrativa o tienda"""
+    await callback.message.edit_text(
+        "🏠 **Menú Principal**\n\n¿Qué deseas hacer?",
+        reply_markup=get_main_menu_keyboard()
+    )
+    await callback.answer()
+
+@router.callback_query(F.data == "menu_principal")
+async def return_to_main_menu_alt(callback: CallbackQuery, session: AsyncSession):
+    """Handler alternativo para 'menu_principal' (usado en algunos lugares)"""
+    await return_to_main_menu(callback, session)
