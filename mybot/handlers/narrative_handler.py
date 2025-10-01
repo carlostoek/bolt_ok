@@ -102,6 +102,7 @@ async def start_narrative_command(message: Message, session: AsyncSession):
 
         # Obtener fragmento actual o iniciar narrativa
         current_fragment = await service.get_user_current_fragment(user_id)
+        logger.info(f"[NARRATIVE_RESUME] User {user_id} current_fragment_key in DB: {user_state.current_fragment_key}, loaded fragment: {current_fragment.key if current_fragment else None}")
 
         if not current_fragment:
             # Para usuarios nuevos, usar enhanced L1F1 si está disponible
@@ -235,11 +236,11 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
             next_fragment = None
 
         if not next_fragment:
-            await callback.answer(
-                "❌ No puedes tomar esta decisión ahora. "
-                "Puede que necesites más besitos o cumplir otros requisitos.",
-                show_alert=True
-            )
+            # Get detailed requirements info
+            can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
+
+            # Build detailed message with requirements
+            await _show_requirements_message(callback, requirements_info, session)
             return
 
         # Mostrar siguiente fragmento
@@ -628,7 +629,11 @@ async def _display_narrative_fragment(
         try:
             if is_callback:
                 # En callback, eliminar mensaje anterior y enviar nuevo con imagen
-                await message.delete()
+                try:
+                    await message.delete()
+                except Exception:
+                    # El mensaje puede ya no existir, continuar de todos modos
+                    pass
                 await message.bot.send_photo(
                     chat_id=message.chat.id,
                     photo=fragment.image_url,
@@ -648,12 +653,22 @@ async def _display_narrative_fragment(
             logger.error(f"Error enviando fragmento con imagen: {e}")
             # Fallback a texto sin imagen
             if is_callback:
-                await safe_edit(message, fragment_text, reply_markup=keyboard)
+                # Si el mensaje anterior tenía foto, eliminar y enviar nuevo
+                if message.photo:
+                    try:
+                        await message.delete()
+                    except Exception:
+                        pass
+                    await message.answer(fragment_text, reply_markup=keyboard)
+                else:
+                    await safe_edit(message, fragment_text, reply_markup=keyboard)
             else:
                 await safe_answer(message, fragment_text, reply_markup=keyboard)
     else:
         # Sin imagen, enviar solo texto como antes
         if is_callback:
+            # Si el mensaje anterior tenía foto, debemos eliminar y enviar nuevo
+            # El patch en message_safety.py manejará esto automáticamente
             await safe_edit(message, fragment_text, reply_markup=keyboard)
         else:
             await safe_answer(message, fragment_text, reply_markup=keyboard)
@@ -1112,7 +1127,11 @@ async def _display_enhanced_followup_fragment(
         if image_url:
             try:
                 # Eliminar mensaje anterior y enviar nuevo con imagen
-                await callback.message.delete()
+                try:
+                    await callback.message.delete()
+                except Exception:
+                    # El mensaje puede ya no existir
+                    pass
                 await callback.bot.send_photo(
                     chat_id=callback.message.chat.id,
                     photo=image_url,
@@ -1122,10 +1141,13 @@ async def _display_enhanced_followup_fragment(
                 )
             except Exception as e:
                 logger.error(f"Error enviando followup con imagen: {e}")
-                # Fallback a editar texto
-                await callback.message.edit_text(fragment_text, reply_markup=keyboard)
+                # Fallback a editar texto con safe_edit que manejará fotos
+                from utils.message_safety import safe_edit
+                await safe_edit(callback.message, fragment_text, reply_markup=keyboard)
         else:
-            await callback.message.edit_text(fragment_text, reply_markup=keyboard)
+            # Usar safe_edit que manejará si el mensaje anterior tenía foto
+            from utils.message_safety import safe_edit
+            await safe_edit(callback.message, fragment_text, reply_markup=keyboard)
 
     except Exception as e:
         logger.error(f"Error mostrando fragmento de seguimiento: {e}")
@@ -1182,3 +1204,110 @@ async def _fallback_to_standard_narrative(callback: CallbackQuery, session: Asyn
     except Exception as e:
         logger.error(f"Error en fallback a narrativa estándar: {e}")
         await callback.answer("❌ Error continuando la historia", show_alert=True)
+
+
+async def _show_requirements_message(callback: CallbackQuery, requirements_info: dict, session: AsyncSession):
+    """
+    Muestra un mensaje detallado de requisitos no cumplidos con opciones de conversión.
+    """
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+    user_id = callback.from_user.id
+
+    # Build message parts
+    message_parts = ["🚫 **Contenido Bloqueado**\n\n"]
+    message_parts.append("_Esta decisión requiere cumplir ciertos requisitos._\n\n")
+
+    # List missing requirements
+    message_parts.append("**📋 Requisitos:**\n")
+
+    has_requirements = False
+
+    # Besitos requirement
+    if requirements_info.get("required_besitos", 0) > 0:
+        has_requirements = True
+        current = requirements_info.get("current_besitos", 0)
+        required = requirements_info.get("required_besitos", 0)
+        missing = requirements_info.get("missing_besitos", 0)
+
+        status_icon = "✅" if missing <= 0 else "❌"
+        message_parts.append(
+            f"{status_icon} **Besitos:** {current:.0f}/{required} "
+        )
+
+        if missing > 0:
+            message_parts.append(f"_(Te faltan {missing:.0f})_")
+
+        message_parts.append("\n")
+
+    # Role requirement
+    if requirements_info.get("required_role"):
+        has_requirements = True
+        current_role = requirements_info.get("current_role", "free")
+        required_role = requirements_info.get("required_role")
+        missing_role = requirements_info.get("missing_role")
+
+        status_icon = "✅" if not missing_role else "❌"
+
+        role_names = {
+            "vip": "Membresía VIP",
+            "free": "Usuario Gratuito",
+            "admin": "Administrador"
+        }
+
+        current_role_name = role_names.get(current_role, current_role)
+        required_role_name = role_names.get(required_role, required_role)
+
+        message_parts.append(
+            f"{status_icon} **Acceso:** {current_role_name}\n"
+        )
+
+        if missing_role:
+            message_parts.append(f"_Necesitas: {required_role_name}_\n")
+
+    if not has_requirements:
+        message_parts.append("_No hay requisitos específicos. Contacta al administrador._\n")
+
+    # Add conversion teaser
+    message_parts.append("\n💡 **¿Cómo conseguirlo?**\n\n")
+
+    # Build keyboard with actions
+    builder = InlineKeyboardBuilder()
+
+    # If missing besitos, offer ways to earn them
+    if requirements_info.get("missing_besitos", 0) > 0:
+        message_parts.append("💰 **Gana más besitos:**\n")
+        message_parts.append("• Completa otros fragmentos de la historia\n")
+        message_parts.append("• Participa en eventos y desafíos\n")
+        message_parts.append("• Visita la tienda para productos especiales\n\n")
+
+        builder.button(text="🛒 Visitar Tienda", callback_data="shop_access")
+
+    # If missing role (VIP), offer subscription
+    if requirements_info.get("missing_role") == "vip":
+        message_parts.append("✨ **Hazte VIP:**\n")
+        message_parts.append("• Accede a contenido exclusivo\n")
+        message_parts.append("• Desbloquea decisiones especiales\n")
+        message_parts.append("• Gana el doble de besitos\n\n")
+
+        builder.button(text="👑 Información VIP", callback_data="vip_info")
+
+    # Add back button
+    builder.button(text="🔙 Volver", callback_data="continue_narrative")
+    builder.adjust(1)
+
+    message_text = "".join(message_parts)
+
+    try:
+        await callback.message.edit_text(
+            message_text,
+            reply_markup=builder.as_markup(),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+    except Exception as e:
+        logger.error(f"Error showing requirements message: {e}")
+        await callback.answer(
+            "❌ No cumples los requisitos para esta decisión",
+            show_alert=True
+        )

@@ -24,17 +24,24 @@ class NarrativeService:
     async def get_user_current_fragment(self, user_id: int) -> Optional[StoryFragment]:
         """Obtiene el fragmento actual del usuario o inicia la narrativa."""
         user_state = await self._get_or_create_user_state(user_id)
-        
+
         if not user_state.current_fragment_key:
             start_fragment = await self._get_fragment_by_key("start")
             if start_fragment:
                 user_state.current_fragment_key = start_fragment.key
+                user_state.narrative_started_at = datetime.utcnow()
+                user_state.fragments_visited = 1
+
+                # Award initial fragment rewards
+                await self._process_fragment_rewards(user_id, start_fragment)
+
                 await self.session.commit()
+                logger.info(f"User {user_id} started narrative at fragment 'start' and received {start_fragment.reward_besitos} besitos")
                 return start_fragment
             else:
                 logger.error("No se encontró fragmento inicial 'start'")
                 return None
-        
+
         return await self._get_fragment_by_key(user_state.current_fragment_key)
 
     async def start_narrative(self, user_id: int) -> Optional[StoryFragment]:
@@ -77,6 +84,19 @@ class NarrativeService:
         # Reutiliza la lógica de procesar por ID para mantener consistencia
         return await self._process_decision_by_id(user_id, selected_choice.id)
 
+    async def check_decision_requirements_info(self, user_id: int, decision_id: int) -> tuple[bool, dict]:
+        """
+        Check if user can take a decision and return detailed requirements info.
+
+        Returns:
+            tuple: (can_proceed: bool, requirements_info: dict)
+        """
+        decision = await self.session.get(NarrativeChoice, decision_id)
+        if not decision:
+            return False, {}
+
+        return await self._check_decision_requirements(user_id, decision)
+
     async def process_user_decision_by_id(self, user_id: int, decision_id: int) -> Optional[StoryFragment]:
         """Procesa una decisión por su ID, verifica condiciones y avanza la historia."""
         decision = await self.session.get(NarrativeChoice, decision_id)
@@ -99,8 +119,10 @@ class NarrativeService:
             logger.error(f"Fragmento de destino no encontrado: {decision.destination_fragment_key}")
             return None
 
-        if not await self._check_access_conditions(user_id, next_fragment):
-            logger.info(f"Usuario {user_id} no cumple condiciones para fragmento {next_fragment.key}")
+        # Check decision requirements (not fragment requirements)
+        can_proceed, requirements_info = await self._check_decision_requirements(user_id, decision)
+        if not can_proceed:
+            logger.info(f"Usuario {user_id} no cumple requisitos de la decisión hacia fragmento {next_fragment.key}")
             return None
 
         user_state = await self._get_or_create_user_state(user_id)
@@ -206,24 +228,81 @@ class NarrativeService:
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def _check_decision_requirements(self, user_id: int, decision) -> tuple[bool, dict]:
+        """
+        Verifica si el usuario cumple los requisitos de una decisión.
+
+        Returns:
+            tuple: (can_proceed: bool, requirements_info: dict)
+            requirements_info contains:
+                - missing_besitos: int (0 if has enough)
+                - current_besitos: float
+                - required_besitos: int
+                - missing_role: str or None
+                - current_role: str
+                - required_role: str or None
+        """
+        requirements_info = {
+            "missing_besitos": 0,
+            "current_besitos": 0,
+            "required_besitos": 0,
+            "missing_role": None,
+            "current_role": "free",
+            "required_role": None
+        }
+
+        if not decision:
+            return False, requirements_info
+
+        user = await self.session.get(User, user_id)
+        if not user:
+            return False, requirements_info
+
+        can_proceed = True
+
+        # Check required besitos for the decision
+        requirements_info["current_besitos"] = user.points
+        requirements_info["required_besitos"] = decision.required_besitos or 0
+
+        if decision.required_besitos and decision.required_besitos > 0:
+            if user.points < decision.required_besitos:
+                requirements_info["missing_besitos"] = decision.required_besitos - user.points
+                logger.info(f"User {user_id} needs {decision.required_besitos} besitos but only has {user.points}")
+                can_proceed = False
+
+        # Check required role for the decision
+        requirements_info["required_role"] = decision.required_role
+
+        if decision.required_role and self.bot:
+            from utils.user_roles import get_user_role
+            user_role = await get_user_role(self.bot, user_id, session=self.session)
+            requirements_info["current_role"] = user_role
+
+            if user_role not in (decision.required_role, "admin"):
+                requirements_info["missing_role"] = decision.required_role
+                logger.info(f"User {user_id} has role {user_role} but needs {decision.required_role}")
+                can_proceed = False
+
+        return can_proceed, requirements_info
+
     async def _check_access_conditions(self, user_id: int, fragment: StoryFragment) -> bool:
         """Verifica si el usuario puede acceder a un fragmento."""
         if not fragment:
             return False
-        
+
         user = await self.session.get(User, user_id)
         if not user:
             return False
 
         if fragment.min_besitos > 0 and user.points < fragment.min_besitos:
             return False
-        
+
         if fragment.required_role and self.bot:
             from utils.user_roles import get_user_role
             user_role = await get_user_role(self.bot, user_id, session=self.session)
             if user_role not in (fragment.required_role, "admin"):
                 return False
-        
+
         return True
 
     async def _process_fragment_rewards(self, user_id: int, fragment: StoryFragment):

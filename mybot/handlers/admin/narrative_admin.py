@@ -31,6 +31,7 @@ class NarrativeAdminStates(StatesGroup):
     # Creación de fragmentos
     create_fragment_waiting_key = State()
     create_fragment_waiting_text = State()
+    create_fragment_waiting_image_url = State()
     create_fragment_waiting_character = State()
     create_fragment_waiting_level = State()
     create_fragment_waiting_min_besitos = State()
@@ -161,10 +162,20 @@ async def view_fragment_detail(callback: CallbackQuery, session: AsyncSession):
     # Preparar detalles
     emoji = "🎩" if fragment.character == "Lucien" else "🌸" if fragment.character == "Diana" else "📖"
 
+    # Información de imagen
+    image_info = "🖼️ Sin imagen"
+    if fragment.image_url:
+        if fragment.image_url.startswith("http"):
+            image_info = "🖼️ Imagen (URL)"
+        else:
+            image_info = "🖼️ Imagen (Telegram)"
+
     text = f"""{emoji} **Fragmento: {fragment.key}**
 
 📝 **Texto:**
 {fragment.text[:200]}{"..." if len(fragment.text) > 200 else ""}
+
+{image_info}
 
 ⚙️ **Configuración:**
 • Personaje: {fragment.character}
@@ -199,7 +210,7 @@ async def start_create_fragment(callback: CallbackQuery, state: FSMContext):
 
     text = """➕ **Crear Nuevo Fragmento**
 
-**Paso 1/7: Key del Fragmento**
+**Paso 1/8: Key del Fragmento**
 
 Ingresa un identificador único para este fragmento (ej: `start`, `mansion_entrance`, `diana_intro`).
 
@@ -242,7 +253,7 @@ async def create_fragment_receive_key(message: Message, session: AsyncSession, s
     await message.answer(
         f"""✅ Key guardado: `{key}`
 
-**Paso 2/7: Texto del Fragmento**
+**Paso 2/8: Texto del Fragmento**
 
 Ahora escribe el contenido narrativo completo del fragmento.
 
@@ -260,7 +271,7 @@ Escribe `/cancel` para cancelar."""
 
 @router.message(NarrativeAdminStates.create_fragment_waiting_text)
 async def create_fragment_receive_text(message: Message, state: FSMContext):
-    """Recibe el texto y pide el personaje"""
+    """Recibe el texto y pide la imagen"""
     if message.text == "/cancel":
         await state.clear()
         await message.answer("❌ Creación cancelada")
@@ -268,6 +279,85 @@ async def create_fragment_receive_text(message: Message, state: FSMContext):
 
     text = message.text.strip()
     await state.update_data(text=text)
+    await state.set_state(NarrativeAdminStates.create_fragment_waiting_image_url)
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="⏭️ Sin imagen", callback_data="narrative_create_image:skip")
+    builder.button(text="❌ Cancelar", callback_data="narrative_create_cancel")
+    builder.adjust(1)
+
+    await message.answer(
+        """✅ Texto guardado
+
+**Paso 3/8: Imagen del Fragmento (Opcional)**
+
+¿Deseas agregar una imagen a este fragmento?
+
+Opciones:
+• Envía una **URL de imagen** (https://...)
+• Envía una **imagen directamente** (Telegram guardará el file_id)
+• Presiona "⏭️ Sin imagen" para continuar sin imagen
+
+La imagen se mostrará junto al texto del fragmento.
+
+Escribe `/cancel` para cancelar.""",
+        reply_markup=builder.as_markup()
+    )
+
+
+@router.callback_query(F.data == "narrative_create_image:skip")
+async def create_fragment_skip_image(callback: CallbackQuery, state: FSMContext):
+    """Salta el paso de imagen y continúa al personaje"""
+    await state.update_data(image_url=None)
+    await state.set_state(NarrativeAdminStates.create_fragment_waiting_character)
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🎩 Lucien", callback_data="narrative_create_char:Lucien")
+    builder.button(text="🌸 Diana", callback_data="narrative_create_char:Diana")
+    builder.button(text="📖 Narrador", callback_data="narrative_create_char:Narrador")
+    builder.button(text="✍️ Otro (escribir)", callback_data="narrative_create_char:custom")
+    builder.button(text="❌ Cancelar", callback_data="narrative_create_cancel")
+    builder.adjust(2)
+
+    await callback.message.edit_text(
+        """⏭️ Sin imagen
+
+**Paso 4/8: Personaje**
+
+Selecciona el personaje que habla en este fragmento:""",
+        reply_markup=builder.as_markup()
+    )
+    await callback.answer()
+
+
+@router.message(NarrativeAdminStates.create_fragment_waiting_image_url)
+async def create_fragment_receive_image(message: Message, state: FSMContext):
+    """Recibe la imagen (URL o foto) y pide el personaje"""
+    if message.text == "/cancel":
+        await state.clear()
+        await message.answer("❌ Creación cancelada")
+        return
+
+    image_url = None
+
+    # Verificar si es una URL
+    if message.text and (message.text.startswith("http://") or message.text.startswith("https://")):
+        image_url = message.text.strip()
+    # Verificar si es una foto
+    elif message.photo:
+        # Obtener la foto de mayor calidad
+        photo = message.photo[-1]
+        image_url = photo.file_id
+    else:
+        await message.answer(
+            "❌ Formato no válido. Por favor:\n"
+            "• Envía una URL que empiece con http:// o https://\n"
+            "• Envía una imagen directamente\n"
+            "• Usa el botón '⏭️ Sin imagen' para continuar"
+        )
+        return
+
+    await state.update_data(image_url=image_url)
     await state.set_state(NarrativeAdminStates.create_fragment_waiting_character)
 
     builder = InlineKeyboardBuilder()
@@ -279,9 +369,9 @@ async def create_fragment_receive_text(message: Message, state: FSMContext):
     builder.adjust(2)
 
     await message.answer(
-        """✅ Texto guardado
+        """✅ Imagen guardada
 
-**Paso 3/7: Personaje**
+**Paso 4/8: Personaje**
 
 Selecciona el personaje que habla en este fragmento:""",
         reply_markup=builder.as_markup()
@@ -312,7 +402,7 @@ async def create_fragment_receive_character(callback: CallbackQuery, state: FSMC
     await callback.message.edit_text(
         f"""✅ Personaje: {character_choice}
 
-**Paso 4/7: Nivel de Acceso**
+**Paso 5/8: Nivel de Acceso**
 
 Selecciona el nivel del fragmento:
 • Niveles 1-3: Contenido gratuito
@@ -344,7 +434,7 @@ async def create_fragment_receive_level(callback: CallbackQuery, state: FSMConte
     await callback.message.edit_text(
         f"""✅ Nivel: {level}
 
-**Paso 5/7: Besitos Mínimos**
+**Paso 6/8: Besitos Mínimos**
 
 ¿Cuántos besitos necesita el usuario para acceder a este fragmento?""",
         reply_markup=builder.as_markup()
@@ -380,7 +470,7 @@ async def create_fragment_receive_min_besitos(callback: CallbackQuery, state: FS
     await callback.message.edit_text(
         f"""✅ Besitos mínimos: {min_besitos}
 
-**Paso 6/7: Recompensa en Besitos**
+**Paso 7/8: Recompensa en Besitos**
 
 ¿Cuántos besitos gana el usuario al leer este fragmento?""",
         reply_markup=builder.as_markup()
@@ -412,7 +502,7 @@ async def create_fragment_receive_reward(callback: CallbackQuery, state: FSMCont
     await callback.message.edit_text(
         f"""✅ Recompensa: {reward_besitos} besitos
 
-**Paso 7/7: Rol Requerido**
+**Paso 8/8: Rol Requerido**
 
 ¿Este fragmento requiere que el usuario tenga un rol específico?""",
         reply_markup=builder.as_markup()
@@ -433,6 +523,7 @@ async def create_fragment_finalize(callback: CallbackQuery, session: AsyncSessio
     new_fragment = StoryFragment(
         key=data["key"],
         text=data["text"],
+        image_url=data.get("image_url"),
         character=data["character"],
         level=data["level"],
         min_besitos=data["min_besitos"],
@@ -504,6 +595,7 @@ Selecciona qué campo deseas editar:"""
 
     builder = InlineKeyboardBuilder()
     builder.button(text="📝 Texto", callback_data=f"narrative_edit_field:{fragment_id}:text")
+    builder.button(text="🖼️ Imagen", callback_data=f"narrative_edit_field:{fragment_id}:image_url")
     builder.button(text="🎭 Personaje", callback_data=f"narrative_edit_field:{fragment_id}:character")
     builder.button(text="📊 Nivel", callback_data=f"narrative_edit_field:{fragment_id}:level")
     builder.button(text="💰 Besitos Mínimos", callback_data=f"narrative_edit_field:{fragment_id}:min_besitos")
@@ -538,6 +630,31 @@ async def start_edit_fragment_field(callback: CallbackQuery, session: AsyncSessi
             f"📝 **Editar Texto**\n\n"
             f"Texto actual:\n{fragment.text[:500]}...\n\n"
             f"Escribe el nuevo texto del fragmento:"
+        )
+    elif field == "image_url":
+        await state.set_state(NarrativeAdminStates.edit_fragment_waiting_value)
+
+        current_image = fragment.image_url or "Sin imagen"
+        image_type = ""
+        if fragment.image_url:
+            if fragment.image_url.startswith("http"):
+                image_type = " (URL)"
+            else:
+                image_type = " (Telegram file_id)"
+
+        builder = InlineKeyboardBuilder()
+        builder.button(text="🗑️ Quitar imagen", callback_data=f"narrative_edit_value:{fragment_id}:image_url:remove")
+        builder.button(text="❌ Cancelar", callback_data=f"narrative_edit_fragment:{fragment_id}")
+        builder.adjust(1)
+
+        await callback.message.edit_text(
+            f"🖼️ **Editar Imagen**\n\n"
+            f"Imagen actual: {current_image}{image_type}\n\n"
+            f"Opciones:\n"
+            f"• Envía una **URL de imagen** (https://...)\n"
+            f"• Envía una **imagen directamente**\n"
+            f"• Presiona '🗑️ Quitar imagen' para eliminarla",
+            reply_markup=builder.as_markup()
         )
     elif field == "character":
         builder = InlineKeyboardBuilder()
@@ -598,7 +715,6 @@ async def receive_edit_fragment_value(message: Message, session: AsyncSession, s
     data = await state.get_data()
     fragment_id = data.get("fragment_id")
     field = data.get("field")
-    new_value = message.text.strip()
 
     fragment = await session.get(StoryFragment, fragment_id)
     if not fragment:
@@ -606,20 +722,39 @@ async def receive_edit_fragment_value(message: Message, session: AsyncSession, s
         await state.clear()
         return
 
-    # Actualizar el campo
-    if field in ["min_besitos", "reward_besitos", "level"]:
-        try:
-            new_value = int(new_value)
-        except ValueError:
-            await message.answer("❌ El valor debe ser un número")
+    # Procesar según el tipo de campo
+    if field == "image_url":
+        # Verificar si es una URL o una foto
+        if message.text and (message.text.startswith("http://") or message.text.startswith("https://")):
+            new_value = message.text.strip()
+        elif message.photo:
+            photo = message.photo[-1]
+            new_value = photo.file_id
+        else:
+            await message.answer(
+                "❌ Formato no válido. Por favor:\n"
+                "• Envía una URL que empiece con http:// o https://\n"
+                "• Envía una imagen directamente\n"
+                "• Usa el botón '🗑️ Quitar imagen' para eliminarla"
+            )
             return
+    else:
+        new_value = message.text.strip()
+
+        # Actualizar el campo
+        if field in ["min_besitos", "reward_besitos", "level"]:
+            try:
+                new_value = int(new_value)
+            except ValueError:
+                await message.answer("❌ El valor debe ser un número")
+                return
 
     setattr(fragment, field, new_value)
     await session.commit()
     await state.clear()
 
     await message.answer(
-        f"✅ Campo **{field}** actualizado correctamente a: {new_value}"
+        f"✅ Campo **{field}** actualizado correctamente"
     )
 
     # Mostrar menú de edición nuevamente
@@ -647,6 +782,8 @@ async def receive_edit_fragment_value_callback(callback: CallbackQuery, session:
 
     # Procesar valor
     if new_value == "none":
+        new_value = None
+    elif new_value == "remove":
         new_value = None
     elif field in ["level", "min_besitos", "reward_besitos"]:
         new_value = int(new_value)

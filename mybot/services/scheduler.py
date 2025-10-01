@@ -94,30 +94,48 @@ async def run_vip_subscription_check(bot: Bot, session_factory: async_sessionmak
 
 
 async def run_vip_membership_check(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):
-    """Ensure users in the VIP channel have the correct role."""
+    """Ensure users in the VIP channel have valid subscriptions, remove those without."""
     async with session_factory() as session:
         vip_channel_id = await ConfigService(session).get_vip_channel_id()
         if not vip_channel_id:
             return
+
+        # Get all users currently marked as non-VIP
         stmt = select(User).where(User.role != "vip")
         result = await session.execute(stmt)
         users = result.scalars().all()
+
         updated = 0
+        removed = 0
         for user in users:
             try:
                 member = await bot.get_chat_member(vip_channel_id, user.id)
                 if member.status in {"member", "administrator", "creator"}:
-                    user.role = "vip"
+                    # User is in VIP channel but not marked as VIP
                     sub_service = SubscriptionService(session)
                     sub = await sub_service.get_subscription(user.id)
-                    if not sub:
-                        await sub_service.create_subscription(user.id, None)
-                    updated += 1
-            except Exception:
+
+                    # Only sync role if they have a VALID subscription in database
+                    if sub and await sub_service.is_subscription_active(user.id):
+                        user.role = "vip"
+                        updated += 1
+                        logging.info(f"Synced user {user.id} to VIP role (has valid subscription)")
+                    else:
+                        # User is in channel but has no valid subscription - remove them
+                        try:
+                            await bot.ban_chat_member(vip_channel_id, user.id)
+                            await bot.unban_chat_member(vip_channel_id, user.id)
+                            removed += 1
+                            logging.info(f"Removed user {user.id} from VIP channel (no valid subscription)")
+                        except Exception as kick_error:
+                            logging.warning(f"Could not remove user {user.id} from VIP channel: {kick_error}")
+            except Exception as e:
+                logging.debug(f"Error checking user {user.id} in VIP channel: {e}")
                 continue
-        if updated:
+
+        if updated or removed:
             await session.commit()
-            logging.info("Synced %s users to VIP role via channel", updated)
+            logging.info(f"VIP membership check: synced {updated} users, removed {removed} users")
 
 
 async def vip_subscription_scheduler(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):

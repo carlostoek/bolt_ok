@@ -111,38 +111,29 @@ class FreeChannelService:
             self.session.add(pending_request)
             await self.session.commit()
             
-            # Notificar al usuario sobre el tiempo de espera
+            # Notificar al usuario sobre el tiempo de espera con el nuevo sistema de onboarding
             wait_minutes = await self.get_wait_time_minutes()
-            
-            if wait_minutes > 0:
-                wait_text = f"{wait_minutes} minutos"
-                if wait_minutes >= 60:
-                    hours = wait_minutes // 60
-                    remaining_minutes = wait_minutes % 60
-                    if remaining_minutes > 0:
-                        wait_text = f"{hours} horas y {remaining_minutes} minutos"
-                    else:
-                        wait_text = f"{hours} horas"
-                
-                notification_message = (
-                    f"📋 **Solicitud Recibida**\n\n"
-                    f"Tu solicitud para unirte al canal gratuito ha sido registrada.\n\n"
-                    f"⏰ **Tiempo de espera**: {wait_text}\n"
-                    f"✅ Serás aprobado automáticamente una vez transcurrido este tiempo.\n\n"
-                    f"¡Gracias por tu paciencia!"
-                )
-            else:
-                notification_message = (
-                    f"📋 **Solicitud Recibida**\n\n"
-                    f"Tu solicitud para unirte al canal gratuito ha sido registrada.\n\n"
-                    f"✅ Serás aprobado inmediatamente.\n\n"
-                    f"¡Bienvenido!"
-                )
-            
+
             try:
+                from utils.onboarding_messages import get_join_request_message, DEFAULT_SOCIAL_LINKS
+                from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+                message_text, social_buttons = get_join_request_message(wait_minutes, DEFAULT_SOCIAL_LINKS)
+
+                # Construir teclado inline con botones de redes sociales
+                builder = InlineKeyboardBuilder()
+                for button in social_buttons:
+                    builder.button(text=button['text'], url=button['url'])
+
+                # Agregar botón para ver el estado
+                builder.button(text="🔄 Ver Estado", callback_data="check_join_status")
+
+                builder.adjust(2, 2, 1)  # 2 botones por fila para redes, luego 1 para estado
+
                 await self.bot.send_message(
                     user_id,
-                    notification_message,
+                    message_text,
+                    reply_markup=builder.as_markup(),
                     parse_mode="Markdown"
                 )
             except Exception as e:
@@ -184,19 +175,32 @@ class FreeChannelService:
                 
                 # Marcar como aprobada en la base de datos
                 request.approved = True
-                
-                # Enviar mensaje de bienvenida
-                welcome_message = (
-                    f"🎉 **¡Bienvenido al Canal Gratuito!**\n\n"
-                    f"Tu solicitud ha sido aprobada exitosamente.\n"
-                    f"Ya puedes acceder a todo el contenido gratuito.\n\n"
-                    f"¡Disfruta de la experiencia!"
-                )
-                
+
+                # Obtener información del usuario para personalizar el mensaje
+                try:
+                    user = await self.session.get(User, request.user_id)
+                    username = user.username if user and user.username else None
+                except:
+                    username = None
+
+                # Enviar mensaje de bienvenida con el nuevo sistema de onboarding
+                from utils.onboarding_messages import get_welcome_approved_message
+                from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+                welcome_message = get_welcome_approved_message(username)
+
+                # Construir teclado con opciones iniciales
+                builder = InlineKeyboardBuilder()
+                builder.button(text="📖 Comenzar la Historia", callback_data="start_narrative")
+                builder.button(text="💎 Ver Membresía VIP", callback_data="vip_info")
+                builder.button(text="🎁 Contenido Gratuito", callback_data="free_gift")
+                builder.adjust(1)
+
                 try:
                     await self.bot.send_message(
                         request.user_id,
                         welcome_message,
+                        reply_markup=builder.as_markup(),
                         parse_mode="Markdown"
                     )
                 except Exception as e:

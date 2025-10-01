@@ -63,7 +63,7 @@ async def raffle_menu(callback: CallbackQuery, session: AsyncSession):
 # ----- Event creation flow -----
 
 @router.callback_query(F.data == "create_event")
-async def start_create_event(callback: CallbackQuery, state: FSMContext):
+async def start_create_event(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -74,7 +74,7 @@ async def start_create_event(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminEventStates.creating_event_name)
-async def process_event_name(message: Message, state: FSMContext):
+async def process_event_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -83,7 +83,7 @@ async def process_event_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminEventStates.creating_event_description)
-async def process_event_description(message: Message, state: FSMContext):
+async def process_event_description(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(description=message.text)
@@ -166,7 +166,7 @@ async def finish_event(callback: CallbackQuery, session: AsyncSession):
 # ----- Raffle creation flow -----
 
 @router.callback_query(F.data == "create_raffle")
-async def start_create_raffle(callback: CallbackQuery, state: FSMContext):
+async def start_create_raffle(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -177,7 +177,7 @@ async def start_create_raffle(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminRaffleStates.creating_raffle_name)
-async def raffle_name(message: Message, state: FSMContext):
+async def raffle_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -186,7 +186,7 @@ async def raffle_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminRaffleStates.creating_raffle_description)
-async def raffle_desc(message: Message, state: FSMContext):
+async def raffle_desc(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(description=message.text)

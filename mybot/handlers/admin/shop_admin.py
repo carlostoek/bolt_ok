@@ -143,6 +143,16 @@ async def admin_shop_view_item(callback: CallbackQuery, session: AsyncSession):
         lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
         if lore_piece:
             unlock_info = f"🔓 Desbloquea: **{lore_piece.title}**\n   📜 `{lore_piece.code_name}`"
+    if item.unlocks_fragment_key:
+        from database.narrative_models import StoryFragment
+        stmt = select(StoryFragment).where(StoryFragment.key == item.unlocks_fragment_key)
+        fragment_result = await session.execute(stmt)
+        fragment = fragment_result.scalar_one_or_none()
+        if fragment:
+            if unlock_info == "No desbloquea contenido":
+                unlock_info = f"📖 Desbloquea fragmento: **{item.unlocks_fragment_key}**"
+            else:
+                unlock_info += f"\n📖 Desbloquea fragmento: **{item.unlocks_fragment_key}**"
 
     # Build availability info
     avail_info = "♾️ Siempre disponible"
@@ -2561,23 +2571,35 @@ async def admin_shop_edit_unlock(callback: CallbackQuery, state: FSMContext, ses
     if item.unlocks_lore_piece_id:
         lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
         if lore_piece:
-            current_unlock = f"🔓 {lore_piece.title} (`{lore_piece.code_name}`)"
+            current_unlock = f"🔓 Pista: {lore_piece.title} (`{lore_piece.code_name}`)"
+    if item.unlocks_fragment_key:
+        if current_unlock == "No desbloquea contenido":
+            current_unlock = f"📖 Fragmento: `{item.unlocks_fragment_key}`"
+        else:
+            current_unlock += f"\n📖 Fragmento: `{item.unlocks_fragment_key}`"
 
     # Get all lore pieces
     result = await session.execute(select(LorePiece).order_by(LorePiece.title))
     lore_pieces = result.scalars().all()
+
+    # Get all story fragments
+    from database.narrative_models import StoryFragment
+    fragments_result = await session.execute(select(StoryFragment).order_by(StoryFragment.key))
+    fragments = fragments_result.scalars().all()
 
     text = f"""✏️ **Editar Desbloqueo**
 
 **Producto:** {item.name}
 **Desbloqueo actual:** {current_unlock}
 
-Selecciona qué contenido narrativo desbloqueará este producto:"""
+Selecciona qué contenido desbloqueará este producto:
+
+**Pistas Narrativas (LorePieces):**"""
 
     from aiogram.utils.keyboard import InlineKeyboardBuilder
     builder = InlineKeyboardBuilder()
 
-    for lore in lore_pieces[:15]:
+    for lore in lore_pieces[:10]:
         category_emoji = {
             'fragmentos': '🗺️',
             'memorias': '💭',
@@ -2589,10 +2611,21 @@ Selecciona qué contenido narrativo desbloqueará este producto:"""
         prefix = "✅ " if item.unlocks_lore_piece_id == lore.id else ""
         builder.button(
             text=f"{prefix}{category_emoji} {lore.title[:25]}",
-            callback_data=f"set_unlock:{item_id}:{lore.id}"
+            callback_data=f"set_unlock_lore:{item_id}:{lore.id}"
         )
 
-    builder.button(text="❌ Sin Desbloqueo", callback_data=f"set_unlock:{item_id}:none")
+    # Add separator
+    builder.button(text="━━━ Fragmentos de Historia ━━━", callback_data="noop")
+
+    # Add story fragments
+    for fragment in fragments[:10]:
+        prefix = "✅ " if item.unlocks_fragment_key == fragment.key else ""
+        builder.button(
+            text=f"{prefix}📖 {fragment.key}",
+            callback_data=f"set_unlock_fragment:{item_id}:{fragment.key}"
+        )
+
+    builder.button(text="❌ Sin Desbloqueo", callback_data=f"set_unlock_none:{item_id}")
     builder.button(text="🔙 Volver", callback_data=f"admin_shop_edit:{item_id}")
     builder.adjust(1)
 
@@ -2606,56 +2639,38 @@ Selecciona qué contenido narrativo desbloqueará este producto:"""
     await callback.answer()
 
 
-@router.callback_query(F.data.startswith("set_unlock:"))
-async def admin_shop_set_unlock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Set new unlock for product."""
+@router.callback_query(F.data.startswith("set_unlock_lore:"))
+async def admin_shop_set_unlock_lore(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set lore piece unlock for product."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
     parts = callback.data.split(":")
     item_id = int(parts[1])
-    lore_id_str = parts[2]
+    lore_id = int(parts[2])
 
     item = await session.get(ShopItem, item_id)
     if not item:
         await callback.answer("Producto no encontrado", show_alert=True)
         return
 
-    old_unlock_text = "Sin desbloqueo"
-    if item.unlocks_lore_piece_id:
-        old_lore = await session.get(LorePiece, item.unlocks_lore_piece_id)
-        if old_lore:
-            old_unlock_text = old_lore.title
+    lore_piece = await session.get(LorePiece, lore_id)
+    if not lore_piece:
+        await callback.answer("Contenido no encontrado", show_alert=True)
+        return
 
-    if lore_id_str == "none":
-        item.unlocks_lore_piece_id = None
-        new_unlock_text = "Sin desbloqueo"
-    else:
-        lore_id = int(lore_id_str)
-        lore_piece = await session.get(LorePiece, lore_id)
-        if not lore_piece:
-            await callback.answer("Contenido no encontrado", show_alert=True)
-            return
-
-        item.unlocks_lore_piece_id = lore_id
-        new_unlock_text = f"{lore_piece.title} (`{lore_piece.code_name}`)"
-
+    item.unlocks_lore_piece_id = lore_id
     await session.commit()
 
     text = f"""✅ **Desbloqueo Actualizado**
 
 **Producto:** {item.name}
+**Desbloquea:** 🔓 Pista: {lore_piece.title}
 
-**Antes:** {old_unlock_text}
-**Ahora:** {new_unlock_text}
+El producto ahora desbloqueará esta pista narrativa al comprarlo."""
 
-El desbloqueo ha sido configurado exitosamente."""
-
-    from aiogram.utils.keyboard import InlineKeyboardBuilder
     builder = InlineKeyboardBuilder()
-    builder.button(text="✏️ Editar Otro Campo", callback_data=f"admin_shop_edit:{item_id}")
-    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{item_id}")
-    builder.button(text="🔙 Lista de Productos", callback_data="admin_shop_list")
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_view:{item_id}")
     builder.adjust(1)
 
     await update_menu(
@@ -2663,10 +2678,96 @@ El desbloqueo ha sido configurado exitosamente."""
         text,
         builder.as_markup(),
         session,
-        f"admin_shop_unlock_updated_{item_id}"
+        f"shop_unlock_set_{item_id}"
     )
-    await state.clear()
-    await callback.answer()
+    await callback.answer("✅ Desbloqueo actualizado", show_alert=False)
+
+
+@router.callback_query(F.data.startswith("set_unlock_fragment:"))
+async def admin_shop_set_unlock_fragment(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Set story fragment unlock for product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    parts = callback.data.split(":")
+    item_id = int(parts[1])
+    fragment_key = parts[2]
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    # Verify fragment exists
+    from database.narrative_models import StoryFragment
+    stmt = select(StoryFragment).where(StoryFragment.key == fragment_key)
+    fragment_result = await session.execute(stmt)
+    fragment = fragment_result.scalar_one_or_none()
+
+    if not fragment:
+        await callback.answer("Fragmento no encontrado", show_alert=True)
+        return
+
+    item.unlocks_fragment_key = fragment_key
+    await session.commit()
+
+    text = f"""✅ **Desbloqueo Actualizado**
+
+**Producto:** {item.name}
+**Desbloquea:** 📖 Fragmento: `{fragment_key}`
+
+El producto ahora llevará al usuario directamente a este fragmento de historia al comprarlo."""
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_view:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"shop_unlock_set_{item_id}"
+    )
+    await callback.answer("✅ Desbloqueo actualizado", show_alert=False)
+
+
+@router.callback_query(F.data.startswith("set_unlock_none:"))
+async def admin_shop_set_unlock_none(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Remove all unlocks from product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    item_id = int(callback.data.split(":")[-1])
+
+    item = await session.get(ShopItem, item_id)
+    if not item:
+        await callback.answer("Producto no encontrado", show_alert=True)
+        return
+
+    item.unlocks_lore_piece_id = None
+    item.unlocks_fragment_key = None
+    await session.commit()
+
+    text = f"""✅ **Desbloqueo Eliminado**
+
+**Producto:** {item.name}
+**Desbloquea:** Nada
+
+El producto ya no desbloqueará ningún contenido al comprarlo."""
+
+    builder = InlineKeyboardBuilder()
+    builder.button(text="🔙 Volver", callback_data=f"admin_shop_view:{item_id}")
+    builder.adjust(1)
+
+    await update_menu(
+        callback,
+        text,
+        builder.as_markup(),
+        session,
+        f"shop_unlock_removed_{item_id}"
+    )
+    await callback.answer("✅ Desbloqueo eliminado", show_alert=False)
 
 
 # Additional handlers for edit and delete

@@ -5,7 +5,9 @@ from handlers.lore_handlers import show_lore_backpack
 from handlers.missions_handler import show_available_missions
 from handlers.narrative_handler import start_narrative_command
 from keyboards.main_menu_kb import get_main_menu_keyboard
+import logging
 
+logger = logging.getLogger(__name__)
 router = Router()
 
 @router.message(F.text == "🎒 Mochila")
@@ -81,6 +83,10 @@ async def handle_narrative_button(message: Message, session: AsyncSession):
         # Try to get current fragment (where user left off)
         current_fragment = await service.get_user_current_fragment(user_id)
 
+        # Check if user can go back (has history)
+        can_go_back = await service.can_go_back(user_id)
+        logger.info(f"[HISTORIA_BUTTON_DEBUG] User {user_id} can_go_back: {can_go_back}, choices_made: {len(user_state.choices_made or [])}")
+
         if current_fragment:
             logger.info(f"[HISTORIA_BUTTON_DEBUG] Continuing from fragment: {current_fragment.key}")
             await _display_narrative_fragment(message, current_fragment, session)
@@ -131,12 +137,32 @@ async def handle_diario_intimo_button(message: Message, session: AsyncSession):
 
 @router.callback_query(F.data == "narrative_main_menu")
 async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
-    """Regresa al menú principal desde la narrativa o tienda"""
-    await callback.message.edit_text(
-        "🏠 **Menú Principal**\n\n¿Qué deseas hacer?",
-        reply_markup=get_main_menu_keyboard()
-    )
-    await callback.answer()
+    """Regresa al menú principal desde la narrativa o tienda, según el rol del usuario"""
+    user_id = callback.from_user.id
+
+    try:
+        # Use menu factory to create appropriate menu based on user role
+        from utils.menu_factory import MenuFactory
+
+        menu_factory = MenuFactory()
+        text, keyboard = await menu_factory.create_menu("main", user_id, session, callback.bot)
+
+        # Edit the message directly since this is a callback
+        await callback.message.edit_text(
+            text,
+            reply_markup=keyboard,
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error returning to main menu for user {user_id}: {e}", exc_info=True)
+        # Fallback to simple menu
+        await callback.message.edit_text(
+            "🏠 **Menú Principal**\n\n¿Qué deseas hacer?",
+            reply_markup=get_main_menu_keyboard()
+        )
+        await callback.answer()
 
 @router.callback_query(F.data == "menu_principal")
 async def return_to_main_menu_alt(callback: CallbackQuery, session: AsyncSession):

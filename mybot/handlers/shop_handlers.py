@@ -324,6 +324,16 @@ _{unlocked_lore.get('description', 'Nuevo contenido disponible')}_
 Puedes acceder a este contenido desde el menú narrativo.
 """
 
+            # Check if narrative fragment was unlocked
+            unlocked_fragment = result.get("unlocked_fragment")
+            if unlocked_fragment:
+                success_text += f"""
+📖 **¡Fragmento de Historia Desbloqueado!**
+
+Has desbloqueado un nuevo fragmento narrativo.
+Usa "📖 Continuar historia" para verlo.
+"""
+
             success_text += "\n🎒 El producto se ha agregado a tu mochila."
 
             # Build keyboard
