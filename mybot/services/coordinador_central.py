@@ -378,13 +378,21 @@ class CoordinadorCentral:
             has_item = await shop_service.has_item_in_inventory(user_id, required_item)
             
             if not has_item:
+                # Store the pending decision in user state to process after purchase
+                user_state = await self.narrative_service._get_or_create_user_state(user_id)
+                user_state.shop_redirect_fragment_key = user_state.current_fragment_key
+                # Store the decision_id to process later
+                if not hasattr(user_state, 'pending_decision_id'):
+                    # If we need to store additional data, we can use JSON field
+                    user_state.pending_decision_id = decision_id
+                await self.session.commit()
+                
                 # For diary intimate decision, redirect to teaser fragment instead of blocking
                 if decision_id == 15:  # Diary intimate decision
                     # Process decision to teaser fragment instead
                     teaser_fragment = await self.narrative_service._get_fragment_by_key("diana_diary_tease")
                     if teaser_fragment:
                         # Update user state to teaser fragment
-                        user_state = await self.narrative_service._get_or_create_user_state(user_id)
                         user_state.current_fragment_key = teaser_fragment.key
                         user_state.fragments_visited = (user_state.fragments_visited or 0) + 1
                         await self.narrative_service._process_fragment_rewards(user_id, teaser_fragment)
