@@ -330,7 +330,7 @@ Puedes acceder a este contenido desde el menú narrativo.
             builder = InlineKeyboardBuilder()
             builder.button(text="🛒 Seguir comprando", callback_data="shop_access")
             builder.button(text="🎒 Ver mi mochila", callback_data="view_inventory")
-            builder.button(text="📖 Menú narrativo", callback_data="narrative_main_menu")
+            builder.button(text="📖 Continuar historia", callback_data="return_from_shop")
             builder.adjust(1)
 
             await callback.message.edit_text(
