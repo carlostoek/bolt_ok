@@ -32,33 +32,43 @@ async def start_narrative_command(message: Message, session: AsyncSession):
         if user_state.shop_redirect_fragment_key:
             # Check if there's a pending decision to process
             if user_state.pending_decision_id:
+                logger.info(f"Processing pending decision {user_state.pending_decision_id} for user {user_id} after shop return")
                 # Process the pending decision
                 from services.coordinador_central import CoordinadorCentral, AccionUsuario
                 coordinador = CoordinadorCentral(session)
                 
-                result = await coordinador.ejecutar_flujo(
-                    user_id,
-                    AccionUsuario.TOMAR_DECISION,
-                    decision_id=user_state.pending_decision_id
-                )
-                
-                if result["success"]:
-                    # Clear both redirect and pending decision
-                    user_state.shop_redirect_fragment_key = None
+                try:
+                    result = await coordinador.ejecutar_flujo(
+                        user_id,
+                        AccionUsuario.TOMAR_DECISION,
+                        decision_id=user_state.pending_decision_id
+                    )
+                    
+                    if result["success"]:
+                        # Clear both redirect and pending decision
+                        user_state.shop_redirect_fragment_key = None
+                        user_state.pending_decision_id = None
+                        await session.commit()
+                        
+                        # Show the next fragment
+                        next_fragment = result.get("fragment")
+                        if next_fragment:
+                            await _display_narrative_fragment(message, next_fragment, session)
+                            return
+                        else:
+                            # If no fragment is returned, fall through to normal flow
+                            logger.warning(f"No fragment returned from pending decision processing for user {user_id}")
+                    else:
+                        # If decision still fails, just return to the fragment
+                        logger.warning(f"Pending decision still failed for user {user_id}: {result.get('message')}")
+                        # Clear the pending decision to prevent infinite loops
+                        user_state.pending_decision_id = None
+                        await session.commit()
+                except Exception as e:
+                    logger.error(f"Error processing pending decision for user {user_id}: {e}")
+                    # Clear the pending decision on error to prevent infinite loops
                     user_state.pending_decision_id = None
                     await session.commit()
-                    
-                    # Show the next fragment
-                    next_fragment = result.get("fragment")
-                    if next_fragment:
-                        await _display_narrative_fragment(message, next_fragment, session)
-                        return
-                    else:
-                        # If no fragment is returned, fall through to normal flow
-                        pass
-                else:
-                    # If decision still fails, just return to the fragment
-                    logger.warning(f"Pending decision still failed for user {user_id}: {result.get('message')}")
             
             # Return to the fragment where user was redirected to shop
             return_fragment = await service._get_fragment_by_key(user_state.shop_redirect_fragment_key)
@@ -66,7 +76,8 @@ async def start_narrative_command(message: Message, session: AsyncSession):
                 # Clear the redirect flag and set as current fragment
                 user_state.current_fragment_key = user_state.shop_redirect_fragment_key
                 user_state.shop_redirect_fragment_key = None
-                user_state.pending_decision_id = None  # Clear any pending decision
+                # Clear any remaining pending decision
+                user_state.pending_decision_id = None
                 await session.commit()
                 # Add a message indicating they can now proceed
                 await safe_answer(
