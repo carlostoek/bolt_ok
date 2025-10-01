@@ -53,6 +53,9 @@ async def start_narrative_command(message: Message, session: AsyncSession):
                     if next_fragment:
                         await _display_narrative_fragment(message, next_fragment, session)
                         return
+                    else:
+                        # If no fragment is returned, fall through to normal flow
+                        pass
                 else:
                     # If decision still fails, just return to the fragment
                     logger.warning(f"Pending decision still failed for user {user_id}: {result.get('message')}")
@@ -65,6 +68,13 @@ async def start_narrative_command(message: Message, session: AsyncSession):
                 user_state.shop_redirect_fragment_key = None
                 user_state.pending_decision_id = None  # Clear any pending decision
                 await session.commit()
+                # Add a message indicating they can now proceed
+                await safe_answer(
+                    message,
+                    f"🛒 **Regresando de la Tienda**\n\n"
+                    f"Has adquirido el ítem necesario. Ahora puedes continuar con tu historia...\n\n"
+                    f"💡 *Si la decisión no se procesa automáticamente, selecciónala nuevamente.*"
+                )
                 await _display_narrative_fragment(message, return_fragment, session)
                 return
 
