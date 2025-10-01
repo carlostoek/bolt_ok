@@ -478,6 +478,7 @@ class ShopItem(Base):
     price = Column(Integer, nullable=False)  # Price in besitos
     is_vip_only = Column(Boolean, default=False)
     unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
+    unlocks_fragment_key = Column(String(50), nullable=True)  # Key of StoryFragment to unlock on purchase
     image_file_id = Column(String(255), nullable=True)  # Optional Telegram file_id for product image
     stock_limit = Column(Integer, nullable=True)  # NULL = unlimited stock
     max_purchases_per_user = Column(Integer, default=1)  # Maximum times a user can purchase this item

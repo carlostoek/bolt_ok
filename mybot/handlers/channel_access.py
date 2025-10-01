@@ -111,3 +111,75 @@ async def handle_chat_member(update: ChatMemberUpdated, bot: Bot, session: Async
         if req:
             await session.delete(req)
             await session.commit()
+
+
+@router.callback_query(lambda c: c.data == "check_join_status")
+async def check_join_status_handler(callback, session: AsyncSession):
+    """Handler para verificar el estado de la solicitud de ingreso al canal gratuito."""
+    from aiogram import F
+    from aiogram.types import CallbackQuery
+    from datetime import datetime, timedelta
+    from utils.onboarding_messages import DEFAULT_SOCIAL_LINKS
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+
+    user_id = callback.from_user.id
+
+    try:
+        # Buscar solicitud pendiente del usuario
+        stmt = select(PendingChannelRequest).where(
+            PendingChannelRequest.user_id == user_id,
+            PendingChannelRequest.approved == False
+        )
+        result = await session.execute(stmt)
+        pending_request = result.scalar_one_or_none()
+
+        if not pending_request:
+            await callback.answer(
+                "✅ Tu solicitud ya fue aprobada. Revisa el canal.",
+                show_alert=True
+            )
+            return
+
+        # Calcular tiempo restante
+        config = await session.get(BotConfig, 1)
+        wait_minutes = config.free_channel_wait_time_minutes if config else 15
+
+        elapsed_time = datetime.utcnow() - pending_request.request_timestamp
+        elapsed_minutes = int(elapsed_time.total_seconds() / 60)
+        remaining_minutes = max(0, wait_minutes - elapsed_minutes)
+
+        if remaining_minutes == 0:
+            status_message = "⏰ Tu solicitud está siendo procesada. Serás aprobado en cualquier momento."
+        elif remaining_minutes < 5:
+            status_message = f"⏰ **Casi listo!**\n\nTiempo restante: aproximadamente {remaining_minutes} minutos.\n\nPrepárate para la bienvenida de Diana..."
+        else:
+            status_message = f"""⏰ **Estado de tu Solicitud**
+
+Tiempo transcurrido: {elapsed_minutes} minutos
+Tiempo restante: **{remaining_minutes} minutos**
+
+_Recuerda: seguir a Diana en sus redes sociales demuestra tu interés genuino._
+
+¿Ya la sigues en todas sus plataformas?"""
+
+        # Construir teclado con enlaces sociales
+        builder = InlineKeyboardBuilder()
+
+        if DEFAULT_SOCIAL_LINKS.get('instagram'):
+            builder.button(text="📸 Instagram", url=DEFAULT_SOCIAL_LINKS['instagram'])
+        if DEFAULT_SOCIAL_LINKS.get('tiktok'):
+            builder.button(text="🎵 TikTok", url=DEFAULT_SOCIAL_LINKS['tiktok'])
+
+        builder.button(text="🔄 Actualizar Estado", callback_data="check_join_status")
+        builder.adjust(2, 1)
+
+        await callback.message.edit_text(
+            status_message,
+            reply_markup=builder.as_markup(),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error checking join status for user {user_id}: {e}", exc_info=True)
+        await callback.answer("❌ Error al verificar el estado", show_alert=True)

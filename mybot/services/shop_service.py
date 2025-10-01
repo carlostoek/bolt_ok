@@ -298,15 +298,21 @@ class ShopService:
                 # Add to user's lore pieces (backpack) directly
                 unlocked_lore = await self._add_to_backpack(user_id, item_id, item)
 
+            # Unlock narrative fragment if applicable
+            unlocked_fragment = None
+            if item.unlocks_fragment_key:
+                unlocked_fragment = await self._unlock_narrative_fragment(user_id, item.unlocks_fragment_key)
+
             # Don't clear pending_decision_id - it will be processed when user returns to narrative
             # The narrative handler will process the pending decision after purchase
             logger.info(f"Purchase successful for user {user_id}. Pending decision will be processed on return to narrative.")
-            
+
             await self.session.commit()
             return {
                 "success": True,
                 "message": "Purchase successful",
-                "unlocked_lore": unlocked_lore  # Now returns dict or None
+                "unlocked_lore": unlocked_lore,  # Now returns dict or None
+                "unlocked_fragment": unlocked_fragment  # Fragment key or None
             }
         except Exception as e:
             await self.session.rollback()
@@ -358,4 +364,28 @@ class ShopService:
             return None
         except Exception as e:
             logger.error(f"Error adding item to backpack for user {user_id}: {str(e)}")
+            return None
+
+    async def _unlock_narrative_fragment(self, user_id: int, fragment_key: str) -> Optional[str]:
+        """Unlock a narrative fragment for the user by navigating to it"""
+        try:
+            from database.narrative_models import StoryFragment
+            from sqlalchemy import select
+
+            # Verify fragment exists
+            stmt = select(StoryFragment).where(StoryFragment.key == fragment_key)
+            result = await self.session.execute(stmt)
+            fragment = result.scalar_one_or_none()
+
+            if not fragment:
+                logger.error(f"Fragment {fragment_key} not found")
+                return None
+
+            # Navigate user to this fragment
+            await self.narrative_service.navigate_to_fragment(user_id, fragment_key)
+            logger.info(f"User {user_id} unlocked and navigated to fragment {fragment_key}")
+
+            return fragment_key
+        except Exception as e:
+            logger.error(f"Error unlocking fragment {fragment_key} for user {user_id}: {str(e)}")
             return None

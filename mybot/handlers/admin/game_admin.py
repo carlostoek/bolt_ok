@@ -169,7 +169,7 @@ async def admin_view_user(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_search_user")
-async def admin_search_user(callback: CallbackQuery, state: FSMContext):
+async def admin_search_user(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -236,7 +236,7 @@ async def toggle_daily_gift(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_create_mission")
-async def admin_start_create_mission(callback: CallbackQuery, state: FSMContext):
+async def admin_start_create_mission(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -248,7 +248,7 @@ async def admin_start_create_mission(callback: CallbackQuery, state: FSMContext)
 
 
 @router.message(AdminMissionStates.creating_mission_name)
-async def admin_process_mission_name(message: Message, state: FSMContext):
+async def admin_process_mission_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -257,7 +257,7 @@ async def admin_process_mission_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminMissionStates.creating_mission_description)
-async def admin_process_mission_description(message: Message, state: FSMContext):
+async def admin_process_mission_description(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(description=message.text)
@@ -274,7 +274,7 @@ async def admin_process_mission_description(message: Message, state: FSMContext)
 
 
 @router.callback_query(F.data.startswith("mission_type_"))
-async def admin_select_mission_type(callback: CallbackQuery, state: FSMContext):
+async def admin_select_mission_type(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     m_type = callback.data.split("mission_type_")[-1]
@@ -291,7 +291,7 @@ async def admin_select_mission_type(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminMissionStates.creating_mission_target)
-async def admin_process_target(message: Message, state: FSMContext):
+async def admin_process_target(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -305,7 +305,7 @@ async def admin_process_target(message: Message, state: FSMContext):
 
 
 @router.message(AdminMissionStates.creating_mission_reward)
-async def admin_process_reward(message: Message, state: FSMContext):
+async def admin_process_reward(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -483,7 +483,7 @@ async def admin_content_badges(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_create_badge")
-async def admin_create_badge(callback: CallbackQuery, state: FSMContext):
+async def admin_create_badge(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -495,7 +495,7 @@ async def admin_create_badge(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminBadgeStates.creating_badge_name)
-async def badge_name_step(message: Message, state: FSMContext):
+async def badge_name_step(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text.strip())
@@ -504,7 +504,7 @@ async def badge_name_step(message: Message, state: FSMContext):
 
 
 @router.message(AdminBadgeStates.creating_badge_description)
-async def badge_description_step(message: Message, state: FSMContext):
+async def badge_description_step(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(description=message.text.strip())
@@ -513,7 +513,7 @@ async def badge_description_step(message: Message, state: FSMContext):
 
 
 @router.message(AdminBadgeStates.creating_badge_requirement)
-async def badge_requirement_step(message: Message, state: FSMContext):
+async def badge_requirement_step(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(requirement=message.text.strip())
@@ -711,7 +711,7 @@ async def toggle_minigames(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_manage_hints")
-async def admin_manage_hints(callback: CallbackQuery):
+async def admin_manage_hints(callback: CallbackQuery, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
 
@@ -757,7 +757,7 @@ async def save_daily_gift_amount(message: Message, state: FSMContext, session: A
 # --- Gestión de Recompensas ---
 
 @router.callback_query(F.data == "admin_reward_add")
-async def admin_reward_add(callback: CallbackQuery, state: FSMContext):
+async def admin_reward_add(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -769,7 +769,7 @@ async def admin_reward_add(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminRewardStates.creating_reward_name)
-async def process_reward_name(message: Message, state: FSMContext):
+async def process_reward_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -778,7 +778,7 @@ async def process_reward_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminRewardStates.creating_reward_points)
-async def process_reward_points(message: Message, state: FSMContext):
+async def process_reward_points(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -792,7 +792,7 @@ async def process_reward_points(message: Message, state: FSMContext):
 
 
 @router.message(AdminRewardStates.creating_reward_description)
-async def process_reward_description(message: Message, state: FSMContext):
+async def process_reward_description(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     desc = message.text
@@ -934,7 +934,7 @@ async def start_edit_reward(callback: CallbackQuery, session: AsyncSession, stat
 
 
 @router.message(AdminRewardStates.editing_reward_name)
-async def edit_reward_name(message: Message, state: FSMContext):
+async def edit_reward_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -943,7 +943,7 @@ async def edit_reward_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminRewardStates.editing_reward_points)
-async def edit_reward_points(message: Message, state: FSMContext):
+async def edit_reward_points(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -957,7 +957,7 @@ async def edit_reward_points(message: Message, state: FSMContext):
 
 
 @router.message(AdminRewardStates.editing_reward_description)
-async def edit_reward_description(message: Message, state: FSMContext):
+async def edit_reward_description(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     desc = message.text
@@ -1012,7 +1012,7 @@ async def admin_levels_view(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data == "admin_level_add")
-async def admin_level_add(callback: CallbackQuery, state: FSMContext):
+async def admin_level_add(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -1023,7 +1023,7 @@ async def admin_level_add(callback: CallbackQuery, state: FSMContext):
 
 
 @router.message(AdminLevelStates.creating_level_number)
-async def level_add_number(message: Message, state: FSMContext):
+async def level_add_number(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -1037,7 +1037,7 @@ async def level_add_number(message: Message, state: FSMContext):
 
 
 @router.message(AdminLevelStates.creating_level_name)
-async def level_add_name(message: Message, state: FSMContext):
+async def level_add_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(name=message.text)
@@ -1046,7 +1046,7 @@ async def level_add_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminLevelStates.creating_level_points)
-async def level_add_points(message: Message, state: FSMContext):
+async def level_add_points(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -1060,7 +1060,7 @@ async def level_add_points(message: Message, state: FSMContext):
 
 
 @router.message(AdminLevelStates.creating_level_reward)
-async def level_add_reward(message: Message, state: FSMContext):
+async def level_add_reward(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     reward = message.text
@@ -1132,7 +1132,7 @@ async def start_edit_level(callback: CallbackQuery, state: FSMContext, session: 
 
 
 @router.message(AdminLevelStates.editing_level_number)
-async def edit_level_number(message: Message, state: FSMContext):
+async def edit_level_number(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -1146,7 +1146,7 @@ async def edit_level_number(message: Message, state: FSMContext):
 
 
 @router.message(AdminLevelStates.editing_level_name)
-async def edit_level_name(message: Message, state: FSMContext):
+async def edit_level_name(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(new_name=message.text)
@@ -1155,7 +1155,7 @@ async def edit_level_name(message: Message, state: FSMContext):
 
 
 @router.message(AdminLevelStates.editing_level_points)
-async def edit_level_points(message: Message, state: FSMContext):
+async def edit_level_points(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     try:
@@ -1456,7 +1456,7 @@ async def lore_piece_toggle_active(callback: CallbackQuery, session: AsyncSessio
 
 
 @router.callback_query(F.data == "lore_piece_create")
-async def lore_piece_create_start(callback: CallbackQuery, state: FSMContext):
+async def lore_piece_create_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     await callback.message.edit_text(
@@ -1482,7 +1482,7 @@ async def process_lore_code_name(message: Message, state: FSMContext, session: A
 
 
 @router.message(LorePieceAdminStates.creating_title)
-async def process_lore_title(message: Message, state: FSMContext):
+async def process_lore_title(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(title=message.text)
@@ -1491,7 +1491,7 @@ async def process_lore_title(message: Message, state: FSMContext):
 
 
 @router.message(LorePieceAdminStates.creating_description)
-async def process_lore_description(message: Message, state: FSMContext):
+async def process_lore_description(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     desc = message.text
@@ -1503,7 +1503,7 @@ async def process_lore_description(message: Message, state: FSMContext):
 
 
 @router.message(LorePieceAdminStates.creating_category)
-async def process_lore_category(message: Message, state: FSMContext):
+async def process_lore_category(message: Message, session: AsyncSession, state: FSMContext):
     if not await is_admin(message.from_user.id, session):
         return
     await state.update_data(category=message.text)
@@ -1526,7 +1526,7 @@ async def process_lore_category(message: Message, state: FSMContext):
         ]
     ),
 )
-async def process_main_story(callback: CallbackQuery, state: FSMContext):
+async def process_main_story(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     is_main = callback.data == "lore_main_yes"
@@ -1545,7 +1545,7 @@ async def process_main_story(callback: CallbackQuery, state: FSMContext):
 
 
 @router.callback_query(LorePieceAdminStates.choosing_content_type, F.data.startswith("lore_type_"))
-async def choose_content_type(callback: CallbackQuery, state: FSMContext):
+async def choose_content_type(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     ctype = callback.data.split("lore_type_")[-1]
@@ -1626,7 +1626,7 @@ async def lore_piece_edit(callback: CallbackQuery, session: AsyncSession, state:
 
 
 @router.callback_query(F.data == "lore_edit_title")
-async def edit_lore_title_start(callback: CallbackQuery, state: FSMContext):
+async def edit_lore_title_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     data = await state.get_data()
@@ -1654,7 +1654,7 @@ async def edit_lore_title(message: Message, state: FSMContext, session: AsyncSes
 
 
 @router.callback_query(F.data == "lore_edit_description")
-async def edit_lore_description_start(callback: CallbackQuery, state: FSMContext):
+async def edit_lore_description_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     data = await state.get_data()
@@ -1686,7 +1686,7 @@ async def edit_lore_description(message: Message, state: FSMContext, session: As
 
 
 @router.callback_query(F.data == "lore_edit_category")
-async def edit_lore_category_start(callback: CallbackQuery, state: FSMContext):
+async def edit_lore_category_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     data = await state.get_data()
@@ -1718,7 +1718,7 @@ async def edit_lore_category(message: Message, state: FSMContext, session: Async
 
 
 @router.callback_query(F.data == "lore_edit_main")
-async def edit_lore_main_start(callback: CallbackQuery, state: FSMContext):
+async def edit_lore_main_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     data = await state.get_data()
@@ -1763,7 +1763,7 @@ async def edit_lore_main(callback: CallbackQuery, state: FSMContext, session: As
 
 
 @router.callback_query(F.data == "lore_edit_type")
-async def edit_lore_type_start(callback: CallbackQuery, state: FSMContext):
+async def edit_lore_type_start(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer()
     data = await state.get_data()
