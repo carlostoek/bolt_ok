@@ -619,11 +619,44 @@ async def _display_narrative_fragment(
     # Crear teclado con opciones (pasando user_id para navegación)
     keyboard = await get_narrative_keyboard(fragment, session, user_id=user_id)
 
+    # Verificar si el fragmento tiene imagen
+    has_image = hasattr(fragment, 'image_url') and fragment.image_url
+
     # Mostrar el fragmento
-    if is_callback:
-        await safe_edit(message, fragment_text, reply_markup=keyboard)
+    if has_image:
+        # Si tiene imagen, enviar como foto con caption
+        try:
+            if is_callback:
+                # En callback, eliminar mensaje anterior y enviar nuevo con imagen
+                await message.delete()
+                await message.bot.send_photo(
+                    chat_id=message.chat.id,
+                    photo=fragment.image_url,
+                    caption=fragment_text,
+                    reply_markup=keyboard,
+                    parse_mode="Markdown"
+                )
+            else:
+                # En mensaje normal, enviar directamente
+                await message.answer_photo(
+                    photo=fragment.image_url,
+                    caption=fragment_text,
+                    reply_markup=keyboard,
+                    parse_mode="Markdown"
+                )
+        except Exception as e:
+            logger.error(f"Error enviando fragmento con imagen: {e}")
+            # Fallback a texto sin imagen
+            if is_callback:
+                await safe_edit(message, fragment_text, reply_markup=keyboard)
+            else:
+                await safe_answer(message, fragment_text, reply_markup=keyboard)
     else:
-        await safe_answer(message, fragment_text, reply_markup=keyboard)
+        # Sin imagen, enviar solo texto como antes
+        if is_callback:
+            await safe_edit(message, fragment_text, reply_markup=keyboard)
+        else:
+            await safe_answer(message, fragment_text, reply_markup=keyboard)
 
 @router.callback_query(F.data == "start_narrative")
 async def start_narrative_callback(callback: CallbackQuery, session: AsyncSession):
@@ -713,6 +746,7 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
         character = fragment_data.get('character', 'Diana')
         content = fragment_data.get('content', '')
         choices = fragment_data.get('choices', [])
+        image_url = fragment_data.get('image_url')
 
         # Formatear texto del fragmento
         character_emoji = "🌸" if character == "Diana" else "🎩"
@@ -726,7 +760,22 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
         # Crear teclado con opciones de enhanced L1F1
         keyboard = await _get_enhanced_l1f1_keyboard(choices)
 
-        await safe_answer(message, fragment_text, reply_markup=keyboard)
+        # Enviar con imagen si está disponible
+        if image_url:
+            try:
+                await message.answer_photo(
+                    photo=image_url,
+                    caption=fragment_text,
+                    reply_markup=keyboard,
+                    parse_mode="Markdown"
+                )
+            except Exception as e:
+                logger.error(f"Error enviando enhanced L1F1 con imagen: {e}")
+                # Fallback a texto sin imagen
+                await safe_answer(message, fragment_text, reply_markup=keyboard)
+        else:
+            await safe_answer(message, fragment_text, reply_markup=keyboard)
+
         logger.info(f"Enhanced L1F1 mostrado a usuario {message.from_user.id}")
 
     except Exception as e:
@@ -1045,6 +1094,7 @@ async def _display_enhanced_followup_fragment(
         character = fragment_data.get('character', 'Diana')
         content = fragment_data.get('content', '')
         choices = fragment_data.get('choices', [])
+        image_url = fragment_data.get('image_url')
 
         # Formatear texto del fragmento
         character_emoji = "🌸" if character == "Diana" else "🎩"
@@ -1058,7 +1108,24 @@ async def _display_enhanced_followup_fragment(
         # Crear teclado para el seguimiento
         keyboard = await _get_enhanced_followup_keyboard(choices)
 
-        await callback.message.edit_text(fragment_text, reply_markup=keyboard)
+        # Enviar con imagen si está disponible
+        if image_url:
+            try:
+                # Eliminar mensaje anterior y enviar nuevo con imagen
+                await callback.message.delete()
+                await callback.bot.send_photo(
+                    chat_id=callback.message.chat.id,
+                    photo=image_url,
+                    caption=fragment_text,
+                    reply_markup=keyboard,
+                    parse_mode="Markdown"
+                )
+            except Exception as e:
+                logger.error(f"Error enviando followup con imagen: {e}")
+                # Fallback a editar texto
+                await callback.message.edit_text(fragment_text, reply_markup=keyboard)
+        else:
+            await callback.message.edit_text(fragment_text, reply_markup=keyboard)
 
     except Exception as e:
         logger.error(f"Error mostrando fragmento de seguimiento: {e}")
