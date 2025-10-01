@@ -79,6 +79,9 @@ class UserNarrativeState(Base):
     total_besitos_earned = Column(Integer, default=0)
     narrative_started_at = Column(DateTime, default=func.now())
     last_activity_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    # Para redirección desde la tienda
+    shop_redirect_fragment_key = Column(String(50), nullable=True)
 
     user = relationship(
         "User", 
