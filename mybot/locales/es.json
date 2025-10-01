@@ -4,12 +4,12 @@
     "welcome_back": "🎭 Oh, {user_name}... has regresado. Lucien arquea una ceja con complicidad, como si nunca te hubieras marchado."
   },
   "main_menu": {
-    "button_backpack": "🎒 Mochila (custodiada con celo por Lucien)",
-    "button_wallet": "💰 Billetera (cada moneda contada con obsesiva precisión)",
-    "button_missions": "🎯 Misiones (susurradas por Diana en la penumbra)",
-    "button_story": "📖 Historia (ahí donde las sombras toman forma)",
-    "button_settings": "⚙️ Ajustes (la maquinaria discreta de Lucien)",
-    "button_help": "❓ Ayuda (aunque, recuerda, no toda ayuda es sincera)"
+    "button_backpack": "🎒 Mochila",
+    "button_wallet": "💰 Billetera",
+    "button_missions": "🎯 Misiones",
+    "button_story": "📖 Historia",
+    "button_settings": "⚙️ Ajustes",
+    "button_help": "❓ Ayuda"
   },
   "generic_errors": {
     "unknown_command": "Lucien inclina la cabeza con elegancia: *«Disculpa, pero esa orden no figura en mis registros. Quizá quieras usar los botones… o empezar de nuevo con /start.»*",
@@ -17,8 +17,8 @@
   },
   "start_handler": {
     "admin_init_error": "❌ **Error Crítico**\n\nLucien retira los guantes con fastidio: *«El sistema de administración no ha respondido. Contacta al soporte, antes de que todo se desmorone.»*",
-    "admin_welcome": "👑 **Bienvenido, Administrador.**\n\nLucien se inclina: *«El tablero aguarda sus órdenes.»*",
-    "admin_panel_activated": "🎛️ **Panel de Control Desplegado** —cada engranaje al servicio de tu voluntad.",
+    "admin_welcome": "👑 \*\*Bienvenido, Administrador.\*\*\n\nLucien se inclina: *«El tablero aguarda sus órdenes.»*",
+    "admin_panel_activated": "🎛️ **Panel de Control Desplegado\*\* —cada engranaje al servicio de tu voluntad.",
     "admin_menu_error": "❌ *El panel administrativo se resiste a abrir. Quizás debas intentarlo otra vez...*",
     "user_welcome": "🌟 **Has llegado.**\n\nLucien sonríe: *«La aventura comienza.»*",
     "vip_welcome": "✨ **El círculo íntimo te recibe.**\n\nDiana susurra: *«Hay secretos que sólo se revelan a unos pocos.»*",
@@ -158,7 +158,7 @@
   "backpack": {
     "title": "🎒 **Tu Mochila**",
     "title_alt": "🎒 **Mi Mochila**",
-    "empty_message_lore": "Tu mochila está vacía. Lucien murmura: *«Será mejor visitar la tienda o ganar pistas.»*",
+    "empty_message_lore": "Tu mochila está vacía. Lucien murmura: \*\*«Será mejor visitar la tienda o ganar pistas.»\*\*",
     "empty_message_shop": "Tu mochila descansa vacía.\n\nLucien: *«La tienda tiene justo lo que te falta.»*",
     "header": "🎁 Ítems y pistas adquiridas:",
     "inventory_summary": "Llevas contigo **{count}** {product_plural}:\n\n",
