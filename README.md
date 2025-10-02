@@ -1,221 +1,270 @@
-# Botmaestro - Sistema de Bot Multi-Tenant con Gamificación
+# 🌹 DianaBot - Experiencia Narrativa Inmersiva
 
-## 🌟 Características Principales
-
-### ✨ Experiencia de Usuario Mejorada
-- **Gestión Inteligente de Mensajes**: Sin basura en el chat, mensajes temporales que se auto-eliminan
-- **Navegación Fluida**: Menús que se actualizan sin crear nuevos mensajes
-- **Interfaz Consistente**: Experiencia pulida y profesional en toda la aplicación
-- **Sistema de Navegación**: Historial de navegación con funcionalidad de "volver"
-
-### 🏢 Sistema Multi-Tenant
-- **Configuración Independiente**: Cada administrador puede configurar su propio bot
-- **Setup Guiado**: Proceso de configuración inicial paso a paso
-- **Gestión de Canales**: Configuración separada de canales VIP y gratuitos
-- **Tarifas Personalizadas**: Sistema de suscripciones configurable por tenant
-
-### 🎮 Sistema de Gamificación Universal
-- **Gamificación Lite para Usuarios Gratuitos**: Multiplicadores reducidos y funciones limitadas
-- **Gamificación Completa para VIP**: Acceso total con multiplicadores mejorados
-- **Sistema de Puntos Diferenciado**: Configuración automática según el tipo de usuario
-- **Misiones y Recompensas**: Sistema completo de engagement
-
-## 🚀 Configuración Inicial
-
-### 1. Instalación de Dependencias
-
-```bash
-pip install -r requirements.txt
-```
-
-### 2. Variables de Entorno
-
-```bash
-export BOT_TOKEN="<your_bot_token>"
-export ADMIN_IDS="11111;22222"          # IDs de usuarios administradores
-export VIP_CHANNEL_ID="-100123456789"   # ID del canal VIP (opcional)
-export FREE_CHANNEL_ID="-100987654321"  # ID del canal gratuito (opcional)
-export DATABASE_URL="sqlite+aiosqlite:///gamification.db"  # Conexión a BD
-export VIP_POINTS_MULTIPLIER="2"        # Multiplicador de puntos VIP
-export CHANNEL_SCHEDULER_INTERVAL="30"  # Segundos entre verificaciones de canal
-export VIP_SCHEDULER_INTERVAL="3600"    # Segundos entre verificaciones VIP
-```
-
-### 3. Inicialización de la Base de Datos
-
-```bash
-python scripts/init_db.py
-```
-
-### 4. Ejecutar el Bot
-
-```bash
-python mybot/bot.py
-```
-
-## 🛠️ Configuración Multi-Tenant
-
-### Primer Uso (Administradores)
-
-1. **Comando de Inicio**: Usa `/start` como administrador
-2. **Setup Guiado**: El bot detectará que es la primera vez y ofrecerá configuración guiada
-3. **Configuración de Canales**: 
-   - Reenvía mensajes de tus canales para detectar automáticamente los IDs
-   - O ingresa los IDs manualmente
-4. **Configuración de Tarifas**: Crea planes de suscripción VIP
-5. **Gamificación**: Configura el sistema de puntos y misiones
-
-### Configuración Avanzada
-
-Accede al panel de administración con `/admin_menu` para:
-- Gestionar usuarios y suscripciones
-- Crear misiones y recompensas personalizadas
-- Configurar eventos y sorteos
-- Administrar el sistema de subastas
-- Personalizar mensajes y reacciones
-
-## 👥 Roles y Flujos de Usuario
-
-### 🔧 Administradores
-- **Panel de Control Completo**: Gestión total del bot y configuraciones
-- **Setup Multi-Tenant**: Configuración independiente por administrador
-- **Gestión de Contenido**: Control sobre gamificación, canales y usuarios
-- **Estadísticas**: Métricas detalladas de uso y engagement
-
-### 💎 Usuarios VIP
-- **Gamificación Completa**: Acceso total al sistema de puntos y recompensas
-- **Multiplicadores Mejorados**: Puntos adicionales por actividades
-- **Subastas Exclusivas**: Participación en subastas en tiempo real
-- **Contenido Premium**: Acceso a canales y funciones exclusivas
-
-### 🆓 Usuarios Gratuitos
-- **Gamificación Lite**: Sistema reducido pero funcional
-- **Multiplicadores Básicos**: Puntos estándar por actividades
-- **Acceso Limitado**: Funciones básicas y canal gratuito
-- **Upgrade Path**: Opciones claras para mejorar a VIP
-
-## 🎯 Sistema de Gamificación
-
-### Características Universales
-- **Puntos por Actividad**: Mensajes, reacciones, check-ins diarios
-- **Sistema de Niveles**: Progresión basada en puntos acumulados
-- **Misiones Dinámicas**: Tareas diarias, semanales y especiales
-- **Insignias y Logros**: Reconocimientos por hitos alcanzados
-- **Ranking Global**: Competencia sana entre usuarios
-
-### Diferenciación VIP vs Gratuito
-- **Multiplicadores**: VIP 2x, Gratuito 1x (configurable)
-- **Acceso a Recompensas**: VIP acceso completo, Gratuito limitado
-- **Frecuencia de Misiones**: VIP más misiones disponibles
-- **Subastas**: Solo VIP puede participar
-
-## 🏛️ Sistema de Subastas (VIP)
-
-### Características
-- **Tiempo Real**: Subastas con temporizadores automáticos
-- **Auto-extensión**: Extensión automática si hay pujas de último minuto
-- **Notificaciones**: Alertas cuando otros usuarios superan tu puja
-- **Historial**: Seguimiento de participación y resultados
-
-### Gestión Administrativa
-- **Creación Flexible**: Configuración completa de duración, precios y premios
-- **Monitoreo**: Supervisión en tiempo real de todas las subastas
-- **Finalización Manual**: Opción de terminar subastas anticipadamente
-- **Estadísticas**: Métricas de participación y engagement
-
-## 📊 Tareas Programadas
-
-### Verificaciones Automáticas
-1. **Solicitudes de Canal**: Aprobación automática después del tiempo de espera
-2. **Suscripciones VIP**: Recordatorios de expiración y limpieza automática
-3. **Subastas**: Finalización automática y notificaciones de resultados
-
-### Configuración de Intervalos
-- Modificables desde el panel de administración
-- Variables de entorno para configuración inicial
-- Logs detallados para monitoreo
-
-## 🔧 Arquitectura del Sistema
-
-### Gestión de Menús
-- **MenuManager**: Gestión centralizada de mensajes y navegación
-- **MenuFactory**: Creación consistente de menús basada en roles
-- **Navegación Inteligente**: Historial y funcionalidad de "volver"
-- **safe_answer / safe_edit**: Utiliza estas funciones para enviar mensajes de forma segura
-
-### Servicios Multi-Tenant
-- **TenantService**: Gestión de configuraciones independientes
-- **ConfigService**: Almacenamiento de configuraciones por tenant
-- **Aislamiento de Datos**: Cada administrador gestiona su propia instancia
-
-### Base de Datos
-- **SQLAlchemy Async**: ORM moderno para operaciones asíncronas
-- **Migraciones Automáticas**: Creación automática de tablas en primer uso
-- **Escalabilidad**: Diseño preparado para múltiples tenants
-
-## 🚀 Preparación para Distribución Pública
-
-### Características de Distribución
-- **Setup Automático**: Configuración guiada para nuevos administradores
-- **Aislamiento Completo**: Cada instancia es independiente
-- **Documentación Integrada**: Guías y ayuda dentro del bot
-- **Configuración Flexible**: Adaptable a diferentes necesidades
-
-### Consideraciones de Seguridad
-- **Validación de Permisos**: Verificación estricta de roles
-- **Sanitización de Datos**: Limpieza automática de inputs
-- **Envío Seguro de Mensajes**: Todas las respuestas utilizan `safe_answer` y `safe_edit` para evitar textos vacíos
-- **Logs de Auditoría**: Registro detallado de acciones administrativas
-
-## 📈 Métricas y Estadísticas
-
-### Panel de Administración
-- **Usuarios Totales**: Conteo de usuarios registrados
-- **Suscripciones**: Activas, expiradas y ingresos
-- **Engagement**: Participación en gamificación
-- **Uso de Funciones**: Estadísticas de uso por característica
-
-### Exportación de Datos
-- **Reportes Automáticos**: Generación de reportes periódicos
-- **Métricas en Tiempo Real**: Dashboard actualizado constantemente
-- **Análisis de Tendencias**: Identificación de patrones de uso
-
-## 🔄 Actualizaciones y Mantenimiento
-
-### Versionado
-- **Migraciones Automáticas**: Actualización de BD sin pérdida de datos
-- **Compatibilidad**: Mantenimiento de compatibilidad hacia atrás
-- **Rollback**: Capacidad de revertir cambios si es necesario
-
-### Monitoreo
-- **Logs Estructurados**: Sistema de logging detallado
-- **Alertas Automáticas**: Notificaciones de errores críticos
-- **Métricas de Rendimiento**: Monitoreo de performance del bot
-
-## 📞 Soporte y Documentación
-
-### Recursos Disponibles
-- **Documentación Integrada**: Ayuda accesible desde el bot
-- **Guías de Setup**: Tutoriales paso a paso
-- **FAQ**: Preguntas frecuentes y soluciones
-
-### Comunidad
-- **Canal de Soporte**: Asistencia técnica
-- **Actualizaciones**: Notificaciones de nuevas características
-- **Feedback**: Canal para sugerencias y mejoras
+> *Un ecosistema interactivo donde la narrativa, la gamificación y la exclusividad VIP se fusionan para crear una experiencia única.*
 
 ---
 
-## 🎉 ¡Listo para Usar!
+## 🎭 ¿Qué es DianaBot?
 
-Tu bot está ahora preparado para distribución pública con:
-- ✅ Experiencia de usuario pulida y profesional
-- ✅ Sistema multi-tenant completamente funcional
-- ✅ Gamificación diferenciada para VIP y usuarios gratuitos
-- ✅ Configuración guiada para nuevos administradores
-- ✅ Gestión inteligente de mensajes sin basura en el chat
-- ✅ Navegación fluida y consistente
-- ✅ Sistema de subastas en tiempo real
-- ✅ Arquitectura escalable y mantenible
+DianaBot no es solo un bot de Telegram. Es una **experiencia inmersiva** que combina narrativa ramificada, mecánicas de juego y contenido exclusivo en un ecosistema cohesivo y envolvente.
 
-¡Comienza con `/start` y disfruta de la experiencia mejorada!
+Guiado por **Lucien**, un mayordomo elegante y enigmático, cada usuario emprende un viaje personalizado hacia el descubrimiento de **Diana** - una figura deseada, misteriosa y omnipresente que se revela progresivamente a través de las decisiones del jugador.
+
+---
+
+## 🧩 Los Tres Pilares del Ecosistema
+
+### 📖 1. Narrativa Inmersiva
+El corazón emocional de la experiencia.
+
+- **Historia Ramificada**: Cada decisión del usuario afecta el desarrollo de la narrativa
+- **Contenido Multinivel**:
+  - Niveles 1-3: Canal gratuito
+  - Niveles 4-6: Canal VIP (contenido exclusivo)
+- **Fragmentos Ocultos**: Pistas y revelaciones que se desbloquean mediante:
+  - Logros específicos
+  - Objetos de la tienda
+  - Reacciones a publicaciones
+  - Progreso en misiones
+
+**Personajes Principales**:
+- 🕴️ **Lucien** - El mayordomo guía, elegante y sarcástico
+- 🌸 **Diana** - La musa, el misterio, la meta del viaje
+- 👤 **El Usuario** - Protagonista con múltiples caminos posibles
+
+### 🎯 2. Sistema de Gamificación
+La mecánica que mantiene el engagement.
+
+**Economía Virtual: Besitos** 💋
+- Moneda interna que se gana y gasta en el ecosistema
+- Obtenible mediante:
+  - Completar misiones
+  - Reaccionar a publicaciones
+  - Ganar trivias
+  - Regalos diarios
+  - Subastas (solo VIP)
+
+**Elementos de Juego**:
+- 🎯 **Misiones**: Diarias, semanales y especiales
+- 🏆 **Logros**: Badges desbloqueables con beneficios
+- 🛍️ **Tienda**: Objetos que influyen en la narrativa
+- 🎲 **Trivias**: Preguntas con recompensas
+- 🏛️ **Subastas VIP**: Competencia por contenido exclusivo
+- 🎒 **Mochila**: Inventario personal de objetos y pistas
+
+### 🛡️ 3. Administración de Canales
+El sistema que controla accesos y contenido.
+
+- **Canal Gratuito**: Acceso a los primeros niveles narrativos
+- **Canal VIP**: Contenido premium y funciones exclusivas
+- **Gestión de Suscripciones**: Control automático de accesos
+- **Publicaciones Programadas**: Contenido cronometrado
+- **Protección de Mensajes**: Anti-reenvío y anti-descarga
+
+---
+
+## 🔄 Cómo se Conecta Todo
+
+| Acción del Usuario | 📖 Narrativa | 🎯 Gamificación | 🛡️ Administración |
+|-------------------|-------------|----------------|-------------------|
+| Reacciona a publicación | Desbloquea pistas | Gana besitos | Registra acción |
+| Toma decisión narrativa | Avanza historia | Activa misiones | Puede generar evento |
+| Compra en tienda | Desbloquea fragmento | Usa besitos | — |
+| Juega trivia | Gana pistas | Gana puntos/logros | — |
+| Entra a canal VIP | Niveles 4-6 disponibles | Misiones especiales | Validación requerida |
+| Completa misión | Recibe fragmento | Gana besitos/logros | — |
+
+---
+
+## 💎 Experiencia VIP vs Gratuita
+
+### 🆓 Usuario Gratuito
+- ✅ Acceso a niveles narrativos 1-3
+- ✅ Sistema de gamificación básico
+- ✅ Misiones limitadas
+- ✅ Tienda con items básicos
+- ⭐ Opción de upgrade visible
+
+### 💎 Usuario VIP
+- ✨ Acceso completo a niveles 4-6
+- ✨ Sistema de gamificación completo
+- ✨ Misiones exclusivas con mayores recompensas
+- ✨ Participación en subastas en tiempo real
+- ✨ Contenido narrativo premium
+- ✨ Multiplicadores de besitos mejorados
+- ✨ **Mi Diván**: Espacio exclusivo con:
+  - 💘 Test de Compatibilidad con Diana
+  - ✉️ Mensajes Anónimos a Diana
+  - 📊 Estadísticas personalizadas
+
+---
+
+## 🌟 Características Destacadas
+
+### 🎬 Mi Diván (Exclusivo VIP)
+Un espacio íntimo y personal para usuarios VIP donde pueden:
+
+- **Test de Compatibilidad**: Quiz interactivo que mide tu afinidad con Diana
+  - 10 preguntas sobre personalidad, valores e intereses
+  - Resultados personalizados con mensajes de Diana
+  - Recompensas en besitos
+  - Niveles de compatibilidad: desde "Por Conocerse" hasta "Alma Gemela"
+
+- **Mensajería Anónima**: Canal privado con Diana
+  - Envía confesiones, preguntas o fantasías de forma anónima
+  - Diana lee y responde personalmente
+  - Historial de conversaciones
+  - Notificaciones cuando Diana responde
+
+### 🎮 Sistema de Progresión
+- **Niveles Narrativos**: 6 niveles con historias únicas
+- **Fragmentos Ocultos**: Contenido secreto desbloqueable
+- **Pistas Distribuidas**: Búsqueda transcanal de información
+- **Decisiones Permanentes**: Algunas elecciones son irreversibles
+- **Múltiples Finales**: Distintos desenlaces según tus acciones
+
+### 🏛️ Subastas Dinámicas (VIP)
+- Tiempo real con temporizadores automáticos
+- Auto-extensión si hay pujas de último minuto
+- Notificaciones cuando te superan
+- Historial de participación
+- Items únicos y exclusivos
+
+### 🎯 Misiones Adaptativas
+- Se ajustan según tu progreso narrativo
+- Recompensas que desbloquean contenido
+- Conexión directa con la historia
+- Misiones especiales por eventos
+
+---
+
+## 🚀 Cómo Empezar
+
+### Para Usuarios
+
+1. **Inicia el bot**: `/start`
+2. **Conoce a Lucien**: Tu guía en esta experiencia
+3. **Comienza tu historia**: Toma tu primera decisión
+4. **Explora y gana**: Completa misiones, gana besitos
+5. **Avanza**: Desbloquea pistas y fragmentos ocultos
+6. **Considera VIP**: Accede a contenido exclusivo cuando estés listo
+
+### Para Administradores
+
+1. **Panel de Control**: `/admin_menu`
+2. **Configuración Guiada**: Setup paso a paso
+3. **Gestión de Canales**: Configure canales gratuito y VIP
+4. **Contenido**: Cree misiones, trivias y subastas
+5. **Publicaciones**: Programe contenido automático
+6. **Monitoreo**: Estadísticas y métricas en tiempo real
+
+---
+
+## 🎨 La Experiencia del Usuario
+
+### Primera Interacción
+Lucien te recibe con elegancia y misterio. Te presenta el universo de Diana y te ofrece tu primera decisión. Cada elección que tomes comenzará a moldear tu camino único.
+
+### Progresión
+A medida que avanzas, ganarás besitos, desbloquearás logros y descubrirás fragmentos de la historia. Algunos contenidos requieren objetos específicos de la tienda, otros se revelan solo a quienes toman ciertas decisiones.
+
+### Contenido VIP
+Al convertirte en VIP, se abre un nuevo mundo:
+- Niveles narrativos más profundos e íntimos
+- Acceso a **Mi Diván**, el espacio personal con Diana
+- Participación en subastas exclusivas
+- Misiones con recompensas premium
+- Multiplicadores mejorados de besitos
+
+### Metajuego
+El verdadero juego está en descubrir las conexiones ocultas, combinar pistas dispersas en publicaciones, y encontrar los fragmentos secretos que revelan la historia completa de Diana.
+
+---
+
+## 🔧 Stack Técnico
+
+- **Framework**: Aiogram 3.x (Python async)
+- **Base de Datos**: SQLAlchemy (async) + SQLite/PostgreSQL
+- **Scheduler**: Tareas programadas para eventos y verificaciones
+- **Sistema de Mensajes**: Gestión inteligente anti-spam
+- **Localización**: Sistema i18n preparado para múltiples idiomas
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+bolt_ok/
+├── mybot/                    # Código principal del bot
+│   ├── handlers/            # Manejadores de comandos y callbacks
+│   ├── services/            # Lógica de negocio
+│   ├── database/            # Modelos y migraciones
+│   ├── keyboards/           # Teclados personalizados
+│   ├── utils/               # Utilidades y helpers
+│   └── docs/                # Documentación técnica
+│
+├── scripts/                 # Scripts de utilidad
+└── tests/                   # Tests automatizados
+```
+
+---
+
+## 📚 Documentación
+
+- **Concepto Completo**: [`mybot/docs/concepto.md`](mybot/docs/concepto.md)
+- **Mi Diván - Features**: [`mybot/docs/MIDIVAN_VIP_FEATURES.md`](mybot/docs/MIDIVAN_VIP_FEATURES.md)
+- **Sistema Narrativo**: [`mybot/docs/Narrativo.md`](mybot/docs/Narrativo.md)
+- **Ramificación**: [`mybot/docs/ramificado.md`](mybot/docs/ramificado.md)
+- **Índice Completo**: [`mybot/docs/README.md`](mybot/docs/README.md)
+
+---
+
+## 🎯 Filosofía del Proyecto
+
+> **DianaBot** es un sistema vivo donde:
+>
+> 📖 La narrativa despierta el deseo de avanzar
+> 🎯 La gamificación da recompensas y sentido de progreso
+> 🛡️ La administración garantiza control, acceso y seguridad
+>
+> Cada módulo puede existir por separado, pero juntos forman una experiencia interactiva única y envolvente.
+
+---
+
+## ✨ Lo Que Hace Único a DianaBot
+
+1. **Narrativa Adulta Elegante**: No es vulgar, es sensual e intelectual
+2. **Gamificación Integrada**: No se siente forzada, fluye con la historia
+3. **Economía Virtual Significativa**: Los besitos tienen valor real dentro del ecosistema
+4. **Exclusividad VIP Bien Diseñada**: El contenido premium realmente vale la pena
+5. **Personalización Extrema**: Cada usuario vive su propia historia
+6. **Mi Diván**: Conexión íntima y personal con Diana (VIP)
+7. **Sistema de Pistas**: Metajuego que fomenta exploración y comunidad
+
+---
+
+## 🎉 Estado del Proyecto
+
+✅ Sistema narrativo completo
+✅ Gamificación funcional
+✅ Gestión de canales operativa
+✅ Tienda y economía de besitos
+✅ Sistema de misiones
+✅ Trivias y minijuegos
+✅ Subastas VIP
+✅ Mi Diván (Test de compatibilidad + Mensajería anónima)
+✅ Sistema de localización
+✅ Panel administrativo completo
+
+---
+
+## 📞 Soporte
+
+Para más información sobre configuración, uso o desarrollo:
+- Consulta la documentación en `mybot/docs/`
+- Revisa el panel de administración con `/admin_menu`
+- Contacta al equipo de desarrollo
+
+---
+
+*Desarrollado con 💋 para crear experiencias inmersivas inolvidables.*
