@@ -7,6 +7,7 @@ from aiogram.types import Update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.user_service import UserService
+from services.user_journey_service import UserJourneyService
 
 logger = logging.getLogger(__name__)
 
@@ -43,6 +44,15 @@ class UserRegistrationMiddleware(BaseMiddleware):
                     username=getattr(user_info, "username", None),
                 )
                 logger.info("Created new user via middleware: %s", user_info.id)
+
+                # Inicializar milestones del journey para el nuevo usuario
+                try:
+                    journey_service = UserJourneyService(session)
+                    await journey_service.initialize_user_milestones(user.id)
+                    logger.info(f"Journey milestones initialized for new user {user.id}")
+                except Exception as e:
+                    logger.error(f"Error initializing journey milestones for user {user.id}: {e}")
+
             data.setdefault("user", user)
 
         return await handler(event, data)

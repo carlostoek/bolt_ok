@@ -61,6 +61,7 @@ from handlers.admin import admin_router
 from handlers.admin.mission_wizard import router as mission_wizard_router
 from handlers.admin.auction_admin import router as auction_admin_router
 from handlers.admin.content_admin import router as content_admin_router
+from handlers.admin.journey_admin import router as journey_admin_router
 from handlers.lore_handlers import router as lore_router
 from handlers.missions_handler import router as missions_router
 from handlers.info_handler import router as info_router
@@ -83,7 +84,7 @@ from services import (
     vip_subscription_scheduler,
     vip_membership_scheduler,
 )
-from services.scheduler import auction_monitor_scheduler, free_channel_cleanup_scheduler
+from services.scheduler import auction_monitor_scheduler, free_channel_cleanup_scheduler, user_journey_scheduler
 
 # Middlewares
 from middlewares import PointsMiddleware, UserRegistrationMiddleware
@@ -198,6 +199,7 @@ async def main() -> None:
             ("mission_wizard", mission_wizard_router),  # Wizard de misiones V2
             ("auction_admin", auction_admin_router),
             ("content_admin", content_admin_router),  # CMS Journey admin panel
+            ("journey_admin", journey_admin_router),  # Journey Management admin panel
             ("midivan_admin", midivan_admin_router),  # Mi Diván admin panel
             ("start_token", start_token),
             ("start", start.router),
@@ -250,8 +252,12 @@ async def main() -> None:
             "auction_monitor"
         )
         task_manager.add_task(
-            free_channel_cleanup_scheduler(bot, session_factory), 
+            free_channel_cleanup_scheduler(bot, session_factory),
             "channel_cleanup"
+        )
+        task_manager.add_task(
+            user_journey_scheduler(bot, session_factory),
+            "user_journey"
         )
 
         # Iniciar polling con reacciones nativas habilitadas
