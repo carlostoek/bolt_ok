@@ -8,7 +8,7 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.narrative_service import NarrativeService
+from services.narrative_service import NarrativeService, RequirementsInfo
 from services.narrative_loader import NarrativeLoader
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
@@ -145,6 +145,9 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
     user_id = callback.from_user.id
 
     try:
+        # Immediate feedback to user (UX improvement)
+        await callback.answer("✨ Procesando tu decisión...")
+
         # Extraer índice de la decisión
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
@@ -255,6 +258,9 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
     user_id = callback.from_user.id
 
     try:
+        # Immediate feedback to user (UX improvement)
+        await callback.answer("✨ Procesando tu decisión...")
+
         # Extraer índice de la elección
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
@@ -303,8 +309,11 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
 async def handle_auto_continue(callback: CallbackQuery, session: AsyncSession):
     """Maneja la continuación automática de fragmentos sin decisiones."""
     user_id = callback.from_user.id
-    
+
     try:
+        # Immediate feedback to user (UX improvement)
+        await callback.answer("➡️ Continuando...")
+
         service = NarrativeService(session, callback.bot)
         current_fragment = await service.get_user_current_fragment(user_id)
         
@@ -385,6 +394,9 @@ async def continue_narrative(callback: CallbackQuery, session: AsyncSession):
     user_id = callback.from_user.id
 
     try:
+        # Immediate feedback to user (UX improvement)
+        await callback.answer("📖 Cargando historia...")
+
         service = NarrativeService(session, callback.bot)
         current_fragment = await service.get_user_current_fragment(user_id)
 
@@ -1200,9 +1212,14 @@ async def _fallback_to_standard_narrative(callback: CallbackQuery, session: Asyn
         await callback.answer(get_text("narrative.handler.continue_error"), show_alert=True)
 
 
-async def _show_requirements_message(callback: CallbackQuery, requirements_info: dict, session: AsyncSession):
+async def _show_requirements_message(callback: CallbackQuery, requirements_info: RequirementsInfo, session: AsyncSession):
     """
     Muestra un mensaje detallado de requisitos no cumplidos con opciones de conversión.
+
+    Args:
+        callback: CallbackQuery from user
+        requirements_info: Type-safe dict with requirement details
+        session: Database session
     """
     from aiogram.utils.keyboard import InlineKeyboardBuilder
 

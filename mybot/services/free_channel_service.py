@@ -25,6 +25,7 @@ from database.models import PendingChannelRequest, User, BotConfig
 from services.config_service import ConfigService
 from services.message_registry import store_message
 from utils.text_utils import sanitize_text
+from utils.retry import async_retry, STANDARD_RETRY_CONFIG, CRITICAL_RETRY_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -130,7 +131,8 @@ class FreeChannelService:
 
                 builder.adjust(2, 2, 1)  # 2 botones por fila para redes, luego 1 para estado
 
-                await self.bot.send_message(
+                # Critical: Use retry logic for sending welcome message
+                await self._send_message_with_retry(
                     user_id,
                     message_text,
                     reply_markup=builder.as_markup(),
@@ -167,9 +169,9 @@ class FreeChannelService:
         
         for request in pending_requests:
             try:
-                # Aprobar la solicitud en Telegram
-                await self.bot.approve_chat_join_request(
-                    request.chat_id, 
+                # Aprobar la solicitud en Telegram (with retry logic)
+                await self._approve_join_request_with_retry(
+                    request.chat_id,
                     request.user_id
                 )
                 
@@ -197,7 +199,8 @@ class FreeChannelService:
                 builder.adjust(1)
 
                 try:
-                    await self.bot.send_message(
+                    # Send welcome message with retry logic
+                    await self._send_message_with_retry(
                         request.user_id,
                         welcome_message,
                         reply_markup=builder.as_markup(),
@@ -447,3 +450,48 @@ class FreeChannelService:
         except Exception as e:
             logger.error(f"Error cleaning up old requests: {e}")
             return 0
+
+    # Retry wrappers for critical Telegram API calls
+
+    @async_retry(CRITICAL_RETRY_CONFIG)
+    async def _send_message_with_retry(
+        self,
+        user_id: int,
+        text: str,
+        reply_markup: Optional[InlineKeyboardMarkup] = None,
+        parse_mode: Optional[str] = None
+    ) -> Message:
+        """
+        Send message with retry logic (critical operation).
+        Uses CRITICAL_RETRY_CONFIG for maximum resilience.
+        """
+        return await self.bot.send_message(
+            user_id,
+            text,
+            reply_markup=reply_markup,
+            parse_mode=parse_mode
+        )
+
+    @async_retry(CRITICAL_RETRY_CONFIG)
+    async def _approve_join_request_with_retry(
+        self,
+        chat_id: int,
+        user_id: int
+    ) -> bool:
+        """
+        Approve join request with retry logic (critical operation).
+        Uses CRITICAL_RETRY_CONFIG for maximum resilience.
+        """
+        return await self.bot.approve_chat_join_request(chat_id, user_id)
+
+    @async_retry(STANDARD_RETRY_CONFIG)
+    async def _send_media_group_with_retry(
+        self,
+        chat_id: int,
+        media: List[Any]
+    ) -> List[Message]:
+        """
+        Send media group with retry logic.
+        Uses STANDARD_RETRY_CONFIG for balance between speed and resilience.
+        """
+        return await self.bot.send_media_group(chat_id, media)
