@@ -5,15 +5,21 @@ def get_admin_content_missions_keyboard():
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [
-                InlineKeyboardButton(text="➕ Crear Misión", callback_data="admin_create_mission"),
+                InlineKeyboardButton(text="🎯 Crear Misión (Wizard)", callback_data="admin_create_mission_v2")
+            ],
+            [
+                InlineKeyboardButton(text="➕ Crear Misión (Legacy)", callback_data="admin_create_mission"),
                 InlineKeyboardButton(text="👁 Ver Activas", callback_data="admin_view_missions")
             ],
             [
-                InlineKeyboardButton(text="✅ Activar", callback_data="admin_toggle_mission"),
-                InlineKeyboardButton(text="🗑 Eliminar", callback_data="admin_delete_mission")
+                InlineKeyboardButton(text="✅ Activar/Desactivar", callback_data="admin_toggle_mission"),
+                InlineKeyboardButton(text="📊 Estadísticas", callback_data="admin_view_mission_stats")
             ],
             [
-                InlineKeyboardButton(text="🔄 Actualizar", callback_data="admin_content_missions"),
+                InlineKeyboardButton(text="🗑 Eliminar", callback_data="admin_delete_mission"),
+                InlineKeyboardButton(text="🔄 Actualizar", callback_data="admin_content_missions")
+            ],
+            [
                 InlineKeyboardButton(text="↩️ Volver", callback_data="admin_manage_content")
             ],
         ]

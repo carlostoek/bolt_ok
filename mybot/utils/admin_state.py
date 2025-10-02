@@ -72,6 +72,7 @@ class AdminConfigStates(StatesGroup):
     waiting_for_free_channel_id = State()
     waiting_for_reactions_input = State()
     waiting_for_points_input = State()
+    waiting_for_native_reaction_points = State()  # Nuevo: Para reacciones nativas
 
 
 class AdminVipMessageStates(StatesGroup):
@@ -224,3 +225,26 @@ class AdminShopStates(StatesGroup):
     configuring_requirements = State()
     selecting_requirement_type = State()
     entering_requirement_value = State()
+
+
+class AdminContentSetStates(StatesGroup):
+    """States for content set management (CMS)."""
+    # Wizard de creación
+    entering_set_id = State()
+    entering_name = State()
+    entering_description = State()
+    selecting_type = State()
+    selecting_tier = State()
+    selecting_category = State()
+    selecting_archetype = State()
+    uploading_files = State()
+    confirming_creation = State()
+
+    # Envío de sets
+    selecting_user_to_send = State()
+    entering_context_message = State()
+    confirming_send = State()
+
+    # Edición
+    selecting_set_to_edit = State()
+    editing_field = State()

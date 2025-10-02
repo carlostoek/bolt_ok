@@ -49,9 +49,16 @@ class PointService:
         return progress
 
     async def award_reaction(
-        self, user: User, message_id: int, bot: Bot
+        self, user: User, message_id: int, bot: Bot, points: float = None
     ) -> UserStats | None:
-        progress = await self.add_points(user.id, 0.5, bot=bot)
+        # Si no se especifican puntos, usar el valor configurado o default
+        if points is None:
+            from services.config_service import ConfigService
+            config = ConfigService(self.session)
+            points_str = await config.get_value("native_reaction_points") or "0.5"
+            points = float(points_str)
+
+        progress = await self.add_points(user.id, points, bot=bot)
         ach_service = AchievementService(self.session)
         new_badges = await ach_service.check_user_badges(user.id)
         for badge in new_badges:
