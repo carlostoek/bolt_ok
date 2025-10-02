@@ -25,6 +25,9 @@ def get_admin_manage_content_keyboard():
                 InlineKeyboardButton(text="🎉 Eventos", callback_data="admin_manage_events_sorteos")
             ],
             [
+                InlineKeyboardButton(text="📦 CMS Journey", callback_data="cms_main")
+            ],
+            [
                 InlineKeyboardButton(text="🔄 Actualizar", callback_data="admin_manage_content"),
                 InlineKeyboardButton(text="🏠 Panel Admin", callback_data="admin_main_menu")
             ],

@@ -406,13 +406,62 @@ async def admin_view_active_missions(callback: CallbackQuery, session: AsyncSess
         if m.duration_days:
             end = m.created_at + datetime.timedelta(days=m.duration_days)
             remaining = str((end - now).days)
-        lines.append(f"🗒️ {m.name} | 📊 {m.target_value} | 🎁 {m.reward_points} | ⏳ {remaining}d")
+        emoji = getattr(m, 'icon_emoji', '📌') or '📌'
+        lines.append(f"{emoji} {m.name} | 📊 {m.target_value} | 🎁 {m.reward_points} | ⏳ {remaining}d")
     text = "Misiones activas:" if lines else "No hay misiones activas."
     if lines:
         text += "\n" + "\n".join(lines)
     await callback.message.edit_text(
         text,
         reply_markup=get_back_kb("admin_content_missions"),
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "admin_view_mission_stats")
+async def admin_view_mission_stats_menu(callback: CallbackQuery, session: AsyncSession):
+    """Muestra menú de estadísticas de misiones"""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer()
+
+    from services.mission_stats_service import MissionStatsService
+    stats_service = MissionStatsService(session)
+    global_stats = await stats_service.get_global_stats()
+
+    text = (
+        "📊 **ESTADÍSTICAS GLOBALES DE MISIONES**\n\n"
+        f"**Total de misiones:** {global_stats['total_missions']}\n"
+        f"**Misiones activas:** {global_stats['active_missions']}\n"
+        f"**Misiones ocultas:** {global_stats['hidden_missions']}\n"
+        f"**Total completaciones:** {global_stats['total_completions_all']}\n\n"
+    )
+
+    if global_stats.get('most_popular_mission'):
+        pop = global_stats['most_popular_mission']
+        text += f"**🏆 Misión más popular:**\n{pop['name']} ({pop['completions']} completaciones)\n\n"
+
+    # Listar misiones para ver stats individuales
+    stmt = select(Mission).where(Mission.is_active == True).limit(10)
+    result = await session.execute(stmt)
+    missions = result.scalars().all()
+
+    keyboard = []
+    if missions:
+        text += "**Selecciona una misión para ver detalles:**"
+        for m in missions:
+            emoji = getattr(m, 'icon_emoji', '📌') or '📌'
+            keyboard.append([
+                InlineKeyboardButton(
+                    text=f"{emoji} {m.name}",
+                    callback_data=f"admin_mission_stats_{m.id}"
+                )
+            ])
+
+    keyboard.append([InlineKeyboardButton(text="🔙 Volver", callback_data="admin_content_missions")])
+
+    await callback.message.edit_text(
+        text,
+        reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard)
     )
     await callback.answer()
 
