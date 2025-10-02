@@ -9,7 +9,7 @@ def get_main_menu_keyboard():
         # 👤 PROGRESO PERSONAL
         [
             InlineKeyboardButton(text="🏆 Mi Perfil", callback_data="menu:profile"),
-            InlineKeyboardButton(text="💎 Mi Diván", callback_data="vip_subscription")
+            InlineKeyboardButton(text="💎 Mi Diván", callback_data="midivan:main")
         ],
 
         # 🎯 ACTIVIDADES DIARIAS

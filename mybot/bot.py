@@ -68,6 +68,9 @@ from handlers.main_menu import router as main_menu_router
 from handlers.narrative_handler import router as narrative_router
 from handlers.admin_narrative_handlers import router as admin_narrative_handlers
 from handlers.test_evaluation_handler import router as test_evaluation_router
+from handlers.midivan_handler import router as midivan_router
+from handlers.quiz_handler import router as quiz_router
+from handlers.admin.midivan_admin import router as midivan_admin_router
 
 import combinar_pistas
 from backpack import router as backpack_router
@@ -191,6 +194,7 @@ async def main() -> None:
             ("setup", setup_handlers.router),
             ("admin", admin_router),
             ("auction_admin", auction_admin_router),
+            ("midivan_admin", midivan_admin_router),  # Mi Diván admin panel
             ("start_token", start_token),
             ("start", start.router),
             ("main_menu", main_menu_router),
@@ -200,6 +204,8 @@ async def main() -> None:
             ("free_channel_admin", free_channel_admin_router),
             ("publication_test", publication_test_router),
             ("vip_menu", vip.router),
+            ("midivan", midivan_router),  # Mi Diván VIP menu
+            ("quiz", quiz_router),  # Quiz handlers
             ("auction_user", auction_user_router),
             ("reaction_callback", reaction_callback_router),
             ("daily_gift", daily_gift.router),

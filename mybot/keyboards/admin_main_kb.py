@@ -13,8 +13,9 @@ def get_admin_main_kb():
     builder.button(text="🎮 Juego Kinky", callback_data="admin_kinky_game")
     builder.button(text="🛒 Tienda", callback_data="admin_shop")
 
-    # Fila 3: Contenido narrativo
+    # Fila 3: Contenido narrativo y VIP
     builder.button(text="📖 Narrativa", callback_data="admin_narrative_panel")
+    builder.button(text="💎 Mi Diván", callback_data="admin:midivan")
 
     # Fila 4: Estadísticas y configuración
     builder.button(text="📊 Estadísticas", callback_data="admin_stats")
@@ -24,6 +25,6 @@ def get_admin_main_kb():
     builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
     builder.button(text="↩️ Volver", callback_data="admin_back")
 
-    # Distribución: 2x2x1x2x2
-    builder.adjust(2, 2, 1, 2, 2)
+    # Distribución: 2x2x2x2x2 (añadido Mi Diván en fila 3)
+    builder.adjust(2, 2, 2, 2, 2)
     return builder.as_markup()

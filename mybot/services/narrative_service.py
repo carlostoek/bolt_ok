@@ -3,7 +3,7 @@ Servicio unificado para el sistema de narrativa inmersiva.
 Maneja la lógica de fragmentos, decisiones y progresión de historia.
 """
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any, List, TypedDict
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_, func
 from database.models import User, Achievement
@@ -12,6 +12,16 @@ from services.point_service import PointService
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
+
+
+class RequirementsInfo(TypedDict, total=False):
+    """Type-safe structure for decision requirements information."""
+    missing_besitos: float
+    current_besitos: float
+    required_besitos: float
+    missing_role: Optional[str]
+    current_role: str
+    required_role: Optional[str]
 
 class NarrativeService:
     """Servicio principal del sistema narrativo unificado."""
@@ -84,16 +94,24 @@ class NarrativeService:
         # Reutiliza la lógica de procesar por ID para mantener consistencia
         return await self._process_decision_by_id(user_id, selected_choice.id)
 
-    async def check_decision_requirements_info(self, user_id: int, decision_id: int) -> tuple[bool, dict]:
+    async def check_decision_requirements_info(self, user_id: int, decision_id: int) -> tuple[bool, RequirementsInfo]:
         """
         Check if user can take a decision and return detailed requirements info.
 
         Returns:
-            tuple: (can_proceed: bool, requirements_info: dict)
+            tuple: (can_proceed: bool, requirements_info: RequirementsInfo)
         """
         decision = await self.session.get(NarrativeChoice, decision_id)
         if not decision:
-            return False, {}
+            empty_requirements: RequirementsInfo = {
+                "missing_besitos": 0.0,
+                "current_besitos": 0.0,
+                "required_besitos": 0.0,
+                "missing_role": None,
+                "current_role": "free",
+                "required_role": None
+            }
+            return False, empty_requirements
 
         return await self._check_decision_requirements(user_id, decision)
 
@@ -228,24 +246,24 @@ class NarrativeService:
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
-    async def _check_decision_requirements(self, user_id: int, decision) -> tuple[bool, dict]:
+    async def _check_decision_requirements(self, user_id: int, decision) -> tuple[bool, RequirementsInfo]:
         """
         Verifica si el usuario cumple los requisitos de una decisión.
 
         Returns:
-            tuple: (can_proceed: bool, requirements_info: dict)
-            requirements_info contains:
-                - missing_besitos: int (0 if has enough)
+            tuple: (can_proceed: bool, requirements_info: RequirementsInfo)
+            requirements_info is a type-safe dict containing:
+                - missing_besitos: float (0 if has enough)
                 - current_besitos: float
-                - required_besitos: int
+                - required_besitos: float
                 - missing_role: str or None
                 - current_role: str
                 - required_role: str or None
         """
-        requirements_info = {
-            "missing_besitos": 0,
-            "current_besitos": 0,
-            "required_besitos": 0,
+        requirements_info: RequirementsInfo = {
+            "missing_besitos": 0.0,
+            "current_besitos": 0.0,
+            "required_besitos": 0.0,
             "missing_role": None,
             "current_role": "free",
             "required_role": None

@@ -14,6 +14,7 @@ from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from sqlalchemy.orm import selectinload
 from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from services.shop_service import ShopService
 from services.condition_checker import ConditionChecker
@@ -372,9 +373,11 @@ async def view_inventory(callback: CallbackQuery, session: AsyncSession):
     try:
         user_id = callback.from_user.id
 
-        # Get all purchases
+        # Get all purchases with shop_item loaded in single query (eliminates N+1)
         purchases_stmt = select(UserPurchase).where(
             UserPurchase.user_id == user_id
+        ).options(
+            selectinload(UserPurchase.shop_item)
         ).order_by(UserPurchase.purchased_at.desc())
 
         purchases_result = await session.execute(purchases_stmt)
@@ -400,13 +403,13 @@ async def view_inventory(callback: CallbackQuery, session: AsyncSession):
         product_plural = get_text("backpack.product") if len(purchases) == 1 else get_text("backpack.products")
         text = get_text("backpack.title_alt") + "\n\n" + get_text("backpack.inventory_summary", count=len(purchases), product_plural=product_plural)
 
-        # Group purchases by item
+        # Group purchases by item (shop_item already loaded via selectinload)
         from collections import defaultdict
         items_count = defaultdict(int)
         items_info = {}
 
         for purchase in purchases:
-            item = await session.get(ShopItem, purchase.shop_item_id)
+            item = purchase.shop_item  # No DB query - already loaded!
             if item:
                 items_count[item.id] += 1
                 if item.id not in items_info:
