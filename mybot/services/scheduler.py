@@ -11,6 +11,7 @@ from services.config_service import ConfigService
 from services.auction_service import AuctionService
 from services.free_channel_service import FreeChannelService
 from services.subscription_service import SubscriptionService
+from services.user_journey_service import UserJourneyService
 
 
 async def run_channel_request_check(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):
@@ -230,3 +231,39 @@ async def free_channel_cleanup_scheduler(bot: Bot, session_factory: async_sessio
         raise
     except Exception:
         logging.exception("Unhandled error in free channel cleanup scheduler")
+
+
+async def run_user_journey_check(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):
+    """Process all pending user journey milestones once."""
+    async with session_factory() as session:
+        journey_service = UserJourneyService(session)
+        try:
+            stats = await journey_service.process_all_milestones(bot)
+
+            total_processed = stats["day_1_processed"] + stats["day_7_processed"] + stats["day_30_processed"]
+
+            if total_processed > 0:
+                logging.info(
+                    f"Journey milestones processed - "
+                    f"Day 1: {stats['day_1_processed']}, "
+                    f"Day 7: {stats['day_7_processed']}, "
+                    f"Day 30: {stats['day_30_processed']}, "
+                    f"Errors: {stats['errors']}"
+                )
+        except Exception as e:
+            logging.exception("Error in user journey check: %s", e)
+
+
+async def user_journey_scheduler(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):
+    """Background task processing user journey milestones daily."""
+    logging.info("User journey scheduler started")
+    interval = 3600  # Check every hour (can be adjusted)
+    try:
+        while True:
+            await run_user_journey_check(bot, session_factory)
+            await asyncio.sleep(interval)
+    except asyncio.CancelledError:
+        logging.info("User journey scheduler cancelled")
+        raise
+    except Exception:
+        logging.exception("Unhandled error in user journey scheduler")
