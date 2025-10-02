@@ -5,9 +5,10 @@ def get_admin_config_kb():
     builder = InlineKeyboardBuilder()
     builder.button(text="📺 Agregar Canales", callback_data="config_add_channels")
     builder.button(text="⏱️ Schedulers", callback_data="config_scheduler")
+    builder.button(text="💫 Reacciones Nativas", callback_data="config_native_reactions")
     builder.button(text="🔄 Actualizar", callback_data="admin_config")
     builder.button(text="↩️ Volver", callback_data="admin_back")
-    builder.adjust(2, 2)
+    builder.adjust(2, 2, 1)
     return builder.as_markup()
 
 

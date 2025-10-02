@@ -122,6 +122,55 @@ async def save_reaction_buttons_callback(callback: CallbackQuery, state: FSMCont
     await callback.answer()
 
 
+@router.callback_query(F.data == "config_native_reactions")
+async def config_native_reactions_menu(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
+    """Configurar puntos para reacciones nativas de Telegram"""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer()
+
+    config = ConfigService(session)
+    current_points = await config.get_value("native_reaction_points") or "0.5"
+
+    text = (
+        "💫 **Configuración de Reacciones Nativas**\n\n"
+        f"Puntos actuales: **{current_points}**\n\n"
+        "Las reacciones nativas son las que los usuarios hacen directamente "
+        "en los mensajes del canal (sin botones).\n\n"
+        "Estas reacciones otorgan puntos de manera general, sin validar emoji específico.\n\n"
+        "**Recomendado:** 0.3-0.5 puntos (menor que botones inline)\n\n"
+        "Envía el nuevo valor de puntos:"
+    )
+
+    await callback.message.edit_text(text, reply_markup=get_back_kb("admin_config"))
+    await state.set_state(AdminConfigStates.waiting_for_native_reaction_points)
+    await callback.answer()
+
+
+@router.message(AdminConfigStates.waiting_for_native_reaction_points)
+async def set_native_reaction_points(message: Message, state: FSMContext, session: AsyncSession):
+    """Procesar el valor de puntos para reacciones nativas"""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    try:
+        points = float(message.text.strip())
+        if points < 0:
+            raise ValueError()
+    except ValueError:
+        await message.answer("❌ Ingresa un número válido (mayor o igual a 0):")
+        return
+
+    config = ConfigService(session)
+    await config.set_value("native_reaction_points", str(points))
+
+    await message.answer(
+        f"✅ Puntos para reacciones nativas actualizados a **{points}**\n\n"
+        "Las reacciones nativas ahora otorgarán este valor de puntos.",
+        reply_markup=get_admin_config_kb()
+    )
+    await state.clear()
+
+
 @router.callback_query(F.data == "config_scheduler")
 async def scheduler_menu(callback: CallbackQuery, session: AsyncSession):
     if not await is_admin(callback.from_user.id, session):

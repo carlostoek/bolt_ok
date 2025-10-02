@@ -154,6 +154,34 @@ class Mission(Base):
         )
     created_at = Column(DateTime, default=func.now())
 
+    # ===== CAMPOS AVANZADOS PARA ADMIN PANEL =====
+    # Categorización y visibilidad
+    mission_category = Column(String, nullable=True)  # narrative, social, competitive, secret
+    is_hidden = Column(Boolean, default=False)  # Misiones secretas
+    icon_emoji = Column(String, nullable=True)  # Emoji visual para la misión
+    difficulty_level = Column(Integer, default=1)  # 1-5 estrellas
+    tags = Column(JSON, default=[])  # Tags para filtrar ["vip", "beginner", etc]
+
+    # Encadenamiento de misiones
+    prerequisite_mission_id = Column(String, ForeignKey('missions.id', ondelete='SET NULL'), nullable=True)
+    unlocks_mission_id = Column(String, ForeignKey('missions.id', ondelete='SET NULL'), nullable=True)
+
+    # Mecánicas de tiempo y urgencia
+    time_limit_minutes = Column(Integer, nullable=True)  # Timer para misiones con urgencia
+    bonus_points_if_fast = Column(Integer, nullable=True)  # Bonus por completar rápido
+
+    # Competitivas y escasez
+    min_ranking_position = Column(Integer, nullable=True)  # Para misiones de ranking (Top X)
+    max_completions_global = Column(Integer, nullable=True)  # Límite global de completaciones
+    current_completions_global = Column(Integer, default=0)  # Contador actual
+
+    # Repetibilidad
+    repeatable = Column(Boolean, default=False)  # Si puede repetirse
+    reset_period = Column(String, nullable=True)  # daily, weekly, monthly
+
+    # Recompensas adicionales
+    xp_reward = Column(Integer, default=0)  # XP adicional además de puntos
+
 
 class UserMissionEntry(Base):
     """Consolidated mission progress and completion per user."""
@@ -167,6 +195,56 @@ class UserMissionEntry(Base):
     completed_at = Column(DateTime, nullable=True)
 
     __table_args__ = (UniqueConstraint("user_id", "mission_id", name="uix_user_mission_entry"),)
+
+class ContentSet(Base):
+    """Sets de contenido multimedia (fotos, videos, audios) para el journey del usuario"""
+    __tablename__ = "content_sets"
+
+    id = Column(String, primary_key=True)  # ej: "primera_mirada", "bienvenida_vip"
+    name = Column(String, nullable=False)  # Nombre display: "Primera Mirada"
+    type = Column(String, nullable=False)  # "photo_set", "video", "audio", "mixed"
+    tier = Column(String, nullable=False, default="free")  # "free", "vip", "gift", "premium"
+    file_ids = Column(JSON, default=[])  # Lista de Telegram file_ids
+    description = Column(Text, nullable=True)  # Descripción interna para admin
+    category = Column(String, nullable=True)  # "teaser", "welcome", "milestone", "surprise"
+    for_archetype = Column(String, default="all")  # "luz", "sombra", "all"
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    is_active = Column(Boolean, default=True)
+
+
+class GiftRecord(Base):
+    """Registro de regalos enviados a usuarios"""
+    __tablename__ = "gift_records"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    content_set_id = Column(String, ForeignKey("content_sets.id"), nullable=False)
+    sent_at = Column(DateTime, default=func.now())
+    context = Column(String, nullable=True)  # "day_1", "won_auction", "loyalty", etc
+    trigger_type = Column(String, nullable=True)  # "automatic", "manual", "milestone", "achievement"
+    sent_by_admin = Column(Boolean, default=False)
+
+    __table_args__ = (
+        # Permitir múltiples regalos del mismo set (no unique constraint)
+    )
+
+
+class UserMilestone(Base):
+    """Tracking de milestones del journey del usuario"""
+    __tablename__ = "user_milestones"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    milestone_type = Column(String, nullable=False)  # "day_1", "day_7", "day_30", "first_purchase", etc
+    completed = Column(Boolean, default=False)
+    completed_at = Column(DateTime, nullable=True)
+    data = Column(JSON, nullable=True)  # Datos adicionales del milestone
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "milestone_type", name="uix_user_milestone"),
+    )
+
 
 class Event(Base):
     __tablename__ = "events"

@@ -177,13 +177,19 @@ async def handle_mission_details_callback(callback: CallbackQuery, session: Asyn
         
         mission_details_message = await get_mission_details_message(mission)
 
-        keyboard = InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="✅ Completar Misión", callback_data=f"complete_mission_{mission_id}")],
-                [InlineKeyboardButton(text="⬅️ Volver a Misiones", callback_data="menu:missions")],
-                [InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal")],
-            ]
-        )
+        # Solo mostrar botón "Completar" si NO requiere acción externa
+        keyboard_buttons = []
+        if not mission.requires_action:
+            keyboard_buttons.append([
+                InlineKeyboardButton(text="✅ Reclamar Recompensa", callback_data=f"complete_mission_{mission_id}")
+            ])
+
+        keyboard_buttons.extend([
+            [InlineKeyboardButton(text="⬅️ Volver a Misiones", callback_data="menu:missions")],
+            [InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal")],
+        ])
+
+        keyboard = InlineKeyboardMarkup(inline_keyboard=keyboard_buttons)
 
         await menu_manager.update_menu(callback, mission_details_message, keyboard, session, "mission_details")
     except Exception as e:
@@ -216,6 +222,14 @@ async def handle_complete_mission_callback(callback: CallbackQuery, session: Asy
         is_completed_for_period, _ = await mission_service.check_mission_completion_status(user, mission)
         if is_completed_for_period:
             await callback.answer("Ya completaste esta misión. ¡Pronto habrá más!", show_alert=True)
+            return
+
+        # Validación crítica: NO permitir completar misiones que requieren acción externa
+        if mission.requires_action:
+            await callback.answer(
+                "⚠️ Esta misión requiere una acción específica y no puede completarse manualmente.",
+                show_alert=True
+            )
             return
 
         # Complete mission
