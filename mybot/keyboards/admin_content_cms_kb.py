@@ -21,7 +21,8 @@ def get_cms_main_keyboard():
                 InlineKeyboardButton(text="📊 Estadísticas", callback_data="cms_stats")
             ],
             [
-                InlineKeyboardButton(text="🎯 Journey Management", callback_data="journey_main")
+                InlineKeyboardButton(text="🎯 Journey Management", callback_data="journey_main"),
+                InlineKeyboardButton(text="🎁 Gift Service", callback_data="gift_main")
             ],
             [
                 InlineKeyboardButton(text="🔙 Volver", callback_data="admin_manage_content")
