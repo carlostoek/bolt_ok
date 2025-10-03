@@ -248,3 +248,18 @@ class AdminContentSetStates(StatesGroup):
     # Edición
     selecting_set_to_edit = State()
     editing_field = State()
+
+
+class AdminGiftStates(StatesGroup):
+    """States for gift service management."""
+    # Envío de regalo
+    selecting_event_type = State()
+    entering_user_id = State()
+    selecting_content_set = State()
+    entering_custom_message = State()
+    entering_context_data = State()
+    confirming_gift = State()
+
+    # Envío masivo
+    selecting_user_segment = State()
+    confirming_bulk_gift = State()
