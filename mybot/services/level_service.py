@@ -4,6 +4,7 @@ from aiogram import Bot
 
 from database.models import User, Level, LorePiece, UserLorePiece
 from utils.messages import BOT_MESSAGES
+from services.gift_service import GiftService
 import logging
 
 logger = logging.getLogger(__name__)
@@ -153,6 +154,19 @@ class LevelService:
                         reward=new_level.reward or "",
                     )
                     await bot.send_message(user.id, special_msg)
+
+                    # Try to send level milestone gift if configured
+                    try:
+                        gift_service = GiftService(self.session)
+                        await gift_service.send_level_reached_gift(
+                            user_id=user.id,
+                            level=new_level.level_id,
+                            bot=bot
+                        )
+                        logger.info(f"Level milestone gift sent to user {user.id} for level {new_level.level_id}")
+                    except Exception as e:
+                        # Graceful degradation - gifts are optional
+                        logger.debug(f"Could not send level milestone gift: {e}")
 
             # Desbloquear pistas de lore asociadas al nivel alcanzado
             unlock_code = getattr(new_level, "unlocks_lore_piece_code", None)
