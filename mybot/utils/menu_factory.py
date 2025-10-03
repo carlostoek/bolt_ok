@@ -96,9 +96,12 @@ class MenuFactory:
             )
         else: # Covers "free" and any other unrecognized roles
             return (
-                "🌟 **Bienvenido a los Kinkys**\n\n"
-                "Explora nuestro contenido gratuito y descubre todo lo que tenemos para ti. "
-                "¿Listo para una experiencia única?",
+                "✨ **Bienvenido, mi amor**\n\n"
+                "Soy Diana, y me encanta que estés aquí. Este es tu espacio para "
+                "descubrir lo que tengo para ti...\n\n"
+                "💫 Explora, juega, y descubre. Algunas cosas son para todos, "
+                "pero las más íntimas... solo para quienes se atreven a estar más cerca.\n\n"
+                "¿Qué te gustaría ver primero?",
                 get_free_main_menu_kb()
             )
     

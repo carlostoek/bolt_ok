@@ -7,11 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from utils.user_roles import get_user_role
 from utils.menu_manager import menu_manager
-from keyboards.subscription_kb import get_free_main_menu_kb, get_vip_explore_kb
+from keyboards.subscription_kb import get_free_main_menu_kb, get_vip_explore_kb, get_free_content_menu_kb
 from keyboards.packs_kb import get_packs_list_kb, get_pack_detail_kb
 from utils.messages import BOT_MESSAGES
 from keyboards.common import get_back_kb
 from utils.notify_admins import notify_admins
+from utils.vip_cta_messages import get_vip_cta
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -166,5 +169,147 @@ async def cb_pack_details(callback: CallbackQuery, session: AsyncSession):
         get_pack_detail_kb(pack_id),
         session,
         f"pack_{pack_id}",
+    )
+    await callback.answer()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NUEVOS HANDLERS - MENÚ MEJORADO PARA USUARIOS FREE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@router.callback_query(F.data == "free_my_content")
+async def cb_free_my_content(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar el submenú 'Mi Contenido' que unifica Packs, VIP Explore y Custom."""
+    text = (
+        "📂 **Mi Contenido Exclusivo**\n\n"
+        "Aquí puedes explorar todo lo que tengo para ofrecerte:\n\n"
+        "🎀 **Mis Packs:** Colecciones temáticas especiales\n"
+        "🔐 **Explorar VIP:** Descubre el mundo premium\n"
+        "💌 **Contenido Custom:** Solicita algo personalizado\n\n"
+        "¿Qué te gustaría ver?"
+    )
+
+    await menu_manager.update_menu(
+        callback,
+        text,
+        get_free_content_menu_kb(),
+        session,
+        "free_my_content",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "free_shop_preview")
+async def cb_free_shop_preview(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar preview de la tienda con CTA persuasivo."""
+    from services.shop_service import ShopService
+
+    shop_service = ShopService(session)
+    all_items = await shop_service.get_all_items()
+
+    # Obtener CTA personalizado con el número de items
+    cta = get_vip_cta("shop", total_items=len(all_items))
+
+    # Crear keyboard con botón CTA
+    builder = InlineKeyboardBuilder()
+    builder.button(text=cta["button_text"], callback_data="vip_explore_interest")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "free_shop_preview",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "free_missions_preview")
+async def cb_free_missions_preview(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar preview de misiones con CTA persuasivo."""
+    from services.mission_service import MissionService
+
+    mission_service = MissionService(session)
+    all_missions = await mission_service.get_active_missions()
+
+    # Obtener CTA personalizado con el número de misiones
+    cta = get_vip_cta("missions", total_missions=len(all_missions))
+
+    # Crear keyboard con botón CTA
+    builder = InlineKeyboardBuilder()
+    builder.button(text=cta["button_text"], callback_data="vip_explore_interest")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "free_missions_preview",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "free_auctions_preview")
+async def cb_free_auctions_preview(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar preview de subastas con CTA persuasivo."""
+    cta = get_vip_cta("auctions")
+
+    # Crear keyboard con botón CTA
+    builder = InlineKeyboardBuilder()
+    builder.button(text=cta["button_text"], callback_data="vip_explore_interest")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "free_auctions_preview",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "free_backpack_preview")
+async def cb_free_backpack_preview(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar preview de la mochila con CTA persuasivo."""
+    cta = get_vip_cta("backpack")
+
+    # Crear keyboard con botón CTA
+    builder = InlineKeyboardBuilder()
+    builder.button(text=cta["button_text"], callback_data="vip_explore_interest")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "free_backpack_preview",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "free_rewards_preview")
+async def cb_free_rewards_preview(callback: CallbackQuery, session: AsyncSession):
+    """Mostrar preview de recompensas con CTA persuasivo."""
+    cta = get_vip_cta("rewards")
+
+    # Crear keyboard con botón CTA
+    builder = InlineKeyboardBuilder()
+    builder.button(text=cta["button_text"], callback_data="vip_explore_interest")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "free_rewards_preview",
     )
     await callback.answer()

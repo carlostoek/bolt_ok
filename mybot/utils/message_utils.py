@@ -86,18 +86,41 @@ async def get_profile_message(
             + "\n".join(achievements_list)
         )
 
-    # Usar el mensaje personalizado para no misiones activas
+    # Misión recomendada: mostrar solo UNA misión para no abrumar
     missions_text = BOT_MESSAGES["profile_no_active_missions"]
     if active_missions:
-        missions_list = [
-            f"• {escape_markdown(mission.name)} ({mission.reward_points} Puntos)"
-            for mission in active_missions
-        ]
-        missions_text = (
-            BOT_MESSAGES["profile_active_missions_title"]
-            + "\n"
-            + "\n".join(missions_list)
-        )
+        # Seleccionar la misión con mejor prioridad:
+        # 1. Misiones de bienvenida (beginner)
+        # 2. Misiones diarias
+        # 3. Misiones con menor dificultad
+        # 4. Misiones con mayor recompensa
+
+        recommended_mission = None
+
+        # Prioridad 1: Misiones de bienvenida no completadas
+        beginner_missions = [m for m in active_missions if "beginner" in (m.tags or [])]
+        if beginner_missions:
+            recommended_mission = beginner_missions[0]
+        # Prioridad 2: Misiones diarias
+        elif any(m.type == "daily" for m in active_missions):
+            recommended_mission = [m for m in active_missions if m.type == "daily"][0]
+        # Prioridad 3: Por dificultad y recompensa
+        else:
+            # Ordenar por dificultad (menor primero) y luego por recompensa (mayor primero)
+            sorted_missions = sorted(
+                active_missions,
+                key=lambda m: (m.difficulty_level or 1, -(m.reward_points or 0))
+            )
+            recommended_mission = sorted_missions[0] if sorted_missions else None
+
+        if recommended_mission:
+            difficulty_stars = "⭐" * (recommended_mission.difficulty_level or 1)
+            missions_text = (
+                f"🎯 **Misión Recomendada:**\n\n"
+                f"• {escape_markdown(recommended_mission.name)}\n"
+                f"   {difficulty_stars} | {recommended_mission.reward_points} Besitos\n\n"
+                f"💡 _Tienes {len(active_missions)} misiones disponibles en total_"
+            )
 
     return (
         # Usar mensajes personalizados para cada parte del perfil
