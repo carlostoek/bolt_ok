@@ -153,6 +153,33 @@ async def handle_claim_reward_callback(callback: CallbackQuery, session: AsyncSe
         logger.error(f"Error claiming reward for user {user_id}: {e}")
         await callback.answer("Error al reclamar la recompensa", show_alert=True)
 
+@router.callback_query(F.data.startswith("missions_page_"))
+async def handle_missions_pagination(callback: CallbackQuery, session: AsyncSession):
+    """Handle missions menu pagination."""
+    user_id = callback.from_user.id
+    role = await get_user_role(callback.bot, user_id, session=session)
+
+    if role not in ["vip", "admin"]:
+        await callback.answer("Esta función está disponible solo para miembros VIP.", show_alert=True)
+        return
+
+    try:
+        # Extraer offset del callback_data
+        offset = int(callback.data.split("_")[-1])
+
+        # Crear el menú de misiones con el offset especificado
+        from utils.menu_creators import create_missions_menu
+        text, keyboard = await create_missions_menu(user_id, session, offset=offset)
+
+        # Actualizar el menú
+        await menu_manager.update_menu(callback, text, keyboard, session, "missions")
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error in missions pagination for user {user_id}: {e}")
+        await callback.answer("Error al cambiar de página", show_alert=True)
+
+
 @router.callback_query(F.data.startswith("mission_"))
 async def handle_mission_details_callback(callback: CallbackQuery, session: AsyncSession):
     """Enhanced mission details with better navigation."""

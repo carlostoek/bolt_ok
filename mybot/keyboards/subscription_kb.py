@@ -3,16 +3,52 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardMarkup
 
 def get_free_main_menu_kb() -> InlineKeyboardMarkup:
-    """Return the main menu keyboard for free users."""
+    """
+    Return the main menu keyboard for free users.
+
+    Estructura similar al VIP pero con restricciones estratégicas para generar conversión.
+    Muestra todo para crear FOMO pero bloquea acciones con CTAs persuasivos.
+    """
     builder = InlineKeyboardBuilder()
+
+    # 🎭 NARRATIVA (Principal)
     builder.button(text="📖 Historia", callback_data="start_narrative")
-    builder.button(text="🎁 Desbloquear Regalo", callback_data="free_gift")
+
+    # 👤 PROGRESO PERSONAL
+    builder.button(text="🏆 Mi Perfil", callback_data="menu:profile")
+    builder.button(text="📂 Mi Contenido", callback_data="free_my_content")  # Unifica Packs, VIP, Custom
+
+    # 🎯 ACTIVIDADES DIARIAS (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🎯 Misiones", callback_data="menu:missions")
+    builder.button(text="🎁 Regalo", callback_data="free_gift")
+
+    # 🛍️ ECONOMÍA & TIENDA (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🛒 Tienda", callback_data="shop_access")
+    builder.button(text="🏛️ Subastas", callback_data="auction_main")
+
+    # 🎒 COLECCIONES (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🗺️ Mochila", callback_data="open_backpack")
+    builder.button(text="💝 Recompensas", callback_data="menu:rewards")
+
+    # 👥 SOCIAL
+    builder.button(text="👑 Ranking", callback_data="menu:ranking")
+
+    # Ajustar layout: 1, 2, 2, 2, 2, 1
+    builder.adjust(1, 2, 2, 2, 2, 1)
+    return builder.as_markup()
+
+
+def get_free_content_menu_kb() -> InlineKeyboardMarkup:
+    """
+    Keyboard para el submenú 'Mi Contenido' de usuarios free.
+    Unifica: Mis Packs, Explorar VIP, Contenido Custom
+    """
+    builder = InlineKeyboardBuilder()
     builder.button(text="🎀 Mis Packs", callback_data="free_packs")
     builder.button(text="🔐 Explorar VIP", callback_data="free_vip_explore")
     builder.button(text="💌 Contenido Custom", callback_data="free_custom")
-    builder.button(text="🎮 Juego Kinky", callback_data="free_game")
-    builder.button(text="🌐 Sígueme", callback_data="free_follow")
-    builder.adjust(1, 2, 2, 2)
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1, 1, 1, 1)  # Todos en columna
     return builder.as_markup()
 
 def get_vip_explore_kb() -> InlineKeyboardMarkup:

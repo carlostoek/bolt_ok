@@ -32,11 +32,11 @@ async def create_profile_menu(user_id: int, session: AsyncSession) -> Tuple[str,
     profile_text = await get_profile_message(user, active_missions, session)
     return profile_text, get_profile_keyboard()
 
-async def create_missions_menu(user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
-    """Create the missions menu for a user."""
+async def create_missions_menu(user_id: int, session: AsyncSession, offset: int = 0) -> Tuple[str, InlineKeyboardMarkup]:
+    """Create the missions menu for a user with pagination support."""
     mission_service = MissionService(session)
     active_missions = await mission_service.get_active_missions(user_id=user_id)
-    
+
     if not active_missions:
         text = (
             "🎯 **Misiones Disponibles**\n\n"
@@ -44,12 +44,18 @@ async def create_missions_menu(user_id: int, session: AsyncSession) -> Tuple[str
             "¡Mantente atento! Pronto habrá nuevos desafíos."
         )
     else:
+        # Mostrar información de paginación
+        total_missions = len(active_missions)
+        current_page = (offset // 4) + 1
+        total_pages = (total_missions + 3) // 4  # Redondear hacia arriba
+
         text = (
-            "🎯 **Misiones Disponibles**\n\n"
-            "Completa estas misiones para ganar puntos y desbloquear recompensas:"
+            f"🎯 **Misiones Disponibles** (Página {current_page}/{total_pages})\n\n"
+            f"📊 Total: {total_missions} misiones activas\n\n"
+            f"Completa estas misiones para ganar puntos y desbloquear recompensas:"
         )
-    
-    return text, get_missions_keyboard(active_missions)
+
+    return text, get_missions_keyboard(active_missions, offset)
 
 async def create_rewards_menu(user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
     """Create the rewards menu for a user."""

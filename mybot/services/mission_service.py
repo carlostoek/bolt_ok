@@ -29,10 +29,13 @@ class MissionService:
     async def get_active_missions(self, user_id: int = None, mission_type: str = None) -> list[Mission]:
         """
         Retrieves active missions, optionally filtered by user completion status and type.
+        Ordered by creation date (newest first).
         """
         stmt = select(Mission).where(Mission.is_active == True)
         if mission_type:
             stmt = stmt.where(Mission.type == mission_type)
+        # Ordenar por fecha de creación descendente (más recientes primero)
+        stmt = stmt.order_by(Mission.created_at.desc())
         result = await self.session.execute(stmt)
         missions = [m for m in result.scalars().all() if not m.duration_days or (m.created_at + datetime.timedelta(days=m.duration_days)) > datetime.datetime.utcnow()]
 
