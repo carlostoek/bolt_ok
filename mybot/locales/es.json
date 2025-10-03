@@ -158,7 +158,7 @@
   "backpack": {
     "title": "🎒 **Tu Mochila**",
     "title_alt": "🎒 **Mi Mochila**",
-    "empty_message_lore": "Tu mochila está vacía. Lucien murmura: **«Será mejor visitar la tienda o ganar pistas.»**",
+    "empty_message_lore": "*Tu mochila está vacía.* Lucien murmura: **«Será mejor visitar la tienda o ganar pistas.»**",
     "empty_message_shop": "Tu mochila descansa vacía.\n\nLucien: *«La tienda tiene justo lo que te falta.»*",
     "header": "🎁 Ítems y pistas adquiridas:",
     "inventory_summary": "Llevas contigo **{count}** {product_plural}:\n\n",
