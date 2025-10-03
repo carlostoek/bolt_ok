@@ -59,6 +59,7 @@ MISSIONS = [
                 "difficulty_level": 1,
                 "mission_category": "narrative",
                 "tags": ["beginner", "welcome"],
+                "requires_action": True,  # Requiere reaccionar en el canal
                 "lore_piece": {
                     "code_name": "primera_mirada_pista",
                     "title": "💭 Reflexión de Diana - Primera Impresión",
@@ -620,6 +621,9 @@ async def create_mission(session: AsyncSession, mission_data: dict) -> Mission:
         existing.repeatable = mission_data.get("repeatable", False)
         existing.reset_period = mission_data.get("reset_period")
         existing.unlocks_lore_piece_code = lore_piece_code
+        # CRÍTICO: Por defecto las misiones requieren acción (reaccionar, explorar, etc)
+        # Solo False para misiones de "reclamar recompensa" o auto-completables
+        existing.requires_action = mission_data.get("requires_action", True)
         return existing
     else:
         mission = Mission(
@@ -642,7 +646,10 @@ async def create_mission(session: AsyncSession, mission_data: dict) -> Mission:
             max_completions_global=mission_data.get("max_completions_global"),
             repeatable=mission_data.get("repeatable", False),
             reset_period=mission_data.get("reset_period"),
-            unlocks_lore_piece_code=lore_piece_code
+            unlocks_lore_piece_code=lore_piece_code,
+            # CRÍTICO: Por defecto las misiones requieren acción (reaccionar, explorar, etc)
+            # Solo False para misiones de "reclamar recompensa" o auto-completables
+            requires_action=mission_data.get("requires_action", True)
         )
         session.add(mission)
         await session.flush()
