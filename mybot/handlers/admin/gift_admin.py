@@ -12,6 +12,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from utils.localization import L
 from utils.user_roles import is_admin
 from utils.admin_state import AdminGiftStates
 from services.gift_service import GiftService, GIFT_MESSAGES
@@ -35,19 +36,13 @@ router = Router()
 async def show_gift_main_menu(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Muestra el menú principal del Gift Service"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     await state.clear()
 
     text = (
-        "🎁 **Gift Service**\n\n"
-        "Sistema de regalos estratégicos para usuarios.\n\n"
-        "Envía contenido especial por:\n"
-        "• Ganar subastas 🏆\n"
-        "• Compras en tienda 🛍️\n"
-        "• Alcanzar niveles 🎯\n"
-        "• Sorpresas espontáneas 💝\n"
-        "• Y más..."
+        L("gift.admin.main_menu_title") + "\n\n" +
+        L("gift.admin.main_menu_description")
     )
 
     await callback.message.edit_text(text, reply_markup=get_gift_main_keyboard())
@@ -60,11 +55,11 @@ async def show_gift_main_menu(callback: CallbackQuery, session: AsyncSession, st
 async def start_send_gift(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Inicia el proceso de enviar un regalo"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     text = (
-        "🎁 **Enviar Regalo**\n\n"
-        "**Paso 1/4:** Selecciona el tipo de evento:"
+        L("gift.admin.send_gift_title") + "\n\n" +
+        L("gift.admin.step_1")
     )
 
     await callback.message.edit_text(text, reply_markup=get_event_type_keyboard())
@@ -76,25 +71,24 @@ async def start_send_gift(callback: CallbackQuery, session: AsyncSession, state:
 async def select_event_type(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Usuario selecciona el tipo de evento"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     event_type = callback.data.split("gift_event_")[-1]
     await state.update_data(event_type=event_type)
 
-    # Nombres bonitos para mostrar
     event_names = {
-        "auction_won": "🏆 Ganó Subasta",
-        "shop_purchase": "🛍️ Compró en Tienda",
-        "level_reached": "🎯 Alcanzó Nivel",
-        "surprise": "💝 Sorpresa Espontánea",
-        "loyalty": "💎 Recompensa Lealtad",
-        "birthday": "🎂 Cumpleaños",
-        "custom": "✨ Personalizado"
+        "auction_won": L("gift.events.auction_won"),
+        "shop_purchase": L("gift.events.shop_purchase"),
+        "level_reached": L("gift.events.level_reached"),
+        "surprise": L("gift.events.surprise"),
+        "loyalty": L("gift.events.loyalty"),
+        "birthday": L("gift.events.birthday"),
+        "custom": L("gift.events.custom")
     }
 
     text = (
-        f"✅ Evento: **{event_names.get(event_type, event_type)}**\n\n"
-        "**Paso 2/4:** Ingresa el **user_id** del destinatario:"
+        L("gift.admin.event_selected").format(event_name=event_names.get(event_type, event_type)) + "\n\n" +
+        L("gift.admin.step_2")
     )
 
     await callback.message.edit_text(text, reply_markup=get_back_kb("gift_main"))
@@ -111,7 +105,7 @@ async def process_user_id(message: Message, session: AsyncSession, state: FSMCon
     try:
         user_id = int(message.text.strip())
     except ValueError:
-        await message.answer("❌ Ingresa un user_id numérico válido:")
+        await message.answer(L("gift.admin.invalid_user_id"))
         return
 
     # Verificar que el usuario existe
@@ -120,8 +114,7 @@ async def process_user_id(message: Message, session: AsyncSession, state: FSMCon
 
     if not user:
         await message.answer(
-            f"❌ Usuario {user_id} no encontrado.\n"
-            "Intenta con otro user_id:"
+            L("gift.admin.user_not_found").format(user_id=user_id)
         )
         return
 
@@ -133,16 +126,15 @@ async def process_user_id(message: Message, session: AsyncSession, state: FSMCon
 
     if not sets:
         await message.answer(
-            "❌ No hay content sets disponibles para regalar.\n\n"
-            "Crea un content set con tier='gift' primero desde el CMS.",
+            L("gift.admin.no_content_sets"),
             reply_markup=get_back_kb("gift_main")
         )
         await state.clear()
         return
 
     text = (
-        f"✅ Usuario: `{user_id}` (@{user.username or 'sin username'})\n\n"
-        "**Paso 3/4:** Selecciona el content set a enviar:"
+        L("gift.admin.user_selected").format(user_id=user_id, username=user.username or 'sin username') + "\n\n" +
+        L("gift.admin.step_3")
     )
 
     await message.answer(text, reply_markup=get_gift_sets_keyboard(sets))
@@ -153,7 +145,7 @@ async def process_user_id(message: Message, session: AsyncSession, state: FSMCon
 async def select_content_set(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Usuario selecciona el content set"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     set_id = callback.data.split("gift_select_")[-1]
     await state.update_data(content_set_id=set_id)
@@ -164,24 +156,24 @@ async def select_content_set(callback: CallbackQuery, session: AsyncSession, sta
 
     # Eventos que requieren contexto adicional
     needs_context = {
-        "auction_won": "Ingresa el **nombre de la subasta** ganada:",
-        "shop_purchase": "Ingresa el **nombre del item** comprado:",
-        "level_reached": "Ingresa el **nivel** alcanzado (número):",
-        "loyalty": "Ingresa los **días activos** (número):"
+        "auction_won": L("gift.admin.step_4a_auction"),
+        "shop_purchase": L("gift.admin.step_4a_shop"),
+        "level_reached": L("gift.admin.step_4a_level"),
+        "loyalty": L("gift.admin.step_4a_loyalty")
     }
 
     if event_type in needs_context:
         text = (
-            f"✅ Content set: `{set_id}`\n\n"
-            f"**Paso 4a/4:** {needs_context[event_type]}"
+            L("gift.admin.content_set_selected").format(set_id=set_id) + "\n\n" +
+            needs_context[event_type]
         )
         await callback.message.edit_text(text, reply_markup=get_back_kb("gift_main"))
         await state.set_state(AdminGiftStates.entering_context_data)
     else:
         # Preguntar si quiere mensaje personalizado
         text = (
-            f"✅ Content set: `{set_id}`\n\n"
-            "**Paso 4/4:** ¿Deseas agregar un mensaje personalizado o usar el template?"
+            L("gift.admin.content_set_selected").format(set_id=set_id) + "\n\n" +
+            L("gift.admin.step_4b")
         )
         await callback.message.edit_text(text, reply_markup=get_custom_message_keyboard())
         await state.set_state(AdminGiftStates.entering_custom_message)
@@ -210,22 +202,22 @@ async def process_context_data(message: Message, session: AsyncSession, state: F
             level = int(context_value)
             context_data = {"level": level}
         except ValueError:
-            await message.answer("❌ Ingresa un número válido para el nivel:")
+            await message.answer(L("gift.admin.invalid_level"))
             return
     elif event_type == "loyalty":
         try:
             days = int(context_value)
             context_data = {"days": days}
         except ValueError:
-            await message.answer("❌ Ingresa un número válido para los días:")
+            await message.answer(L("gift.admin.invalid_days"))
             return
 
     await state.update_data(context_data=context_data)
 
     # Preguntar por mensaje personalizado
     text = (
-        "✅ Datos guardados\n\n"
-        "**Paso 4b/4:** ¿Deseas agregar un mensaje personalizado o usar el template?"
+        L("gift.admin.data_saved") + "\n\n" +
+        L("gift.admin.step_4b")
     )
 
     await message.answer(text, reply_markup=get_custom_message_keyboard())
@@ -236,13 +228,9 @@ async def process_context_data(message: Message, session: AsyncSession, state: F
 async def request_custom_message(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Usuario quiere escribir un mensaje personalizado"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
-    text = (
-        "✍️ **Mensaje Personalizado**\n\n"
-        "Escribe el mensaje que acompañará el regalo.\n\n"
-        "Este mensaje reemplazará el template por defecto."
-    )
+    text = L("gift.admin.custom_message_prompt")
 
     await callback.message.edit_text(text, reply_markup=get_back_kb("gift_main"))
     await state.update_data(wants_custom_message=True)
@@ -280,13 +268,13 @@ async def show_gift_preview(message: Message, state: FSMContext, session: AsyncS
     data = await state.get_data()
 
     event_names = {
-        "auction_won": "🏆 Ganó Subasta",
-        "shop_purchase": "🛍️ Compró en Tienda",
-        "level_reached": "🎯 Alcanzó Nivel",
-        "surprise": "💝 Sorpresa",
-        "loyalty": "💎 Lealtad",
-        "birthday": "🎂 Cumpleaños",
-        "custom": "✨ Personalizado"
+        "auction_won": L("gift.events.auction_won"),
+        "shop_purchase": L("gift.events.shop_purchase"),
+        "level_reached": L("gift.events.level_reached"),
+        "surprise": L("gift.events.surprise"),
+        "loyalty": L("gift.events.loyalty"),
+        "birthday": L("gift.events.birthday"),
+        "custom": L("gift.events.custom")
     }
 
     event_type = data.get("event_type")
@@ -297,21 +285,21 @@ async def show_gift_preview(message: Message, state: FSMContext, session: AsyncS
     context_data = data.get("context_data", {})
 
     text = (
-        "📋 **PREVIEW DEL REGALO**\n\n"
-        f"**Destinatario:** {user_id} (@{username or 'sin username'})\n"
-        f"**Evento:** {event_names.get(event_type)}\n"
-        f"**Content Set:** `{set_id}`\n"
+        L("gift.admin.preview_title") + "\n\n" +
+        L("gift.admin.preview_recipient").format(user_id=user_id, username=username or 'sin username') + "\n" +
+        L("gift.admin.preview_event").format(event_name=event_names.get(event_type)) + "\n" +
+        L("gift.admin.preview_content_set").format(set_id=set_id) + "\n"
     )
 
     if context_data:
-        text += f"**Contexto:** {context_data}\n"
+        text += L("gift.admin.preview_context").format(context_data=context_data) + "\n"
 
     if custom_message:
-        text += f"\n**Mensaje personalizado:**\n{custom_message[:100]}...\n"
+        text += L("gift.admin.preview_custom_message").format(custom_message=custom_message[:100]) + "\n"
     else:
-        text += f"\n**Mensaje:** Template por defecto\n"
+        text += L("gift.admin.preview_default_message") + "\n"
 
-    text += "\n¿Enviar este regalo?"
+    text += "\n" + L("gift.admin.preview_confirm")
 
     await message.answer(text, reply_markup=get_confirm_gift_keyboard())
     await state.set_state(AdminGiftStates.confirming_gift)
@@ -321,11 +309,11 @@ async def show_gift_preview(message: Message, state: FSMContext, session: AsyncS
 async def confirm_send_gift(callback: CallbackQuery, session: AsyncSession, state: FSMContext, bot: Bot):
     """Confirma y envía el regalo"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     data = await state.get_data()
 
-    await callback.answer("⏳ Enviando regalo...", show_alert=True)
+    await callback.answer(L("gift.admin.sending"), show_alert=True)
 
     try:
         gift_service = GiftService(session)
@@ -341,17 +329,16 @@ async def confirm_send_gift(callback: CallbackQuery, session: AsyncSession, stat
         )
 
         if success:
-            text = (
-                "✅ **Regalo enviado exitosamente!**\n\n"
-                f"Usuario: {data.get('target_user_id')}\n"
-                f"Set: `{data.get('content_set_id')}`\n"
-                f"Evento: {data.get('event_type')}"
+            text = L("gift.admin.send_success").format(
+                user_id=data.get('target_user_id'),
+                set_id=data.get('content_set_id'),
+                event_type=data.get('event_type')
             )
             await callback.message.edit_text(text, reply_markup=get_gift_main_keyboard())
             await state.clear()
         else:
             await callback.message.edit_text(
-                "❌ Error enviando el regalo. Revisa los logs.",
+                L("gift.admin.send_error"),
                 reply_markup=get_gift_main_keyboard()
             )
             await state.clear()
@@ -359,7 +346,7 @@ async def confirm_send_gift(callback: CallbackQuery, session: AsyncSession, stat
     except Exception as e:
         logger.error(f"Error enviando regalo: {e}")
         await callback.message.edit_text(
-            f"❌ Error: {str(e)}",
+            L("gift.admin.generic_error").format(error=str(e)),
             reply_markup=get_gift_main_keyboard()
         )
         await state.clear()
@@ -371,30 +358,30 @@ async def confirm_send_gift(callback: CallbackQuery, session: AsyncSession, stat
 async def show_gift_stats(callback: CallbackQuery, session: AsyncSession):
     """Muestra estadísticas de regalos"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     try:
         gift_service = GiftService(session)
         stats = await gift_service.get_gift_stats()
 
         text = (
-            "📊 **Estadísticas de Regalos**\n\n"
-            f"**Total enviado:** {stats['total_gifts']} regalos\n"
-            f"**Usuarios únicos:** {stats['unique_users']}\n"
-            f"**Enviados por admin:** {stats['admin_gifts']}\n"
-            f"**Automáticos:** {stats['automatic_gifts']}\n\n"
-            "**Por tipo de evento:**\n"
+            L("gift.admin.stats_title") + "\n\n" +
+            L("gift.admin.stats_total").format(total_gifts=stats['total_gifts']) + "\n" +
+            L("gift.admin.stats_unique_users").format(unique_users=stats['unique_users']) + "\n" +
+            L("gift.admin.stats_admin_gifts").format(admin_gifts=stats['admin_gifts']) + "\n" +
+            L("gift.admin.stats_automatic_gifts").format(automatic_gifts=stats['automatic_gifts']) + "\n\n" +
+            L("gift.admin.stats_by_type") + "\n"
         )
 
         event_names = {
-            "auction_won": "🏆 Subastas",
-            "shop_purchase": "🛍️ Tienda",
-            "level_reached": "🎯 Niveles",
-            "surprise": "💝 Sorpresas",
-            "loyalty": "💎 Lealtad",
-            "birthday": "🎂 Cumpleaños",
-            "custom": "✨ Personalizados",
-            "automatic": "🤖 Journey"
+            "auction_won": L("gift.events.auction_won"),
+            "shop_purchase": L("gift.events.shop_purchase"),
+            "level_reached": L("gift.events.level_reached"),
+            "surprise": L("gift.events.surprise"),
+            "loyalty": L("gift.events.loyalty"),
+            "birthday": L("gift.events.birthday"),
+            "custom": L("gift.events.custom"),
+            "automatic": L("gift.events.automatic")
         }
 
         for event_type, count in stats['gifts_by_type'].items():
@@ -406,7 +393,7 @@ async def show_gift_stats(callback: CallbackQuery, session: AsyncSession):
 
     except Exception as e:
         logger.error(f"Error mostrando estadísticas: {e}")
-        await callback.answer(f"Error: {str(e)}", show_alert=True)
+        await callback.answer(L("gift.admin.generic_error").format(error=str(e)), show_alert=True)
 
 
 # ========== HISTORIAL ==========
@@ -415,7 +402,7 @@ async def show_gift_stats(callback: CallbackQuery, session: AsyncSession):
 async def show_gift_history(callback: CallbackQuery, session: AsyncSession):
     """Muestra historial reciente de regalos"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("gift.admin.access_denied"), show_alert=True)
 
     try:
         from sqlalchemy import select
@@ -432,19 +419,21 @@ async def show_gift_history(callback: CallbackQuery, session: AsyncSession):
         records = result.scalars().all()
 
         if not records:
-            text = "📋 **Historial de Regalos**\n\nNo hay regalos registrados aún."
+            text = L("gift.admin.history_title") + "\n\n" + L("gift.admin.history_empty")
         else:
-            text = "📋 **Historial Reciente**\n\n"
+            text = L("gift.admin.history_recent_title") + "\n\n"
 
             for record in records:
                 date = record.sent_at.strftime("%Y-%m-%d %H:%M")
-                by = "👤 Admin" if record.sent_by_admin else "🤖 Auto"
+                by = L("gift.admin.history_admin") if record.sent_by_admin else L("gift.admin.history_auto")
                 text += (
-                    f"• {date}\n"
-                    f"  Usuario: {record.user_id}\n"
-                    f"  Set: `{record.content_set_id}`\n"
-                    f"  Tipo: {record.trigger_type}\n"
-                    f"  {by}\n\n"
+                    L("gift.admin.history_item").format(
+                        date=date,
+                        user_id=record.user_id,
+                        content_set_id=record.content_set_id,
+                        trigger_type=record.trigger_type,
+                        by=by
+                    ) + "\n\n"
                 )
 
         await callback.message.edit_text(text, reply_markup=get_back_kb("gift_main"))
@@ -452,4 +441,4 @@ async def show_gift_history(callback: CallbackQuery, session: AsyncSession):
 
     except Exception as e:
         logger.error(f"Error mostrando historial: {e}")
-        await callback.answer(f"Error: {str(e)}", show_alert=True)
+        await callback.answer(L("gift.admin.generic_error").format(error=str(e)), show_alert=True)

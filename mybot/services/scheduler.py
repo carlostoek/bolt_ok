@@ -12,6 +12,7 @@ from services.auction_service import AuctionService
 from services.free_channel_service import FreeChannelService
 from services.subscription_service import SubscriptionService
 from services.user_journey_service import UserJourneyService
+from services.session_trigger_service import SessionTriggerService
 
 
 async def run_channel_request_check(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):
@@ -252,6 +253,15 @@ async def run_user_journey_check(bot: Bot, session_factory: async_sessionmaker[A
                 )
         except Exception as e:
             logging.exception("Error in user journey check: %s", e)
+
+        # Check for loyalty-based session triggers (60 days VIP)
+        try:
+            trigger_service = SessionTriggerService(session)
+            triggered_count = await trigger_service.check_all_loyalty_milestones(bot)
+            if triggered_count > 0:
+                logging.info(f"Triggered {triggered_count} loyalty session offers (60 days VIP)")
+        except Exception as e:
+            logging.exception("Error in session trigger check: %s", e)
 
 
 async def user_journey_scheduler(bot: Bot, session_factory: async_sessionmaker[AsyncSession]):

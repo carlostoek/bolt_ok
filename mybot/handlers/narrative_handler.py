@@ -246,6 +246,22 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
         await callback.answer()
 
+        # ========================================
+        # MEJORA #3: TRIGGER DE SESIÓN INDIVIDUAL
+        # ========================================
+        # Evaluar si es momento de ofrecer sesión individual después de fragmento emocional
+        try:
+            from services.session_trigger_service import SessionTriggerService
+            trigger_service = SessionTriggerService(session)
+            await trigger_service.trigger_on_narrative_completion(
+                user_id=user_id,
+                fragment_key=next_fragment.key,
+                bot=callback.bot
+            )
+        except Exception as trigger_error:
+            # No bloquear flujo principal si falla el trigger
+            logger.error(f"Error in session trigger: {trigger_error}")
+
     except ValueError:
         await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
     except Exception as e:
