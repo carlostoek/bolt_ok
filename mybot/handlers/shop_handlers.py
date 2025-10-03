@@ -299,7 +299,7 @@ async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
         user_id = callback.from_user.id
 
         shop_service = ShopService(session)
-        result = await shop_service.purchase_item(user_id, item_id)
+        result = await shop_service.purchase_item(user_id, item_id, callback.bot)
 
         if result["success"]:
             # Get item info for success message

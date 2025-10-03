@@ -62,6 +62,7 @@ from handlers.admin.mission_wizard import router as mission_wizard_router
 from handlers.admin.auction_admin import router as auction_admin_router
 from handlers.admin.content_admin import router as content_admin_router
 from handlers.admin.journey_admin import router as journey_admin_router
+from handlers.admin.gift_admin import router as gift_admin_router
 from handlers.lore_handlers import router as lore_router
 from handlers.missions_handler import router as missions_router
 from handlers.info_handler import router as info_router
@@ -200,6 +201,7 @@ async def main() -> None:
             ("auction_admin", auction_admin_router),
             ("content_admin", content_admin_router),  # CMS Journey admin panel
             ("journey_admin", journey_admin_router),  # Journey Management admin panel
+            ("gift_admin", gift_admin_router),  # Gift Service admin panel
             ("midivan_admin", midivan_admin_router),  # Mi Diván admin panel
             ("start_token", start_token),
             ("start", start.router),
