@@ -20,7 +20,9 @@ from services.shop_service import ShopService
 from services.condition_checker import ConditionChecker
 from database.models import ShopItem, UserPurchase, LorePiece
 from keyboards.common import build_shop_keyboard
+from keyboards.besitos_kb import get_besitos_packs_list_kb, get_besitos_pack_detail_kb
 from utils.localization import get_text
+from utils.messages import BOT_MESSAGES
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -195,7 +197,9 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
         if can_purchase:
             builder.button(text="🛒 Comprar", callback_data=f"confirm_purchase:{item_id}")
         elif not can_afford:
-            builder.button(text="💰 No tienes suficientes besitos", callback_data="noop")
+            # CRÍTICO: Momento de conversión - ofrecer compra de besitos
+            missing = item.price - user_points
+            builder.button(text="💰 Comprar besitos", callback_data=f"besitos_insufficient:{item_id}:{int(missing)}")
         elif user_purchases_count >= item.max_purchases_per_user:
             builder.button(text="✅ Ya lo compraste (límite alcanzado)", callback_data="noop")
 
@@ -353,7 +357,21 @@ Usa "📖 Continuar historia" para verlo.
             await callback.answer("✅ Compra realizada!", show_alert=False)
 
         else:
-            # Show error
+            # CRÍTICO: Detectar error de insufficient_points y ofrecer besitos
+            error_code = result.get('error')
+            if error_code == 'insufficient_points':
+                # Recuperar puntos necesarios
+                from database.models import User
+                user = await session.get(User, user_id)
+                item = await session.get(ShopItem, item_id)
+                missing = item.price - (user.points if user else 0)
+
+                # Redirigir a oferta de besitos
+                await callback.answer("💰 Necesitas más besitos...", show_alert=False)
+                await offer_besitos_packs(callback, session, item_id, int(missing))
+                return
+
+            # Otros errores: mostrar mensaje y volver a shop
             error_msg = result.get('message', 'Error desconocido')
             await callback.answer(f"❌ {error_msg}", show_alert=True)
 
@@ -442,3 +460,205 @@ async def view_inventory(callback: CallbackQuery, session: AsyncSession):
     except Exception as e:
         logger.error(f"Error viewing inventory: {e}", exc_info=True)
         await callback.answer(get_text("backpack.load_error"), show_alert=True)
+
+
+# ============================================================================
+# MONETIZATION HANDLERS - Sprint 1: Conversion Focus
+# ============================================================================
+
+async def offer_besitos_packs(callback: CallbackQuery, session: AsyncSession, item_id: int, missing: int):
+    """
+    MOMENTO CRÍTICO DE CONVERSIÓN:
+    Usuario quiere comprar pero le faltan besitos.
+    Ofrecer paquetes de besitos de manera inteligente.
+
+    Args:
+        callback: CallbackQuery del botón de compra
+        session: Sesión de BD
+        item_id: ID del producto que querían comprar
+        missing: Besitos que le faltan
+    """
+    try:
+        # Obtener información del producto para context
+        item = await session.get(ShopItem, item_id)
+        item_name = item.name if item else "este producto"
+
+        # Determinar pack recomendado según lo que falta
+        recommended_pack = 1  # Basic por default
+        if missing > 500:
+            recommended_pack = 2  # Premium
+        if missing > 1000:
+            recommended_pack = 3  # Luxury
+
+        # Mensaje de Lucien personalizado
+        text = BOT_MESSAGES["besitos_packs_intro"].format(missing=missing)
+
+        # Modificar mensaje para mencionar el producto
+        text += f"\n\n🎁 **Recordatorio:** Querías comprar *{item_name}*\n"
+        text += "Con besitos suficientes, podrás conseguirlo.\n"
+
+        await callback.message.edit_text(
+            text,
+            reply_markup=get_besitos_packs_list_kb(highlight_pack=recommended_pack),
+            parse_mode="Markdown"
+        )
+
+    except Exception as e:
+        logger.error(f"Error offering besitos packs: {e}", exc_info=True)
+        await callback.answer("❌ Error al cargar packs", show_alert=True)
+
+
+@router.callback_query(F.data == "besitos_packs_list")
+async def show_besitos_packs(callback: CallbackQuery, session: AsyncSession):
+    """Muestra lista de paquetes de besitos disponibles"""
+    try:
+        text = """💰 **Paquetes de Besitos**
+
+*Lucien te muestra las opciones*
+
+—Estos packs te darán los besitos que necesitas para conseguir lo que deseas...
+
+**Todos los pagos incluyen:**
+✅ Entrega instantánea
+✅ Bonos de lealtad
+✅ Soporte directo
+
+Selecciona el pack que prefieras."""
+
+        await callback.message.edit_text(
+            text,
+            reply_markup=get_besitos_packs_list_kb(),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error showing besitos packs: {e}", exc_info=True)
+        await callback.answer("❌ Error al cargar packs", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("besitos_insufficient:"))
+async def handle_besitos_insufficient(callback: CallbackQuery, session: AsyncSession):
+    """
+    Handler para cuando usuario hace click en "Comprar besitos" desde producto
+    Callback data: besitos_insufficient:{item_id}:{missing}
+    """
+    try:
+        parts = callback.data.split(":")
+        item_id = int(parts[1])
+        missing = int(parts[2])
+
+        await callback.answer("💰 Cargando opciones...")
+        await offer_besitos_packs(callback, session, item_id, missing)
+
+    except Exception as e:
+        logger.error(f"Error handling besitos insufficient: {e}", exc_info=True)
+        await callback.answer("❌ Error", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("besitos_pack_"))
+async def show_besitos_pack_details(callback: CallbackQuery, session: AsyncSession):
+    """Muestra detalles de un pack específico"""
+    try:
+        pack_id = int(callback.data.split("_")[-1])
+
+        # Get pack details from messages
+        text = BOT_MESSAGES.get(f"besitos_pack_{pack_id}_details", "Pack no disponible")
+
+        await callback.message.edit_text(
+            text,
+            reply_markup=get_besitos_pack_detail_kb(pack_id),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error showing pack details: {e}", exc_info=True)
+        await callback.answer("❌ Error al cargar pack", show_alert=True)
+
+
+@router.callback_query(F.data.startswith("besitos_interest_"))
+async def handle_besitos_interest(callback: CallbackQuery, session: AsyncSession):
+    """
+    Usuario hace click en "Me interesa" en un pack de besitos
+    Notifica a admin y confirma al usuario
+
+    Callback data: besitos_interest_{pack_id}
+    """
+    try:
+        pack_id = int(callback.data.split("_")[-1])
+        user = callback.from_user
+
+        # Pack info
+        packs_info = {
+            1: {"name": "Pack Básico", "price": 50, "besitos": 500},
+            2: {"name": "Pack Premium", "price": 90, "besitos": 1100},
+            3: {"name": "Pack Luxury", "price": 200, "besitos": 3000},
+        }
+
+        pack = packs_info.get(pack_id, {"name": "Pack", "price": 0, "besitos": 0})
+
+        # Notificar a admins con contexto
+        from utils.notify_admins import notify_admins
+        from utils.config import ADMIN_IDS
+        from database.models import User as UserModel
+
+        # Get user data from DB for more context
+        db_user = await session.get(UserModel, user.id)
+        current_points = db_user.points if db_user else 0
+
+        admin_msg = (
+            f"💰 **INTERÉS EN PAQUETE DE BESITOS**\n\n"
+            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
+            f"**ID:** {user.id}\n"
+            f"**Pack:** {pack['name']} - ${pack['price']} MXN\n"
+            f"**Besitos:** {pack['besitos']}\n"
+            f"**Besitos actuales:** {current_points:.0f}\n"
+            f"**Contexto:** Usuario en tienda sin suficientes puntos\n\n"
+            f"Contactar para coordinar pago."
+        )
+
+        await notify_admins(callback.bot, admin_msg)
+
+        # Mensaje temporal al usuario
+        from utils.menu_manager import menu_manager
+        await menu_manager.send_temporary_message(
+            callback.message,
+            BOT_MESSAGES["besitos_interest_reply"],
+            auto_delete_seconds=10
+        )
+
+        await callback.answer("✅ Solicitud enviada", show_alert=False)
+
+    except Exception as e:
+        logger.error(f"Error handling besitos interest: {e}", exc_info=True)
+        await callback.answer("❌ Error al procesar solicitud", show_alert=True)
+
+
+@router.callback_query(F.data == "besitos_packs_bonus")
+async def show_besitos_packs_bonus(callback: CallbackQuery, session: AsyncSession):
+    """
+    Muestra packs de besitos con bonus especial (30% extra)
+    Se activa cuando usuario ha comprado mucho en un día
+    """
+    try:
+        text = BOT_MESSAGES["besitos_packs_bonus_intro"]
+
+        # Keyboard con bonus destacado
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✨ Pack 500 + 150 bonus = 650 - $50 MXN", callback_data="besitos_pack_1")
+        builder.button(text="✨ Pack 1000 + 300 bonus = 1,300 - $90 MXN", callback_data="besitos_pack_2")
+        builder.button(text="✨ Pack 2500 + 750 bonus = 3,250 - $200 MXN", callback_data="besitos_pack_3")
+        builder.button(text="🔙 Volver", callback_data="shop_access")
+        builder.adjust(1)
+
+        await callback.message.edit_text(
+            text,
+            reply_markup=builder.as_markup(),
+            parse_mode="Markdown"
+        )
+        await callback.answer()
+
+    except Exception as e:
+        logger.error(f"Error showing bonus packs: {e}", exc_info=True)
+        await callback.answer("❌ Error", show_alert=True)
