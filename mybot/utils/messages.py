@@ -227,3 +227,266 @@ NIVEL_TEMPLATE = """
 TRIVIA_INTRO_MESSAGE = "🎲 *Selecciona una trivia:*"
 TRIVIA_COMPLETE_MESSAGE = "🎉 *Has completado la trivia con {score} respuestas correctas.*"
 TRIVIA_ADMIN_MENU = "🛠️ *Panel de Administración de Trivias*"
+
+# ============================================================================
+# MONETIZATION MESSAGES - Sprint 1: Conversion Focus
+# ============================================================================
+
+# Besitos Packs Messages
+BESITOS_MESSAGES = {
+    "besitos_packs_intro": (
+        "💰 **¿Tan cerca y tan lejos?**\n\n"
+        "*Lucien te mira con comprensión*\n\n"
+        "—Solo te faltan **{missing} besitos** para conseguir lo que deseas...\n\n"
+        "💡 Tengo dos opciones para ti:\n\n"
+        "**1️⃣ Comprar besitos ahora** (instantáneo)\n"
+        "   └─> Packs desde $50 MXN, con bonos incluidos\n\n"
+        "**2️⃣ Ganar besitos gratis** (toma tiempo)\n"
+        "   └─> Completa misiones y vuelve\n\n"
+        "*Diana no espera a nadie... ¿qué decides?* 😏"
+    ),
+
+    "besitos_pack_1_details": (
+        "💋 **Pack Básico**\n\n"
+        "**500 besitos** por solo **$50 MXN**\n\n"
+        "Perfecto para:\n"
+        "• Comprar 1-2 items de tienda\n"
+        "• Desbloquear fragmentos narrativos\n"
+        "• Participar en subastas pequeñas\n\n"
+        "*Lucien puede ayudarte con el pago* 💳"
+    ),
+
+    "besitos_pack_2_details": (
+        "💋💋 **Pack Premium**\n\n"
+        "**1,000 besitos + 100 GRATIS** por **$90 MXN**\n\n"
+        "*¡El más popular!*\n\n"
+        "Ideal para:\n"
+        "• Comprar varios items premium\n"
+        "• Pujar en subastas importantes\n"
+        "• Desbloquear múltiples niveles\n\n"
+        "**Bonus:** +10% gratis = 1,100 besitos totales\n\n"
+        "*Diana recomienda este pack* 😉"
+    ),
+
+    "besitos_pack_3_details": (
+        "💋💋💋 **Pack Luxury**\n\n"
+        "**2,500 besitos + 500 GRATIS** por **$200 MXN**\n\n"
+        "*Para los más dedicados*\n\n"
+        "Con esto puedes:\n"
+        "• Acceder a TODO el contenido premium\n"
+        "• Dominar subastas sin límites\n"
+        "• Desbloquear finales secretos\n\n"
+        "**Bonus:** +20% gratis = 3,000 besitos totales\n\n"
+        "*El pack de los verdaderos players* 👑"
+    ),
+
+    "besitos_interest_reply": (
+        "💌 **Solicitud Recibida**\n\n"
+        "*Lucien asiente*\n\n"
+        "—Excelente elección. Diana me pidió que coordine tu compra.\n\n"
+        "📱 Te contactaré en breve para el pago, o puedes escribirme directo:\n"
+        "WhatsApp: @DianaKinky\n\n"
+        "*Tus besitos llegarán en minutos* ⚡"
+    ),
+
+    "besitos_packs_bonus_intro": (
+        "🎉 **¡Oferta Especial!**\n\n"
+        "*Diana está impresionada con tu actividad*\n\n"
+        "Por tu lealtad, te ofrezco un **bonus exclusivo**:\n\n"
+        "💝 **+30% EXTRA en cualquier pack**\n\n"
+        "Ejemplos:\n"
+        "• $50 → 650 besitos (normal 500)\n"
+        "• $90 → 1,430 besitos (normal 1,100)\n"
+        "• $200 → 3,900 besitos (normal 3,000)\n\n"
+        "⏰ *Oferta válida solo HOY*"
+    ),
+}
+
+# Session Individual Messages
+SESSION_MESSAGES = {
+    "session_standard_offer": (
+        "💋 **Sesión Individual con Diana**\n\n"
+        "*Lucien te mira con una sonrisa cómplice*\n\n"
+        "—Diana quiere conocerte más allá de la pantalla.\n"
+        "Una conexión más... personal.\n\n"
+        "**Lo que incluye:**\n"
+        "• Videollamada privada 30 minutos\n"
+        "• Contenido personalizado para ti\n"
+        "• Experiencia única e íntima\n"
+        "• Audio/video que solo tú tendrás\n\n"
+        "**Inversión:** $500 MXN\n\n"
+        "*Solo 3 espacios disponibles este mes* 🔒"
+    ),
+
+    "session_vip_special_offer": (
+        "👑 **Oferta Exclusiva VIP**\n\n"
+        "*Diana te reservó algo especial*\n\n"
+        "Como miembro VIP activo, tienes acceso a:\n\n"
+        "💋 **Sesión Individual Premium**\n"
+        "• 30 minutos solo tú y Diana\n"
+        "• Contenido personalizado según tus fantasías\n"
+        "• Pack de fotos/videos exclusivos post-sesión\n\n"
+        "~~$800 MXN~~ **$500 MXN** (VIP Price)\n\n"
+        "*Cupos limitados, prioridad para VIPs* ✨"
+    ),
+
+    "session_loyalty_discount": (
+        "🎁 **Regalo de Lealtad**\n\n"
+        "Has sido un miembro increíble.\n"
+        "Diana quiere agradecerte personalmente.\n\n"
+        "💝 **Sesión Individual con Descuento**\n"
+        "• Videollamada privada 30 min\n"
+        "• Contenido hecho para ti\n"
+        "• Experiencia inolvidable\n\n"
+        "~~$800 MXN~~ **$400 MXN**\n"
+        "*Solo para miembros de 60+ días*\n\n"
+        "¿Aceptas la invitación de Diana? 💋"
+    ),
+
+    "session_emotional_narrative": (
+        "💫 **Diana te sintió...**\n\n"
+        "*Ese fragmento que acabas de vivir fue intenso, ¿verdad?*\n\n"
+        "Diana quiere conocerte más allá de la pantalla.\n"
+        "Conectar contigo de manera más... personal.\n\n"
+        "💋 **Sesión Individual Privada**\n"
+        "• 30 minutos solo tú y Diana\n"
+        "• Videollamada íntima y personalizada\n"
+        "• Contenido creado especialmente para ti\n\n"
+        "**Inversión:** $500 MXN\n"
+        "*Solo 3 espacios disponibles este mes*\n\n"
+        "¿Te atreves a cruzar la pantalla? 🔥"
+    ),
+
+    "session_interest_reply": (
+        "💌 **Solicitud Enviada**\n\n"
+        "*Diana recibió tu mensaje personal.*\n\n"
+        "Lucien se pondrá en contacto contigo en las próximas horas\n"
+        "para coordinar tu sesión privada.\n\n"
+        "📞 **También puedes escribir directamente:**\n"
+        "WhatsApp: @DianaKinky\n\n"
+        "*Te esperamos* 💋"
+    ),
+}
+
+# Post-Purchase Upsell Messages
+UPSELL_MESSAGES = {
+    "upsell_premium_pack_vip": (
+        "📸 *Diana susurra:*\n\n"
+        "—Ya que estás desbloqueando secretos...\n"
+        "¿te gustaría el pack fotográfico completo?\n\n"
+        "**Pack Sensualidad Revelada** - $200 MXN\n"
+        "• 15 fotos exclusivas HD\n"
+        "• Behind the scenes\n"
+        "• Video mensaje personal de Diana\n\n"
+        "*Solo para quien desbloqueó este fragmento* 🔥"
+    ),
+
+    "upsell_vip_upgrade_free": (
+        "💎 *Lucien nota tu entusiasmo*\n\n"
+        "—Veo que te gusta lo que ofrece Diana...\n"
+        "Tienes {points} besitos acumulados.\n\n"
+        "¿Sabías que con VIP obtienes:\n"
+        "• 50% de descuento en TODO\n"
+        "• Contenido diario exclusivo\n"
+        "• Sets completos (no teasers)\n\n"
+        "**Oferta especial:** Primera semana GRATIS\n"
+        "*Solo por comprar hoy* 🎁"
+    ),
+
+    "upsell_session_loyal_vip": (
+        "👑 *{username}, tu ausencia se nota*\n\n"
+        "Diana guarda contenido exclusivo solo para ti.\n"
+        "Has sido un miembro increíble ({days_vip} días).\n\n"
+        "¿Qué tal una sesión individual?\n"
+        "**Precio especial HOY:** $400 MXN (50% desc)\n\n"
+        "*Por tu lealtad* 💝"
+    ),
+
+    "upsell_besitos_reload_active": (
+        "🎉 *¡Wow! Tercera compra del día!*\n\n"
+        "Diana está impresionada con tu entusiasmo.\n\n"
+        "💝 **Regalo especial:**\n"
+        "Recarga besitos ahora y recibe **30% EXTRA gratis**\n\n"
+        "Ejemplo:\n"
+        "• Pack 1000 besitos → Recibes 1,300\n"
+        "• Pack 2500 besitos → Recibes 3,250\n\n"
+        "*Oferta válida solo hoy* ⏰"
+    ),
+}
+
+# VIP Products in Shop
+VIP_PRODUCTS_MESSAGES = {
+    "vip_day_offer": (
+        "✨ **Acceso VIP por 1 Día**\n\n"
+        "*Lucien te ofrece una prueba*\n\n"
+        "¿Quieres experimentar el mundo VIP sin compromiso?\n\n"
+        "**24 horas de acceso completo:**\n"
+        "• Todo el contenido exclusivo\n"
+        "• Descuentos en tienda\n"
+        "• Acceso a subastas VIP\n\n"
+        "**Precio:** $50 MXN (1 día)\n\n"
+        "*Perfecto para probar antes de comprometerte* 💎"
+    ),
+
+    "vip_month_offer": (
+        "💎 **Membresía VIP - 1 Mes Completo**\n\n"
+        "*El acceso total al mundo de Diana*\n\n"
+        "**Lo que obtienes:**\n"
+        "• Acceso ilimitado a +2000 archivos\n"
+        "• Videos sin censura diarios\n"
+        "• 50% descuento en tienda\n"
+        "• Prioridad en subastas\n"
+        "• Sets completos (no teasers)\n\n"
+        "**Precio:** $350 MXN (30 días)\n\n"
+        "*La mejor inversión en placer* 🔥"
+    ),
+
+    "vip_interest_standard": (
+        "💌 **Solicitud de VIP Recibida**\n\n"
+        "*Lucien prepara tu acceso*\n\n"
+        "—Excelente decisión. Diana te dará la bienvenida.\n\n"
+        "Te contactaré en breve para activar tu membresía.\n"
+        "O escríbeme directo: @DianaKinky\n\n"
+        "*Tu acceso VIP estará listo en minutos* ✨"
+    ),
+}
+
+# Admin Notifications (for internal tracking)
+ADMIN_NOTIFICATION_TEMPLATES = {
+    "besitos_interest": (
+        "💰 **INTERÉS EN PAQUETE DE BESITOS**\n\n"
+        "**Usuario:** {first_name} (@{username})\n"
+        "**ID:** {user_id}\n"
+        "**Pack:** {pack_name} - ${price} MXN\n"
+        "**Besitos:** {besitos}\n"
+        "**Contexto:** {context}\n\n"
+        "Contactar para coordinar pago."
+    ),
+
+    "session_interest": (
+        "💋 **SOLICITUD DE SESIÓN INDIVIDUAL**\n\n"
+        "**Usuario:** {first_name} (@{username})\n"
+        "**ID:** {user_id}\n"
+        "**Tipo sesión:** {session_type}\n"
+        "**VIP desde:** {vip_since}\n"
+        "**Besitos actuales:** {points}\n"
+        "**Trigger:** {trigger_reason}\n\n"
+        "Contactar para coordinar sesión."
+    ),
+
+    "vip_interest": (
+        "💎 **INTERÉS EN MEMBRESÍA VIP**\n\n"
+        "**Usuario:** {first_name} (@{username})\n"
+        "**ID:** {user_id}\n"
+        "**Tipo:** {vip_type}\n"
+        "**Días activo:** {days_active}\n"
+        "**Besitos:** {points}\n\n"
+        "Contactar para activar VIP."
+    ),
+}
+
+# Update BOT_MESSAGES with new categories
+BOT_MESSAGES.update(BESITOS_MESSAGES)
+BOT_MESSAGES.update(SESSION_MESSAGES)
+BOT_MESSAGES.update(UPSELL_MESSAGES)
+BOT_MESSAGES.update(VIP_PRODUCTS_MESSAGES)

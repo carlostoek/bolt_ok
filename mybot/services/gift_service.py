@@ -374,11 +374,11 @@ class GiftService:
         if content_set_id:
             conditions.append(GiftRecord.content_set_id == content_set_id)
 
-        stmt = select(GiftRecord).where(and_(*conditions))
+        stmt = select(func.count()).select_from(GiftRecord).where(and_(*conditions))
         result = await self.session.execute(stmt)
-        record = result.scalar_one_or_none()
+        count = result.scalar()
 
-        return record is not None
+        return count > 0
 
     async def get_user_gifts_by_event(
         self,
