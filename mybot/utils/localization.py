@@ -58,3 +58,6 @@ def get_text(key: str, lang: str = _default_lang, **kwargs) -> str:
 
 # Cargar el idioma por defecto al iniciar el módulo
 load_translations(_default_lang)
+
+# Alias corto para get_text (útil para imports: from utils.localization import L)
+L = get_text

@@ -202,6 +202,22 @@ class AuctionService:
                     # Graceful degradation - gifts are optional
                     logger.debug(f"Could not send auction winner gift: {e}")
 
+                # ========================================
+                # MEJORA #3: TRIGGER DE SESIÓN INDIVIDUAL
+                # ========================================
+                # Evaluar si es momento de ofrecer sesión individual después de ganar subasta importante
+                try:
+                    from services.session_trigger_service import SessionTriggerService
+                    trigger_service = SessionTriggerService(self.session)
+                    await trigger_service.trigger_on_auction_win(
+                        user_id=auction.winner_id,
+                        auction_value=auction.current_highest_bid,
+                        bot=bot
+                    )
+                except Exception as trigger_error:
+                    # No bloquear flujo principal si falla el trigger
+                    logger.error(f"Error in session trigger for auction: {trigger_error}")
+
                 # Notify all participants about the result
                 await self._notify_auction_ended(auction, bot)
         

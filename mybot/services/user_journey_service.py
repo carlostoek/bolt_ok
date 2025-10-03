@@ -71,15 +71,15 @@ class UserJourneyService:
         Returns:
             Lista de usuarios que alcanzaron el milestone
         """
-        # Calcular días desde registro según milestone
-        days_map = {
-            "day_1": 1,
-            "day_7": 7,
-            "day_30": 30
+        # MODO TESTING: Calcular MINUTOS desde registro según milestone
+        minutes_map = {
+            "day_1": 7,   # 7 minutos en lugar de 1 día
+            "day_7": 15,  # 15 minutos en lugar de 7 días
+            "day_30": 30  # 30 minutos en lugar de 30 días
         }
 
-        days_required = days_map.get(milestone_type, 1)
-        cutoff_date = datetime.utcnow() - timedelta(days=days_required)
+        minutes_required = minutes_map.get(milestone_type, 7)
+        cutoff_date = datetime.utcnow() - timedelta(minutes=minutes_required)
 
         # Query: usuarios registrados hace X días que no completaron el milestone
         stmt = (

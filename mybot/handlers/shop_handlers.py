@@ -18,9 +18,10 @@ from sqlalchemy.orm import selectinload
 from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from services.shop_service import ShopService
 from services.condition_checker import ConditionChecker
+from services.upsell_service import UpsellService
 from database.models import ShopItem, UserPurchase, LorePiece
 from keyboards.common import build_shop_keyboard
-from keyboards.besitos_kb import get_besitos_packs_list_kb, get_besitos_pack_detail_kb
+from keyboards.besitos_kb import get_besitos_packs_list_kb, get_besitos_pack_detail_kb, get_upsell_keyboard
 from utils.localization import get_text
 from utils.messages import BOT_MESSAGES
 
@@ -342,16 +343,35 @@ Usa "📖 Continuar historia" para verlo.
 
             success_text += "\n🎒 El producto se ha agregado a tu mochila."
 
-            # Build keyboard
-            builder = InlineKeyboardBuilder()
-            builder.button(text="🛒 Seguir comprando", callback_data="shop_access")
-            builder.button(text="🎒 Ver mi mochila", callback_data="view_inventory")
-            builder.button(text="📖 Continuar historia", callback_data="return_from_shop")
-            builder.adjust(1)
+            # ========================================
+            # MEJORA #2: UPSELL INTELIGENTE POST-COMPRA
+            # ========================================
+
+            # Determinar upsell inteligente
+            upsell_service = UpsellService(session)
+            upsell = await upsell_service.get_smart_upsell(user_id, item)
+
+            # Si hay upsell específico, agregarlo al mensaje
+            if upsell["type"] and upsell["message_key"]:
+                upsell_message = BOT_MESSAGES.get(upsell["message_key"], "")
+                if upsell_message:
+                    # Formatear mensaje con datos
+                    try:
+                        upsell_message = upsell_message.format(**upsell["data"])
+                    except KeyError:
+                        pass  # Si falta algún dato, usar mensaje sin formatear
+
+                    success_text += f"\n\n─────────────\n\n{upsell_message}"
+
+            # Build keyboard según tipo de upsell
+            keyboard = get_upsell_keyboard(
+                upsell_type=upsell["keyboard_type"],
+                item_data=upsell["keyboard_data"]
+            )
 
             await callback.message.edit_text(
                 success_text,
-                reply_markup=builder.as_markup(),
+                reply_markup=keyboard,
                 parse_mode="Markdown"
             )
             await callback.answer("✅ Compra realizada!", show_alert=False)
@@ -661,4 +681,153 @@ async def show_besitos_packs_bonus(callback: CallbackQuery, session: AsyncSessio
 
     except Exception as e:
         logger.error(f"Error showing bonus packs: {e}", exc_info=True)
+        await callback.answer("❌ Error", show_alert=True)
+
+
+# ============================================================================
+# UPSELL HANDLERS - Post-Purchase Intelligence
+# ============================================================================
+
+@router.callback_query(F.data.startswith("session_interest_"))
+async def handle_session_interest(callback: CallbackQuery, session: AsyncSession):
+    """
+    Usuario hace click en "Quiero mi sesión con Diana"
+    Notifica a admin y confirma al usuario
+
+    Callback data: session_interest_{session_type}
+    session_type: "standard", "vip_special", "loyalty_discount", "emotional_narrative"
+    """
+    try:
+        session_type = callback.data.split("_", 2)[2]  # Después de "session_interest_"
+        user = callback.from_user
+
+        # Get user data from DB
+        from database.models import User as UserModel
+        db_user = await session.get(UserModel, user.id)
+
+        # Session types
+        session_types_info = {
+            "standard": {"name": "Sesión Estándar", "price": 500},
+            "vip_special": {"name": "Sesión VIP Especial", "price": 500},
+            "loyalty_discount": {"name": "Sesión con Descuento Lealtad", "price": 400},
+            "emotional_narrative": {"name": "Sesión Post-Narrativa", "price": 500},
+        }
+
+        session_info = session_types_info.get(session_type, {"name": "Sesión Individual", "price": 500})
+
+        # Determinar trigger reason
+        trigger_reason = "post_purchase_upsell"
+        if session_type == "emotional_narrative":
+            trigger_reason = "emotional_fragment"
+        elif session_type == "loyalty_discount":
+            trigger_reason = "loyalty_reward"
+
+        # Notificar a admins
+        from utils.notify_admins import notify_admins
+
+        vip_since_str = db_user.vip_since.strftime('%d/%m/%Y') if db_user and db_user.vip_since else 'N/A'
+        current_points = db_user.points if db_user else 0
+
+        admin_msg = (
+            f"💋 **SOLICITUD DE SESIÓN INDIVIDUAL**\n\n"
+            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
+            f"**ID:** {user.id}\n"
+            f"**Tipo sesión:** {session_info['name']}\n"
+            f"**Precio:** ${session_info['price']} MXN\n"
+            f"**VIP desde:** {vip_since_str}\n"
+            f"**Besitos actuales:** {current_points:.0f}\n"
+            f"**Trigger:** {trigger_reason}\n\n"
+            f"Contactar para coordinar sesión."
+        )
+
+        await notify_admins(callback.bot, admin_msg)
+
+        # Mensaje al usuario
+        await callback.message.edit_text(
+            BOT_MESSAGES["session_interest_reply"],
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardBuilder()
+                .button(text="🔙 Volver al menú", callback_data="narrative_main_menu")
+                .as_markup()
+        )
+
+        await callback.answer("✅ Solicitud enviada a Diana", show_alert=False)
+
+        # Actualizar timestamp de última oferta de sesión
+        if db_user:
+            db_user.last_session_offer_at = datetime.utcnow()
+            await session.commit()
+
+    except Exception as e:
+        logger.error(f"Error handling session interest: {e}", exc_info=True)
+        await callback.answer("❌ Error al procesar solicitud", show_alert=True)
+
+
+@router.callback_query(F.data == "vip_interest_special")
+async def handle_vip_interest_special(callback: CallbackQuery, session: AsyncSession):
+    """
+    Usuario FREE hace click en "Activar VIP gratis" desde upsell
+    Notifica a admin con contexto especial de "acabó de comprar"
+    """
+    try:
+        user = callback.from_user
+
+        # Get user data
+        from database.models import User as UserModel
+        db_user = await session.get(UserModel, user.id)
+
+        days_active = (datetime.utcnow() - db_user.created_at).days if db_user else 0
+        current_points = db_user.points if db_user else 0
+
+        # Notificar admin
+        from utils.notify_admins import notify_admins
+
+        admin_msg = (
+            f"💎 **INTERÉS EN MEMBRESÍA VIP** (Upsell Post-Compra)\n\n"
+            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
+            f"**ID:** {user.id}\n"
+            f"**Tipo:** Primera semana GRATIS\n"
+            f"**Días activo:** {days_active}\n"
+            f"**Besitos:** {current_points:.0f}\n"
+            f"**Contexto:** Usuario acabó de comprar en tienda\n\n"
+            f"⚡ **ALTA PROBABILIDAD DE CONVERSIÓN**\n\n"
+            f"Contactar para activar VIP."
+        )
+
+        await notify_admins(callback.bot, admin_msg)
+
+        # Mensaje al usuario
+        await callback.message.edit_text(
+            BOT_MESSAGES["vip_interest_standard"],
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardBuilder()
+                .button(text="🔙 Volver al menú", callback_data="narrative_main_menu")
+                .as_markup()
+        )
+
+        await callback.answer("✅ Solicitud enviada", show_alert=False)
+
+    except Exception as e:
+        logger.error(f"Error handling VIP interest special: {e}", exc_info=True)
+        await callback.answer("❌ Error", show_alert=True)
+
+
+@router.callback_query(F.data == "continue_narrative_after_purchase")
+async def continue_narrative_after_purchase(callback: CallbackQuery, session: AsyncSession):
+    """
+    Usuario elige continuar la narrativa después de comprar
+    Procesa cualquier decisión pendiente y muestra siguiente fragmento
+    """
+    try:
+        await callback.answer("📖 Regresando a la historia...")
+
+        # Redirigir al handler de narrativa
+        # Este handler ya existe y maneja el shop_redirect_fragment_key
+        from handlers.narrative_handler import start_narrative_command
+
+        # Simular mensaje para el handler
+        await start_narrative_command(callback.message, session)
+
+    except Exception as e:
+        logger.error(f"Error continuing narrative after purchase: {e}", exc_info=True)
         await callback.answer("❌ Error", show_alert=True)

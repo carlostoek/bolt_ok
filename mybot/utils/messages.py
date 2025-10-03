@@ -366,6 +366,19 @@ SESSION_MESSAGES = {
         "WhatsApp: @DianaKinky\n\n"
         "*Te esperamos* 💋"
     ),
+
+    "session_high_auction_offer": (
+        "🏆 **¡Ganaste!** Y Diana lo notó.\n\n"
+        "*Pujaste {auction_value} besitos...*\n"
+        "*Eso demuestra que sabes lo que quieres.*\n\n"
+        "Diana reserva sus sesiones individuales\n"
+        "para quienes realmente aprecian su tiempo.\n\n"
+        "💋 **Oferta Exclusiva para Ti**\n"
+        "Sesión privada de 30 min con Diana\n\n"
+        "**Precio VIP:** $500 MXN\n"
+        "*Cupo limitado, solo este mes*\n\n"
+        "Lucien puede coordinar todo por ti. 📞"
+    ),
 }
 
 # Post-Purchase Upsell Messages
