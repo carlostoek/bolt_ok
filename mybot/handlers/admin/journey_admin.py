@@ -15,6 +15,7 @@ from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
+from utils.localization import L
 from utils.user_roles import is_admin
 from services.user_journey_service import UserJourneyService
 from services.user_service import UserService

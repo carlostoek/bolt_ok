@@ -12,6 +12,7 @@ from aiogram.types import CallbackQuery, Message
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from utils.localization import L
 from utils.user_roles import is_admin
 from utils.admin_state import AdminGiftStates
 from services.gift_service import GiftService, GIFT_MESSAGES
