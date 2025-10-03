@@ -281,7 +281,15 @@ class ShopService:
                 return {"success": False, "message": "User not found"}
 
             if user.points < item.price:
-                return {"success": False, "message": "Insufficient points"}
+                # CRÍTICO: Return detailed error for conversion flow
+                return {
+                    "success": False,
+                    "error": "insufficient_points",  # Error code for detection
+                    "message": "Insufficient points",
+                    "required": item.price,
+                    "available": user.points,
+                    "missing": item.price - user.points
+                }
 
             # Deduct points
             user.points -= item.price
