@@ -18,17 +18,17 @@ def get_free_main_menu_kb() -> InlineKeyboardMarkup:
     builder.button(text="🏆 Mi Perfil", callback_data="menu:profile")
     builder.button(text="📂 Mi Contenido", callback_data="free_my_content")  # Unifica Packs, VIP, Custom
 
-    # 🎯 ACTIVIDADES DIARIAS (Mostrar pero bloquear)
-    builder.button(text="🎯 Misiones", callback_data="free_missions_preview")
+    # 🎯 ACTIVIDADES DIARIAS (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🎯 Misiones", callback_data="menu:missions")
     builder.button(text="🎁 Regalo", callback_data="free_gift")
 
-    # 🛍️ ECONOMÍA & TIENDA (Mostrar pero bloquear)
-    builder.button(text="🛒 Tienda", callback_data="free_shop_preview")
-    builder.button(text="🏛️ Subastas", callback_data="free_auctions_preview")
+    # 🛍️ ECONOMÍA & TIENDA (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🛒 Tienda", callback_data="shop_access")
+    builder.button(text="🏛️ Subastas", callback_data="auction_main")
 
-    # 🎒 COLECCIONES (Mostrar pero bloquear)
-    builder.button(text="🗺️ Mochila", callback_data="free_backpack_preview")
-    builder.button(text="💝 Recompensas", callback_data="free_rewards_preview")
+    # 🎒 COLECCIONES (Acceso directo - verificación dentro del módulo)
+    builder.button(text="🗺️ Mochila", callback_data="open_backpack")
+    builder.button(text="💝 Recompensas", callback_data="menu:rewards")
 
     # 👥 SOCIAL
     builder.button(text="👑 Ranking", callback_data="menu:ranking")
