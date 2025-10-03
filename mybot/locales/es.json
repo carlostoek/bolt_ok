@@ -17,7 +17,7 @@
   },
   "start_handler": {
     "admin_init_error": "❌ **Error Crítico**\n\nLucien retira los guantes con fastidio: *«El sistema de administración no ha respondido. Contacta al soporte, antes de que todo se desmorone.»*",
-    "admin_welcome": "👑 **Bienvenido, Administrador.**\n\nLucien se inclina: *«El tablero aguarda sus órdenes.»*",
+    "admin_welcome": "👑 *Bienvenido, Administrador.*\n\nLucien se inclina: *«El tablero aguarda sus órdenes.»*",
     "admin_panel_activated": "🎛️ **Panel de Control Desplegado** —cada engranaje al servicio de tu voluntad.",
     "admin_menu_error": "❌ *El panel administrativo se resiste a abrir. Quizás debas intentarlo otra vez...*",
     "user_welcome": "🌟 **Has llegado.**\n\nLucien sonríe: *«La aventura comienza.»*",
