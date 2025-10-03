@@ -7,6 +7,35 @@ from services.achievement_service import ACHIEVEMENTS
 from utils.messages import BOT_MESSAGES
 from utils.text_utils import anonymize_username
 import datetime
+import re
+
+
+def escape_markdown(text: str) -> str:
+    """
+    Escapa caracteres especiales de Markdown para Telegram.
+
+    En Telegram Markdown (no V2), solo ciertos caracteres necesitan escape:
+    - _ (cursiva)
+    - * (negrita)
+    - ` (código)
+    - [ y ] (enlaces)
+
+    Otros caracteres se preservan para mantener la legibilidad del texto.
+    """
+    if not text:
+        return text
+
+    # Primero escapar backslash para no re-escapar los que agregamos
+    text = text.replace('\\', '\\\\')
+
+    # Solo caracteres que causan problemas reales en Markdown estándar
+    # No escapamos todos los caracteres especiales porque no es necesario
+    special_chars = ['_', '*', '`', '[', ']']
+
+    for char in special_chars:
+        text = text.replace(char, '\\' + char)
+
+    return text
 
 
 async def get_profile_message(
@@ -61,7 +90,7 @@ async def get_profile_message(
     missions_text = BOT_MESSAGES["profile_no_active_missions"]
     if active_missions:
         missions_list = [
-            f"• {mission.name} ({mission.reward_points} Puntos)"
+            f"• {escape_markdown(mission.name)} ({mission.reward_points} Puntos)"
             for mission in active_missions
         ]
         missions_text = (
@@ -82,21 +111,34 @@ async def get_profile_message(
 
 
 async def get_mission_details_message(mission: Mission) -> str:
+    """
+    Genera el mensaje de detalles de una misión, escapando caracteres especiales.
+
+    Los emojis se preservan, pero caracteres como _, *, (, ), etc. se escapan
+    para evitar errores de parsing de Markdown en Telegram.
+    """
+    # Escapar caracteres especiales de Markdown en el nombre y descripción
+    safe_name = escape_markdown(mission.name)
+    safe_description = escape_markdown(mission.description)
+    safe_type = escape_markdown(mission.type.capitalize())
+
     # Usar el mensaje personalizado para detalles de misión
     return BOT_MESSAGES["mission_details_text"].format(
-        mission_name=mission.name,
-        mission_description=mission.description,
+        mission_name=safe_name,
+        mission_description=safe_description,
         points_reward=mission.reward_points,
-        mission_type=mission.type.capitalize(),
+        mission_type=safe_type,
     )
 
 
 async def get_reward_details_message(reward: Reward, user_points: int) -> str:
     """Return a formatted description of a reward."""
+    safe_title = escape_markdown(reward.title)
+    safe_description = escape_markdown(reward.description)
 
     return BOT_MESSAGES["reward_details_text"].format(
-        reward_title=reward.title,
-        reward_description=reward.description,
+        reward_title=safe_title,
+        reward_description=safe_description,
         required_points=reward.required_points,
     )
 
@@ -139,7 +181,8 @@ async def get_weekly_reaction_ranking_message(ranking: list[tuple[int, int]], se
 
 async def get_mission_completed_message(mission: Mission) -> str:
     """Return a formatted message for mission completion."""
+    safe_name = escape_markdown(mission.name)
     return BOT_MESSAGES["mission_completed_feedback"].format(
-        mission_name=mission.name,
+        mission_name=safe_name,
         points_reward=mission.reward_points,
     )
