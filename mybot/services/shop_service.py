@@ -3,10 +3,12 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
+from aiogram import Bot
 from database.models import ShopItem, UserPurchase, User, UserLorePiece
 from services.point_service import PointService
 from services.narrative_service import NarrativeService
 from services.subscription_service import SubscriptionService
+from services.gift_service import GiftService
 
 logger = logging.getLogger(__name__)
 
@@ -196,7 +198,7 @@ class ShopService:
             logger.error(f"Error checking inventory for user {user_id}: {str(e)}")
             return False
 
-    async def purchase_item(self, user_id: int, item_id: int) -> Dict[str, Any]:
+    async def purchase_item(self, user_id: int, item_id: int, bot: Optional[Bot] = None) -> Dict[str, Any]:
         """Purchase an item for the user directly"""
         try:
             # Get the item
@@ -308,6 +310,21 @@ class ShopService:
             logger.info(f"Purchase successful for user {user_id}. Pending decision will be processed on return to narrative.")
 
             await self.session.commit()
+
+            # Try to send purchase gift if configured
+            if bot:
+                try:
+                    gift_service = GiftService(self.session)
+                    await gift_service.send_shop_purchase_gift(
+                        user_id=user_id,
+                        item_name=item.name,
+                        bot=bot
+                    )
+                    logger.info(f"Shop purchase gift sent to user {user_id}")
+                except Exception as e:
+                    # Graceful degradation - gifts are optional
+                    logger.debug(f"Could not send shop purchase gift: {e}")
+
             return {
                 "success": True,
                 "message": "Purchase successful",

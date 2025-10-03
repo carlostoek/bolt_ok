@@ -10,14 +10,15 @@ from sqlalchemy import select, func, and_, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from database.models import (
-    Auction, 
-    Bid, 
-    AuctionParticipant, 
-    User, 
+    Auction,
+    Bid,
+    AuctionParticipant,
+    User,
     AuctionStatus
 )
 from utils.text_utils import anonymize_username, format_points, format_time_remaining
 from services.point_service import PointService
+from services.gift_service import GiftService
 
 logger = logging.getLogger(__name__)
 
@@ -187,7 +188,20 @@ class AuctionService:
                     )
                 except Exception as e:
                     logger.error(f"Failed to notify auction winner {auction.winner_id}: {e}")
-                
+
+                # Try to send winner gift if configured
+                try:
+                    gift_service = GiftService(self.session)
+                    await gift_service.send_auction_won_gift(
+                        user_id=auction.winner_id,
+                        auction_name=auction.name,
+                        bot=bot
+                    )
+                    logger.info(f"Auction winner gift sent to user {auction.winner_id}")
+                except Exception as e:
+                    # Graceful degradation - gifts are optional
+                    logger.debug(f"Could not send auction winner gift: {e}")
+
                 # Notify all participants about the result
                 await self._notify_auction_ended(auction, bot)
         
