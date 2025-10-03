@@ -38,14 +38,13 @@ class AdminJourneyStates(StatesGroup):
 async def show_journey_main_menu(callback: CallbackQuery, session: AsyncSession, state: FSMContext):
     """Muestra el menú principal del Journey admin"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("journey.admin.access_denied"), show_alert=True)
 
     await state.clear()
 
     text = (
-        "🎯 **Journey Management**\n\n"
-        "Panel de administración del sistema de milestones automáticos.\n\n"
-        "Aquí puedes monitorear, testear y gestionar el journey de los usuarios."
+        L("journey.admin.main_menu_title") + "\n\n" +
+        L("journey.admin.main_menu_description")
     )
 
     await callback.message.edit_text(text, reply_markup=get_journey_main_keyboard())
@@ -58,7 +57,7 @@ async def show_journey_main_menu(callback: CallbackQuery, session: AsyncSession,
 async def show_journey_stats(callback: CallbackQuery, session: AsyncSession):
     """Muestra estadísticas del journey"""
     if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
+        return await callback.answer(L("journey.admin.access_denied"), show_alert=True)
 
     try:
         # Contar usuarios totales
@@ -116,17 +115,17 @@ async def show_journey_stats(callback: CallbackQuery, session: AsyncSession):
         day30_rate = (day30_completed / total_users * 100) if total_users > 0 else 0
 
         text = (
-            "📊 **Estadísticas del Journey**\n\n"
-            f"**Usuarios totales:** {total_users}\n\n"
-            "**Day 1 - Bienvenida:**\n"
-            f"✅ Completados: {day1_completed} ({day1_rate:.1f}%)\n"
-            f"⏳ Pendientes: {day1_pending}\n\n"
-            "**Day 7 - Oferta VIP:**\n"
-            f"✅ Completados: {day7_completed} ({day7_rate:.1f}%)\n"
-            f"⏳ Pendientes: {day7_pending}\n\n"
-            "**Day 30 - Final:**\n"
-            f"✅ Completados: {day30_completed} ({day30_rate:.1f}%)\n"
-            f"⏳ Pendientes: {day30_pending}\n"
+            L("journey.admin.stats_title") + "\n\n" +
+            L("journey.admin.stats_total_users").format(total_users=total_users) + "\n\n" +
+            L("journey.admin.stats_day1_title") + "\n" +
+            L("journey.admin.stats_day1_completed").format(count=day1_completed, rate=day1_rate) + "\n" +
+            L("journey.admin.stats_day1_pending").format(count=day1_pending) + "\n\n" +
+            L("journey.admin.stats_day7_title") + "\n" +
+            L("journey.admin.stats_day7_completed").format(count=day7_completed, rate=day7_rate) + "\n" +
+            L("journey.admin.stats_day7_pending").format(count=day7_pending) + "\n\n" +
+            L("journey.admin.stats_day30_title") + "\n" +
+            L("journey.admin.stats_day30_completed").format(count=day30_completed, rate=day30_rate) + "\n" +
+            L("journey.admin.stats_day30_pending").format(count=day30_pending) + "\n"
         )
 
         await callback.message.edit_text(text, reply_markup=get_back_kb("journey_main"))
@@ -134,7 +133,7 @@ async def show_journey_stats(callback: CallbackQuery, session: AsyncSession):
 
     except Exception as e:
         logger.error(f"Error mostrando estadísticas del journey: {e}")
-        await callback.answer(f"Error: {str(e)}", show_alert=True)
+        await callback.answer(L("journey.admin.stats_error").format(error=str(e)), show_alert=True)
 
 
 # ========== FORZAR PROCESAMIENTO ==========

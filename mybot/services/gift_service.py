@@ -21,83 +21,41 @@ from services.content_service import ContentService
 logger = logging.getLogger(__name__)
 
 
+from utils.localization import L
+
 # Templates de mensajes según evento
 GIFT_MESSAGES = {
     "auction_won": {
-        "title": "🏆 ¡Felicidades por tu victoria!",
-        "message": (
-            "{username} 🎉\n\n"
-            "¡Ganaste la subasta de '{item_name}'!\n\n"
-            "Diana está muy emocionada por ti y quiere celebrar "
-            "esta victoria contigo con algo especial...\n\n"
-            "Esto es solo para ti. 💎"
-        )
+        "title": L("gift.user.auction_won_title"),
+        "message": L("gift.user.auction_won_message")
     },
     "shop_purchase": {
-        "title": "💖 Gracias por tu apoyo",
-        "message": (
-            "{username} ✨\n\n"
-            "Diana quiere agradecerte por adquirir '{item_name}'.\n\n"
-            "Tu apoyo hace posible todo esto, y como muestra "
-            "de gratitud, te envía un regalito especial...\n\n"
-            "Disfrútalo. 🎁"
-        )
+        "title": L("gift.user.shop_purchase_title"),
+        "message": L("gift.user.shop_purchase_message")
     },
     "level_reached": {
-        "title": "🎯 ¡Nuevo nivel desbloqueado!",
-        "message": (
-            "{username} 🌟\n\n"
-            "¡Has alcanzado el nivel {level}!\n\n"
-            "Tu dedicación no pasa desapercibida. Diana quiere "
-            "recompensarte por llegar hasta aquí...\n\n"
-            "Sigue así. 🔥"
-        )
+        "title": L("gift.user.level_reached_title"),
+        "message": L("gift.user.level_reached_message")
     },
     "milestone": {
-        "title": "🎊 Milestone alcanzado",
-        "message": (
-            "{username} 💫\n\n"
-            "Has completado '{milestone_name}'!\n\n"
-            "Este es un momento especial y Diana quiere "
-            "celebrarlo contigo de una manera única...\n\n"
-            "Para ti. ✨"
-        )
+        "title": L("gift.user.milestone_title"),
+        "message": L("gift.user.milestone_message")
     },
     "surprise": {
-        "title": "🎁 Sorpresa especial",
-        "message": (
-            "{username} 💝\n\n"
-            "Diana pensó en ti y quiere sorprenderte "
-            "con algo especial...\n\n"
-            "Sin razón particular, solo porque sí.\n\n"
-            "Disfruta este momento. 🌹"
-        )
+        "title": L("gift.user.surprise_title"),
+        "message": L("gift.user.surprise_message")
     },
     "loyalty": {
-        "title": "💎 Recompensa por lealtad",
-        "message": (
-            "{username} 👑\n\n"
-            "Has estado con nosotros por {days} días y "
-            "Diana quiere agradecer tu lealtad...\n\n"
-            "Esta comunidad es especial gracias a personas "
-            "como tú.\n\n"
-            "Un regalo por tu apoyo constante. 💖"
-        )
+        "title": L("gift.user.loyalty_title"),
+        "message": L("gift.user.loyalty_message")
     },
     "birthday": {
-        "title": "🎂 ¡Feliz cumpleaños!",
-        "message": (
-            "{username} 🎉🎊\n\n"
-            "¡Hoy es un día especial! Diana quiere celebrar "
-            "contigo y hacerte sentir especial...\n\n"
-            "Que este nuevo año esté lleno de momentos "
-            "mágicos como este.\n\n"
-            "Feliz cumpleaños. 🎁🎂"
-        )
+        "title": L("gift.user.birthday_title"),
+        "message": L("gift.user.birthday_message")
     },
     "custom": {
-        "title": "✨ Regalo especial",
-        "message": "{custom_message}"
+        "title": L("gift.user.custom_title"),
+        "message": L("gift.user.custom_message")
     }
 }
 
@@ -138,13 +96,13 @@ class GiftService:
             # Obtener usuario
             user = await self.session.get(User, user_id)
             if not user:
-                logger.error(f"Usuario {user_id} no encontrado")
+                logger.error(L("gift.user.user_not_found").format(user_id=user_id))
                 return False
 
             # Verificar que el content set existe
             content_set = await self.content_service.get_content_set(content_set_id)
             if not content_set:
-                logger.error(f"Content set {content_set_id} no encontrado")
+                logger.error(L("gift.user.content_set_not_found").format(content_set_id=content_set_id))
                 return False
 
             # Generar mensaje de contexto
@@ -171,11 +129,11 @@ class GiftService:
                 logger.info(f"Regalo {content_set_id} enviado a usuario {user_id} por evento {event_type}")
                 return True
             else:
-                logger.error(f"Error enviando regalo {content_set_id} a usuario {user_id}")
+                logger.error(L("gift.user.send_error").format(content_set_id=content_set_id, user_id=user_id))
                 return False
 
         except Exception as e:
-            logger.error(f"Error en send_gift para usuario {user_id}: {e}")
+            logger.error(L("gift.user.generic_error").format(user_id=user_id, error=e))
             return False
 
     def _build_context_message(
