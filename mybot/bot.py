@@ -294,7 +294,9 @@ async def main() -> None:
     finally:
         logger.info("Cerrando bot...")
         try:
-            await task_manager.shutdown()
+            # Only shutdown task_manager if it was successfully created
+            if 'task_manager' in locals():
+                await task_manager.shutdown()
             if 'bot' in locals():
                 await bot.session.close()
         except Exception as e:
