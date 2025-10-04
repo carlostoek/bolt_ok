@@ -197,7 +197,7 @@ class UserJourneyService:
 
         return milestone.completed if milestone else False
 
-    async def get_next_onboarding_step(self, user_id: int) -> Dict[str, Any]:
+    async def get_next_onboarding_step(self, user_id: int) -> Optional[Dict[str, Any]]:
         """
         Obtiene el siguiente paso de onboarding para el usuario
         STRATEGIC: Sistema de onboarding progresivo inteligente

@@ -47,7 +47,7 @@ class GamificationMiddleware(BaseMiddleware):
         try:
             from services.user_journey_service import UserJourneyService
             from services.point_service import PointService
-            from utils.messages import get_badge_unlock_message, get_daily_streak_message
+            from utils.messages import get_badge_unlock_message
             
             journey_service = UserJourneyService(session)
             point_service = PointService(session)

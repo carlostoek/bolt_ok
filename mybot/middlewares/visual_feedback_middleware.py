@@ -40,11 +40,16 @@ class VisualFeedbackMiddleware(BaseMiddleware):
             if isinstance(event, Message) and event.text:
                 # Reaccionar inmediatamente a mensajes de texto
                 try:
-                    await bot.set_message_reaction(
-                        chat_id=chat_id,
-                        message_id=event.message_id,
-                        reaction=[{"type": "emoji", "emoji": "👀"}]
-                    )
+                    # Check if set_message_reaction is available
+                    if hasattr(bot, 'set_message_reaction'):
+                        await bot.set_message_reaction(
+                            chat_id=chat_id,
+                            message_id=event.message_id,
+                            reaction=[{"type": "emoji", "emoji": "👀"}]
+                        )
+                    else:
+                        # Fallback: enviar acción de typing
+                        await bot.send_chat_action(chat_id, ChatAction.TYPING)
                 except Exception:
                     # Fallback: enviar acción de typing
                     await bot.send_chat_action(chat_id, ChatAction.TYPING)
@@ -87,10 +92,14 @@ class VisualFeedbackMiddleware(BaseMiddleware):
         
         try:
             # Cambiar reacción a "procesando"
-            await bot.set_message_reaction(
-                chat_id=chat_id,
-                message_id=message_id,
-                reaction=[{"type": "emoji", "emoji": "⏳"}]
-            )
+            if hasattr(bot, 'set_message_reaction'):
+                await bot.set_message_reaction(
+                    chat_id=chat_id,
+                    message_id=message_id,
+                    reaction=[{"type": "emoji", "emoji": "⏳"}]
+                )
+            else:
+                # Fallback: enviar mensaje de procesamiento
+                await bot.send_message(chat_id, "⏳ Procesando...")
         except Exception as e:
             logger.debug(f"No se pudo actualizar reacción: {e}")
