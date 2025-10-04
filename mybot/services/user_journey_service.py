@@ -8,7 +8,7 @@ Maneja la progresión automática del usuario a través de los milestones:
 """
 import logging
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from aiogram import Bot
