@@ -110,8 +110,8 @@ class GamificationMiddleware(BaseMiddleware):
             )
             session.add(streak_milestone)
             
-            # Premio por primer día - using keyword argument
-            await point_service.add_points(user.id, 10, reason="daily_streak_day_1")
+            # Premio por primer día
+            await point_service.add_points(user.id, 10)
             
         else:
             last_interaction = datetime.fromisoformat(streak_milestone.data.get("last_interaction")).date()
@@ -126,7 +126,7 @@ class GamificationMiddleware(BaseMiddleware):
                 # Premios por racha - using keyword arguments
                 if current_streak in [3, 7, 30]:
                     bonus_points = {3: 50, 7: 100, 30: 500}[current_streak]
-                    await point_service.add_points(user.id, bonus_points, reason=f"daily_streak_bonus_{current_streak}")
+                    await point_service.add_points(user.id, bonus_points)
                     
                     # Enviar mensaje de racha
                     try:
@@ -186,7 +186,7 @@ class GamificationMiddleware(BaseMiddleware):
                         journey_service.session.add(new_badge)
                         
                         # Otorgar puntos - using keyword argument
-                        await point_service.add_points(user.id, 25, reason="badge_diana_mention")
+                        await point_service.add_points(user.id, 25)
                         
                         # Enviar notificación
                         badge_message = (
@@ -227,8 +227,8 @@ class GamificationMiddleware(BaseMiddleware):
                     user, bot, "first_shop_visit"
                 )
             
-            # Otorgar puntos por interacción básica de callback - usando keyword arguments
-            await point_service.add_points(user.id, 1, reason="callback_interaction")
+            # Otorgar puntos por interacción básica de callback
+            await point_service.add_points(user.id, 1)
             
         except Exception as e:
             logger.error(f"Error en procesamiento de callback para gamificación: {e}")
