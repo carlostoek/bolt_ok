@@ -110,8 +110,8 @@ class GamificationMiddleware(BaseMiddleware):
             )
             session.add(streak_milestone)
             
-            # Premio por primer día
-            await point_service.add_points(user.id, 10, "daily_streak_day_1")
+            # Premio por primer día - using keyword argument
+            await point_service.add_points(user.id, 10, reason="daily_streak_day_1")
             
         else:
             last_interaction = datetime.fromisoformat(streak_milestone.data.get("last_interaction")).date()
@@ -123,10 +123,10 @@ class GamificationMiddleware(BaseMiddleware):
                 streak_milestone.data["current_streak"] = current_streak
                 streak_milestone.data["last_interaction"] = today.isoformat()
                 
-                # Premios por racha
+                # Premios por racha - using keyword arguments
                 if current_streak in [3, 7, 30]:
                     bonus_points = {3: 50, 7: 100, 30: 500}[current_streak]
-                    await point_service.add_points(user.id, bonus_points, f"daily_streak_bonus_{current_streak}")
+                    await point_service.add_points(user.id, bonus_points, reason=f"daily_streak_bonus_{current_streak}")
                     
                     # Enviar mensaje de racha
                     try:
@@ -142,6 +142,7 @@ class GamificationMiddleware(BaseMiddleware):
                 streak_milestone.data["last_interaction"] = today.isoformat()
         
         await session.commit()
+        return True
 
     async def _process_message_interaction(self, event, user, journey_service, point_service, bot) -> int:
         """Procesa gamificación para mensajes - retorna número de badges desbloqueados"""
@@ -184,8 +185,8 @@ class GamificationMiddleware(BaseMiddleware):
                         )
                         journey_service.session.add(new_badge)
                         
-                        # Otorgar puntos
-                        await point_service.add_points(user.id, 25, "badge_diana_mention")
+                        # Otorgar puntos - using keyword argument
+                        await point_service.add_points(user.id, 25, reason="badge_diana_mention")
                         
                         # Enviar notificación
                         badge_message = (
