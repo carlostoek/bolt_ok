@@ -195,6 +195,12 @@ async def main() -> None:
         dp.message.middleware(visual_feedback_middleware)
         dp.callback_query.middleware(visual_feedback_middleware)
 
+        # STRATEGIC: Middleware de gamificación
+        from middlewares.gamification_middleware import GamificationMiddleware
+        gamification_middleware = GamificationMiddleware()
+        dp.message.middleware(gamification_middleware)
+        dp.callback_query.middleware(gamification_middleware)
+
         # Registrar routers en orden de prioridad
         logger.info("Registrando handlers...")
         # Import shop router
