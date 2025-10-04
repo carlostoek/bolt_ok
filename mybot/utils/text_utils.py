@@ -27,10 +27,10 @@ def anonymize_username(user, current_user_id: int, admin_ids: list[int] | None =
     if admin_ids is None:
         admin_ids = ADMIN_IDS
     
-    # Show full info to the user themselves or if user is admin
-    if user.id == current_user_id or user.id in admin_ids:
+    # Show full info ONLY to the user themselves (sin @ para evitar links)
+    if user.id == current_user_id:
         if user.username:
-            return f"@{user.username}"
+            return user.username  # Sin @ para evitar link
         elif user.first_name:
             full_name = user.first_name
             if user.last_name:
@@ -38,8 +38,8 @@ def anonymize_username(user, current_user_id: int, admin_ids: list[int] | None =
             return full_name
         else:
             return f"Usuario {user.id}"
-    
-    # Anonymize for other users
+
+    # Anonymize for ALL other users (including admins - privacidad total)
     if user.username:
         return _anonymize_string(user.username)
     elif user.first_name:
@@ -59,24 +59,22 @@ def anonymize_username(user, current_user_id: int, admin_ids: list[int] | None =
 
 def _anonymize_string(text: str) -> str:
     """
-    Anonymize a string by showing first character and asterisks.
-    
+    Anonymize a string by showing first character and asterisks (máxima privacidad).
+
     Args:
         text: String to anonymize
-        
+
     Returns:
-        str: Anonymized string (e.g., "John" -> "J***")
+        str: Anonymized string (e.g., "John" -> "J***", "Maria" -> "M****")
     """
     if not text or len(text) == 0:
         return "***"
     elif len(text) == 1:
-        return "*"
-    elif len(text) == 2:
-        return f"{text[0]}*"
-    elif len(text) <= 4:
-        return f"{text[0]}**{text[-1]}"
+        return text[0]  # Si solo es 1 letra, mostrarla
     else:
-        return f"{text[0]}***{text[-1]}"
+        # Primera letra + asteriscos por el resto (sin mostrar última letra)
+        asterisks = "*" * (len(text) - 1)
+        return f"{text[0]}{asterisks}"
 
 
 def format_points(points: float) -> str:

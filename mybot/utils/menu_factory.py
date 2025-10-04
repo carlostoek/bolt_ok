@@ -277,15 +277,8 @@ class MenuFactory:
             text, keyboard = self._create_main_menu(role)
         
         # Add home button to all specific menus
-        # Convert keyboard to builder to add the home button
-        if hasattr(keyboard, 'inline_keyboard'):
-            builder = InlineKeyboardBuilder()
-            # Add existing buttons
-            for row in keyboard.inline_keyboard:
-                builder.row(*row)
-            # Add home button
-            builder.button(text="🏠 Inicio", callback_data="main")
-            return text, builder.as_markup()
+        # Los keyboards ya tienen el botón de menú principal
+        # No agregar botón duplicado
         return text, keyboard
     
     async def _create_narrative_menu(self, user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
@@ -314,15 +307,8 @@ class MenuFactory:
 *¿Te atreves a comenzar esta aventura?*"""
         
         keyboard = get_narrative_stats_keyboard()
-        # Add home button to narrative menu
-        if hasattr(keyboard, 'inline_keyboard'):
-            builder = InlineKeyboardBuilder()
-            # Add existing buttons
-            for row in keyboard.inline_keyboard:
-                builder.row(*row)
-            # Add home button
-            builder.button(text="🏠 Inicio", callback_data="main")
-            return text, builder.as_markup()
+        # Los keyboards ya tienen el botón de menú principal
+        # No agregar botón duplicado
         return text, keyboard
 
     def _create_admin_vip_menu(self) -> Tuple[str, InlineKeyboardMarkup]:

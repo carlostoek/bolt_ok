@@ -154,11 +154,12 @@ async def cmd_start(message: Message, session: AsyncSession, bot: Bot):
                 delete_origin_message=True
             )
             
-            # Show reply keyboard
-            await message.answer(
-                get_text("start_handler.main_menu_activated"),
-                reply_markup=main_menu_keyboard
-            )
+            # Show reply keyboard (sin mensaje adicional para evitar spam)
+            # El menú ya está desplegado arriba, no necesitamos confirmar con otro mensaje
+            # await message.answer(
+            #     get_text("start_handler.main_menu_activated"),
+            #     reply_markup=main_menu_keyboard
+            # )
 
         except Exception as e:
             logger.error(f"Error creating main menu for user {user_id}: {e}")

@@ -143,7 +143,7 @@ async def handle_claim_reward_callback(callback: CallbackQuery, session: AsyncSe
     try:
         reward_id = int(callback.data.split("_")[-1])
         reward_service = RewardService(session)
-        success, message = await reward_service.claim_reward(user_id, reward_id)
+        success, message = await reward_service.claim_reward(user_id, reward_id, bot=callback.bot)
 
         if success:
             # Refresh rewards menu

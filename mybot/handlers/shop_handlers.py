@@ -50,9 +50,13 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
         user = await session.get(User, user_id)
         user_points = user.points if user else 0
 
-        text = f"""🛒 **Tienda de Diana**
+        text = f"""🛍️ **Bienvenido a la Tienda de Diana**
 
 💰 Tus besitos: **{user_points:.0f}**
+
+Aquí puedes canjear tus besitos por recompensas exclusivas.
+
+💎 **Recomendación:** Comienza con los sets básicos y ve subiendo según acumules más besitos.
 
 📦 **Productos disponibles:** {len(items)}
 

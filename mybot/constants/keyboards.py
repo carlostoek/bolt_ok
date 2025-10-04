@@ -5,6 +5,9 @@ from utils.localization import get_text
 main_menu_keyboard = ReplyKeyboardMarkup(
     keyboard=[
         [
+            KeyboardButton(text=get_text("main_menu.button_home")),
+        ],
+        [
             KeyboardButton(text=get_text("main_menu.button_backpack")),
             KeyboardButton(text=get_text("main_menu.button_wallet")),
             KeyboardButton(text=get_text("main_menu.button_missions")),

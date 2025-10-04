@@ -191,11 +191,10 @@ class FreeChannelService:
 
                 welcome_message = get_welcome_approved_message(username)
 
-                # Construir teclado con opciones iniciales
+                # Construir teclado con botón de acceso al canal y menú
                 builder = InlineKeyboardBuilder()
-                builder.button(text="📖 Comenzar la Historia", callback_data="start_narrative")
-                builder.button(text="💎 Ver Membresía VIP", callback_data="vip_info")
-                builder.button(text="🎁 Contenido Gratuito", callback_data="free_gift")
+                builder.button(text="Ingresar al canal", url="https://t.me/+4LTMTUrmUg8zZDhh")
+                builder.button(text="Menú", callback_data="menu_principal")
                 builder.adjust(1)
 
                 try:

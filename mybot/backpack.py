@@ -159,10 +159,21 @@ async def _mostrar_mochila_con_session(message: Message, session, user_id: int =
         [
             InlineKeyboardButton(text="📈 Estadísticas", callback_data="stats_mochila"),
             InlineKeyboardButton(text="🎯 Sugerencias", callback_data="sugerencias_diana")
+        ],
+        [
+            InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal")
         ]
     ])
-    
-    await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+
+    # Intentar editar el mensaje si es un callback, sino enviar nuevo
+    try:
+        if hasattr(message, 'edit_text'):
+            await message.edit_text(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+        else:
+            await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+    except Exception:
+        # Si falla editar (ej: mensaje muy antiguo), enviar nuevo
+        await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
 
 
 @router.message(F.text == "🎒 Mochila")
@@ -706,8 +717,23 @@ async def open_backpack_callback(callback: CallbackQuery):
     """Handler para abrir la mochila desde el menú principal (callback)"""
     # El handler de callbacks necesita pasar el user_id explícitamente
     session_factory = get_session_factory()
+
+    # Crear un wrapper del mensaje para que tenga edit_text
+    class MessageWrapper:
+        def __init__(self, original_message):
+            self._message = original_message
+            self.from_user = original_message.chat
+
+        async def edit_text(self, *args, **kwargs):
+            return await self._message.edit_text(*args, **kwargs)
+
+        async def answer(self, *args, **kwargs):
+            return await self._message.answer(*args, **kwargs)
+
+    wrapped_message = MessageWrapper(callback.message)
+
     async with session_factory() as session:
-        await _mostrar_mochila_con_session(callback.message, session, user_id=callback.from_user.id)
+        await _mostrar_mochila_con_session(wrapped_message, session, user_id=callback.from_user.id)
     await callback.answer()
 
 
