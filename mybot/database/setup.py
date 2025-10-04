@@ -14,7 +14,7 @@ TABLES_ORDER = [
     'users',
     'achievements',
     'story_fragments',
-    'narrative_choices', 
+    'narrative_choices',
     'user_narrative_states',
     'rewards',
     'lore_pieces',
@@ -40,6 +40,7 @@ TABLES_ORDER = [
     'raffle_entries',
     'user_badges',
     'vip_subscriptions',
+    'vip_grants',  # Nueva tabla para auditoría de VIP grants
     'user_stats',
     'tokens',
     'user_challenge_progress',

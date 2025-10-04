@@ -27,6 +27,37 @@ BUTLER_MESSAGES = {
         "Expira el: {expires_at}.\n\n"
         "Use /vip_menu para acceder a sus beneficios VIP."
     ),
+    # VIP Grant Messages
+    "vip_grant_success": (
+        "🎉 *¡Acceso VIP Otorgado!*\n\n"
+        "Has recibido *{days} día(s)* de acceso VIP.\n\n"
+        "✨ Disfruta de contenido exclusivo hasta el {expires_at}"
+    ),
+    "vip_grant_narrative": (
+        "🎭 *Regalo Narrativo*\n\n"
+        "Como recompensa por tu elección, Diana te ha otorgado acceso VIP por {days} día(s).\n\n"
+        "—_Que disfrutes los secretos que guardé para ti_ —susurra Diana con una sonrisa cómplice."
+    ),
+    "vip_grant_reward": (
+        "🎁 *Recompensa Canjeada*\n\n"
+        "¡Has canjeado tu acceso VIP con éxito!\n\n"
+        "📅 Duración: {days} día(s)\n"
+        "⏰ Expira: {expires_at}\n\n"
+        "✨ _El Diván te espera..._"
+    ),
+    "vip_grant_achievement": (
+        "🏆 *¡Logro Desbloqueado!*\n\n"
+        "Como recompensa por tu dedicación, has recibido {days} día(s) de acceso VIP.\n\n"
+        "Diana aplaude suavemente: —_Lo has ganado._"
+    ),
+    "vip_grant_channel_link": (
+        "🔑 *Acceso al Canal VIP*\n\n"
+        "[Haz clic aquí para unirte]({invite_link})\n\n"
+        "⏰ Este enlace expira en 24 horas."
+    ),
+    "vip_grant_error": (
+        "❌ No se pudo otorgar el acceso VIP. Por favor contacta a soporte."
+    ),
     "vip_members_only": "Esta sección está disponible solo para miembros VIP.",
     "profile_not_registered": "Parece que aún no ha iniciado su recorrido. Use /start para dar su primer paso.",
     "profile_title": "🛋️ *Su rincón en El Diván de Diana*",
@@ -39,7 +70,7 @@ BUTLER_MESSAGES = {
     "profile_active_missions_title": "📋 *Sus desafíos activos*",
     "profile_no_active_missions": "Por ahora no hay desafíos disponibles, pero pronto habrá novedades.",
     "ranking_title": "🏆 *Tabla de Posiciones*",
-    "ranking_entry": "#{rank}. @{username} - Puntos: `{points}`, Nivel: `{level}`",
+    "ranking_entry": "#{rank}. {username} - {points} besitos | Nivel {level}",
     "no_ranking_data": "Aún no hay datos en el ranking. Sea usted el primero en aparecer.",
     "no_active_subscription": "No tiene una suscripción activa.",
 }
@@ -202,7 +233,87 @@ BOT_MESSAGES = {
     **MISSION_MESSAGES,
 }
 
-# Badge descriptions
+# ============================================================================
+# GAMIFICATION SYSTEM - STRATEGIC ENHANCEMENT
+# ============================================================================
+
+MICRO_INTERACTION_BADGES = {
+    "early_bird": {
+        "name": "🐦 Early Bird",
+        "description": "Interactúa con el bot por 3 días consecutivos",
+        "points_reward": 50,
+        "icon": "🐦"
+    },
+    "story_explorer": {
+        "name": "📖 Explorador de Historias", 
+        "description": "Completa 5 fragmentos narrativos diferentes",
+        "points_reward": 100,
+        "icon": "📖"
+    },
+    "mission_master": {
+        "name": "🎯 Maestro de Misiones",
+        "description": "Completa 10 misiones exitosamente",
+        "points_reward": 150,
+        "icon": "🎯"
+    },
+    "shop_enthusiast": {
+        "name": "🛍️ Entusiasta de la Tienda",
+        "description": "Realiza tu primera compra en la tienda",
+        "points_reward": 75,
+        "icon": "🛍️"
+    },
+    "reaction_king": {
+        "name": "❤️ Rey de las Reacciones",
+        "description": "Reacciona a 20 publicaciones diferentes",
+        "points_reward": 80,
+        "icon": "❤️"
+    },
+    "vip_curious": {
+        "name": "💎 Curioso VIP",
+        "description": "Consulta el menú VIP por primera vez",
+        "points_reward": 25,
+        "icon": "💎"
+    },
+    "social_butterfly": {
+        "name": "🦋 Mariposa Social",
+        "description": "Invita a 3 amigos al canal",
+        "points_reward": 120,
+        "icon": "🦋"
+    }
+}
+
+DAILY_STREAK_MESSAGES = {
+    "streak_1": "🔥 **¡Día 1!** Tu aventura comienza. Vuelve mañana.",
+    "streak_3": "🔥 **¡Racha de 3 días!** Diana nota tu dedicación. +50 besitos extra.",
+    "streak_7": "🔥 **¡Racha de 7 días!** Eres un habitante del Diván. +100 besitos extra.",
+    "streak_30": "🔥 **¡Racha de 30 días!** Leyenda viviente. +500 besitos extra y badge exclusivo.",
+}
+
+def get_badge_unlock_message(badge_key: str) -> str:
+    """Genera mensaje de desbloqueo de badge"""
+    badge = MICRO_INTERACTION_BADGES.get(badge_key, {})
+    return (
+        f"🏅 **¡Badge Desbloqueado!**\n\n"
+        f"{badge.get('icon', '⭐')} **{badge.get('name', 'Nuevo Logro')}**\n"
+        f"📝 {badge.get('description', '')}\n\n"
+        f"💰 **Recompensa:** +{badge.get('points_reward', 0)} besitos\n"
+        f"✨ ¡Sigue explorando para desbloquear más!"
+    )
+
+def get_daily_streak_message(streak_days: int) -> str:
+    """Genera mensaje de racha diaria"""
+    if streak_days == 1:
+        return DAILY_STREAK_MESSAGES["streak_1"]
+    elif streak_days == 3:
+        return DAILY_STREAK_MESSAGES["streak_3"] 
+    elif streak_days == 7:
+        return DAILY_STREAK_MESSAGES["streak_7"]
+    elif streak_days == 30:
+        return DAILY_STREAK_MESSAGES["streak_30"]
+    else:
+        return f"🔥 **¡Racha de {streak_days} días consecutivos!** Sigue así."
+
+# Badge descriptions (originales + nuevas)
 BADGE_TEXTS = {
     "first_message": {
         "name": "Primer Mensaje",
@@ -213,9 +324,10 @@ BADGE_TEXTS = {
         "description": "Alcanza 100 mensajes enviados",
     },
     "invitador": {
-        "name": "Invitador",
+        "name": "Invitador", 
         "description": "Consigue 5 invitaciones exitosas",
     },
+    **MICRO_INTERACTION_BADGES
 }
 
 NIVEL_TEMPLATE = """

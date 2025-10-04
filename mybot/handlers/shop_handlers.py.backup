@@ -50,13 +50,9 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
         user = await session.get(User, user_id)
         user_points = user.points if user else 0
 
-        text = f"""🛍️ **Bienvenido a la Tienda de Diana**
+        text = f"""🛒 **Tienda de Diana**
 
 💰 Tus besitos: **{user_points:.0f}**
-
-Aquí puedes canjear tus besitos por recompensas exclusivas.
-
-💎 **Recomendación:** Comienza con los sets básicos y ve subiendo según acumules más besitos.
 
 📦 **Productos disponibles:** {len(items)}
 
@@ -364,47 +360,38 @@ async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
             # Get item info for success message
             item = await session.get(ShopItem, item_id)
 
-            success_text = f"""💝 **¡Compra Exitosa!**
+            success_text = f"""✅ **¡Compra Exitosa!**
 
-🌸 **Diana sonríe...** has adquirido: **{item.name}**
+Has adquirido: **{item.name}**
 
-💰 *Has invertido {item.price} besitos en algo especial...*
-*Tu conexión con Diana acaba de profundizar...*
+💰 **Besitos gastados:** {item.price}
 """
 
             # Check if lore was unlocked
             unlocked_lore = result.get("unlocked_lore")
             if unlocked_lore:
                 success_text += f"""
+🎉 **¡Contenido Desbloqueado!**
 
-🎉 **¡Contenido Íntimo Desbloqueado!**
+Has desbloqueado la pista narrativa:
+📜 **{unlocked_lore['title']}**
 
-Diana te revela un nuevo secreto:
-📜 **{unlocked_lore.get("title", "Secreto de Diana")}**
+_{unlocked_lore.get('description', 'Nuevo contenido disponible')}_
 
-_{unlocked_lore.get("description", "Nuevo contenido disponible")}_
-
-📖 Puedes acceder a este contenido exclusivo desde el menú narrativo.
-*Diana espera ansiosa a que lo explores...*
+Puedes acceder a este contenido desde el menú narrativo.
 """
 
             # Check if narrative fragment was unlocked
             unlocked_fragment = result.get("unlocked_fragment")
             if unlocked_fragment:
                 success_text += f"""
+📖 **¡Fragmento de Historia Desbloqueado!**
 
-📖 **¡Nuevo Capítulo Revelado!**
-
-Diana ha desbloqueado un fragmento especial solo para ti.
-📖 Usa "📖 Continuar historia" para sumergirte más profundo en su mundo.
-*¿Te atreves a seguir descubriendo sus secretos?*
+Has desbloqueado un nuevo fragmento narrativo.
+Usa "📖 Continuar historia" para verlo.
 """
 
-            success_text += """
-
-🎒 *Tu colección personal acaba de crecer...*
-*Gracias por valorar lo que Diana comparte contigo...*
-"""
+            success_text += "\n🎒 El producto se ha agregado a tu mochila."
 
             # ========================================
             # MEJORA #2: UPSELL INTELIGENTE POST-COMPRA

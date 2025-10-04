@@ -34,12 +34,9 @@ class UserAuctionStates(StatesGroup):
 async def auction_main_menu(callback: CallbackQuery, session: AsyncSession):
     """Main auction menu for users."""
     user_id = callback.from_user.id
-    role = await get_user_role(callback.bot, user_id, session=session)
-    
-    if role not in ["vip", "admin"]:
-        await callback.answer("Esta función está disponible solo para miembros VIP.", show_alert=True)
-        return
-    
+    # NOTA: Removida verificación VIP - FREE pueden ver subastas
+    # La verificación VIP se hace al intentar PUJAR, no al ver
+
     await update_menu(
         callback,
         "🏛️ **Subastas en Tiempo Real**\n\nParticipa en subastas exclusivas y gana premios únicos.",

@@ -1,0 +1,80 @@
+async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
+    """Show purchase confirmation dialog with emotional feedback."""
+    try:
+        item_id = int(callback.data.split(":")[1])
+        user_id = callback.from_user.id
+
+        # Immediate emotional feedback
+        await callback.answer("🌸 Diana espera tu decisión...")
+        
+        # Show visual processing feedback
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        processing_builder = InlineKeyboardBuilder()
+        processing_builder.button(text="⏳ Preparando detalles...", callback_data="noop")
+        
+        processing_text = f"""🌸 **Diana**:
+
+¿Vas a desbloquear este secreto?...
+*Tu elección me emociona...*
+"""
+        
+        # Update message with processing feedback
+        try:
+            await callback.message.edit_text(
+                processing_text,
+                reply_markup=processing_builder.as_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception:
+            # If message edit fails, continue with the flow
+            pass
+
+        # Get product
+        item = await session.get(ShopItem, item_id)
+        if not item:
+            await callback.answer("❌ Producto no encontrado", show_alert=True)
+            return
+
+        # Get user points
+        from database.models import User
+        user = await session.get(User, user_id)
+        user_points = user.points if user else 0
+
+        # Build confirmation message
+        text = f"""🛒 **Confirmación de Compra**
+
+**Producto:** {item.name}
+**Precio:** {item.price} besitos
+
+💰 **Tus besitos actuales:** {user_points:.0f}
+💎 **Tras la compra:** {user_points - item.price:.0f} besitos
+"""
+
+        if item.unlocks_lore_piece_id:
+            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
+            if lore_piece:
+                text += f"""
+🔓 **Se desbloqueará:** {lore_piece.title}
+"""
+
+        text += """
+**¿Confirmas la compra?**"""
+
+        # Build keyboard
+        builder = InlineKeyboardBuilder()
+        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item_id}")
+        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item_id}")
+        builder.adjust(1)
+
+        await callback.message.edit_text(
+            text,
+            reply_markup=builder.as_markup(),
+            parse_mode="Markdown"
+        )
+        await callback.answer("✨ Listo para confirmar...")
+
+    except ValueError:
+        await callback.answer("❌ ID de producto inválido", show_alert=True)
+    except Exception as e:
+        logger.error(f"Error in confirm_purchase: {e}", exc_info=True)
+        await callback.answer("❌ Error al procesar", show_alert=True)

@@ -22,121 +22,37 @@ router = Router(name="narrative_handler")
 
 @router.message(Command("historia"))
 async def start_narrative_command(message: Message, session: AsyncSession):
-    """Inicia o continúa la narrativa para el usuario."""
+    """Continúa la narrativa desde el último punto guardado del usuario."""
     user_id = message.from_user.id
 
     try:
         service = NarrativeService(session, message.bot)
 
-        # First, check if user has a shop redirect fragment to return to
-        user_state = await service._get_or_create_user_state(user_id)
-        logger.info(f"[SHOP_RETURN_DEBUG] User {user_id} state: shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}, current_fragment={user_state.current_fragment_key}")
-
-        if user_state.shop_redirect_fragment_key:
-            # Check if there's a pending decision to process
-            if user_state.pending_decision_id:
-                logger.info(f"[SHOP_RETURN_DEBUG] Processing pending decision {user_state.pending_decision_id} for user {user_id} after shop return")
-                # Process the pending decision
-                from services.coordinador_central import CoordinadorCentral, AccionUsuario
-                coordinador = CoordinadorCentral(session)
-
-                try:
-                    result = await coordinador.ejecutar_flujo(
-                        user_id,
-                        AccionUsuario.TOMAR_DECISION,
-                        decision_id=user_state.pending_decision_id
-                    )
-
-                    logger.info(f"[SHOP_RETURN_DEBUG] Coordinator result: success={result['success']}, has_fragment={result.get('fragment') is not None}")
-                    if result.get("fragment"):
-                        logger.info(f"[SHOP_RETURN_DEBUG] Fragment returned: key={result['fragment'].key}, text={result['fragment'].text[:50]}...")
-
-                    if result["success"]:
-                        # Clear both redirect and pending decision
-                        user_state.shop_redirect_fragment_key = None
-                        user_state.pending_decision_id = None
-                        await session.commit()
-                        logger.info(f"[SHOP_RETURN_DEBUG] Cleared flags for user {user_id}")
-
-                        # Show the next fragment
-                        next_fragment = result.get("fragment")
-                        if next_fragment:
-                            logger.info(f"[SHOP_RETURN_DEBUG] Showing next fragment {next_fragment.key} to user {user_id}")
-                            await _display_narrative_fragment(message, next_fragment, session)
-                            return
-                        else:
-                            # If no fragment is returned, fall through to normal flow
-                            logger.warning(f"[SHOP_RETURN_DEBUG] No fragment returned from pending decision processing for user {user_id}")
-                    else:
-                        # If decision still fails, just return to the fragment
-                        logger.warning(f"[SHOP_RETURN_DEBUG] Pending decision still failed for user {user_id}: {result.get('message')}")
-                        # Clear the pending decision to prevent infinite loops
-                        user_state.pending_decision_id = None
-                        await session.commit()
-                except Exception as e:
-                    logger.error(f"[SHOP_RETURN_DEBUG] Error processing pending decision for user {user_id}: {e}", exc_info=True)
-                    # Clear the pending decision on error to prevent infinite loops
-                    user_state.pending_decision_id = None
-                    await session.commit()
-
-            # Return to the fragment where user was redirected to shop
-            logger.info(f"[SHOP_RETURN_DEBUG] Returning to fragment {user_state.shop_redirect_fragment_key} for user {user_id}")
-            return_fragment = await service._get_fragment_by_key(user_state.shop_redirect_fragment_key)
-            if return_fragment:
-                logger.info(f"[SHOP_RETURN_DEBUG] Found return fragment: key={return_fragment.key}, text={return_fragment.text[:50]}...")
-                # Clear the redirect flag and set as current fragment
-                user_state.current_fragment_key = user_state.shop_redirect_fragment_key
-                user_state.shop_redirect_fragment_key = None
-                # Clear any remaining pending decision
-                user_state.pending_decision_id = None
-                await session.commit()
-                logger.info(f"[SHOP_RETURN_DEBUG] Cleared flags and set current_fragment to {user_state.current_fragment_key} for user {user_id}")
-                # Add a message indicating they can now proceed
-                await safe_answer(
-                    message,
-                    get_text("narrative.handler.shop_return_message")
-                )
-                await _display_narrative_fragment(message, return_fragment, session)
-                return
-
-        # Obtener fragmento actual o iniciar narrativa
+        # Obtener fragmento actual del usuario (esto debería recordar el progreso)
         current_fragment = await service.get_user_current_fragment(user_id)
-        logger.info(f"[NARRATIVE_RESUME] User {user_id} current_fragment_key in DB: {user_state.current_fragment_key}, loaded fragment: {current_fragment.key if current_fragment else None}")
-
-        if not current_fragment:
-            # Para usuarios nuevos, usar enhanced L1F1 si está disponible
-            is_new_user = await _is_new_user(user_id, session)
-
-            if is_new_user:
-                # Intentar cargar enhanced L1F1 para detección de arquetipos
-                enhanced_fragment = await _try_load_enhanced_l1f1(session)
-
-                if enhanced_fragment:
-                    # Mostrar enhanced L1F1 directamente para análisis de arquetipo
-                    await _display_enhanced_l1f1_fragment(message, enhanced_fragment, session)
-
-                    # Marcar que el usuario ha comenzado con enhanced L1F1
-                    await _mark_user_started_enhanced_l1f1(user_id, session)
-                    return
-
-            # Fallback a narrativa estándar para usuarios existentes o si enhanced L1F1 falla
+        
+        if current_fragment:
+            # El usuario ya tiene progreso - continuar desde ahí
+            logger.info(f"Usuario {user_id} continúa narrativa desde fragmento: {current_fragment.key}")
+            await _display_narrative_fragment(message, current_fragment, session)
+        else:
+            # Usuario nuevo - iniciar narrativa desde el principio
+            logger.info(f"Usuario {user_id} inicia narrativa por primera vez")
             current_fragment = await service.start_narrative(user_id)
-
-            if not current_fragment:
+            
+            if current_fragment:
+                await _display_narrative_fragment(message, current_fragment, session)
+            else:
                 await safe_answer(
                     message,
-                    get_text("narrative.handler.story_not_available")
+                    "❌ No se pudo iniciar la narrativa. Por favor, intenta más tarde."
                 )
-                return
-
-        # Mostrar fragmento actual
-        await _display_narrative_fragment(message, current_fragment, session)
 
     except Exception as e:
         logger.error(f"Error en comando historia para usuario {user_id}: {e}")
         await safe_answer(
             message,
-            get_text("narrative.handler.story_load_error")
+            "❌ Error al cargar tu historia. Por favor, intenta nuevamente."
         )
 
 @router.callback_query(F.data.startswith("narrative_choice:"))
@@ -145,8 +61,32 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
     user_id = callback.from_user.id
 
     try:
-        # Immediate feedback to user (UX improvement)
-        await callback.answer("✨ Procesando tu decisión...")
+        # Immediate feedback to user with emotional response (UX improvement)
+        await callback.answer("🌸 Diana siente tu elección...")
+        
+        # Show visual processing feedback with Diana's voice
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        processing_builder = InlineKeyboardBuilder()
+        processing_builder.button(text="⏳ Pensando en tu decisión...", callback_data="noop")
+        
+        # Get current fragment to show character context
+        service = NarrativeService(session, callback.bot)
+        current_fragment = await service.get_user_current_fragment(user_id)
+        
+        character_emoji = "🎩" if current_fragment and current_fragment.character == "Lucien" else "🌸"
+        processing_text = f"{character_emoji} *{current_fragment.character if current_fragment else 'Diana'}*:\n\n"
+        processing_text += "Siento tu elección... déjame ver qué nos depara el destino..."
+        
+        # Update message with processing feedback
+        try:
+            await callback.message.edit_text(
+                processing_text,
+                reply_markup=processing_builder.as_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception:
+            # If message edit fails, continue with the flow
+            pass
 
         # Extraer índice de la decisión
         choice_data = callback.data.split(":")
@@ -156,10 +96,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
 
         choice_index = int(choice_data[1])
 
-        service = NarrativeService(session, callback.bot)
-
         # Get current fragment and choices to check for special decisions
-        current_fragment = await service.get_user_current_fragment(user_id)
         if current_fragment:
             choices = await service._get_fragment_choices(current_fragment.id)
             if 0 <= choice_index < len(choices):
@@ -236,15 +173,18 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
 
         if not next_fragment:
             # Get detailed requirements info
-            can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
-
-            # Build detailed message with requirements
-            await _show_requirements_message(callback, requirements_info, session)
+            # We need to get selected_choice again for requirements check
+            if current_fragment and 0 <= choice_index < len(choices):
+                selected_choice = choices[choice_index]
+                can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
+                
+                # Build detailed message with requirements
+                await _show_requirements_message(callback, requirements_info, session)
             return
 
-        # Mostrar siguiente fragmento
+        # Mostrar siguiente fragmento con feedback emocional
+        await callback.answer("✨ Tu decisión ha sido escuchada...")
         await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
-        await callback.answer()
 
         # ========================================
         # MEJORA #3: TRIGGER DE SESIÓN INDIVIDUAL
@@ -274,8 +214,28 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
     user_id = callback.from_user.id
 
     try:
-        # Immediate feedback to user (UX improvement)
-        await callback.answer("✨ Procesando tu decisión...")
+        # Immediate emotional feedback to user (UX improvement)
+        await callback.answer("🌸 Diana siente tu elección...")
+        
+        # Show visual processing feedback with Diana's voice
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        processing_builder = InlineKeyboardBuilder()
+        processing_builder.button(text="⏳ Analizando tu elección...", callback_data="noop")
+        
+        processing_text = f"🌸 **Diana**:\n\n"
+        processing_text += "¡Qué interesante elección! Cada decisión me dice más de ti...\n\n"
+        processing_text += "*Diana sonríe con curiosidad...*"
+        
+        # Update message with processing feedback
+        try:
+            await callback.message.edit_text(
+                processing_text,
+                reply_markup=processing_builder.as_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception:
+            # If message edit fails, continue with the flow
+            pass
 
         # Extraer índice de la elección
         choice_data = callback.data.split(":")
@@ -313,7 +273,7 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
         # Continuar a siguiente fragmento según la elección
         await _process_enhanced_l1f1_followup(callback, choice_index, enhanced_fragment, session)
 
-        await callback.answer(get_text("narrative.handler.choice_registered"))
+        await callback.answer("✨ Tu elección ha sido registrada... Diana sonríe")
 
     except ValueError:
         await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)

@@ -177,12 +177,17 @@ async def get_ranking_message(users_ranking: list[User], viewer_user_id: int) ->
 
     for i, user in enumerate(users_ranking):
         display_name = anonymize_username(user, viewer_user_id)
-        
+        # Escapar caracteres especiales de Markdown
+        safe_display_name = escape_markdown(display_name)
+
+        # Formatear puntos sin decimales innecesarios
+        points_display = int(user.points) if user.points == int(user.points) else f"{user.points:.1f}"
+
         ranking_text += (
             BOT_MESSAGES["ranking_entry"].format(
-                rank=i + 1, 
-                username=display_name, 
-                points=user.points, 
+                rank=i + 1,
+                username=safe_display_name,
+                points=points_display,
                 level=user.level
             )
             + "\n"

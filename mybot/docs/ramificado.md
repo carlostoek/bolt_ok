@@ -1,4 +1,4 @@
-# REQUERIMIENTOS PARA CLAUDE CODE - SISTEMA NARRATIVO RAMIFICADO DIANA (PYTHON)
+# REQUERIMIENTOS SISTEMA NARRATIVO RAMIFICADO DIANA (PYTHON)
 
 ## OBJETIVO PRINCIPAL
 Transformar el sistema narrativo lineal actual en un ecosistema de ramificación real donde cada jugador vive una historia completamente diferente basada en su arquetipo psicológico.

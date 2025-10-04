@@ -70,23 +70,27 @@ async def menu_callback_handler(callback: CallbackQuery, session: AsyncSession):
     """Enhanced menu navigation with improved error handling."""
     user_id = callback.from_user.id
     role = await get_user_role(callback.bot, user_id, session=session)
-    
+    menu_type = callback.data.split(":")[1]
+
+    # Permitir acceso a ciertos menús independientemente del rol
+    # Estrategia: FREE ve todo pero con CTAs internos
+    allowed_for_all = ["profile", "missions", "ranking"]
+
     # Check access for VIP-only features
-    if role not in ["vip", "admin"]:
+    if role not in ["vip", "admin"] and menu_type not in allowed_for_all:
         await callback.answer(
-            "Esta función está disponible solo para miembros VIP.", 
+            "Esta función está disponible solo para miembros VIP.",
             show_alert=True
         )
         return
-    
+
     try:
-        menu_type = callback.data.split(":")[1]
         text, keyboard = await menu_factory.create_menu(menu_type, user_id, session, callback.bot)
         await menu_manager.update_menu(callback, text, keyboard, session, menu_type)
     except Exception as e:
         logger.error(f"Error in menu navigation for user {user_id}: {e}")
         await callback.answer("Error al cargar el menú", show_alert=True)
-    
+
     await callback.answer()
 
 @router.callback_query(F.data == "view_level")
@@ -139,7 +143,7 @@ async def handle_claim_reward_callback(callback: CallbackQuery, session: AsyncSe
     try:
         reward_id = int(callback.data.split("_")[-1])
         reward_service = RewardService(session)
-        success, message = await reward_service.claim_reward(user_id, reward_id)
+        success, message = await reward_service.claim_reward(user_id, reward_id, bot=callback.bot)
 
         if success:
             # Refresh rewards menu
@@ -155,13 +159,8 @@ async def handle_claim_reward_callback(callback: CallbackQuery, session: AsyncSe
 
 @router.callback_query(F.data.startswith("missions_page_"))
 async def handle_missions_pagination(callback: CallbackQuery, session: AsyncSession):
-    """Handle missions menu pagination."""
+    """Handle missions menu pagination - accessible to all users."""
     user_id = callback.from_user.id
-    role = await get_user_role(callback.bot, user_id, session=session)
-
-    if role not in ["vip", "admin"]:
-        await callback.answer("Esta función está disponible solo para miembros VIP.", show_alert=True)
-        return
 
     try:
         # Extraer offset del callback_data
@@ -182,14 +181,10 @@ async def handle_missions_pagination(callback: CallbackQuery, session: AsyncSess
 
 @router.callback_query(F.data.startswith("mission_"))
 async def handle_mission_details_callback(callback: CallbackQuery, session: AsyncSession):
-    """Enhanced mission details with better navigation."""
+    """Enhanced mission details - checks mission tags for VIP requirement."""
     user_id = callback.from_user.id
     role = await get_user_role(callback.bot, user_id, session=session)
-    
-    if role not in ["vip", "admin"]:
-        await callback.answer("Esta función está disponible solo para miembros VIP.", show_alert=True)
-        return
-    
+
     try:
         mission_id = callback.data[len("mission_"):]
         mission_service = MissionService(session)
@@ -199,9 +194,36 @@ async def handle_mission_details_callback(callback: CallbackQuery, session: Asyn
             await callback.answer("Misión no encontrada.", show_alert=True)
             return
 
+        # Verificar si la misión requiere VIP (por tags)
+        mission_tags = mission.tags or []
+        requires_vip = "vip" in mission_tags
+
+        # Si requiere VIP y el usuario es FREE, mostrar CTA
+        if requires_vip and role not in ["vip", "admin"]:
+            from utils.vip_cta_messages import get_vip_cta
+            from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+            cta = get_vip_cta(
+                "mission_complete",
+                mission_name=mission.name,
+                mission_description=mission.description,
+                mission_reward=mission.reward_points
+            )
+
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [InlineKeyboardButton(text=cta["button_text"], callback_data="vip_explore_interest")],
+                [InlineKeyboardButton(text="⬅️ Volver a Misiones", callback_data="menu:missions")],
+                [InlineKeyboardButton(text="🏠 Menú Principal", callback_data="menu_principal")],
+            ])
+
+            await menu_manager.update_menu(callback, cta["message"], keyboard, session, "mission_vip_required")
+            await callback.answer()
+            return
+
+        # Usuario tiene acceso - mostrar detalles normales
         from utils.message_utils import get_mission_details_message
         from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-        
+
         mission_details_message = await get_mission_details_message(mission)
 
         # Solo mostrar botón "Completar" si NO requiere acción externa
@@ -222,19 +244,15 @@ async def handle_mission_details_callback(callback: CallbackQuery, session: Asyn
     except Exception as e:
         logger.error(f"Error showing mission details for user {user_id}: {e}")
         await callback.answer("Error al cargar los detalles de la misión", show_alert=True)
-    
+
     await callback.answer()
 
 @router.callback_query(F.data.startswith("complete_mission_"))
 async def handle_complete_mission_callback(callback: CallbackQuery, session: AsyncSession):
-    """Enhanced mission completion with better feedback."""
+    """Enhanced mission completion - checks mission tags for VIP requirement."""
     user_id = callback.from_user.id
     role = await get_user_role(callback.bot, user_id, session=session)
-    
-    if role not in ["vip", "admin"]:
-        await callback.answer("Esta función está disponible solo para miembros VIP.", show_alert=True)
-        return
-    
+
     try:
         mission_id = callback.data[len("complete_mission_"):]
         mission_service = MissionService(session)
@@ -243,6 +261,14 @@ async def handle_complete_mission_callback(callback: CallbackQuery, session: Asy
 
         if not user or not mission:
             await callback.answer("Error: Usuario o misión no encontrada.", show_alert=True)
+            return
+
+        # Verificar si la misión requiere VIP (por tags)
+        mission_tags = mission.tags or []
+        requires_vip = "vip" in mission_tags
+
+        if requires_vip and role not in ["vip", "admin"]:
+            await callback.answer("Esta misión es exclusiva para miembros VIP.", show_alert=True)
             return
 
         # Check if already completed

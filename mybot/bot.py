@@ -195,6 +195,16 @@ async def main() -> None:
         dp.message.middleware(visual_feedback_middleware)
         dp.callback_query.middleware(visual_feedback_middleware)
 
+        # STRATEGIC: Middleware de gamificación
+        from middlewares.gamification_middleware import GamificationMiddleware
+        gamification_middleware = GamificationMiddleware()
+        dp.message.middleware(gamification_middleware)
+        dp.callback_query.middleware(gamification_middleware)
+
+        # STRATEGIC: Handler de métricas para admin
+        from handlers.admin.metrics_handler import router as metrics_router
+        dp.include_router(metrics_router)
+
         # Registrar routers en orden de prioridad
         logger.info("Registrando handlers...")
         # Import shop router
@@ -213,7 +223,7 @@ async def main() -> None:
             ("start", start.router),
             ("main_menu", main_menu_router),
             ("backpack", backpack_router),
-            ("missions", missions_router),
+            ("missions", missions_router),  # Misiones mejoradas
             ("info", info_router),
             ("free_channel_admin", free_channel_admin_router),
             ("publication_test", publication_test_router),
@@ -229,7 +239,7 @@ async def main() -> None:
             ("lore", lore_router),
             ("combinar_pistas", combinar_pistas.router),
             ("channel_access", channel_access_router),
-            ("narrative", narrative_router),
+            ("narrative", narrative_router),  # Narrativa mejorada
             ("admin_narrative", admin_narrative_handlers),
             ("test_evaluation", test_evaluation_router),
             ("shop", shop_router),  # Add shop router
@@ -284,7 +294,9 @@ async def main() -> None:
     finally:
         logger.info("Cerrando bot...")
         try:
-            await task_manager.shutdown()
+            # Only shutdown task_manager if it was successfully created
+            if 'task_manager' in locals():
+                await task_manager.shutdown()
             if 'bot' in locals():
                 await bot.session.close()
         except Exception as e:
