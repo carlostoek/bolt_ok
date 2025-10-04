@@ -1,7 +1,7 @@
 """
 Enhanced start handler with improved user experience and multi-tenant support.
 """
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from constants.keyboards import main_menu_keyboard
@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 router = Router()
 
 @router.message(CommandStart())
-async def cmd_start(message: Message, session: AsyncSession):
+async def cmd_start(message: Message, session: AsyncSession, bot: Bot):
     """
     Enhanced start command with intelligent routing based on user status.
     Provides seamless experience for new and returning users.
@@ -46,6 +46,15 @@ async def cmd_start(message: Message, session: AsyncSession):
             session.add(user)
             await session.commit()
             logger.info(f"Created new user: {user_id}")
+            
+            # STRATEGIC: Initialize user journey milestones
+            try:
+                from services.user_journey_service import UserJourneyService
+                journey_service = UserJourneyService(session)
+                await journey_service.initialize_user_milestones(user_id)
+                logger.info(f"User journey milestones initialized for user {user_id}")
+            except Exception as e:
+                logger.error(f"Error initializing user journey for {user_id}: {e}")
         else:
             # Update user info if changed
             updated = False
@@ -66,6 +75,21 @@ async def cmd_start(message: Message, session: AsyncSession):
             if updated:
                 await session.commit()
                 logger.info(f"Updated user info: {user_id}")
+        
+        # STRATEGIC: Integrate onboarding system
+        try:
+            from services.user_journey_service import UserJourneyService
+            journey_service = UserJourneyService(session)
+            
+            if is_new_user:
+                # Send contextual onboarding message for new users
+                await journey_service.send_contextual_onboarding_message(
+                    user, bot, "first_narrative_interaction"
+                )
+                # Complete welcome step
+                await journey_service.complete_onboarding_step(user.id, "welcome")
+        except Exception as e:
+            logger.error(f"Error in onboarding integration for user {user_id}: {e}")
         
         # Check if this is an admin
         if await is_admin(user_id, session):

@@ -45,6 +45,9 @@ class NotificationService:
         "reaction": 4,  # Confirmación de reacción
         "mission": 8,  # Misión completada (más tiempo para leer)
         "narrative": 4,  # Puntos de narrativa
+        "purchase": 0,  # Compras en tienda - no se eliminan
+        "unlock": 0,   # Desbloqueos - no se eliminan
+        "gift": 0,     # Regalos - no se eliminan
         "default": 5,  # Por defecto
     }
 
@@ -127,7 +130,9 @@ class NotificationService:
             # Programar auto-eliminación si está habilitado
             if auto_delete:
                 delay = cls.AUTO_DELETE_DELAY.get(notification_type, cls.AUTO_DELETE_DELAY["default"])
-                asyncio.create_task(cls._schedule_deletion(bot, msg, delay))
+                # If delay is 0, don't delete the message
+                if delay > 0:
+                    asyncio.create_task(cls._schedule_deletion(bot, msg, delay))
 
             logger.info(
                 f"Sent {notification_type} notification to user {user_id}"
@@ -290,6 +295,82 @@ class NotificationService:
         """Limpia el historial de notificaciones de un usuario."""
         if user_id in cls._recent_notifications:
             del cls._recent_notifications[user_id]
+
+    @classmethod
+    async def send_purchase_notification(
+        cls,
+        bot: Bot,
+        user_id: int,
+        item_name: str,
+        item_price: float,
+        remaining_points: float
+    ) -> Optional[Message]:
+        """
+        Envía notificación de compra en tienda (no se auto-elimina).
+        """
+        text = f"🛍️ **Compra Realizada**\n\n"
+        text += f"📦 {item_name}\n"
+        text += f"💎 Precio: {item_price:.0f} besitos\n"
+        text += f"💰 Besitos restantes: {remaining_points:.0f}"
+
+        return await cls.send_notification(
+            bot=bot,
+            user_id=user_id,
+            text=text,
+            notification_type="purchase",
+            auto_delete=False,  # No se elimina
+            force_send=True
+        )
+
+    @classmethod
+    async def send_unlock_notification(
+        cls,
+        bot: Bot,
+        user_id: int,
+        unlocked_item: str,
+        description: Optional[str] = None
+    ) -> Optional[Message]:
+        """
+        Envía notificación de desbloqueo (no se auto-elimina).
+        """
+        text = f"🔓 **¡Nuevo Desbloqueo!**\n\n"
+        text += f"✨ {unlocked_item}\n"
+        if description:
+            text += f"\n{description}"
+
+        return await cls.send_notification(
+            bot=bot,
+            user_id=user_id,
+            text=text,
+            notification_type="unlock",
+            auto_delete=False,  # No se elimina
+            force_send=True
+        )
+
+    @classmethod
+    async def send_gift_notification(
+        cls,
+        bot: Bot,
+        user_id: int,
+        gift_name: str,
+        description: Optional[str] = None
+    ) -> Optional[Message]:
+        """
+        Envía notificación de regalo (no se auto-elimina).
+        """
+        text = f"🎁 **¡Has recibido un regalo!**\n\n"
+        text += f"💝 {gift_name}\n"
+        if description:
+            text += f"\n{description}"
+
+        return await cls.send_notification(
+            bot=bot,
+            user_id=user_id,
+            text=text,
+            notification_type="gift",
+            auto_delete=False,  # No se elimina
+            force_send=True
+        )
 
     @classmethod
     def get_stats(cls) -> Dict:

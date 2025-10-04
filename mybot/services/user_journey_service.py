@@ -197,7 +197,7 @@ class UserJourneyService:
 
         return milestone.completed if milestone else False
 
-    async def get_next_onboarding_step(self, user_id: int) -> Dict[str, Any]:
+    async def get_next_onboarding_step(self, user_id: int) -> Optional[Dict[str, Any]]:
         """
         Obtiene el siguiente paso de onboarding para el usuario
         STRATEGIC: Sistema de onboarding progresivo inteligente
@@ -556,51 +556,105 @@ class UserJourneyService:
     async def get_intelligent_suggestions(self, user_id: int) -> List[Dict[str, str]]:
         """
         Genera sugerencias inteligentes basadas en el comportamiento del usuario
-        STRATEGIC: Sistema de anticipación inteligente
+        STRATEGIC: Sistema de anticipación inteligente mejorado
         """
         suggestions = []
         
-        # Obtener datos del usuario
-        user_stmt = select(User).where(User.id == user_id)
-        user_result = await self.session.execute(user_stmt)
-        user = user_result.scalar_one_or_none()
-        
-        if not user:
-            return suggestions
-        
-        # Sugerencia basada en puntos acumulados
-        if user.points >= 1000 and user.points < 5000:
-            suggestions.append({
-                "type": "shop_reminder",
-                "title": "🎁 Tienes besitos para gastar",
-                "message": f"Tienes {user.points} besitos acumulados. ¡Visita la tienda para reclamar recompensas!",
-                "action": "/shop"
-            })
-        
-        # Sugerencia basada en tiempo desde última interacción
-        from datetime import datetime
-        if user.last_interaction:
-            time_diff = datetime.utcnow() - user.last_interaction
-            if time_diff.days >= 2:
-                suggestions.append({
-                    "type": "re_engagement",
-                    "title": "💫 Te extrañamos",
-                    "message": "Tu historia te espera. ¿Quieres continuar donde lo dejaste?",
-                    "action": "/start"
-                })
-        
-        # Sugerencia basada en progreso de misiones
-        from services.mission_service import MissionService
-        mission_service = MissionService(self.session)
-        active_missions = await mission_service.get_active_missions(user_id)
-        
-        if len(active_missions) == 0:
-            suggestions.append({
-                "type": "mission_suggestion", 
-                "title": "🎯 Nuevos desafíos disponibles",
-                "message": "Hay nuevas misiones esperándote. ¡Complétalas para ganar más besitos!",
-                "action": "/missions"
-            })
+        try:
+            # Obtener datos del usuario
+            user_stmt = select(User).where(User.id == user_id)
+            user_result = await self.session.execute(user_stmt)
+            user = user_result.scalar_one_or_none()
+            
+            if not user:
+                return suggestions
+            
+            # STRATEGIC: Sistema de scoring para priorizar sugerencias
+            suggestion_scores = {}
+            
+            # 1. Sugerencia basada en puntos acumulados (score: 80)
+            if user.points >= 1000 and user.points < 5000:
+                suggestion_scores["shop_reminder"] = {
+                    "type": "shop_reminder",
+                    "title": "🎁 Tienes besitos para gastar",
+                    "message": f"Tienes {user.points} besitos acumulados. ¡Visita la tienda para reclamar recompensas!",
+                    "action": "/shop",
+                    "score": 80
+                }
+            
+            # 2. Sugerencia basada en tiempo desde última interacción (score: 60-90)
+            from datetime import datetime
+            if user.last_interaction:
+                time_diff = datetime.utcnow() - user.last_interaction
+                if time_diff.days >= 2:
+                    score = min(90, 60 + (time_diff.days * 10))  # Más días = mayor prioridad
+                    suggestion_scores["re_engagement"] = {
+                        "type": "re_engagement",
+                        "title": "💫 Te extrañamos",
+                        "message": "Tu historia te espera. ¿Quieres continuar donde lo dejaste?",
+                        "action": "/start",
+                        "score": score
+                    }
+            
+            # 3. Sugerencia basada en progreso de misiones (score: 70)
+            try:
+                from services.mission_service import MissionService
+                mission_service = MissionService(self.session)
+                active_missions = await mission_service.get_active_missions(user_id)
+                
+                if len(active_missions) == 0:
+                    suggestion_scores["mission_suggestion"] = {
+                        "type": "mission_suggestion", 
+                        "title": "🎯 Nuevos desafíos disponibles",
+                        "message": "Hay nuevas misiones esperándote. ¡Complétalas para ganar más besitos!",
+                        "action": "/missions",
+                        "score": 70
+                    }
+            except Exception as e:
+                logger.debug(f"No se pudieron obtener misiones para sugerencias: {e}")
+            
+            # 4. Sugerencia basada en onboarding incompleto (score: 100 - máxima prioridad)
+            next_step = await self.get_next_onboarding_step(user_id)
+            if next_step:
+                step_type = next_step["step_type"]
+                onboarding_suggestions = {
+                    "narrative_intro": {
+                        "title": "📖 Comienza tu historia",
+                        "message": "Aún no has explorado la narrativa principal. ¡Descubre tu primer fragmento!",
+                        "action": "/start",
+                        "score": 100
+                    },
+                    "missions_intro": {
+                        "title": "🎯 Tus primeras misiones",
+                        "message": "Completa tu primera misión para ganar besitos y recompensas.",
+                        "action": "/missions", 
+                        "score": 95
+                    },
+                    "points_explained": {
+                        "title": "💰 Aprende sobre besitos",
+                        "message": "Descubre cómo ganar y usar tus besitos en el sistema.",
+                        "action": "/profile",
+                        "score": 85
+                    }
+                }
+                
+                if step_type in onboarding_suggestions:
+                    suggestion_scores[f"onboarding_{step_type}"] = onboarding_suggestions[step_type]
+            
+            # Ordenar sugerencias por score (mayor a menor) y tomar las top 3
+            sorted_suggestions = sorted(
+                suggestion_scores.values(), 
+                key=lambda x: x["score"], 
+                reverse=True
+            )[:3]
+            
+            # Remover el campo score del resultado final
+            for suggestion in sorted_suggestions:
+                suggestion.pop("score", None)
+                suggestions.append(suggestion)
+                
+        except Exception as e:
+            logger.error(f"Error generando sugerencias inteligentes para usuario {user_id}: {e}")
         
         return suggestions
 

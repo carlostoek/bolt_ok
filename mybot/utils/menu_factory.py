@@ -81,29 +81,40 @@ class MenuFactory:
     def _create_main_menu(self, role: str) -> Tuple[str, InlineKeyboardMarkup]:
         """Create the main menu based on user role."""
         if role == "admin":
-            return (
+            text = (
                 "🛠️ **Panel de Administración**\n\n"
                 "Bienvenido al centro de control del bot. Desde aquí puedes gestionar "
-                "todos los aspectos del sistema.",
-                get_admin_main_kb()
+                "todos los aspectos del sistema."
             )
+            keyboard = get_admin_main_kb()
         elif role == "vip":
-            return (
+            text = (
                 "✨ **Bienvenido al Diván de Diana**\n\n"
                 "Tu suscripción VIP te da acceso completo a todas las funciones. "
-                "¡Disfruta de la experiencia premium!",
-                get_vip_main_kb()
+                "¡Disfruta de la experiencia premium!"
             )
+            keyboard = get_vip_main_kb()
         else: # Covers "free" and any other unrecognized roles
-            return (
+            text = (
                 "✨ **Bienvenido, mi amor**\n\n"
                 "Soy Diana, y me encanta que estés aquí. Este es tu espacio para "
                 "descubrir lo que tengo para ti...\n\n"
                 "💫 Explora, juega, y descubre. Algunas cosas son para todos, "
                 "pero las más íntimas... solo para quienes se atreven a estar más cerca.\n\n"
-                "¿Qué te gustaría ver primero?",
-                get_free_main_menu_kb()
+                "¿Qué te gustaría ver primero?"
             )
+            keyboard = get_free_main_menu_kb()
+        
+        # Add home button to refresh the main menu
+        if hasattr(keyboard, 'inline_keyboard'):
+            builder = InlineKeyboardBuilder()
+            # Add existing buttons
+            for row in keyboard.inline_keyboard:
+                builder.row(*row)
+            # Add home button (refresh)
+            builder.button(text="🔄 Actualizar", callback_data="main")
+            return text, builder.as_markup()
+        return text, keyboard
     
     async def _create_setup_menu(
         self, 
@@ -244,30 +255,38 @@ class MenuFactory:
         """Create specific menus based on state."""
         
         if menu_state == "profile":
-            return await create_profile_menu(user_id, session)
+            text, keyboard = await create_profile_menu(user_id, session)
         elif menu_state == "missions":
-            return await create_missions_menu(user_id, session)
+            text, keyboard = await create_missions_menu(user_id, session)
         elif menu_state == "rewards":
-            return await create_rewards_menu(user_id, session)
+            text, keyboard = await create_rewards_menu(user_id, session)
         elif menu_state == "auctions":
-            return await create_auction_menu(user_id, session)
+            text, keyboard = await create_auction_menu(user_id, session)
         elif menu_state == "ranking":
-            return await create_ranking_menu(user_id, session)
-        
+            text, keyboard = await create_ranking_menu(user_id, session)
         elif menu_state == "narrative":
-            return await self._create_narrative_menu(user_id, session)
-        
-        elif menu_state == "admin_gamification_main": # Asegúrate de que este estado es reconocido si alguna otra parte lo invoca
-            # Aunque el handler directo lo gestiona, si por alguna razón menu_factory
-            # necesita crear este menú, podemos redirigirlo al panel admin principal
-            return self._create_main_menu("admin") # O puedes definir un texto y teclado específico aquí
+            text, keyboard = await self._create_narrative_menu(user_id, session)
+        elif menu_state == "admin_gamification_main":
+            text, keyboard = self._create_main_menu("admin")
         elif menu_state == "admin_vip":
-            return self._create_admin_vip_menu()
+            text, keyboard = self._create_admin_vip_menu()
         elif menu_state == "admin_free":
-            return await self._create_admin_free_menu(session)
+            text, keyboard = await self._create_admin_free_menu(session)
         else:
             logger.warning(f"Unknown specific menu state: {menu_state}. Falling back to main menu for role: {role}")
-            return self._create_main_menu(role)
+            text, keyboard = self._create_main_menu(role)
+        
+        # Add home button to all specific menus
+        # Convert keyboard to builder to add the home button
+        if hasattr(keyboard, 'inline_keyboard'):
+            builder = InlineKeyboardBuilder()
+            # Add existing buttons
+            for row in keyboard.inline_keyboard:
+                builder.row(*row)
+            # Add home button
+            builder.button(text="🏠 Inicio", callback_data="main")
+            return text, builder.as_markup()
+        return text, keyboard
     
     async def _create_narrative_menu(self, user_id: int, session: AsyncSession) -> Tuple[str, InlineKeyboardMarkup]:
         """Create the narrative menu for a user."""
@@ -294,7 +313,17 @@ class MenuFactory:
 
 *¿Te atreves a comenzar esta aventura?*"""
         
-        return text, get_narrative_stats_keyboard()
+        keyboard = get_narrative_stats_keyboard()
+        # Add home button to narrative menu
+        if hasattr(keyboard, 'inline_keyboard'):
+            builder = InlineKeyboardBuilder()
+            # Add existing buttons
+            for row in keyboard.inline_keyboard:
+                builder.row(*row)
+            # Add home button
+            builder.button(text="🏠 Inicio", callback_data="main")
+            return text, builder.as_markup()
+        return text, keyboard
 
     def _create_admin_vip_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
         """Creates the admin VIP channel management menu."""

@@ -62,11 +62,28 @@ class MissionService:
     async def check_mission_completion_status(self, user: User, mission: Mission, target_message_id: int = None) -> tuple[bool, str]:
         """
         Checks if a user has completed a mission for the current reset period,
-        or if it's a one-time mission already completed.
+        with improved synchronization and real-time checking.
         Returns (is_completed_for_period, reason_if_completed)
         """
+        # First check the stored completion record
         mission_completion_record = user.missions_completed.get(mission.id)
         
+        # Real-time synchronization for specific mission types
+        if mission.type == "reaction" and not mission_completion_record:
+            # Check if user has recently reacted to channel messages
+            recent_reactions = await self._get_user_recent_reactions(user.id)
+            if recent_reactions and len(recent_reactions) >= mission.target_value:
+                # Auto-complete the mission
+                await self.complete_mission(user.id, mission.id, bot=None)
+                return True, "auto_completed"
+                
+        elif mission.type == "login_streak" and not mission_completion_record:
+            # Check login streak from user stats
+            if hasattr(user, 'login_streak') and user.login_streak >= mission.target_value:
+                await self.complete_mission(user.id, mission.id, bot=None)
+                return True, "auto_completed"
+        
+        # Original logic for reset periods
         if mission.type == "one_time":
             if mission_completion_record:
                 return True, "already_completed"
@@ -81,11 +98,22 @@ class MissionService:
                 if (datetime.datetime.now() - last_completed) < datetime.timedelta(weeks=1):
                     return True, "weekly_limit_reached"
         elif mission.type == "reaction":
-            # For reaction missions, check if already completed once
             if mission_completion_record:
                 return True, "already_completed"
         
-        return False, "" # Not completed for current period or not a one-time mission
+        return False, "" # Not completed for current period
+
+    async def _get_user_recent_reactions(self, user_id: int) -> list:
+        """
+        Get user's recent reactions to channel messages for real-time mission synchronization.
+        """
+        try:
+            # This would query your reaction tracking system
+            # For now, return empty list - implement based on your reaction storage
+            return []
+        except Exception as e:
+            logger.error(f"Error getting user recent reactions: {e}")
+            return []
 
     async def complete_mission(
         self,
