@@ -313,7 +313,17 @@ class MenuFactory:
 
 *¿Te atreves a comenzar esta aventura?*"""
         
-        return text, get_narrative_stats_keyboard()
+        keyboard = get_narrative_stats_keyboard()
+        # Add home button to narrative menu
+        if hasattr(keyboard, 'inline_keyboard'):
+            builder = InlineKeyboardBuilder()
+            # Add existing buttons
+            for row in keyboard.inline_keyboard:
+                builder.row(*row)
+            # Add home button
+            builder.button(text="🏠 Inicio", callback_data="main")
+            return text, builder.as_markup()
+        return text, keyboard
 
     def _create_admin_vip_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
         """Creates the admin VIP channel management menu."""
