@@ -189,6 +189,12 @@ async def main() -> None:
         dp.poll_answer.middleware(points_middleware)
         dp.message_reaction.middleware(points_middleware)
 
+        # Middleware de feedback visual (QUICK WIN)
+        from middlewares.visual_feedback_middleware import VisualFeedbackMiddleware
+        visual_feedback_middleware = VisualFeedbackMiddleware()
+        dp.message.middleware(visual_feedback_middleware)
+        dp.callback_query.middleware(visual_feedback_middleware)
+
         # Registrar routers en orden de prioridad
         logger.info("Registrando handlers...")
         # Import shop router
