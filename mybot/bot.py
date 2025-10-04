@@ -223,7 +223,7 @@ async def main() -> None:
             ("start", start.router),
             ("main_menu", main_menu_router),
             ("backpack", backpack_router),
-            ("missions", missions_router),
+            ("missions", missions_router),  # Misiones mejoradas
             ("info", info_router),
             ("free_channel_admin", free_channel_admin_router),
             ("publication_test", publication_test_router),
@@ -239,7 +239,7 @@ async def main() -> None:
             ("lore", lore_router),
             ("combinar_pistas", combinar_pistas.router),
             ("channel_access", channel_access_router),
-            ("narrative", narrative_router),
+            ("narrative", narrative_router),  # Narrativa mejorada
             ("admin_narrative", admin_narrative_handlers),
             ("test_evaluation", test_evaluation_router),
             ("shop", shop_router),  # Add shop router

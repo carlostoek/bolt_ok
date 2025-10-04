@@ -32,27 +32,36 @@ class NarrativeService:
         self.point_service = PointService(session) if session else None
 
     async def get_user_current_fragment(self, user_id: int) -> Optional[StoryFragment]:
-        """Obtiene el fragmento actual del usuario o inicia la narrativa."""
+        """Obtiene el fragmento actual del usuario, manteniendo el progreso entre sesiones."""
         user_state = await self._get_or_create_user_state(user_id)
 
-        if not user_state.current_fragment_key:
-            start_fragment = await self._get_fragment_by_key("start")
-            if start_fragment:
-                user_state.current_fragment_key = start_fragment.key
-                user_state.narrative_started_at = datetime.utcnow()
-                user_state.fragments_visited = 1
-
-                # Award initial fragment rewards
-                await self._process_fragment_rewards(user_id, start_fragment)
-
-                await self.session.commit()
-                logger.info(f"User {user_id} started narrative at fragment 'start' and received {start_fragment.reward_besitos} besitos")
-                return start_fragment
+        # Si el usuario ya tiene un fragmento actual, continuar desde ahí
+        if user_state.current_fragment_key:
+            current_fragment = await self._get_fragment_by_key(user_state.current_fragment_key)
+            if current_fragment:
+                logger.info(f"Usuario {user_id} continúa desde fragmento: {user_state.current_fragment_key}")
+                return current_fragment
             else:
-                logger.error("No se encontró fragmento inicial 'start'")
-                return None
+                # Fragmento no encontrado, resetear al inicio
+                logger.warning(f"Fragmento {user_state.current_fragment_key} no encontrado para usuario {user_id}, reseteando al inicio")
+                user_state.current_fragment_key = None
 
-        return await self._get_fragment_by_key(user_state.current_fragment_key)
+        # Si no hay fragmento actual, iniciar narrativa
+        start_fragment = await self._get_fragment_by_key("start")
+        if start_fragment:
+            user_state.current_fragment_key = start_fragment.key
+            user_state.narrative_started_at = datetime.utcnow()
+            user_state.fragments_visited = 1
+
+            # Award initial fragment rewards
+            await self._process_fragment_rewards(user_id, start_fragment)
+
+            await self.session.commit()
+            logger.info(f"Usuario {user_id} inició narrativa en fragmento 'start' y recibió {start_fragment.reward_besitos} besitos")
+            return start_fragment
+        else:
+            logger.error("No se encontró fragmento inicial 'start'")
+            return None
 
     async def start_narrative(self, user_id: int) -> Optional[StoryFragment]:
         """Inicia la narrativa para un usuario nuevo."""
