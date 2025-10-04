@@ -1,7 +1,7 @@
 """
 Enhanced start handler with improved user experience and multi-tenant support.
 """
-from aiogram import Router
+from aiogram import Router, Bot
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 from constants.keyboards import main_menu_keyboard
