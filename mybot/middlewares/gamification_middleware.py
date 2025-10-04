@@ -210,15 +210,26 @@ class GamificationMiddleware(BaseMiddleware):
 
     async def _process_callback_interaction(self, event, user, journey_service, point_service, bot):
         """Procesa gamificación para callback queries"""
-        # Detectar interacciones específicas por callback data
-        callback_data = event.data
+        badges_unlocked = 0
         
-        if callback_data and "mission" in callback_data:
-            # El usuario está interactuando con misiones
-            await journey_service.complete_onboarding_step(user.id, "first_interaction")
+        try:
+            # Detectar interacciones específicas por callback data
+            callback_data = event.data
             
-        # También detectar interacciones con la tienda
-        if callback_data and "shop" in callback_data:
-            await journey_service.send_contextual_onboarding_message(
-                user, bot, "first_shop_visit"
-            )
+            if callback_data and "mission" in callback_data:
+                # El usuario está interactuando con misiones
+                await journey_service.complete_onboarding_step(user.id, "first_interaction")
+                
+            # También detectar interacciones con la tienda
+            if callback_data and "shop" in callback_data:
+                await journey_service.send_contextual_onboarding_message(
+                    user, bot, "first_shop_visit"
+                )
+            
+            # Otorgar puntos por interacción básica de callback - usando keyword arguments
+            await point_service.add_points(user.id, 1, reason="callback_interaction")
+            
+        except Exception as e:
+            logger.error(f"Error en procesamiento de callback para gamificación: {e}")
+        
+        return badges_unlocked
