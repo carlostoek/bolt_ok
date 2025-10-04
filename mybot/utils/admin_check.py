@@ -1,11 +1,5 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from database.models import User
+from utils.config import ADMIN_IDS
 
-async def is_admin(user_id: int, session: AsyncSession) -> bool:
-    """Verifica si un usuario es administrador"""
-    result = await session.execute(
-        select(User).filter_by(id=user_id)
-    )
-    user = result.scalars().first()
-    return user and user.is_admin
+async def is_admin(user_id: int, session=None) -> bool:
+    """Verifica si un usuario es administrador basado en ADMIN_IDS del config"""
+    return user_id in ADMIN_IDS
