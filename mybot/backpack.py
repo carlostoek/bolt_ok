@@ -5,12 +5,16 @@ from aiogram.types import Message, CallbackQuery, InlineKeyboardButton, InlineKe
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from sqlalchemy import select, and_, func
-from database.models import LorePiece, UserLorePiece
+from database.models import LorePiece, UserLorePiece, ShopItem, UserPurchase
 from database.hint_combination import HintCombination
-from database.setup import get_session
+from database.setup import get_session_factory
 from notificaciones import send_narrative_notification
+from utils.message_utils import escape_markdown
 import random
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 
@@ -39,6 +43,11 @@ BACKPACK_CATEGORIES = {
         'emoji': '🗝️',
         'title': 'Llaves de Acceso',
         'description': 'Elementos que abren nuevos espacios'
+    },
+    'tesoros': {
+        'emoji': '💎',
+        'title': 'Tesoros Adquiridos',
+        'description': 'Objetos que has obtenido de la tienda de Diana'
     }
 }
 
@@ -51,78 +60,118 @@ LUCIEN_BACKPACK_MESSAGES = [
     "Hay pistas aquí que Diana espera que descifres. No todas son obvias."
 ]
 
+async def _mostrar_mochila_con_session(message: Message, session, user_id: int = None):
+    """Lógica interna de la mochila que recibe una sesión ya abierta"""
+    # Si no se proporciona user_id, intentar obtenerlo del mensaje
+    if user_id is None:
+        user_id = message.from_user.id if message.from_user else None
+
+    if user_id is None:
+        await message.answer("❌ Error: No se pudo identificar al usuario")
+        return
+
+    # Obtener todas las pistas del usuario
+    result = await session.execute(
+        select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
+        .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
+        .where(UserLorePiece.user_id == user_id)
+        .order_by(UserLorePiece.unlocked_at.desc())
+    )
+
+    pistas_data = result.all()
+
+    # Obtener items comprados (independiente del rol actual - si compró como VIP, debe verlos)
+    purchases_result = await session.execute(
+        select(ShopItem, UserPurchase.purchased_at)
+        .join(UserPurchase, ShopItem.id == UserPurchase.shop_item_id)
+        .where(UserPurchase.user_id == user_id)
+        .order_by(UserPurchase.purchased_at.desc())
+    )
+
+    purchased_items = purchases_result.all()
+
+    # Debug logging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.info(f"[MOCHILA_DEBUG] User {user_id}: {len(pistas_data)} lore pieces, {len(purchased_items)} items comprados")
+
+    # Si no tiene nada (ni pistas ni compras), mostrar mochila vacía
+    if not pistas_data and not purchased_items:
+        await mostrar_mochila_vacia(message)
+        return
+
+    # Organizar por categorías
+    categorized_hints = {}
+    recent_hints = []
+
+    for pista, unlocked_at, context in pistas_data:
+        category = pista.category or 'fragmentos'
+        if category not in categorized_hints:
+            categorized_hints[category] = []
+        categorized_hints[category].append(('lore', pista, unlocked_at, context))
+
+        # Marcar pistas recientes (últimas 24h)
+        if unlocked_at and (datetime.now() - unlocked_at).days == 0:
+            recent_hints.append(pista)
+
+    # Agregar items comprados a una categoría especial
+    if purchased_items:
+        categorized_hints['tesoros'] = []
+        for shop_item, purchased_at in purchased_items:
+            categorized_hints['tesoros'].append(('item', shop_item, purchased_at, None))
+
+    # Crear mensaje principal
+    lucien_message = random.choice(LUCIEN_BACKPACK_MESSAGES)
+    total_hints = len(pistas_data)
+    total_items = len(purchased_items)
+
+    texto = f"🎩 **Lucien:**\n*{lucien_message}*\n\n"
+    texto += f"📊 **Tu Colección:** {total_hints} pistas descubiertas"
+
+    if total_items > 0:
+        texto += f" | 💎 {total_items} tesoros adquiridos"
+
+    texto += "\n"
+
+    if recent_hints:
+        texto += f"✨ **Nuevas:** {len(recent_hints)} pistas recientes\n"
+
+    texto += "\n🎒 **Explora tu mochila:**"
+    
+    # Crear botones por categoría
+    keyboard = []
+    for category, data in categorized_hints.items():
+        cat_info = BACKPACK_CATEGORIES.get(category, {
+            'emoji': '📜', 'title': category.title(), 'description': 'Elementos diversos'
+        })
+        count = len(data)
+        keyboard.append([
+            InlineKeyboardButton(text=f"{cat_info['emoji']} {cat_info['title']} ({count})", callback_data=f"mochila_cat:{category}"
+            )
+        ])
+    
+    # Botones adicionales
+    keyboard.extend([
+        [
+            InlineKeyboardButton(text="🔗 Combinar Pistas", callback_data="combinar_inicio"),
+            InlineKeyboardButton(text="🔍 Buscar", callback_data="buscar_pistas")
+        ],
+        [
+            InlineKeyboardButton(text="📈 Estadísticas", callback_data="stats_mochila"),
+            InlineKeyboardButton(text="🎯 Sugerencias", callback_data="sugerencias_diana")
+        ]
+    ])
+    
+    await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+
+
 @router.message(F.text == "🎒 Mochila")
 async def mostrar_mochila_narrativa(message: Message):
-    """Mochila principal con categorización y contexto narrativo"""
-    session_factory = await get_session()
+    """Mochila principal con categorización y contexto narrativo (desde keyboard)"""
+    session_factory = get_session_factory()
     async with session_factory() as session:
-        user_id = message.from_user.id
-        
-        # Obtener todas las pistas del usuario
-        result = await session.execute(
-            select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-            .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-            .where(UserLorePiece.user_id == user_id)
-            .order_by(UserLorePiece.unlocked_at.desc())
-        )
-        
-        pistas_data = result.all()
-        
-        if not pistas_data:
-            await mostrar_mochila_vacia(message)
-            return
-        
-        # Organizar por categorías
-        categorized_hints = {}
-        recent_hints = []
-        
-        for pista, unlocked_at, context in pistas_data:
-            category = pista.category or 'fragmentos'
-            if category not in categorized_hints:
-                categorized_hints[category] = []
-            categorized_hints[category].append((pista, unlocked_at, context))
-            
-            # Marcar pistas recientes (últimas 24h)
-            if unlocked_at and (datetime.now() - unlocked_at).days == 0:
-                recent_hints.append(pista)
-        
-        # Crear mensaje principal
-        lucien_message = random.choice(LUCIEN_BACKPACK_MESSAGES)
-        total_hints = len(pistas_data)
-        
-        texto = f"🎩 **Lucien:**\n*{lucien_message}*\n\n"
-        texto += f"📊 **Tu Colección:** {total_hints} pistas descubiertas\n"
-        
-        if recent_hints:
-            texto += f"✨ **Nuevas:** {len(recent_hints)} pistas recientes\n"
-        
-        texto += "\n🎒 **Explora tu mochila:**"
-        
-        # Crear botones por categoría
-        keyboard = []
-        for category, data in categorized_hints.items():
-            cat_info = BACKPACK_CATEGORIES.get(category, {
-                'emoji': '📜', 'title': category.title(), 'description': 'Elementos diversos'
-            })
-            count = len(data)
-            keyboard.append([
-                InlineKeyboardButton(text=f"{cat_info['emoji']} {cat_info['title']} ({count})", callback_data=f"mochila_cat:{category}"
-                )
-            ])
-        
-        # Botones adicionales
-        keyboard.extend([
-            [
-                InlineKeyboardButton(text="🔗 Combinar Pistas", callback_data="combinar_inicio"),
-                InlineKeyboardButton(text="🔍 Buscar", callback_data="buscar_pistas")
-            ],
-            [
-                InlineKeyboardButton(text="📈 Estadísticas", callback_data="stats_mochila"),
-                InlineKeyboardButton(text="🎯 Sugerencias", callback_data="sugerencias_diana")
-            ]
-        ])
-        
-        await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+        await _mostrar_mochila_con_session(message, session)
+
 
 async def mostrar_mochila_vacia(message: Message):
     """Mensaje especial para mochila vacía con contexto narrativo"""
@@ -142,51 +191,72 @@ async def mostrar_mochila_vacia(message: Message):
 *Tu primera pista te está esperando...*"""
     
     keyboard = [
-        [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="misiones_disponibles")],
-        [InlineKeyboardButton(text="📚 Guía del Viajero", callback_data="guia_principiante")]
+        [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="menu:missions")],
+        [InlineKeyboardButton(text="↩️ Menú Principal", callback_data="menu_principal")]
     ]
-    
+
     await message.answer(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
 
 @router.callback_query(F.data.startswith("mochila_cat:"))
 async def mostrar_categoria(callback: CallbackQuery):
-    """Muestra pistas de una categoría específica"""
+    """Muestra pistas de una categoría específica (lore pieces o items comprados)"""
     category = callback.data.split(":")[1]
-    session_factory = await get_session()
-    
+    session_factory = get_session_factory()
+
     async with session_factory() as session:
         user_id = callback.from_user.id
-        
-        result = await session.execute(
-            select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-            .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-            .where(
-                and_(
-                    UserLorePiece.user_id == user_id,
-                    LorePiece.category == category
-                )
-            )
-            .order_by(UserLorePiece.unlocked_at.desc())
-        )
-        
-        pistas_data = result.all()
         cat_info = BACKPACK_CATEGORIES.get(category, {'emoji': '📜', 'title': category.title(), 'description': 'Elementos diversos'})
-        
+
         texto = f"{cat_info['emoji']} **{cat_info['title']}**\n*{cat_info['description']}*\n\n"
-        
         keyboard = []
-        for pista, unlocked_at, context in pistas_data:
-            # Agregar indicadores especiales
-            indicators = ""
-            if context and context.get('is_combinable'):
-                indicators += "🔗"
-            if unlocked_at and (datetime.now() - unlocked_at).days == 0:
-                indicators += "✨"
-            
-            button_text = f"{indicators} {pista.title}"
-            keyboard.append([
-                InlineKeyboardButton(text=button_text, callback_data=f"ver_pista_detail:{pista.id}")
-            ])
+
+        # Si es la categoría 'tesoros', mostrar items comprados
+        if category == 'tesoros':
+            purchases_result = await session.execute(
+                select(ShopItem, UserPurchase.purchased_at)
+                .join(UserPurchase, ShopItem.id == UserPurchase.shop_item_id)
+                .where(UserPurchase.user_id == user_id)
+                .order_by(UserPurchase.purchased_at.desc())
+            )
+
+            purchased_items = purchases_result.all()
+
+            for shop_item, purchased_at in purchased_items:
+                dias_desde = (datetime.now() - purchased_at).days
+                indicator = "✨" if dias_desde == 0 else "💎"
+                button_text = f"{indicator} {escape_markdown(shop_item.name)}"
+                keyboard.append([
+                    InlineKeyboardButton(text=button_text, callback_data=f"ver_tesoro:{shop_item.id}")
+                ])
+
+        else:
+            # Para otras categorías, mostrar lore pieces
+            result = await session.execute(
+                select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
+                .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
+                .where(
+                    and_(
+                        UserLorePiece.user_id == user_id,
+                        LorePiece.category == category
+                    )
+                )
+                .order_by(UserLorePiece.unlocked_at.desc())
+            )
+
+            pistas_data = result.all()
+
+            for pista, unlocked_at, context in pistas_data:
+                # Agregar indicadores especiales
+                indicators = ""
+                if context and context.get('is_combinable'):
+                    indicators += "🔗"
+                if unlocked_at and (datetime.now() - unlocked_at).days == 0:
+                    indicators += "✨"
+
+                button_text = f"{indicators} {escape_markdown(pista.title)}"
+                keyboard.append([
+                    InlineKeyboardButton(text=button_text, callback_data=f"ver_pista_detail:{pista.id}")
+                ])
         
         keyboard.append([
             InlineKeyboardButton(text="⬅️ Volver a Mochila", callback_data="volver_mochila")
@@ -198,7 +268,7 @@ async def mostrar_categoria(callback: CallbackQuery):
 async def ver_pista_detallada(callback: CallbackQuery):
     """Vista detallada de una pista con contexto narrativo"""
     pista_id = int(callback.data.split(":")[1])
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     
     async with session_factory() as session:
         user_id = callback.from_user.id
@@ -268,7 +338,7 @@ async def ver_pista_detallada(callback: CallbackQuery):
 async def mostrar_contenido_pista(callback: CallbackQuery):
     """Muestra el contenido real de la pista"""
     pista_id = int(callback.data.split(":")[1])
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     
     async with session_factory() as session:
         pista = await session.get(LorePiece, pista_id)
@@ -293,10 +363,70 @@ async def mostrar_contenido_pista(callback: CallbackQuery):
         
         await callback.answer()
 
+
+@router.callback_query(F.data.startswith("ver_tesoro:"))
+async def ver_tesoro_detallado(callback: CallbackQuery):
+    """Vista detallada de un item comprado"""
+    item_id = int(callback.data.split(":")[1])
+    session_factory = get_session_factory()
+
+    async with session_factory() as session:
+        user_id = callback.from_user.id
+
+        # Obtener item y datos de compra
+        purchase_result = await session.execute(
+            select(ShopItem, UserPurchase.purchased_at, UserPurchase.price_paid)
+            .join(UserPurchase, ShopItem.id == UserPurchase.shop_item_id)
+            .where(
+                and_(
+                    UserPurchase.user_id == user_id,
+                    ShopItem.id == item_id
+                )
+            )
+        )
+
+        tesoro_data = purchase_result.first()
+        if not tesoro_data:
+            await callback.answer("❌ Tesoro no encontrado")
+            return
+
+        shop_item, purchased_at, price_paid = tesoro_data
+
+        # Crear mensaje detallado
+        texto = f"💎 **{shop_item.name}**\n\n"
+
+        if shop_item.description:
+            texto += f"*{shop_item.description}*\n\n"
+
+        # Información de compra
+        dias_desde = (datetime.now() - purchased_at).days
+        if dias_desde == 0:
+            texto += "⏰ Adquirido hoy\n"
+        else:
+            texto += f"⏰ Adquirido hace {dias_desde} días\n"
+
+        texto += f"💰 Precio pagado: {price_paid} besitos\n"
+
+        # Si desbloquea algo especial
+        if shop_item.unlocks_lore_piece_id:
+            lore_piece = await session.get(LorePiece, shop_item.unlocks_lore_piece_id)
+            if lore_piece:
+                texto += f"\n🔓 Desbloqueó: *{lore_piece.title}*\n"
+
+        texto += "\n🌸 **Diana:**\n"
+        texto += "*Cada objeto que eliges me dice algo sobre ti... Me gusta.*"
+
+        keyboard = [
+            [InlineKeyboardButton(text="⬅️ Volver", callback_data="mochila_cat:tesoros")]
+        ]
+
+        await callback.message.edit_text(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
+
+
 @router.callback_query(F.data == "combinar_inicio")
 async def iniciar_combinacion_interactiva(callback: CallbackQuery, state: FSMContext):
     """Inicia el proceso interactivo de combinación"""
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     
     async with session_factory() as session:
         user_id = callback.from_user.id
@@ -381,7 +511,7 @@ async def seleccionar_pista_combinacion(callback: CallbackQuery, state: FSMConte
 **Selecciona más pistas o intenta la combinación:**"""
     
     # Recrear keyboard con indicadores de selección
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     async with session_factory() as session:
         result = await session.execute(
             select(LorePiece)
@@ -415,7 +545,7 @@ async def procesar_combinacion_seleccionada(callback: CallbackQuery, state: FSMC
         await callback.answer("❌ Selecciona al menos 2 pistas")
         return
     
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     async with session_factory() as session:
         user_id = callback.from_user.id
         
@@ -519,7 +649,7 @@ async def verificar_combinaciones_disponibles(session, user_id, hint_code):
 
 async def desbloquear_pista_narrativa(bot, user_id, pista_code, context=None):
     """Desbloquea una pista con contexto narrativo completo"""
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     async with session_factory() as session:
         # Buscar la pista por código
         result = await session.execute(
@@ -565,14 +695,28 @@ async def desbloquear_pista_narrativa(bot, user_id, pista_code, context=None):
 @router.callback_query(F.data == "volver_mochila")
 async def volver_mochila(callback: CallbackQuery):
     """Regresa al menú principal de la mochila"""
-    await mostrar_mochila_narrativa(callback.message)
+    session_factory = get_session_factory()
+    async with session_factory() as session:
+        await _mostrar_mochila_con_session(callback.message, session, user_id=callback.from_user.id)
+    await callback.answer()
+
+
+@router.callback_query(F.data == "open_backpack")
+async def open_backpack_callback(callback: CallbackQuery):
+    """Handler para abrir la mochila desde el menú principal (callback)"""
+    # El handler de callbacks necesita pasar el user_id explícitamente
+    session_factory = get_session_factory()
+    async with session_factory() as session:
+        await _mostrar_mochila_con_session(callback.message, session, user_id=callback.from_user.id)
+    await callback.answer()
+
 
 # Funciones de utilidad adicionales para estadísticas y búsqueda
 
 @router.callback_query(F.data == "stats_mochila")
 async def mostrar_estadisticas(callback: CallbackQuery):
     """Muestra estadísticas detalladas de la colección"""
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     async with session_factory() as session:
         user_id = callback.from_user.id
         
@@ -612,7 +756,7 @@ async def mostrar_estadisticas(callback: CallbackQuery):
         if first_data:
             dias_viajando = (datetime.now() - first_data[1]).days
             texto += f"\n\n🗓️ **Días como viajero:** {dias_viajando}"
-            texto += f"\n🏆 **Primera pista:** {first_data[0]}"
+            texto += f"\n🏆 **Primera pista:** {escape_markdown(first_data[0])}"
         
         keyboard = [
             [InlineKeyboardButton(text="⬅️ Volver", callback_data="volver_mochila")]
@@ -623,7 +767,7 @@ async def mostrar_estadisticas(callback: CallbackQuery):
 @router.callback_query(F.data == "sugerencias_diana")
 async def mostrar_sugerencias_diana(callback: CallbackQuery):
     """Diana da sugerencias sobre qué hacer con las pistas actuales"""
-    session_factory = await get_session()
+    session_factory = get_session_factory()
     async with session_factory() as session:
         user_id = callback.from_user.id
         
@@ -636,18 +780,23 @@ async def mostrar_sugerencias_diana(callback: CallbackQuery):
         
         # Verificar combinaciones posibles
         combinaciones_disponibles = []
-        result = await session.execute(
-            select(LorePiece.code_name)
-            .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-            .where(UserLorePiece.user_id == user_id)
-        )
-        user_codes = [row[0] for row in result.all()]
-        
-        combinaciones_result = await session.execute(select(HintCombination))
-        for combo in combinaciones_result.scalars().all():
-            required = combo.required_hints.split(",")
-            if all(code in user_codes for code in required):
-                combinaciones_disponibles.append(combo)
+        try:
+            result = await session.execute(
+                select(LorePiece.code_name)
+                .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
+                .where(UserLorePiece.user_id == user_id)
+            )
+            user_codes = [row[0] for row in result.all()]
+
+            combinaciones_result = await session.execute(select(HintCombination))
+            for combo in combinaciones_result.scalars().all():
+                required = combo.required_hints.split(",")
+                if all(code in user_codes for code in required):
+                    combinaciones_disponibles.append(combo)
+        except Exception as e:
+            # Si no existe la tabla hint_combinations, continuar sin combinaciones
+            logger.warning(f"No se pudieron cargar combinaciones: {e}")
+            combinaciones_disponibles = []
         
         # Generar sugerencia personalizada
         if count == 0:
