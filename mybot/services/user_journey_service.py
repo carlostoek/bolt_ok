@@ -58,6 +58,15 @@ class UserJourneyService:
                 )
                 self.session.add(milestone)
 
+        # QUICK WIN: Añadir milestone de onboarding progresivo
+        onboarding_milestone = UserMilestone(
+            user_id=user_id,
+            milestone_type="onboarding_complete",
+            completed=False,
+            data={"current_step": 0, "total_steps": 5}
+        )
+        self.session.add(onboarding_milestone)
+
         await self.session.commit()
         logger.info(f"Milestones inicializados para usuario {user_id}")
 
