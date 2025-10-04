@@ -87,6 +87,7 @@ class Reward(Base):
     image_url = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+    vip_days = Column(Integer, nullable=True)  # Días VIP si reward_type="vip_access"
 
 
 class UserReward(Base):
@@ -317,6 +318,19 @@ class VipSubscription(Base):
     user_id = Column(BigInteger, primary_key=True)
     expires_at = Column(DateTime, nullable=True)
     created_at = Column(DateTime, default=func.now())
+
+
+class VipGrant(Base):
+    """Registro de accesos VIP gratuitos otorgados (auditoría)."""
+    __tablename__ = "vip_grants"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(BigInteger, ForeignKey("users.id"), nullable=False)
+    days_granted = Column(Integer, nullable=False)
+    source = Column(String(50), nullable=False)  # 'narrative', 'reward', 'achievement', 'admin'
+    source_id = Column(Integer, nullable=True)  # fragment_id, reward_id, etc.
+    granted_at = Column(DateTime, default=func.now())
+    expires_at = Column(DateTime, nullable=False)
+    invite_link = Column(String(255), nullable=True)
 
 
 class UserStats(Base):

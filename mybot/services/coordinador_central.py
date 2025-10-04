@@ -75,6 +75,7 @@ class AccionUsuario(enum.Enum):
     AGREGAR_A_MOCHILA = "agregar_a_mochila"
     VERIFICAR_ACCESO_NIVEL = "verificar_acceso_nivel"
     ANALISIS_ARQUETIPO_L1 = "analisis_arquetipo_l1"
+    OTORGAR_VIP_TEMPORAL = "otorgar_vip_temporal"
 
 class CoordinadorCentral:
     """
@@ -150,6 +151,8 @@ class CoordinadorCentral:
                 return await self._flujo_verificar_acceso_nivel(user_id, **kwargs)
             elif accion == AccionUsuario.ANALISIS_ARQUETIPO_L1:
                 return await self._flujo_analisis_arquetipo_l1(user_id, **kwargs)
+            elif accion == AccionUsuario.OTORGAR_VIP_TEMPORAL:
+                return await self._flujo_otorgar_vip_temporal(user_id, **kwargs)
             else:
                 logger.warning(f"Acción no implementada: {accion}")
                 return {
@@ -1228,5 +1231,76 @@ class CoordinadorCentral:
                 "action": "archetype_analysis_error",
                 "message": error_message,
                 "fallback_archetype": fallback_archetype,
+                "error": str(e)
+            }
+
+    async def _flujo_otorgar_vip_temporal(self, user_id: int, **kwargs) -> Dict[str, Any]:
+        """
+        Flujo para otorgar acceso VIP temporal.
+
+        Este flujo permite otorgar acceso VIP gratuito por X días desde diferentes fuentes:
+        - Narrativa (recompensa por decisiones)
+        - Achievements (logros especiales)
+        - Admin (manual)
+
+        Args:
+            user_id: ID único del usuario
+            **kwargs:
+                - days (int): Días de acceso VIP (default: 1)
+                - source (str): Fuente del grant ("narrative", "achievement", "admin")
+                - source_id (int): ID de la fuente (fragment_id, achievement_id, etc.)
+                - bot (Bot): Instancia del bot para generar invite link
+
+        Returns:
+            Dict con resultado del grant y mensaje para el usuario
+        """
+        try:
+            from services.vip_grant_service import VipGrantService
+
+            days = kwargs.get("days", 1)
+            source = kwargs.get("source", "narrative")
+            source_id = kwargs.get("source_id")
+            bot = kwargs.get("bot")
+
+            if not bot:
+                logger.warning(f"Bot instance not provided for VIP grant to user {user_id}")
+                return {
+                    "success": False,
+                    "message": "No se pudo otorgar el acceso VIP (bot no disponible)",
+                    "action": "vip_grant_no_bot"
+                }
+
+            vip_grant = VipGrantService(self.session)
+            success, message = await vip_grant.grant_vip_access(
+                user_id=user_id,
+                days=days,
+                source=source,
+                source_id=source_id,
+                bot=bot
+            )
+
+            if success:
+                logger.info(f"VIP grant successful for user {user_id} from source {source}")
+                return {
+                    "success": True,
+                    "message": message,
+                    "action": "vip_granted",
+                    "days": days,
+                    "source": source
+                }
+            else:
+                logger.error(f"VIP grant failed for user {user_id}: {message}")
+                return {
+                    "success": False,
+                    "message": message,
+                    "action": "vip_grant_failed"
+                }
+
+        except Exception as e:
+            logger.exception(f"Error en flujo de otorgar VIP temporal para usuario {user_id}: {str(e)}")
+            return {
+                "success": False,
+                "action": "vip_grant_error",
+                "message": "Error al otorgar acceso VIP. Contacta a soporte.",
                 "error": str(e)
             }

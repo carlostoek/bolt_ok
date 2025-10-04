@@ -11,6 +11,32 @@ import logging
 logger = logging.getLogger(__name__)
 router = Router()
 
+@router.message(F.text == "🏠 Inicio")
+async def handle_home_button(message: Message, session: AsyncSession):
+    """Abre el menú principal inline."""
+    from utils.user_roles import get_user_role
+    from utils.menu_manager import menu_manager
+    from utils.menu_factory import menu_factory
+
+    user_id = message.from_user.id
+    role = await get_user_role(message.bot, user_id, session=session)
+
+    try:
+        # Crear el menú principal según el rol
+        text, keyboard = await menu_factory.create_menu("main", user_id, session, message.bot)
+
+        # Enviar el menú inline
+        await menu_manager.send_menu(
+            message,
+            text,
+            keyboard,
+            session,
+            "main"
+        )
+    except Exception as e:
+        logger.error(f"Error showing main menu for user {user_id}: {e}", exc_info=True)
+        await message.answer("❌ Error al cargar el menú principal. Intenta /start")
+
 @router.message(F.text == "🎒 Mochila")
 async def handle_backpack_button(message: Message, session: AsyncSession):
     # Directly call the lore handler function

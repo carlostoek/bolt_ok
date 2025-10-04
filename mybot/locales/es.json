@@ -9,7 +9,8 @@
     "button_missions": "🎯 Misiones",
     "button_story": "📖 Historia",
     "button_settings": "⚙️ Ajustes",
-    "button_help": "❓ Ayuda"
+    "button_help": "❓ Ayuda",
+    "button_home": "🏠 Inicio"
   },
   "generic_errors": {
     "unknown_command": "Lucien inclina la cabeza con elegancia: *«Disculpa, pero esa orden no figura en mis registros. Quizá quieras usar los botones… o empezar de nuevo con /start.»*",
@@ -37,7 +38,7 @@
     "button_previous": "⬅️ Anterior",
     "button_next": "➡️ Siguiente",
     "button_refresh": "🔄 Renovar",
-    "button_main_menu": "🏠 Regresar al Salón"
+    "button_main_menu": "🏠 Menú Principal"
   },
   "narrative": {
     "keyboard": {
