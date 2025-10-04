@@ -132,7 +132,8 @@ class NarrativeService:
 
         source_fragment_key = (await self.get_user_current_fragment(user_id)).key
 
-        next_fragment = await self._get_fragment_by_key(decision.destination_fragment_key)
+        # CRITICAL: Pasar user_id para seleccionar variante por arquetipo
+        next_fragment = await self._get_fragment_by_key(decision.destination_fragment_key, user_id=user_id)
         if not next_fragment:
             logger.error(f"Fragmento de destino no encontrado: {decision.destination_fragment_key}")
             return None
@@ -279,11 +280,58 @@ class NarrativeService:
         
         return user_state
 
-    async def _get_fragment_by_key(self, key: str) -> Optional[StoryFragment]:
-        """Obtiene un fragmento por su clave única."""
+    async def _get_fragment_by_key(self, key: str, user_id: int = None) -> Optional[StoryFragment]:
+        """
+        Obtiene un fragmento por su clave única, con soporte para variantes por arquetipo.
+
+        Si se proporciona user_id, busca primero la variante específica del arquetipo del usuario.
+        Si no existe variante o el usuario no tiene arquetipo, retorna el fragmento genérico.
+
+        Args:
+            key: Clave base del fragmento
+            user_id: ID del usuario (opcional, para variantes por arquetipo)
+
+        Returns:
+            StoryFragment o None
+        """
+        # Si no hay user_id, retornar fragmento genérico
+        if not user_id:
+            stmt = select(StoryFragment).where(StoryFragment.key == key)
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+
+        # Obtener arquetipo del usuario
+        from utils.archetype_analyzer import analyze_user_archetype
+
+        user_state = await self._get_or_create_user_state(user_id)
+        choices_made = user_state.choices_made or []
+        archetype = analyze_user_archetype(choices_made)
+
+        # Si el arquetipo está indeterminado o es balanced, usar fragmento genérico
+        if archetype in ["undetermined", "balanced"]:
+            stmt = select(StoryFragment).where(StoryFragment.key == key)
+            result = await self.session.execute(stmt)
+            return result.scalar_one_or_none()
+
+        # Buscar variante específica del arquetipo
+        variant_key = f"{key}_{archetype}"
+        stmt_variant = select(StoryFragment).where(StoryFragment.key == variant_key)
+        result_variant = await self.session.execute(stmt_variant)
+        variant_fragment = result_variant.scalar_one_or_none()
+
+        if variant_fragment:
+            logger.info(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → variant fragment: {variant_key}")
+            return variant_fragment
+
+        # Si no existe variante, retornar fragmento genérico
         stmt = select(StoryFragment).where(StoryFragment.key == key)
         result = await self.session.execute(stmt)
-        return result.scalar_one_or_none()
+        generic_fragment = result.scalar_one_or_none()
+
+        if generic_fragment:
+            logger.debug(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → generic fragment: {key} (no variant found)")
+
+        return generic_fragment
 
     async def _get_fragment_choices(self, fragment_id: int) -> List[NarrativeChoice]:
         """Obtiene las opciones de decisión para un fragmento."""
@@ -388,11 +436,34 @@ class NarrativeService:
                 await ach_service._grant(user_id, achievement, bot=self.bot)
 
     async def _count_accessible_fragments(self, user_id: int) -> int:
-        """Cuenta los fragmentos accesibles para el usuario."""
-        # This is a simplified count. A more accurate one would traverse the graph.
-        stmt = select(func.count(StoryFragment.id))
-        result = await self.session.execute(stmt)
-        return result.scalar_one()
+        """
+        Cuenta los fragmentos en el camino único del usuario.
+
+        En lugar de contar TODOS los fragmentos (37 total), cuenta solo
+        los fragmentos que el usuario ha visitado + los que podría visitar
+        desde su posición actual (basado en choices disponibles).
+
+        Para simplicidad: retorna fragments_visited + opciones disponibles.
+        """
+        user_state = await self._get_or_create_user_state(user_id)
+
+        # Fragmentos que ya visitó
+        visited = user_state.fragments_visited or 0
+
+        # Si no ha empezado, estimar ~10 fragmentos en un camino típico
+        if visited == 0:
+            return 10
+
+        # Obtener fragmento actual y contar opciones disponibles
+        current_fragment = await self._get_fragment_by_key(user_state.current_fragment_key)
+        if current_fragment:
+            choices = await self._get_fragment_choices(current_fragment.id)
+            available_paths = len(choices)
+            # Estimación: fragmentos visitados + opciones disponibles + margen
+            return visited + available_paths + 3
+
+        # Fallback: solo lo que ha visitado + pequeño margen
+        return visited + 2
 
     async def unlock_lore_piece(self, user_id: int, lore_piece_id: int) -> bool:
         """
