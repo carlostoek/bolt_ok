@@ -218,6 +218,53 @@ class NarrativeService:
             "can_go_back": await self.can_go_back(user_id)
         }
 
+    async def get_user_archetype(self, user_id: int) -> str:
+        """
+        Obtiene el arquetipo del usuario basado en sus decisiones narrativas.
+
+        El arquetipo se determina después de 3 decisiones y permanece fijo.
+        Es invisible para el usuario pero se usa para personalización.
+
+        Returns:
+            str: Código del arquetipo ("adventurer", "romantic", "balanced", "explorer", "undetermined")
+        """
+        from utils.archetype_analyzer import analyze_user_archetype
+
+        user_state = await self._get_or_create_user_state(user_id)
+        choices_made = user_state.choices_made or []
+
+        archetype = analyze_user_archetype(choices_made)
+
+        # Log para analytics (sin exponer al usuario)
+        if archetype != "undetermined":
+            logger.info(f"[ARCHETYPE] User {user_id} classified as '{archetype}' after {len(choices_made)} decisions")
+
+        return archetype
+
+    async def get_user_archetype_info(self, user_id: int) -> Dict[str, Any]:
+        """
+        Obtiene información completa del arquetipo del usuario (para admin/debug).
+
+        Returns:
+            Dict con archetype, emoji, name, description, decisions_count
+        """
+        from utils.archetype_analyzer import get_archetype_info, debug_archetype_analysis
+
+        user_state = await self._get_or_create_user_state(user_id)
+        choices_made = user_state.choices_made or []
+
+        # Análisis detallado
+        analysis = debug_archetype_analysis(choices_made)
+
+        return {
+            "archetype_code": analysis["archetype"],
+            "emoji": analysis["archetype_info"]["emoji"],
+            "name": analysis["archetype_info"]["name"],
+            "description": analysis["archetype_info"]["description"],
+            "decisions_count": analysis["decisions_analyzed"],
+            "tag_distribution": analysis["tag_counts"]
+        }
+
     async def _get_or_create_user_state(self, user_id: int) -> UserNarrativeState:
         """Obtiene o crea el estado narrativo del usuario."""
         stmt = select(UserNarrativeState).where(UserNarrativeState.user_id == user_id)
