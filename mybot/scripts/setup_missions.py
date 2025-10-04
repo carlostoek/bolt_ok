@@ -218,7 +218,8 @@ MISSIONS = [
                 "description": (
                     "Visita el bot todos los días de esta semana.\n\n"
                     "💪 Diana valora la dedicación por sobre todo\n"
-                    "📆 7 días consecutivos"
+                    "📆 7 días consecutivos\n\n"
+                    "💎 Misión exclusiva VIP"
                 ),
                 "reward_points": 100,
                 "type": "weekly",
@@ -226,7 +227,7 @@ MISSIONS = [
                 "icon_emoji": "🔥",
                 "difficulty_level": 3,
                 "mission_category": "competitive",
-                "tags": ["weekly", "challenge"],
+                "tags": ["weekly", "challenge", "vip"],
                 "repeatable": True,
                 "reset_period": "weekly",
                 "lore_piece": {
@@ -252,7 +253,8 @@ MISSIONS = [
                 "description": (
                     "Desbloquea 5 pistas narrativas esta semana.\n\n"
                     "🔍 Cada secreto te acerca más a Diana\n"
-                    "🎯 Meta: 5 LorePieces"
+                    "🎯 Meta: 5 LorePieces\n\n"
+                    "💎 Misión exclusiva VIP"
                 ),
                 "reward_points": 80,
                 "type": "weekly",
@@ -260,7 +262,7 @@ MISSIONS = [
                 "icon_emoji": "📚",
                 "difficulty_level": 4,
                 "mission_category": "narrative",
-                "tags": ["weekly", "collection"],
+                "tags": ["weekly", "collection", "vip"],
                 "repeatable": True,
                 "reset_period": "weekly"
             },
@@ -429,7 +431,8 @@ MISSIONS = [
                 "description": (
                     "Lee 10 fragmentos narrativos sin tomar ninguna decisión inmediata.\n\n"
                     "💭 A veces el silencio dice más que mil palabras\n"
-                    "🤫 Diana aprecia a quienes saben escuchar"
+                    "🤫 Diana aprecia a quienes saben escuchar\n\n"
+                    "💎 Misión exclusiva VIP"
                 ),
                 "reward_points": 50,
                 "type": "one_time",
@@ -437,7 +440,7 @@ MISSIONS = [
                 "icon_emoji": "🤐",
                 "difficulty_level": 3,
                 "mission_category": "secret",
-                "tags": ["secret", "narrative", "patience"],
+                "tags": ["secret", "narrative", "patience", "vip"],
                 "is_hidden": True,
                 "lore_piece": {
                     "code_name": "arte_escuchar",
