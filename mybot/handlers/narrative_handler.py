@@ -145,8 +145,32 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
     user_id = callback.from_user.id
 
     try:
-        # Immediate feedback to user (UX improvement)
-        await callback.answer("✨ Procesando tu decisión...")
+        # Immediate feedback to user with emotional response (UX improvement)
+        await callback.answer("🌸 Diana siente tu elección...")
+        
+        # Show visual processing feedback with Diana's voice
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        processing_builder = InlineKeyboardBuilder()
+        processing_builder.button(text="⏳ Pensando en tu decisión...", callback_data="noop")
+        
+        # Get current fragment to show character context
+        service = NarrativeService(session, callback.bot)
+        current_fragment = await service.get_user_current_fragment(user_id)
+        
+        character_emoji = "🎩" if current_fragment and current_fragment.character == "Lucien" else "🌸"
+        processing_text = f"{character_emoji} *{current_fragment.character if current_fragment else 'Diana'}*:\n\n"
+        processing_text += "Siento tu elección... déjame ver qué nos depara el destino..."
+        
+        # Update message with processing feedback
+        try:
+            await callback.message.edit_text(
+                processing_text,
+                reply_markup=processing_builder.as_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception:
+            # If message edit fails, continue with the flow
+            pass
 
         # Extraer índice de la decisión
         choice_data = callback.data.split(":")
@@ -156,10 +180,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
 
         choice_index = int(choice_data[1])
 
-        service = NarrativeService(session, callback.bot)
-
         # Get current fragment and choices to check for special decisions
-        current_fragment = await service.get_user_current_fragment(user_id)
         if current_fragment:
             choices = await service._get_fragment_choices(current_fragment.id)
             if 0 <= choice_index < len(choices):
@@ -236,15 +257,18 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
 
         if not next_fragment:
             # Get detailed requirements info
-            can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
-
-            # Build detailed message with requirements
-            await _show_requirements_message(callback, requirements_info, session)
+            # We need to get selected_choice again for requirements check
+            if current_fragment and 0 <= choice_index < len(choices):
+                selected_choice = choices[choice_index]
+                can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
+                
+                # Build detailed message with requirements
+                await _show_requirements_message(callback, requirements_info, session)
             return
 
-        # Mostrar siguiente fragmento
+        # Mostrar siguiente fragmento con feedback emocional
+        await callback.answer("✨ Tu decisión ha sido escuchada...")
         await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
-        await callback.answer()
 
         # ========================================
         # MEJORA #3: TRIGGER DE SESIÓN INDIVIDUAL
@@ -274,8 +298,28 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
     user_id = callback.from_user.id
 
     try:
-        # Immediate feedback to user (UX improvement)
-        await callback.answer("✨ Procesando tu decisión...")
+        # Immediate emotional feedback to user (UX improvement)
+        await callback.answer("🌸 Diana siente tu elección...")
+        
+        # Show visual processing feedback with Diana's voice
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        processing_builder = InlineKeyboardBuilder()
+        processing_builder.button(text="⏳ Analizando tu elección...", callback_data="noop")
+        
+        processing_text = f"🌸 **Diana**:\n\n"
+        processing_text += "¡Qué interesante elección! Cada decisión me dice más de ti...\n\n"
+        processing_text += "*Diana sonríe con curiosidad...*"
+        
+        # Update message with processing feedback
+        try:
+            await callback.message.edit_text(
+                processing_text,
+                reply_markup=processing_builder.as_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception:
+            # If message edit fails, continue with the flow
+            pass
 
         # Extraer índice de la elección
         choice_data = callback.data.split(":")
@@ -313,7 +357,7 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
         # Continuar a siguiente fragmento según la elección
         await _process_enhanced_l1f1_followup(callback, choice_index, enhanced_fragment, session)
 
-        await callback.answer(get_text("narrative.handler.choice_registered"))
+        await callback.answer("✨ Tu elección ha sido registrada... Diana sonríe")
 
     except ValueError:
         await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
