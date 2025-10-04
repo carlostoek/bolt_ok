@@ -109,6 +109,7 @@ class GamificationMiddleware(BaseMiddleware):
                     
                     # Enviar mensaje de racha
                     try:
+                        from utils.messages import get_daily_streak_message
                         streak_message = get_daily_streak_message(current_streak)
                         await bot.send_message(user.id, streak_message, parse_mode="Markdown")
                     except Exception as e:
