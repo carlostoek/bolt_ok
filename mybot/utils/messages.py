@@ -464,6 +464,58 @@ VIP_PRODUCTS_MESSAGES = {
     ),
 }
 
+# ============================================================================
+# EMPTY STATES MOTIVACIONALES - QUICK WIN
+# ============================================================================
+
+EMPTY_STATES_MESSAGES = {
+    "missions_empty": {
+        "title": "🎯 Sin desafíos activos",
+        "message": "Por ahora no hay desafíos disponibles, pero pronto habrá novedades.\n\n💡 **¿Qué puedes hacer?**\n• Revisa tu progreso en /profile\n• Explora la narrativa con /start\n• Visita la tienda con /shop",
+        "cta": "📖 Continuar historia"
+    },
+    "achievements_empty": {
+        "title": "🏅 Tu colección de logros",
+        "message": "Aún no hay logros, pero confío en que los obtendrás.\n\n✨ **Próximos logros disponibles:**\n• **Primer paso**: Envía tu primer mensaje\n• **Explorador**: Completa 3 fragmentos narrativos\n• **Social**: Reacciona a 5 publicaciones",
+        "cta": "🎭 Comenzar aventura"
+    },
+    "shop_empty": {
+        "title": "🛍️ Tienda temporalmente vacía",
+        "message": "Por ahora no hay recompensas disponibles. Pero pronto sí.\n\n💎 **Próximamente:**\n• Contenido exclusivo de Diana\n• Accesos VIP temporales\n• Sesiones personalizadas\n\n💝 Mientras tanto, acumula besitos completando misiones.",
+        "cta": "📋 Ver misiones"
+    },
+    "inventory_empty": {
+        "title": "🎒 Tu mochila está vacía",
+        "message": "Aún no has coleccionado items especiales.\n\n🔮 **Cómo obtener items:**\n• Completa misiones desafiantes\n• Participa en eventos especiales\n• Desbloquea finales secretos\n• Gana subastas exclusivas",
+        "cta": "🎯 Buscar misiones"
+    },
+    "ranking_empty": {
+        "title": "🏆 Sé el primero en liderar",
+        "message": "Aún no hay datos en el ranking. Sea usted el primero en aparecer.\n\n⚡ **Cómo subir en el ranking:**\n• Completa misiones diarias\n• Reacciona a publicaciones\n• Invita amigos al canal\n• Participa en eventos",
+        "cta": "⭐ Ganar puntos"
+    }
+}
+
+def get_empty_state_message(context: str, user_points: int = 0) -> str:
+    """Obtiene un mensaje motivacional para estados vacíos"""
+    empty_data = EMPTY_STATES_MESSAGES.get(context, {
+        "title": "📭 Sin contenido",
+        "message": "No hay elementos para mostrar en este momento.",
+        "cta": "🏠 Menú principal"
+    })
+    
+    message = f"**{empty_data['title']}**\n\n{empty_data['message']}"
+    
+    # Personalizar basado en puntos del usuario
+    if user_points > 0 and context == "shop_empty":
+        message += f"\n\n💰 **Tienes {user_points} besitos listos para gastar**"
+    
+    return message
+
+def get_empty_state_cta(context: str) -> str:
+    """Obtiene el CTA para el estado vacío"""
+    return EMPTY_STATES_MESSAGES.get(context, {}).get("cta", "🏠 Menú principal")
+
 # Admin Notifications (for internal tracking)
 ADMIN_NOTIFICATION_TEMPLATES = {
     "besitos_interest": (
@@ -498,8 +550,52 @@ ADMIN_NOTIFICATION_TEMPLATES = {
     ),
 }
 
+# ============================================================================
+# LOADING STATES CONTEXTUALES - QUICK WIN
+# ============================================================================
+
+LOADING_MESSAGES = {
+    "emotional_analysis": [
+        "💭 Diana está analizando tus emociones...",
+        "🔍 Lucien estudia tu respuesta con atención...",
+        "🎭 Detectando los matices en tu mensaje...",
+        "✨ Tu esencia está siendo procesada..."
+    ],
+    "archetype_detection": [
+        "🎯 Identificando tu arquetipo dominante...",
+        "🔮 Diana busca patrones en tu personalidad...",
+        "📊 Analizando tus elecciones anteriores...",
+        "💫 Tu esencia única está siendo revelada..."
+    ],
+    "content_loading": [
+        "📸 Preparando contenido especial para ti...",
+        "🎁 Diana selecciona algo perfecto...",
+        "✨ Cargando momentos mágicos...",
+        "💋 Preparando sorpresas sensuales..."
+    ],
+    "narrative_progression": [
+        "📖 Avanzando en tu historia personal...",
+        "🎭 Diana prepara el siguiente fragmento...",
+        "✨ Tu camino se desvela...",
+        "💫 Transicionando a nuevas experiencias..."
+    ],
+    "general_processing": [
+        "⚡ Procesando tu solicitud...",
+        "💭 Diana está pensando...",
+        "✨ Trabajando en tu respuesta...",
+        "🎯 Preparando algo especial..."
+    ]
+}
+
+def get_loading_message(context: str) -> str:
+    """Obtiene un mensaje de loading contextual aleatorio"""
+    import random
+    messages = LOADING_MESSAGES.get(context, LOADING_MESSAGES["general_processing"])
+    return random.choice(messages)
+
 # Update BOT_MESSAGES with new categories
 BOT_MESSAGES.update(BESITOS_MESSAGES)
 BOT_MESSAGES.update(SESSION_MESSAGES)
 BOT_MESSAGES.update(UPSELL_MESSAGES)
 BOT_MESSAGES.update(VIP_PRODUCTS_MESSAGES)
+BOT_MESSAGES.update(LOADING_MESSAGES)
