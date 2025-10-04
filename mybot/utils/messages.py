@@ -202,7 +202,87 @@ BOT_MESSAGES = {
     **MISSION_MESSAGES,
 }
 
-# Badge descriptions
+# ============================================================================
+# GAMIFICATION SYSTEM - STRATEGIC ENHANCEMENT
+# ============================================================================
+
+MICRO_INTERACTION_BADGES = {
+    "early_bird": {
+        "name": "🐦 Early Bird",
+        "description": "Interactúa con el bot por 3 días consecutivos",
+        "points_reward": 50,
+        "icon": "🐦"
+    },
+    "story_explorer": {
+        "name": "📖 Explorador de Historias", 
+        "description": "Completa 5 fragmentos narrativos diferentes",
+        "points_reward": 100,
+        "icon": "📖"
+    },
+    "mission_master": {
+        "name": "🎯 Maestro de Misiones",
+        "description": "Completa 10 misiones exitosamente",
+        "points_reward": 150,
+        "icon": "🎯"
+    },
+    "shop_enthusiast": {
+        "name": "🛍️ Entusiasta de la Tienda",
+        "description": "Realiza tu primera compra en la tienda",
+        "points_reward": 75,
+        "icon": "🛍️"
+    },
+    "reaction_king": {
+        "name": "❤️ Rey de las Reacciones",
+        "description": "Reacciona a 20 publicaciones diferentes",
+        "points_reward": 80,
+        "icon": "❤️"
+    },
+    "vip_curious": {
+        "name": "💎 Curioso VIP",
+        "description": "Consulta el menú VIP por primera vez",
+        "points_reward": 25,
+        "icon": "💎"
+    },
+    "social_butterfly": {
+        "name": "🦋 Mariposa Social",
+        "description": "Invita a 3 amigos al canal",
+        "points_reward": 120,
+        "icon": "🦋"
+    }
+}
+
+DAILY_STREAK_MESSAGES = {
+    "streak_1": "🔥 **¡Día 1!** Tu aventura comienza. Vuelve mañana.",
+    "streak_3": "🔥 **¡Racha de 3 días!** Diana nota tu dedicación. +50 besitos extra.",
+    "streak_7": "🔥 **¡Racha de 7 días!** Eres un habitante del Diván. +100 besitos extra.",
+    "streak_30": "🔥 **¡Racha de 30 días!** Leyenda viviente. +500 besitos extra y badge exclusivo.",
+}
+
+def get_badge_unlock_message(badge_key: str) -> str:
+    """Genera mensaje de desbloqueo de badge"""
+    badge = MICRO_INTERACTION_BADGES.get(badge_key, {})
+    return (
+        f"🏅 **¡Badge Desbloqueado!**\n\n"
+        f"{badge.get('icon', '⭐')} **{badge.get('name', 'Nuevo Logro')}**\n"
+        f"📝 {badge.get('description', '')}\n\n"
+        f"💰 **Recompensa:** +{badge.get('points_reward', 0)} besitos\n"
+        f"✨ ¡Sigue explorando para desbloquear más!"
+    )
+
+def get_daily_streak_message(streak_days: int) -> str:
+    """Genera mensaje de racha diaria"""
+    if streak_days == 1:
+        return DAILY_STREAK_MESSAGES["streak_1"]
+    elif streak_days == 3:
+        return DAILY_STREAK_MESSAGES["streak_3"] 
+    elif streak_days == 7:
+        return DAILY_STREAK_MESSAGES["streak_7"]
+    elif streak_days == 30:
+        return DAILY_STREAK_MESSAGES["streak_30"]
+    else:
+        return f"🔥 **¡Racha de {streak_days} días consecutivos!** Sigue así."
+
+# Badge descriptions (originales + nuevas)
 BADGE_TEXTS = {
     "first_message": {
         "name": "Primer Mensaje",
@@ -213,9 +293,10 @@ BADGE_TEXTS = {
         "description": "Alcanza 100 mensajes enviados",
     },
     "invitador": {
-        "name": "Invitador",
+        "name": "Invitador", 
         "description": "Consigue 5 invitaciones exitosas",
     },
+    **MICRO_INTERACTION_BADGES
 }
 
 NIVEL_TEMPLATE = """

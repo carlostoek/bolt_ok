@@ -8,7 +8,7 @@ Maneja la progresión automática del usuario a través de los milestones:
 """
 import logging
 from datetime import datetime, timedelta
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 from aiogram import Bot
@@ -58,14 +58,38 @@ class UserJourneyService:
                 )
                 self.session.add(milestone)
 
-        # QUICK WIN: Añadir milestone de onboarding progresivo
+        # STRATEGIC: Sistema de onboarding progresivo mejorado
         onboarding_milestone = UserMilestone(
             user_id=user_id,
             milestone_type="onboarding_complete",
             completed=False,
-            data={"current_step": 0, "total_steps": 5}
+            data={
+                "current_step": 0, 
+                "total_steps": 5,
+                "steps_completed": [],
+                "last_interaction": datetime.utcnow().isoformat(),
+                "personalized_tips": []
+            }
         )
         self.session.add(onboarding_milestone)
+        
+        # Crear steps individuales de onboarding para tracking granular
+        onboarding_steps = [
+            {"step_type": "welcome", "completed": False, "data": {}},
+            {"step_type": "narrative_intro", "completed": False, "data": {}},
+            {"step_type": "missions_intro", "completed": False, "data": {}},
+            {"step_type": "points_explained", "completed": False, "data": {}},
+            {"step_type": "first_interaction", "completed": False, "data": {}},
+        ]
+        
+        for step_data in onboarding_steps:
+            step = UserMilestone(
+                user_id=user_id,
+                milestone_type=f"onboarding_{step_data['step_type']}",
+                completed=step_data["completed"],
+                data=step_data["data"]
+            )
+            self.session.add(step)
 
         await self.session.commit()
         logger.info(f"Milestones inicializados para usuario {user_id}")
@@ -172,6 +196,148 @@ class UserJourneyService:
         milestone = result.scalar_one_or_none()
 
         return milestone.completed if milestone else False
+
+    async def get_next_onboarding_step(self, user_id: int) -> Dict[str, Any]:
+        """
+        Obtiene el siguiente paso de onboarding para el usuario
+        STRATEGIC: Sistema de onboarding progresivo inteligente
+        """
+        stmt = select(UserMilestone).where(
+            and_(
+                UserMilestone.user_id == user_id,
+                UserMilestone.milestone_type.like("onboarding_%"),
+                UserMilestone.completed == False
+            )
+        ).order_by(UserMilestone.id)
+        
+        result = await self.session.execute(stmt)
+        next_step = result.scalars().first()
+        
+        if next_step:
+            return {
+                "step_type": next_step.milestone_type.replace("onboarding_", ""),
+                "milestone": next_step
+            }
+        return None
+
+    async def complete_onboarding_step(self, user_id: int, step_type: str, data: Dict = None) -> bool:
+        """
+        Marca un paso de onboarding como completado
+        """
+        stmt = select(UserMilestone).where(
+            and_(
+                UserMilestone.user_id == user_id,
+                UserMilestone.milestone_type == f"onboarding_{step_type}"
+            )
+        )
+        
+        result = await self.session.execute(stmt)
+        step = result.scalar_one_or_none()
+        
+        if step:
+            step.completed = True
+            step.completed_at = datetime.utcnow()
+            if data:
+                step.data = data
+            await self.session.commit()
+            
+            # Actualizar milestone principal de onboarding
+            main_stmt = select(UserMilestone).where(
+                and_(
+                    UserMilestone.user_id == user_id,
+                    UserMilestone.milestone_type == "onboarding_complete"
+                )
+            )
+            main_result = await self.session.execute(main_stmt)
+            main_milestone = main_result.scalar_one_or_none()
+            
+            if main_milestone:
+                current_data = main_milestone.data or {}
+                completed_steps = current_data.get("steps_completed", [])
+                completed_steps.append(step_type)
+                current_data["steps_completed"] = completed_steps
+                current_data["current_step"] = len(completed_steps)
+                main_milestone.data = current_data
+                
+                # Marcar como completado si todos los steps están hechos
+                if len(completed_steps) >= current_data.get("total_steps", 5):
+                    main_milestone.completed = True
+                    main_milestone.completed_at = datetime.utcnow()
+                
+                await self.session.commit()
+            
+            return True
+        return False
+
+    async def send_contextual_onboarding_message(self, user: User, bot: Bot, context: str) -> bool:
+        """
+        Envía mensajes de onboarding contextuales basados en la interacción del usuario
+        STRATEGIC: Anticipación inteligente en onboarding
+        """
+        try:
+            onboarding_messages = {
+                "first_narrative_interaction": {
+                    "message": (
+                        "💫 **¡Excelente elección!**\n\n"
+                        "Acabas de descubrir tu primer fragmento narrativo. "
+                        "Cada elección que hagas revela más sobre tu historia personal.\n\n"
+                        "✨ **Tip:** Completa misiones para desbloquear más fragmentos rápidamente."
+                    ),
+                    "step_to_complete": "narrative_intro"
+                },
+                "first_mission_complete": {
+                    "message": (
+                        "🎯 **¡Primera misión completada!**\n\n"
+                        "Has ganado tus primeros besitos. "
+                        "Estos te permitirán acceder a contenido exclusivo y recompensas especiales.\n\n"
+                        "💰 **Tip:** Acumula besitos para desbloquear sets fotográficos y experiencias únicas."
+                    ),
+                    "step_to_complete": "missions_intro"
+                },
+                "first_points_earned": {
+                    "message": (
+                        "💰 **¡Besitos ganados!**\n\n"
+                        "Los besitos son tu moneda en este mundo. "
+                        "Úsalos para:\n"
+                        "• Desbloquear contenido exclusivo\n"
+                        "• Participar en subastas\n"
+                        "• Comprar en la tienda\n\n"
+                        "🛍️ **Tip:** Visita /shop para ver las recompensas disponibles."
+                    ),
+                    "step_to_complete": "points_explained"
+                },
+                "first_shop_visit": {
+                    "message": (
+                        "🛍️ **Bienvenido a la tienda**\n\n"
+                        "Aquí puedes canjear tus besitos por recompensas exclusivas.\n\n"
+                        "💎 **Recomendación:** Comienza con los sets básicos "
+                        "y ve subiendo según acumules más besitos.\n\n"
+                        "✨ **Próximo paso:** ¡Sigue explorando la narrativa!"
+                    ),
+                    "step_to_complete": None  # No specific step, just guidance
+                }
+            }
+            
+            if context in onboarding_messages:
+                message_data = onboarding_messages[context]
+                
+                await bot.send_message(
+                    user.id,
+                    message_data["message"],
+                    parse_mode="Markdown"
+                )
+                
+                # Completar step si corresponde
+                if message_data["step_to_complete"]:
+                    await self.complete_onboarding_step(user.id, message_data["step_to_complete"])
+                
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error enviando onboarding contextual para usuario {user.id}: {e}")
+            return False
 
     async def process_day_1_milestone(self, user: User, bot: Bot) -> bool:
         """
@@ -385,6 +551,90 @@ class UserJourneyService:
 
         except Exception as e:
             logger.error(f"Error procesando day_30 milestone para usuario {user.id}: {e}")
+            return False
+
+    async def get_intelligent_suggestions(self, user_id: int) -> List[Dict[str, str]]:
+        """
+        Genera sugerencias inteligentes basadas en el comportamiento del usuario
+        STRATEGIC: Sistema de anticipación inteligente
+        """
+        suggestions = []
+        
+        # Obtener datos del usuario
+        user_stmt = select(User).where(User.id == user_id)
+        user_result = await self.session.execute(user_stmt)
+        user = user_result.scalar_one_or_none()
+        
+        if not user:
+            return suggestions
+        
+        # Sugerencia basada en puntos acumulados
+        if user.points >= 1000 and user.points < 5000:
+            suggestions.append({
+                "type": "shop_reminder",
+                "title": "🎁 Tienes besitos para gastar",
+                "message": f"Tienes {user.points} besitos acumulados. ¡Visita la tienda para reclamar recompensas!",
+                "action": "/shop"
+            })
+        
+        # Sugerencia basada en tiempo desde última interacción
+        from datetime import datetime
+        if user.last_interaction:
+            time_diff = datetime.utcnow() - user.last_interaction
+            if time_diff.days >= 2:
+                suggestions.append({
+                    "type": "re_engagement",
+                    "title": "💫 Te extrañamos",
+                    "message": "Tu historia te espera. ¿Quieres continuar donde lo dejaste?",
+                    "action": "/start"
+                })
+        
+        # Sugerencia basada en progreso de misiones
+        from services.mission_service import MissionService
+        mission_service = MissionService(self.session)
+        active_missions = await mission_service.get_active_missions(user_id)
+        
+        if len(active_missions) == 0:
+            suggestions.append({
+                "type": "mission_suggestion", 
+                "title": "🎯 Nuevos desafíos disponibles",
+                "message": "Hay nuevas misiones esperándote. ¡Complétalas para ganar más besitos!",
+                "action": "/missions"
+            })
+        
+        return suggestions
+
+    async def send_intelligent_suggestions(self, user: User, bot: Bot, trigger: str = "automatic") -> bool:
+        """
+        Envía sugerencias inteligentes al usuario basadas en su comportamiento
+        """
+        try:
+            suggestions = await self.get_intelligent_suggestions(user.id)
+            
+            if suggestions:
+                # Seleccionar la sugerencia más relevante (por ahora la primera)
+                suggestion = suggestions[0]
+                
+                message = f"**{suggestion['title']}**\n\n{suggestion['message']}"
+                
+                if trigger == "automatic":
+                    # En automático, ser más discreto
+                    message += f"\n\n💡 *Sugerencia: Usa* `{suggestion['action']}` *para continuar*"
+                else:
+                    # En respuesta a interacción, ser más directo
+                    message += f"\n\n✨ *¿Te gustaría probar* `{suggestion['action']}` *ahora?*"
+                
+                await bot.send_message(
+                    user.id,
+                    message,
+                    parse_mode="Markdown"
+                )
+                return True
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"Error enviando sugerencias inteligentes para usuario {user.id}: {e}")
             return False
 
     async def process_all_milestones(self, bot: Bot) -> Dict[str, int]:
