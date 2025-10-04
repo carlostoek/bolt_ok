@@ -130,8 +130,9 @@ class GamificationMiddleware(BaseMiddleware):
         if event.text and event.text.startswith('/'):
             command = event.text.split()[0]
             if command in ['/start', '/missions', '/shop', '/profile']:
+                command_name = command[1:]  # Remove the leading '/'
                 await journey_service.send_contextual_onboarding_message(
-                    user, bot, f"first_{command[1:]_visit"
+                    user, bot, f"first_{command_name}_visit"
                 )
 
     async def _process_callback_interaction(self, event, user, journey_service, point_service, bot):
@@ -142,3 +143,9 @@ class GamificationMiddleware(BaseMiddleware):
         if callback_data and "mission" in callback_data:
             # El usuario está interactuando con misiones
             await journey_service.complete_onboarding_step(user.id, "first_interaction")
+            
+        # También detectar interacciones con la tienda
+        if callback_data and "shop" in callback_data:
+            await journey_service.send_contextual_onboarding_message(
+                user, bot, "first_shop_visit"
+            )
