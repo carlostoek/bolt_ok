@@ -83,31 +83,8 @@ def get_welcome_approved_message(username: str = None) -> str:
 
 {greeting}, su solicitud ha sido **aprobada**.
 
-Ya tiene acceso completo al canal gratuito del Diván de Diana.
-
-Ahora, permítame presentarle formalmente a la dueña de este establecimiento...
-
----
-
-🌸 **Diana te da la bienvenida**
-
-_Hola, mi kinky. Qué emoción que estés aquí._
-
-_Este es mi espacio, donde lo especial sucede. Aquí encontrarás contenido gratuito, pero también... mucho más._
-
-_Si quieres conocerme de verdad, tienes dos opciones:_
-
-💎 **Modo VIP**: Acceso completo a todo mi contenido sin censura, videos explícitos, historias diarias y descuentos especiales.
-
-📖 **La Historia**: Una experiencia narrativa única donde tus decisiones importan. Gana besitos, desbloquea contenido y descubre secretos.
-
----
-
-🎩 **Lucien nuevamente**
-
-¿Por dónde desea comenzar su experiencia en el Diván?
-
-Use el menú principal del bot para explorar todas las opciones disponibles."""
+Ya tiene acceso completo a
+✨🔞 **𝕃𝕠𝕤 𝕂𝕚𝕟𝕜𝕪𝕤** 🖤🔐"""
 
 
 def get_reminder_follow_socials(wait_remaining: int, social_links: dict) -> tuple[str, list]:

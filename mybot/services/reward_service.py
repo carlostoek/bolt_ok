@@ -39,7 +39,7 @@ class RewardService:
         result = await self.session.execute(select(Reward))
         return result.scalars().all()
 
-    async def claim_reward(self, user_id: int, reward_id: int) -> tuple[bool, str]:
+    async def claim_reward(self, user_id: int, reward_id: int, bot=None) -> tuple[bool, str]:
         """Claim a reward once the user has enough points."""
         user = await self.session.get(User, user_id)
         reward = await self.session.get(Reward, reward_id)
@@ -65,6 +65,28 @@ class RewardService:
             return False, BOT_MESSAGES.get("reward_already_claimed", "Ya reclamado")
         self.session.add(UserReward(user_id=user_id, reward_id=reward_id))
         await self.session.commit()
+
+        # VIP Access Integration: Otorgar VIP si es reward_type="vip_access"
+        if reward.reward_type == "vip_access" and bot:
+            from services.vip_grant_service import VipGrantService
+
+            vip_grant = VipGrantService(self.session)
+            days = reward.vip_days if reward.vip_days else 1  # Default 1 día
+
+            success, vip_msg = await vip_grant.grant_vip_access(
+                user_id=user_id,
+                days=days,
+                source="reward",
+                source_id=reward.id,
+                bot=bot
+            )
+
+            if success:
+                return True, f"{BOT_MESSAGES.get('reward_claim_success', 'Recompensa reclamada')}\n\n{vip_msg}"
+            else:
+                # La recompensa ya fue reclamada, pero falló el VIP grant
+                logger.error(f"VIP grant failed for user {user_id} after claiming reward {reward_id}")
+
         return True, BOT_MESSAGES.get("reward_claim_success", "Recompensa reclamada")
 
     async def create_reward(

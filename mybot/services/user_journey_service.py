@@ -307,25 +307,23 @@ class UserJourneyService:
                     "step_to_complete": "points_explained"
                 },
                 "first_shop_visit": {
-                    "message": (
-                        "🛍️ **Bienvenido a la tienda**\n\n"
-                        "Aquí puedes canjear tus besitos por recompensas exclusivas.\n\n"
-                        "💎 **Recomendación:** Comienza con los sets básicos "
-                        "y ve subiendo según acumules más besitos.\n\n"
-                        "✨ **Próximo paso:** ¡Sigue explorando la narrativa!"
-                    ),
-                    "step_to_complete": None  # No specific step, just guidance
+                    # DESHABILITADO: Mensaje ahora integrado en el menú de la tienda
+                    # para evitar mensajes separados que se acumulan
+                    "message": None,
+                    "step_to_complete": None
                 }
             }
             
             if context in onboarding_messages:
                 message_data = onboarding_messages[context]
-                
-                await bot.send_message(
-                    user.id,
-                    message_data["message"],
-                    parse_mode="Markdown"
-                )
+
+                # Solo enviar si el mensaje no es None
+                if message_data["message"]:
+                    await bot.send_message(
+                        user.id,
+                        message_data["message"],
+                        parse_mode="Markdown"
+                    )
                 
                 # Completar step si corresponde
                 if message_data["step_to_complete"]:

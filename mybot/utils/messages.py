@@ -27,6 +27,37 @@ BUTLER_MESSAGES = {
         "Expira el: {expires_at}.\n\n"
         "Use /vip_menu para acceder a sus beneficios VIP."
     ),
+    # VIP Grant Messages
+    "vip_grant_success": (
+        "🎉 *¡Acceso VIP Otorgado!*\n\n"
+        "Has recibido *{days} día(s)* de acceso VIP.\n\n"
+        "✨ Disfruta de contenido exclusivo hasta el {expires_at}"
+    ),
+    "vip_grant_narrative": (
+        "🎭 *Regalo Narrativo*\n\n"
+        "Como recompensa por tu elección, Diana te ha otorgado acceso VIP por {days} día(s).\n\n"
+        "—_Que disfrutes los secretos que guardé para ti_ —susurra Diana con una sonrisa cómplice."
+    ),
+    "vip_grant_reward": (
+        "🎁 *Recompensa Canjeada*\n\n"
+        "¡Has canjeado tu acceso VIP con éxito!\n\n"
+        "📅 Duración: {days} día(s)\n"
+        "⏰ Expira: {expires_at}\n\n"
+        "✨ _El Diván te espera..._"
+    ),
+    "vip_grant_achievement": (
+        "🏆 *¡Logro Desbloqueado!*\n\n"
+        "Como recompensa por tu dedicación, has recibido {days} día(s) de acceso VIP.\n\n"
+        "Diana aplaude suavemente: —_Lo has ganado._"
+    ),
+    "vip_grant_channel_link": (
+        "🔑 *Acceso al Canal VIP*\n\n"
+        "[Haz clic aquí para unirte]({invite_link})\n\n"
+        "⏰ Este enlace expira en 24 horas."
+    ),
+    "vip_grant_error": (
+        "❌ No se pudo otorgar el acceso VIP. Por favor contacta a soporte."
+    ),
     "vip_members_only": "Esta sección está disponible solo para miembros VIP.",
     "profile_not_registered": "Parece que aún no ha iniciado su recorrido. Use /start para dar su primer paso.",
     "profile_title": "🛋️ *Su rincón en El Diván de Diana*",
@@ -39,7 +70,7 @@ BUTLER_MESSAGES = {
     "profile_active_missions_title": "📋 *Sus desafíos activos*",
     "profile_no_active_missions": "Por ahora no hay desafíos disponibles, pero pronto habrá novedades.",
     "ranking_title": "🏆 *Tabla de Posiciones*",
-    "ranking_entry": "#{rank}. @{username} - Puntos: `{points}`, Nivel: `{level}`",
+    "ranking_entry": "#{rank}. {username} - {points} besitos | Nivel {level}",
     "no_ranking_data": "Aún no hay datos en el ranking. Sea usted el primero en aparecer.",
     "no_active_subscription": "No tiene una suscripción activa.",
 }
