@@ -25,7 +25,10 @@ class StoryFragment(Base):
     
     # Auto-next para fragmentos sin decisiones
     auto_next_fragment_key = Column(String(50), nullable=True)
-    
+
+    # Variante por arquetipo (adventurer, romantic, explorer, balanced, null=genérico)
+    archetype_variant = Column(String(20), nullable=True, index=True)
+
     # Timestamps
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())

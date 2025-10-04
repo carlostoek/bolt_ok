@@ -99,7 +99,8 @@ class NarrativeLoader:
             required_role=data.get('required_role'),
             reward_besitos=data.get('reward_besitos', 0),
             unlocks_achievement_id=data.get('unlocks_achievement_id'),
-            auto_next_fragment_key=data.get('auto_next_fragment_key')
+            auto_next_fragment_key=data.get('auto_next_fragment_key'),
+            archetype_variant=data.get('archetype_variant')
         )
         
         self.session.add(fragment)
@@ -119,7 +120,8 @@ class NarrativeLoader:
         fragment.reward_besitos = data.get('reward_besitos', fragment.reward_besitos)
         fragment.unlocks_achievement_id = data.get('unlocks_achievement_id', fragment.unlocks_achievement_id)
         fragment.auto_next_fragment_key = data.get('auto_next_fragment_key', fragment.auto_next_fragment_key)
-        
+        fragment.archetype_variant = data.get('archetype_variant', fragment.archetype_variant)
+
         await self.session.commit()
         logger.info(f"Fragmento actualizado: {fragment.key}")
 

@@ -50,6 +50,30 @@ class UserRegistrationMiddleware(BaseMiddleware):
                     journey_service = UserJourneyService(session)
                     await journey_service.initialize_user_milestones(user.id)
                     logger.info(f"Journey milestones initialized for new user {user.id}")
+                    
+                    # QUICK WIN: Enviar mensaje de bienvenida mejorado
+                    if hasattr(event, 'message') and event.message:
+                        try:
+                            from utils.messages import get_loading_message
+                            welcome_msg = (
+                                f"✨ **¡Bienvenid@ a El Diván de Diana!** ✨\n\n"
+                                f"Me alegra tenerte aquí. Soy Lucien, tu guía en este mundo de misterio y sensualidad.\n\n"
+                                f"💫 **Tu aventura comienza ahora...**\n"
+                                f"• Explora tu historia personal con /start\n"
+                                f"• Descubre desafíos con /missions\n"
+                                f"• Gana besitos y desbloquea recompensas\n\n"
+                                f"{get_loading_message('narrative_progression')}"
+                            )
+                            bot = data.get("bot")
+                            if bot:
+                                await bot.send_message(
+                                    user_info.id,
+                                    welcome_msg,
+                                    parse_mode="Markdown"
+                                )
+                        except Exception as welcome_error:
+                            logger.debug(f"Could not send enhanced welcome: {welcome_error}")
+                            
                 except Exception as e:
                     logger.error(f"Error initializing journey milestones for user {user.id}: {e}")
 

@@ -127,16 +127,46 @@ async def cb_free_follow(callback: CallbackQuery, session: AsyncSession):
 
 @router.callback_query(F.data == "vip_explore_interest")
 async def cb_vip_explore_interest(callback: CallbackQuery, session: AsyncSession):
-    """Notify admins about VIP interest and thank the user."""
+    """
+    Maneja el interés en VIP con mensaje personalizado por arquetipo.
+
+    Obtiene el arquetipo del usuario (basado en decisiones narrativas) y
+    muestra un CTA personalizado que resuena con su estilo.
+    """
+    from services.narrative_service import NarrativeService
+    from utils.vip_cta_messages import get_vip_cta
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+
     user = callback.from_user
+    user_id = user.id
+
+    # Obtener arquetipo del usuario
+    narrative_service = NarrativeService(session, callback.bot)
+    archetype = await narrative_service.get_user_archetype(user_id)
+
+    # Notificar a admins con arquetipo
     notify_text = (
-        f"Interés en VIP de {user.first_name} (@{user.username or user.id})"
+        f"💎 Interés en VIP\n"
+        f"Usuario: {user.first_name} (@{user.username or user.id})\n"
+        f"Arquetipo: {archetype}"
     )
     await notify_admins(callback.bot, notify_text)
-    await menu_manager.send_temporary_message(
-        callback.message,
-        BOT_MESSAGES.get("VIP_INTEREST_REPLY"),
-        auto_delete_seconds=8,
+
+    # Obtener CTA personalizado por arquetipo
+    cta = get_vip_cta("general", archetype=archetype)
+
+    # Crear keyboard con información de contacto
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📱 Contactar para suscripción", url="https://t.me/tu_usuario_admin")
+    builder.button(text="↩️ Menú Principal", callback_data="free_main_menu")
+    builder.adjust(1)
+
+    await menu_manager.update_menu(
+        callback,
+        cta["message"],
+        builder.as_markup(),
+        session,
+        "vip_interest_personalized"
     )
     await callback.answer()
 
