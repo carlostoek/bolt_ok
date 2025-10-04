@@ -52,14 +52,35 @@ class GamificationMiddleware(BaseMiddleware):
             journey_service = UserJourneyService(session)
             point_service = PointService(session)
             
+            # STRATEGIC: Logging de métricas
+            interaction_type = "message" if isinstance(event, Message) else "callback"
+            logger.info(f"🎮 Gamification processing: user={user.id}, type={interaction_type}")
+            
             # Verificar y actualizar racha diaria
-            await self._update_daily_streak(user, session, point_service, bot)
+            streak_updated = await self._update_daily_streak(user, session, point_service, bot)
+            if streak_updated:
+                logger.info(f"🔥 Daily streak updated: user={user.id}")
             
             # Procesar badges por tipo de interacción
+            badges_unlocked = 0
             if isinstance(event, Message):
-                await self._process_message_interaction(event, user, journey_service, point_service, bot)
+                badges_unlocked = await self._process_message_interaction(event, user, journey_service, point_service, bot)
             elif isinstance(event, CallbackQuery):
-                await self._process_callback_interaction(event, user, journey_service, point_service, bot)
+                badges_unlocked = await self._process_callback_interaction(event, user, journey_service, point_service, bot)
+            
+            # STRATEGIC: Enviar sugerencias inteligentes periódicamente (10% de las veces)
+            import random
+            if random.random() < 0.1:  # 10% de probabilidad
+                try:
+                    suggestion_sent = await journey_service.send_intelligent_suggestions(user, bot, "automatic")
+                    if suggestion_sent:
+                        logger.info(f"💡 Intelligent suggestion sent: user={user.id}")
+                except Exception as e:
+                    logger.debug(f"No se pudo enviar sugerencia automática: {e}")
+            
+            # Log resumen de la gamificación
+            if streak_updated or badges_unlocked > 0:
+                logger.info(f"🎯 Gamification summary: user={user.id}, streaks={streak_updated}, badges={badges_unlocked}")
                 
         except Exception as e:
             logger.error(f"Error procesando gamificación para usuario {user.id}: {e}")
@@ -122,19 +143,70 @@ class GamificationMiddleware(BaseMiddleware):
         
         await session.commit()
 
-    async def _process_message_interaction(self, event, user, journey_service, point_service, bot):
-        """Procesa gamificación para mensajes"""
-        # Lógica para detectar diferentes tipos de interacciones por mensaje
-        # (esto se puede expandir según las necesidades)
+    async def _process_message_interaction(self, event, user, journey_service, point_service, bot) -> int:
+        """Procesa gamificación para mensajes - retorna número de badges desbloqueados"""
+        badges_unlocked = 0
         
-        # Por ahora, solo registrar la interacción para onboarding
-        if event.text and event.text.startswith('/'):
-            command = event.text.split()[0]
-            if command in ['/start', '/missions', '/shop', '/profile']:
-                command_name = command[1:]  # Remove the leading '/'
-                await journey_service.send_contextual_onboarding_message(
-                    user, bot, f"first_{command_name}_visit"
-                )
+        try:
+            # STRATEGIC: Detectar diferentes tipos de interacciones por mensaje
+            if event.text and event.text.startswith('/'):
+                command = event.text.split()[0]
+                if command in ['/start', '/missions', '/shop', '/profile']:
+                    command_name = command[1:]  # Remove the leading '/'
+                    await journey_service.send_contextual_onboarding_message(
+                        user, bot, f"first_{command_name}_visit"
+                    )
+            
+            # STRATEGIC: Detectar interacciones específicas para badges
+            message_text = event.text or ""
+            message_text_lower = message_text.lower()
+            
+            # Badge por primera interacción extensa
+            if len(message_text) > 20 and "diana" in message_text_lower:
+                # Usuario mencionó a Diana en mensaje largo
+                try:
+                    from database.models import UserBadge
+                    
+                    # Verificar si ya tiene el badge
+                    stmt = select(UserBadge).where(
+                        UserBadge.user_id == user.id,
+                        UserBadge.badge_type == "diana_mention"
+                    )
+                    result = await journey_service.session.execute(stmt)
+                    existing_badge = result.scalar_one_or_none()
+                    
+                    if not existing_badge:
+                        # Otorgar badge
+                        new_badge = UserBadge(
+                            user_id=user.id,
+                            badge_type="diana_mention",
+                            earned_at=datetime.utcnow()
+                        )
+                        journey_service.session.add(new_badge)
+                        
+                        # Otorgar puntos
+                        await point_service.add_points(user.id, 25, "badge_diana_mention")
+                        
+                        # Enviar notificación
+                        badge_message = (
+                            "🏅 **¡Badge Desbloqueado!**\n\n"
+                            "💬 **Mencionador de Diana**\n"
+                            "Mencionaste a Diana en un mensaje significativo\n\n"
+                            "💰 **Recompensa:** +25 besitos\n"
+                            "✨ ¡Sigue conectando con la historia!"
+                        )
+                        
+                        await bot.send_message(user.id, badge_message, parse_mode="Markdown")
+                        badges_unlocked += 1
+                        logger.info(f"🎖️ Badge unlocked: diana_mention for user={user.id}")
+                        
+                except Exception as badge_error:
+                    logger.debug(f"No se pudo otorgar badge de mención: {badge_error}")
+            
+        except Exception as e:
+            logger.error(f"Error en procesamiento de mensaje para gamificación: {e}")
+        
+        return badges_unlocked
 
     async def _process_callback_interaction(self, event, user, journey_service, point_service, bot):
         """Procesa gamificación para callback queries"""

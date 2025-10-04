@@ -201,6 +201,10 @@ async def main() -> None:
         dp.message.middleware(gamification_middleware)
         dp.callback_query.middleware(gamification_middleware)
 
+        # STRATEGIC: Handler de métricas para admin
+        from handlers.admin.metrics_handler import router as metrics_router
+        dp.include_router(metrics_router)
+
         # Registrar routers en orden de prioridad
         logger.info("Registrando handlers...")
         # Import shop router
