@@ -2,17 +2,18 @@
 Migration script to add product_files table.
 """
 import logging
-from sqlalchemy import text, create_engine
-from database.setup import DATABASE_URL
+import asyncio
+from sqlalchemy import text
+from database.setup import get_engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def migrate_product_files():
+async def migrate_product_files():
     """Create the product_files table if it doesn't exist."""
-    engine = create_engine(DATABASE_URL)
+    engine = get_engine()
     
-    with engine.connect() as conn:
+    async with engine.connect() as conn:
         try:
             # Check if table exists
             check_table_sql = """
@@ -21,7 +22,7 @@ def migrate_product_files():
                 WHERE table_name = 'product_files'
             );
             """
-            result = conn.execute(text(check_table_sql))
+            result = await conn.execute(text(check_table_sql))
             table_exists = result.scalar()
             
             if not table_exists:
@@ -36,16 +37,16 @@ def migrate_product_files():
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 );
                 """
-                conn.execute(text(create_table_sql))
-                conn.commit()
+                await conn.execute(text(create_table_sql))
+                await conn.commit()
                 logger.info("✅ Created product_files table")
             else:
                 logger.info("✅ product_files table already exists")
                 
         except Exception as e:
             logger.error(f"❌ Error creating product_files table: {e}")
-            conn.rollback()
+            await conn.rollback()
             raise
 
 if __name__ == "__main__":
-    migrate_product_files()
+    asyncio.run(migrate_product_files())
