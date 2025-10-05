@@ -323,6 +323,14 @@ class ShopService:
             logger.info(f"Purchase successful for user {user_id}. Pending decision will be processed on return to narrative.")
 
             await self.session.commit()
+            logger.info(f"Purchase committed successfully for user {user_id}, item {item.id}")
+
+            # Send product files if any - do this after commit to ensure purchase was successful
+            if bot:
+                logger.info(f"Bot available, attempting to send product files for item {item.id} to user {user_id}")
+                await self._send_product_files(bot, user_id, item)
+            else:
+                logger.warning(f"No bot available to send product files for item {item.id} to user {user_id}")
 
             # Try to send purchase gift if configured
             if bot:
@@ -419,3 +427,58 @@ class ShopService:
         except Exception as e:
             logger.error(f"Error unlocking fragment {fragment_key} for user {user_id}: {str(e)}")
             return None
+
+    async def _send_product_files(self, bot: Bot, user_id: int, item: ShopItem):
+        """Send all files associated with a product to the user"""
+        try:
+            # Get product files
+            from database.models import ProductFile
+            from sqlalchemy import select
+            
+            files_stmt = select(ProductFile).where(
+                ProductFile.shop_item_id == item.id
+            ).order_by(ProductFile.order_index)
+            files_result = await self.session.execute(files_stmt)
+            product_files = files_result.scalars().all()
+            
+            logger.info(f"Found {len(product_files)} product files for item {item.id} ({item.name})")
+            
+            if not product_files:
+                logger.info(f"No product files found for item {item.id}")
+                return
+                
+            # Send a message first
+            await bot.send_message(
+                chat_id=user_id,
+                text=f"🎁 ¡Gracias por tu compra de **{item.name}**!\n\nAquí tienes tu contenido:"
+            )
+            
+            # Send each file
+            for idx, product_file in enumerate(product_files, 1):
+                logger.info(f"Sending file {idx}/{len(product_files)}: type={product_file.file_type}, id={product_file.file_id}")
+                if product_file.file_type == 'photo':
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=product_file.file_id,
+                        caption=f"📸 {item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'video':
+                    await bot.send_video(
+                        chat_id=user_id,
+                        video=product_file.file_id,
+                        caption=f"🎥 {item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'document':
+                    await bot.send_document(
+                        chat_id=user_id,
+                        document=product_file.file_id,
+                        caption=f"📄 {item.name} ({idx}/{len(product_files)})"
+                    )
+                # Add a small delay to avoid rate limiting
+                import asyncio
+                await asyncio.sleep(0.5)
+                
+            logger.info(f"Successfully sent {len(product_files)} files to user {user_id}")
+        except Exception as e:
+            logger.error(f"Error sending product files: {str(e)}", exc_info=True)
+            # Don't raise the error - we don't want to fail the purchase if file sending fails
