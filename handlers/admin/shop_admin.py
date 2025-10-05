@@ -6,6 +6,7 @@ import logging
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
