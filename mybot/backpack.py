@@ -120,23 +120,22 @@ async def _mostrar_mochila_con_session(message: Message, session, user_id: int =
         for shop_item, purchased_at in purchased_items:
             categorized_hints['tesoros'].append(('item', shop_item, purchased_at, None))
 
-    # Crear mensaje principal
     lucien_message = random.choice(LUCIEN_BACKPACK_MESSAGES)
     total_hints = len(pistas_data)
     total_items = len(purchased_items)
-
-    texto = f"🎩 **Lucien:**\n*{lucien_message}*\n\n"
-    texto += f"📊 **Tu Colección:** {total_hints} pistas descubiertas"
-
+    texto = (
+        "============================\n"
+        "🎩 *Mensaje de Lucien:*\n"
+        f"{lucien_message}\n"
+        "============================\n\n"
+        "📊 **Resumen de tu Colección**\n"
+        f"- Pistas descubiertas: {total_hints}\n"
+    )
     if total_items > 0:
-        texto += f" | 💎 {total_items} tesoros adquiridos"
-
-    texto += "\n"
-
+        texto += f"- Tesoros adquiridos: {total_items}\n"
     if recent_hints:
-        texto += f"✨ **Nuevas:** {len(recent_hints)} pistas recientes\n"
-
-    texto += "\n🎒 **Explora tu mochila:**"
+        texto += f"- Pistas nuevas: {len(recent_hints)}\n"
+    texto += "\n🎒 **Selecciona una categoría para explorar:**"
     
     # Crear botones por categoría
     keyboard = []
@@ -186,20 +185,19 @@ async def mostrar_mochila_narrativa(message: Message):
 
 async def mostrar_mochila_vacia(message: Message):
     """Mensaje especial para mochila vacía con contexto narrativo"""
-    texto = """🎩 **Lucien:**
-*Una mochila vacía... pero no por mucho tiempo.*
+    texto = """============================
+🎩 **Bienvenido a tu Mochila**
+============================
 
-🌸 **Diana:**
-*Todo viajero comienza con las manos vacías. Lo que importa no es lo que llevas, sino lo que estás dispuesto a descubrir.*
+Tu mochila está actualmente vacía.
 
-*Cada interacción, cada momento de atención genuina, cada reacción que me das... todo suma hacia algo más grande.*
+🔹 **Próximos Pasos:**
+- Reacciona a los mensajes en el canal.
+- Realiza las misiones disponibles.
+- Observa las señales que te ofrecemos.
 
-**🎯 Primeros pasos:**
-• Reacciona a mensajes en el canal
-• Completa misiones disponibles  
-• Mantente atento a las señales que te envío
-
-*Tu primera pista te está esperando...*"""
+¡Tu primera pista te espera a la vuelta de la esquina!
+"""
     
     keyboard = [
         [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="menu:missions")],
