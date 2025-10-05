@@ -1122,6 +1122,233 @@ async def admin_shop_create_with_unlock(callback: CallbackQuery, state: FSMConte
     await callback.answer()
 
 
+# Add file management handlers after unlock selection
+@router.callback_query(AdminShopStates.selecting_unlock, F.data == "shop_create_unlock_no")
+async def admin_shop_create_no_unlock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Create product without unlock - proceed to file upload."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    data = await state.get_data()
+    
+    text = f"""➕ **Crear Producto**
+
+✅ Nombre: **{data['name']}**
+✅ Precio: {data['price']} besitos
+✅ Acceso: {'👑 Solo VIP' if data['is_vip_only'] else '🆓 Para Todos'}
+✅ Sin desbloqueo narrativo
+
+📁 **Paso 10: Archivos del Producto** (Opcional)
+
+¿Este producto incluye archivos (fotos, videos, etc.)?
+
+💡 Ejemplo: Sesión de fotos con múltiples imágenes."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="📁 Sí, agregar archivos", callback_data="shop_create_files_yes")
+    builder.button(text="⏭️ Sin archivos", callback_data="shop_create_files_no")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.configuring_files)
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.configuring_files, F.data == "shop_create_files_no")
+async def admin_shop_create_no_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Create product without files."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    data = await state.get_data()
+
+    # Create the shop item
+    shop_item = ShopItem(
+        name=data['name'],
+        description=data['description'],
+        price=data['price'],
+        is_vip_only=data['is_vip_only'],
+        image_file_id=data.get('image_file_id'),
+        stock_limit=data.get('stock_limit'),
+        max_purchases_per_user=data.get('max_purchases_per_user', 1),
+        available_from=data.get('available_from'),
+        available_until=data.get('available_until'),
+        is_active=True,
+        unlocks_lore_piece_id=None
+    )
+    session.add(shop_item)
+    await session.commit()
+
+    text = f"""✅ **Producto Creado**
+
+**{shop_item.name}** ha sido agregado a la tienda.
+
+• 💰 Precio: {shop_item.price} besitos
+• {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
+• 📦 Sin archivos adjuntos
+• ✅ Activo"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
+    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
+    builder.button(text="🔙 Volver", callback_data="admin_shop")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.clear()
+    await callback.answer()
+
+
+@router.callback_query(AdminShopStates.configuring_files, F.data == "shop_create_files_yes")
+async def admin_shop_create_request_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Request file upload for product."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    text = """📁 **Agregar Archivos al Producto**
+
+Envía los archivos (fotos, videos, documentos) que incluye este producto.
+
+💡 Tips:
+• Puedes enviar múltiples archivos
+• Se enviarán en el orden que los recibas
+• Formatos soportados: fotos, videos, documentos
+
+⚠️ Envía cada archivo individualmente. Cuando termines, presiona "✅ Finalizar"."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✅ Finalizar", callback_data="shop_create_files_done")
+    builder.button(text="❌ Cancelar", callback_data="shop_create_files_no")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.update_data(product_files=[])
+    await state.set_state(AdminShopStates.uploading_files)
+    await callback.answer()
+
+
+@router.message(AdminShopStates.uploading_files, F.photo)
+async def admin_shop_receive_photo_file(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive a photo file for the product."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    files = data.get('product_files', [])
+    
+    # Get the largest photo
+    photo = message.photo[-1]
+    files.append({
+        'file_id': photo.file_id,
+        'file_type': 'photo'
+    })
+    
+    await state.update_data(product_files=files)
+    await message.answer(f"✅ Foto agregada ({len(files)} archivos en total)")
+
+
+@router.message(AdminShopStates.uploading_files, F.video)
+async def admin_shop_receive_video_file(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive a video file for the product."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    files = data.get('product_files', [])
+    
+    files.append({
+        'file_id': message.video.file_id,
+        'file_type': 'video'
+    })
+    
+    await state.update_data(product_files=files)
+    await message.answer(f"✅ Video agregado ({len(files)} archivos en total)")
+
+
+@router.message(AdminShopStates.uploading_files, F.document)
+async def admin_shop_receive_document_file(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive a document file for the product."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    files = data.get('product_files', [])
+    
+    files.append({
+        'file_id': message.document.file_id,
+        'file_type': 'document'
+    })
+    
+    await state.update_data(product_files=files)
+    await message.answer(f"✅ Documento agregado ({len(files)} archivos en total)")
+
+
+@router.callback_query(AdminShopStates.uploading_files, F.data == "shop_create_files_done")
+async def admin_shop_create_with_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Create product with uploaded files."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    data = await state.get_data()
+    files = data.get('product_files', [])
+
+    # Create the shop item
+    shop_item = ShopItem(
+        name=data['name'],
+        description=data['description'],
+        price=data['price'],
+        is_vip_only=data['is_vip_only'],
+        image_file_id=data.get('image_file_id'),
+        stock_limit=data.get('stock_limit'),
+        max_purchases_per_user=data.get('max_purchases_per_user', 1),
+        available_from=data.get('available_from'),
+        available_until=data.get('available_until'),
+        is_active=True,
+        unlocks_lore_piece_id=None
+    )
+    session.add(shop_item)
+    await session.flush()  # Get the ID
+    
+    # Add product files
+    from database.models import ProductFile
+    for index, file_data in enumerate(files):
+        product_file = ProductFile(
+            shop_item_id=shop_item.id,
+            file_id=file_data['file_id'],
+            file_type=file_data['file_type'],
+            order_index=index
+        )
+        session.add(product_file)
+    
+    await session.commit()
+
+    text = f"""✅ **Producto Creado con Archivos**
+
+**{shop_item.name}** ha sido agregado a la tienda.
+
+**Configuración:**
+• 💰 Precio: {shop_item.price} besitos
+• {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
+• ✅ Estado: Activo
+• 📁 Archivos: {len(files)} archivos adjuntos
+
+Los usuarios recibirán todos los archivos al comprar este producto."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
+    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
+    builder.button(text="🔙 Volver", callback_data="admin_shop")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.clear()
+    logger.info(f"Admin {callback.from_user.id} created shop item with {len(files)} files: {shop_item.name}")
+    await callback.answer()
+
 # Import unlock configuration router
 from . import shop_unlock_config
 router.include_router(shop_unlock_config.router)

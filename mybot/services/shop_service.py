@@ -201,10 +201,18 @@ class ShopService:
     async def purchase_item(self, user_id: int, item_id: int, bot: Optional[Bot] = None) -> Dict[str, Any]:
         """Purchase an item for the user directly"""
         try:
-            # Get the item
+            # Get the item with its files
             stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
+            
+            # Also get the product files
+            from database.models import ProductFile
+            files_stmt = select(ProductFile).where(
+                ProductFile.shop_item_id == item_id
+            ).order_by(ProductFile.order_index)
+            files_result = await self.session.execute(files_stmt)
+            product_files = files_result.scalars().all()
 
             if not item:
                 return {"success": False, "message": "Item not found"}
@@ -319,6 +327,14 @@ class ShopService:
 
             await self.session.commit()
 
+            # Send product files if this is a multi-file product
+            if bot and product_files:
+                try:
+                    await self._send_product_files(bot, user_id, item, product_files)
+                    logger.info(f"Sent {len(product_files)} files to user {user_id} for product {item.name}")
+                except Exception as e:
+                    logger.error(f"Error sending product files to user {user_id}: {str(e)}")
+            
             # Try to send purchase gift if configured
             if bot:
                 try:
@@ -390,6 +406,42 @@ class ShopService:
         except Exception as e:
             logger.error(f"Error adding item to backpack for user {user_id}: {str(e)}")
             return None
+
+    async def _send_product_files(self, bot: Bot, user_id: int, item: ShopItem, product_files: List[Any]):
+        """Send all files associated with a product to the user"""
+        try:
+            # Send a message first
+            await bot.send_message(
+                chat_id=user_id,
+                text=f"🎁 ¡Gracias por tu compra de **{item.name}**!\n\nAquí tienes tu contenido:"
+            )
+            
+            # Send each file
+            for product_file in product_files:
+                if product_file.file_type == 'photo':
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=product_file.file_id,
+                        caption=f"📸 {item.name}"
+                    )
+                elif product_file.file_type == 'video':
+                    await bot.send_video(
+                        chat_id=user_id,
+                        video=product_file.file_id,
+                        caption=f"🎥 {item.name}"
+                    )
+                elif product_file.file_type == 'document':
+                    await bot.send_document(
+                        chat_id=user_id,
+                        document=product_file.file_id,
+                        caption=f"📄 {item.name}"
+                    )
+                # Add a small delay to avoid rate limiting
+                import asyncio
+                await asyncio.sleep(0.5)
+        except Exception as e:
+            logger.error(f"Error sending product files: {str(e)}")
+            raise
 
     async def _unlock_narrative_fragment(self, user_id: int, fragment_key: str) -> Optional[str]:
         """Unlock a narrative fragment for the user by navigating to it"""

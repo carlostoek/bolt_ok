@@ -563,6 +563,9 @@ class LorePiece(Base):
 
 class ShopItem(Base):
     __tablename__ = "shop_items"
+    
+    # Add this relationship
+    product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
