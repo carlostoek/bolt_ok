@@ -715,25 +715,185 @@ async def volver_mochila(callback: CallbackQuery):
 @router.callback_query(F.data == "open_backpack")
 async def open_backpack_callback(callback: CallbackQuery):
     """Handler para abrir la mochila desde el menú principal (callback)"""
-    # El handler de callbacks necesita pasar el user_id explícitamente
     session_factory = get_session_factory()
-
-    # Crear un wrapper del mensaje para que tenga edit_text
-    class MessageWrapper:
-        def __init__(self, original_message):
-            self._message = original_message
-            self.from_user = original_message.chat
-
-        async def edit_text(self, *args, **kwargs):
-            return await self._message.edit_text(*args, **kwargs)
-
-        async def answer(self, *args, **kwargs):
-            return await self._message.answer(*args, **kwargs)
-
-    wrapped_message = MessageWrapper(callback.message)
-
+    
     async with session_factory() as session:
-        await _mostrar_mochila_con_session(wrapped_message, session, user_id=callback.from_user.id)
+        # Get user's purchased items
+        from database.models import UserPurchase, ShopItem, ProductFile
+        from sqlalchemy import select
+        
+        user_id = callback.from_user.id
+        
+        # Get user's purchased items
+        stmt = select(UserPurchase, ShopItem).join(
+            ShopItem, UserPurchase.shop_item_id == ShopItem.id
+        ).where(UserPurchase.user_id == user_id)
+        
+        result = await session.execute(stmt)
+        purchases = result.all()
+        
+        if not purchases:
+            await mostrar_mochila_vacia(callback.message)
+            return
+        
+        # Build backpack content
+        text = "🎒 **Tu Mochila**\n\n"
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        
+        for purchase, item in purchases:
+            # Check if it's a multi-file product
+            files_stmt = select(ProductFile).where(ProductFile.shop_item_id == item.id)
+            files_result = await session.execute(files_stmt)
+            files = files_result.scalars().all()
+            
+            if files:
+                # It's a multi-file product
+                builder.button(
+                    text=f"📁 {item.name}",
+                    callback_data=f"backpack_view_files:{item.id}"
+                )
+            else:
+                # Regular item
+                builder.button(
+                    text=f"📦 {item.name}",
+                    callback_data=f"backpack_view_item:{item.id}"
+                )
+        
+        builder.button(text="🔙 Volver", callback_data="menu_principal")
+        builder.adjust(1)
+        
+        await callback.message.edit_text(
+            text="🎒 **Tu Mochila**\n\nSelecciona un item para verlo:",
+            reply_markup=builder.as_markup()
+        )
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("backpack_view_files:"))
+async def backpack_view_files(callback: CallbackQuery):
+    """View files of a purchased multi-file product"""
+    item_id = int(callback.data.split(":")[1])
+    
+    session_factory = get_session_factory()
+    
+    async with session_factory() as session:
+        user_id = callback.from_user.id
+        
+        # Verify ownership
+        from database.models import UserPurchase, ProductFile, ShopItem
+        from sqlalchemy import select
+        
+        purchase_stmt = select(UserPurchase).where(
+            UserPurchase.user_id == user_id,
+            UserPurchase.shop_item_id == item_id
+        )
+        purchase_result = await session.execute(purchase_stmt)
+        purchase = purchase_result.scalar_one_or_none()
+        
+        if not purchase:
+            await callback.answer("❌ No tienes este producto", show_alert=True)
+            return
+        
+        # Get product files
+        files_stmt = select(ProductFile).where(
+            ProductFile.shop_item_id == item_id
+        ).order_by(ProductFile.order_index)
+        files_result = await session.execute(files_stmt)
+        files = files_result.scalars().all()
+        
+        if not files:
+            await callback.answer("❌ Este producto no tiene archivos", show_alert=True)
+            return
+        
+        # Send files to user
+        bot = callback.bot
+        item = await session.get(ShopItem, item_id)
+        
+        await callback.message.answer(f"📁 **{item.name}**\n\nEnviando tus archivos...")
+        
+        # Send each file
+        for product_file in files:
+            if product_file.file_type == 'photo':
+                await bot.send_photo(
+                    chat_id=user_id,
+                    photo=product_file.file_id,
+                    caption=f"📸 {item.name}"
+                )
+            elif product_file.file_type == 'video':
+                await bot.send_video(
+                    chat_id=user_id,
+                    video=product_file.file_id,
+                    caption=f"🎥 {item.name}"
+                )
+            elif product_file.file_type == 'document':
+                await bot.send_document(
+                    chat_id=user_id,
+                    document=product_file.file_id,
+                    caption=f"📄 {item.name}"
+                )
+            # Add a small delay
+            import asyncio
+            await asyncio.sleep(0.5)
+        
+        # Add a back button
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="🔙 Volver a Mochila", callback_data="open_backpack")
+        await callback.message.answer("¿Quieres ver otro item?", reply_markup=builder.as_markup())
+    
+    await callback.answer()
+
+
+@router.callback_query(F.data.startswith("backpack_view_item:"))
+async def backpack_view_item(callback: CallbackQuery):
+    """View regular purchased item"""
+    item_id = int(callback.data.split(":")[1])
+    
+    session_factory = get_session_factory()
+    
+    async with session_factory() as session:
+        user_id = callback.from_user.id
+        
+        # Verify ownership and get item
+        from database.models import UserPurchase, ShopItem
+        from sqlalchemy import select
+        
+        stmt = select(UserPurchase, ShopItem).join(
+            ShopItem, UserPurchase.shop_item_id == ShopItem.id
+        ).where(
+            UserPurchase.user_id == user_id,
+            ShopItem.id == item_id
+        )
+        result = await session.execute(stmt)
+        purchase_data = result.first()
+        
+        if not purchase_data:
+            await callback.answer("❌ No tienes este producto", show_alert=True)
+            return
+        
+        purchase, item = purchase_data
+        
+        # Show item details
+        text = f"📦 **{item.name}**\n\n"
+        if item.description:
+            text += f"{item.description}\n\n"
+        text += f"💰 Precio pagado: {purchase.price_paid} besitos\n"
+        text += f"📅 Fecha de compra: {purchase.purchased_at.strftime('%d/%m/%Y')}\n\n"
+        
+        if item.unlocks_lore_piece_id:
+            from database.models import LorePiece
+            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
+            if lore_piece:
+                text += f"🔓 Desbloquea: {lore_piece.title}\n"
+        
+        # Add back button
+        from aiogram.utils.keyboard import InlineKeyboardBuilder
+        builder = InlineKeyboardBuilder()
+        builder.button(text="🔙 Volver a Mochila", callback_data="open_backpack")
+        
+        await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    
     await callback.answer()
 
 
