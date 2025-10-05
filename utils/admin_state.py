@@ -208,6 +208,8 @@ class AdminShopStates(StatesGroup):
     entering_available_until = State()  # Enter end date
     selecting_unlock = State()
     confirming_creation = State()
+    uploading_files = State()  # New: For file upload step
+    receiving_files = State()  # New: For receiving files
 
     editing_name = State()
     editing_description = State()

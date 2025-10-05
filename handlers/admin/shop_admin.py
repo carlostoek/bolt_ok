@@ -1130,11 +1130,6 @@ Por ejemplo: sesiones fotográficas con múltiples imágenes."""
     await callback.answer()
 
 
-# Add new state for uploading files
-class AdminShopStates(StatesGroup):
-    # ... existing states ...
-    uploading_files = State()
-    receiving_files = State()
 
 # File upload handlers
 @router.callback_query(AdminShopStates.uploading_files, F.data == "shop_create_files_skip")
