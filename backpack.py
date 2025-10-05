@@ -403,6 +403,14 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
 
         shop_item, purchased_at, price_paid = tesoro_data
 
+        # Contar archivos del producto
+        from database.models import ProductFile
+        files_stmt = select(func.count(ProductFile.id)).where(
+            ProductFile.shop_item_id == shop_item.id
+        )
+        files_result = await session.execute(files_stmt)
+        files_count = files_result.scalar() or 0
+
         # Crear mensaje detallado
         texto = f"💎 **{shop_item.name}**\n\n"
 
@@ -417,6 +425,7 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
             texto += f"⏰ Adquirido hace {dias_desde} días\n"
 
         texto += f"💰 Precio pagado: {price_paid} besitos\n"
+        texto += f"📁 Archivos: {files_count} archivo{'s' if files_count != 1 else ''}\n"
 
         # Si desbloquea algo especial
         if shop_item.unlocks_lore_piece_id:
@@ -427,9 +436,17 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
         texto += "\n🌸 **Diana:**\n"
         texto += "*Cada objeto que eliges me dice algo sobre ti... Me gusta.*"
 
-        keyboard = [
-            [InlineKeyboardButton(text="⬅️ Volver", callback_data="mochila_cat:tesoros")]
-        ]
+        keyboard = []
+        
+        # Agregar botón para ver archivos si hay archivos
+        if files_count > 0:
+            keyboard.append([
+                InlineKeyboardButton(text="📁 Ver archivos", callback_data=f"ver_tesoro_archivos:{shop_item.id}")
+            ])
+        
+        keyboard.append([
+            InlineKeyboardButton(text="⬅️ Volver", callback_data="mochila_cat:tesoros")
+        ])
 
         await callback.message.edit_text(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
 
@@ -702,6 +719,78 @@ async def desbloquear_pista_narrativa(bot, user_id, pista_code, context=None):
         })
         
         return True
+
+@router.callback_query(F.data.startswith("ver_tesoro_archivos:"))
+async def ver_tesoro_archivos(callback: CallbackQuery):
+    """Envía los archivos del producto al usuario cuando solicita verlos"""
+    item_id = int(callback.data.split(":")[1])
+    session_factory = get_session_factory()
+
+    async with session_factory() as session:
+        user_id = callback.from_user.id
+
+        # Verificar que el usuario compró este item
+        purchase_result = await session.execute(
+            select(UserPurchase)
+            .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+            .where(
+                and_(
+                    UserPurchase.user_id == user_id,
+                    ShopItem.id == item_id
+                )
+            )
+        )
+        
+        purchase = purchase_result.scalar_one_or_none()
+        if not purchase:
+            await callback.answer("❌ No tienes acceso a este producto")
+            return
+
+        # Obtener el item y los archivos
+        shop_item = await session.get(ShopItem, item_id)
+        from database.models import ProductFile
+        files_stmt = select(ProductFile).where(
+            ProductFile.shop_item_id == item_id
+        ).order_by(ProductFile.order_index)
+        files_result = await session.execute(files_stmt)
+        product_files = files_result.scalars().all()
+
+        if not product_files:
+            await callback.answer("❌ No hay archivos para este producto")
+            return
+
+        # Enviar mensaje de inicio
+        await callback.message.answer(
+            f"🎁 **{shop_item.name}**\n\nAquí tienes tus archivos:"
+        )
+
+        # Enviar cada archivo
+        for idx, product_file in enumerate(product_files, 1):
+            try:
+                if product_file.file_type == 'photo':
+                    await callback.message.answer_photo(
+                        photo=product_file.file_id,
+                        caption=f"📸 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'video':
+                    await callback.message.answer_video(
+                        video=product_file.file_id,
+                        caption=f"🎥 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'document':
+                    await callback.message.answer_document(
+                        document=product_file.file_id,
+                        caption=f"📄 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                # Pequeña pausa para evitar límites de rate
+                import asyncio
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Error enviando archivo {idx} del producto {item_id}: {str(e)}")
+                continue
+
+        await callback.answer("✅ Archivos enviados")
+
 
 @router.callback_query(F.data == "volver_mochila")
 async def volver_mochila(callback: CallbackQuery):
