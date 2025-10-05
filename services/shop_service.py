@@ -201,13 +201,18 @@ class ShopService:
     async def purchase_item(self, user_id: int, item_id: int, bot: Optional[Bot] = None) -> Dict[str, Any]:
         """Purchase an item for the user directly"""
         try:
+            logger.info(f"Starting purchase process for user {user_id}, item {item_id}, bot available: {bot is not None}")
+            
             # Get the item
             stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
 
             if not item:
+                logger.warning(f"Item {item_id} not found or not active")
                 return {"success": False, "message": "Item not found"}
+            
+            logger.info(f"Found item: {item.name} (ID: {item.id})")
 
             # Check if user is VIP for VIP-only items
             if item.is_vip_only:
