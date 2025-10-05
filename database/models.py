@@ -581,6 +581,7 @@ class ShopItem(Base):
     created_at = Column(DateTime, default=func.now())
 
     lore_piece = relationship("LorePiece")
+    product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
 
 class UserPurchase(Base):
     __tablename__ = "user_purchases"
@@ -593,6 +594,22 @@ class UserPurchase(Base):
     
     user = relationship("User", back_populates="purchases")
     shop_item = relationship("ShopItem")
+
+class ProductFile(Base):
+    """Files associated with shop items (for multi-file products like photo sessions)."""
+    
+    __tablename__ = "product_files"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shop_item_id = Column(Integer, ForeignKey("shop_items.id"), nullable=False)
+    file_type = Column(String(20), nullable=False)  # 'photo', 'video', 'document'
+    file_id = Column(String(255), nullable=False)
+    order_index = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationship
+    shop_item = relationship("ShopItem", back_populates="product_files")
+
 
 class UserLorePiece(Base):
     """Mapping of unlocked lore pieces per user."""
