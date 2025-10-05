@@ -1,0 +1,95 @@
+{
+  "quiz_title": "Un Vistazo al Alma",
+  "questions": [
+    {
+      "id": "q1",
+      "text": "Un secreto es...",
+      "answers": [
+        {
+          "id": "q1a1",
+          "text": "Algo para ser descubierto.",
+          "archetype_weights": {
+            "exploratory": 2.0,
+            "intellectual": 1.0
+          }
+        },
+        {
+          "id": "q1a2",
+          "text": "Un lazo íntimo entre dos personas.",
+          "archetype_weights": {
+            "emotional": 2.0,
+            "reciprocal": 1.0
+          }
+        },
+        {
+          "id": "q1a3",
+          "text": "Una verdad que espera el momento adecuado para ser revelada.",
+          "archetype_weights": {
+            "philosophical": 2.0,
+            "patient": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "q2",
+      "text": "Eliges un camino en un bosque misterioso. ¿Qué buscas?",
+      "answers": [
+        {
+          "id": "q2a1",
+          "text": "Un claro oculto del que nadie ha hablado.",
+          "archetype_weights": {
+            "exploratory": 2.0,
+            "direct": 1.0
+          }
+        },
+        {
+          "id": "q2a2",
+          "text": "Un lugar tranquilo para entender tus propios pensamientos.",
+          "archetype_weights": {
+            "intellectual": 2.0,
+            "philosophical": 1.0
+          }
+        },
+        {
+          "id": "q2a3",
+          "text": "La sensación de que alguien especial podría estar esperándote.",
+          "archetype_weights": {
+            "emotional": 2.0,
+            "vulnerable": 1.0
+          }
+        }
+      ]
+    },
+    {
+      "id": "q3",
+      "text": "Recibes una caja cerrada sin remitente. ¿Qué haces?",
+      "answers": [
+        {
+          "id": "q3a1",
+          "text": "La abro de inmediato, la curiosidad me puede.",
+          "archetype_weights": {
+            "direct": 2.0,
+            "exploratory": 1.0
+          }
+        },
+        {
+          "id": "q3a2",
+          "text": "La examino, busco pistas, intento deducir su origen.",
+          "archetype_weights": {
+            "intellectual": 2.0,
+            "patient": 1.0
+          }
+        },
+        {
+          "id": "q3a3",
+          "text": "Espero. Siento que debo abrirla en un momento especial.",
+          "archetype_weights": {
+            "emotional": 2.0,
+            "philosophical": 1.0
+          }
+        }
+      ]
+    }
+  ]
+}
