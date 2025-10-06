@@ -15,7 +15,7 @@ def get_main_menu_keyboard():
         # 🎯 ACTIVIDADES DIARIAS
         [
             InlineKeyboardButton(text="🎯 Misiones", callback_data="menu:missions"),
-            InlineKeyboardButton(text="🎁 Regalo", callback_data="daily_gift")
+            InlineKeyboardButton(text="🎮 Minijuegos", callback_data="menu:minigames")
         ],
 
         # 🛍️ ECONOMÍA & TIENDA
@@ -26,8 +26,7 @@ def get_main_menu_keyboard():
 
         # 🎒 COLECCIONES
         [
-            InlineKeyboardButton(text="🗺️ Mochila", callback_data="open_backpack"),
-            InlineKeyboardButton(text="💝 Recompensas", callback_data="menu:rewards")
+            InlineKeyboardButton(text="🗺️ Mochila", callback_data="open_backpack")
         ],
 
         # 👥 SOCIAL
