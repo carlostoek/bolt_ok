@@ -26,12 +26,13 @@ async def handle_home_button(message: Message, session: AsyncSession):
         text, keyboard = await menu_factory.create_menu("main", user_id, session, message.bot)
 
         # Enviar el menú inline
-        await menu_manager.send_menu(
+        await menu_manager.show_menu(
             message,
             text,
             keyboard,
             session,
-            "main"
+            "main",
+            force_new_message=True
         )
     except Exception as e:
         logger.error(f"Error showing main menu for user {user_id}: {e}", exc_info=True)
