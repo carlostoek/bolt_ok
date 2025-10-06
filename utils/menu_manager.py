@@ -43,7 +43,8 @@ class MenuManager:
         menu_state: str,
         parse_mode: str = "Markdown",
         # NUEVO PARÁMETRO: Indicar si se debe eliminar el mensaje original (ej. el comando /start)
-        delete_origin_message: bool = False 
+        delete_origin_message: bool = False,
+        force_new_message: bool = False
     ) -> Message:
         """
         Display a menu, replacing any existing menu for this user.
@@ -59,7 +60,7 @@ class MenuManager:
         
         # Try to update existing menu if it exists
         existing = self._active_menus.get(user_id)
-        if existing:
+        if existing and not force_new_message:
             chat_id, msg_id = existing
             try:
                 # Intenta editar el mensaje del menú *anterior*
