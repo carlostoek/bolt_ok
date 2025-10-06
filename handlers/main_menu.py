@@ -165,7 +165,17 @@ async def handle_diario_intimo_button(message: Message, session: AsyncSession):
         reason = result.get('message', get_text("main_menu_handler.default_access_denied"))
         await message.answer(get_text("main_menu_handler.access_restricted", reason=reason))
 
-@router.callback_query(F.data == "narrative_main_menu")
+from keyboards.minigames_kb import get_minigames_keyboard
+
+@router.callback_query(F.data == "menu:minigames")
+async def show_minigames_menu(callback: CallbackQuery, session: AsyncSession):
+    """Shows the minigames menu."""
+    text = "Selecciona un minijuego:"
+    keyboard = get_minigames_keyboard()
+    await callback.message.edit_text(text, reply_markup=keyboard)
+    await callback.answer()
+
+@router.callback_query(F.data.in_({"narrative_main_menu", "menu:main"}))
 async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
     """Regresa al menú principal desde la narrativa o tienda, según el rol del usuario"""
     user_id = callback.from_user.id
