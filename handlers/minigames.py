@@ -53,7 +53,7 @@ from sqlalchemy import select
 async def play_dice(message: Message, session: AsyncSession, bot: Bot):
     config = ConfigService(session)
     if (await config.get_value("minigames_enabled")) == "false":
-        await message.answer(BOT_MESSAGES.get("minigames_disabled", "Minijuegos deshabilitados."))
+        await message.answer("🔮 Los portales mágicos están temporalmente cerrados. Vuelve cuando las estrellas se alineen nuevamente.")
         return
 
     user_id = message.from_user.id
@@ -73,29 +73,74 @@ async def play_dice(message: Message, session: AsyncSession, bot: Bot):
             plays_today = dice_milestone.data.get("plays_today", 0)
 
     if plays_today >= 2:
-        await message.answer("Ya has usado tus dos tiradas de dados de hoy. ¡Vuelve mañana!")
+        await message.answer("🎲 Tu energía mística se ha agotado por hoy. Los dados necesitan descansar bajo la luz de la luna. ¡Vuelve mañana!")
         return
 
+    # Enviar mensaje de anticipación
+    loading_msg = await message.answer("🎲 Diana está concentrando energía cósmica en los dados...")
+    
     dice_msg = await bot.send_dice(message.chat.id)
     score = dice_msg.dice.value
+    
+    # Feedback emocional basado en resultado
+    emotional_responses = {
+        1: "😔 Los espíritus del azar no estaban de tu lado... pero cada caída te hace más fuerte.",
+        2: "🤔 La suerte es esquiva hoy, pero mañana será otro día.",
+        3: "😊 La energía fluye suavemente... un resultado digno.",
+        4: "🎯 ¡Bien! Los dados responden a tu aura positiva.",
+        5: "🌟 ¡Excelente! Las estrellas se alinean a tu favor.",
+        6: "💫 ¡INCREÍBLE! El universo conspira para tu éxito máximo."
+    }
+    
+    response = emotional_responses.get(score, f"🎲 Obtuviste {score} puntos de energía cósmica.")
+    
     await PointService(session).add_points(user_id, score, bot=bot)
-    await message.answer(BOT_MESSAGES.get("dice_points", "Ganaste {points} puntos").format(points=score))
-
+    await loading_msg.edit_text(f"{response}\n\n✨ +{score} puntos de energía acumulados")
+    
+    # Actualizar racha y logros
     if not dice_milestone:
         dice_milestone = UserMilestone(
             user_id=user_id,
             milestone_type="dice_plays",
-            data={"plays_today": 1, "last_play_at": today.isoformat()}
+            data={
+                "plays_today": 1, 
+                "last_play_at": today.isoformat(),
+                "total_plays": 1,
+                "current_streak": 1,
+                "max_streak": 1,
+                "last_play_date": today.isoformat()
+            }
         )
         session.add(dice_milestone)
     else:
-        if datetime.datetime.fromisoformat(dice_milestone.data.get("last_play_at")).date() != today:
-            dice_milestone.data["plays_today"] = 1
-        else:
-            dice_milestone.data["plays_today"] += 1
+        # Verificar y actualizar racha
+        last_play = datetime.datetime.fromisoformat(dice_milestone.data.get("last_play_date")).date()
+        yesterday = today - datetime.timedelta(days=1)
+        
+        if last_play == yesterday:
+            current_streak = dice_milestone.data.get("current_streak", 0) + 1
+            dice_milestone.data["current_streak"] = current_streak
+            dice_milestone.data["max_streak"] = max(dice_milestone.data.get("max_streak", 0), current_streak)
+            
+            # Celebrar rachas especiales
+            if current_streak in [3, 7, 30]:
+                streak_bonus = {3: 5, 7: 15, 30: 50}[current_streak]
+                await PointService(session).add_points(user_id, streak_bonus, bot=bot)
+                await message.answer(f"🎉 ¡Racha de {current_streak} días consecutivos! Bonus de +{streak_bonus} puntos")
+        elif last_play != today:
+            dice_milestone.data["current_streak"] = 1
+            
+        dice_milestone.data["plays_today"] = plays_today + 1
         dice_milestone.data["last_play_at"] = today.isoformat()
+        dice_milestone.data["last_play_date"] = today.isoformat()
+        dice_milestone.data["total_plays"] = dice_milestone.data.get("total_plays", 0) + 1
         
     await session.commit()
+    
+    # Mostrar progreso de racha
+    current_streak = dice_milestone.data.get("current_streak", 1)
+    if current_streak >= 2:
+        await message.answer(f"🔥 ¡Llevas {current_streak} días seguidos jugando! La magia se fortalece contigo.")
 
 @router.message(F.text.regexp("/trivia"))
 async def send_trivia(message: Message, session: AsyncSession):
