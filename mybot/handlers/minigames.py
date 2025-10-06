@@ -113,6 +113,17 @@ async def trivia_answer(callback: CallbackQuery, session: AsyncSession, bot: Bot
     if (await config.get_value("minigames_enabled")) == "false":
         return await callback.answer(BOT_MESSAGES.get("minigames_disabled", "Minijuegos deshabilitados."), show_alert=True)
     
+    # Record trivia attempt
+    from database.models import TriviaAttempt
+    score = 5 if callback.data == "trivia_correct" else 0
+    trivia_attempt = TriviaAttempt(
+        user_id=callback.from_user.id,
+        score=score,
+        completed_at=datetime.datetime.utcnow()
+    )
+    session.add(trivia_attempt)
+    await session.commit()
+    
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔄 Jugar de nuevo", callback_data="minigame:trivia")],
         [InlineKeyboardButton(text="⬅️ Volver al menú", callback_data="menu:main")]
