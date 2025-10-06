@@ -32,7 +32,7 @@ from utils.admin_state import (
 from services.mission_service import MissionService
 from services.reward_service import RewardService
 from services.level_service import LevelService
-from database.models import User, Mission, LorePiece
+from database.models import User, Mission, LorePiece, TriviaAttempt
 from services.lore_piece_service import LorePieceService
 from services.point_service import PointService
 from services.config_service import ConfigService
@@ -735,6 +735,7 @@ async def admin_content_minigames(callback: CallbackQuery, session: AsyncSession
     keyboard = InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text=toggle_text, callback_data="toggle_minigames")],
+            [InlineKeyboardButton(text="📊 Estadísticas de Trivia", callback_data="admin_trivia_stats")],
             [InlineKeyboardButton(text="🔙 Volver", callback_data="admin_manage_content")],
         ]
     )
@@ -757,6 +758,92 @@ async def toggle_minigames(callback: CallbackQuery, session: AsyncSession):
     await service.set_value("minigames_enabled", new_value)
     await callback.answer("Configuración actualizada", show_alert=True)
     await admin_content_minigames(callback, session)
+
+
+@router.callback_query(F.data == "admin_trivia_stats")
+async def admin_trivia_stats(callback: CallbackQuery, session: AsyncSession):
+    """Show statistics for trivia minigame"""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer()
+    
+    # Import models
+    from database.models import TriviaAttempt, User
+    
+    # Get total number of trivia attempts
+    total_attempts_stmt = select(func.count()).select_from(TriviaAttempt)
+    total_attempts_result = await session.execute(total_attempts_stmt)
+    total_attempts = total_attempts_result.scalar_one()
+    
+    # Get number of unique users who played trivia
+    unique_users_stmt = select(func.count(func.distinct(TriviaAttempt.user_id))).select_from(TriviaAttempt)
+    unique_users_result = await session.execute(unique_users_stmt)
+    unique_users = unique_users_result.scalar_one()
+    
+    # Get average attempts per user
+    avg_attempts_per_user = total_attempts / unique_users if unique_users > 0 else 0
+    
+    # Get total number of users in the system
+    total_users_stmt = select(func.count()).select_from(User)
+    total_users_result = await session.execute(total_users_stmt)
+    total_users = total_users_result.scalar_one()
+    
+    # Calculate percentage of users who played trivia
+    trivia_participation_rate = (unique_users / total_users * 100) if total_users > 0 else 0
+    
+    # Get average score (assuming score is stored in TriviaAttempt)
+    avg_score_stmt = select(func.avg(TriviaAttempt.score)).select_from(TriviaAttempt)
+    avg_score_result = await session.execute(avg_score_stmt)
+    avg_score = avg_score_result.scalar_one() or 0
+    
+    # Get recent activity (last 7 days)
+    week_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+    recent_attempts_stmt = select(func.count()).select_from(TriviaAttempt).where(
+        TriviaAttempt.completed_at >= week_ago
+    )
+    recent_attempts_result = await session.execute(recent_attempts_stmt)
+    recent_attempts = recent_attempts_result.scalar_one()
+    
+    # Get most active trivia players
+    top_players_stmt = (
+        select(TriviaAttempt.user_id, func.count(TriviaAttempt.id).label('attempt_count'))
+        .group_by(TriviaAttempt.user_id)
+        .order_by(func.count(TriviaAttempt.id).desc())
+        .limit(5)
+    )
+    top_players_result = await session.execute(top_players_stmt)
+    top_players = top_players_result.all()
+    
+    # Format the statistics
+    text = (
+        "📊 **ESTADÍSTICAS DE TRIVIA**\n\n"
+        f"**Total de partidas jugadas:** {total_attempts}\n"
+        f"**Usuarios únicos que jugaron:** {unique_users}\n"
+        f"**Promedio de partidas por usuario:** {avg_attempts_per_user:.2f}\n"
+        f"**Tasa de participación:** {trivia_participation_rate:.1f}%\n"
+        f"**Puntuación promedio:** {avg_score:.1f}\n"
+        f"**Partidas (últimos 7 días):** {recent_attempts}\n\n"
+    )
+    
+    # Add top players section
+    if top_players:
+        text += "**🏆 Jugadores más activos:**\n"
+        for i, (user_id, attempt_count) in enumerate(top_players, 1):
+            # Get username
+            user_stmt = select(User).where(User.id == user_id)
+            user_result = await session.execute(user_stmt)
+            user = user_result.scalar_one_or_none()
+            username = user.username or user.first_name or f"Usuario {user_id}"
+            text += f"{i}. {username}: {attempt_count} partidas\n"
+    
+    keyboard = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🔄 Actualizar", callback_data="admin_trivia_stats")],
+            [InlineKeyboardButton(text="🔙 Volver", callback_data="admin_content_minigames")],
+        ]
+    )
+    
+    await callback.message.edit_text(text, reply_markup=keyboard)
+    await callback.answer()
 
 
 @router.callback_query(F.data == "admin_manage_hints")
