@@ -9,7 +9,7 @@ alias deactivate 'test $?_OLD_VIRTUAL_PATH != 0 && setenv PATH "$_OLD_VIRTUAL_PA
 # Unset irrelevant variables.
 deactivate nondestructive
 
-setenv VIRTUAL_ENV /home/azureuser/repos/bolt_ok/mybot/.venvs/venv_deepseek
+setenv VIRTUAL_ENV /home/azureuser/repos/bolt_ok/.venvs/venv_oficial
 
 set _OLD_VIRTUAL_PATH="$PATH"
 setenv PATH "$VIRTUAL_ENV/"bin":$PATH"
@@ -18,8 +18,8 @@ setenv PATH "$VIRTUAL_ENV/"bin":$PATH"
 set _OLD_VIRTUAL_PROMPT="$prompt"
 
 if (! "$?VIRTUAL_ENV_DISABLE_PROMPT") then
-    set prompt = '(venv_deepseek) '"$prompt"
-    setenv VIRTUAL_ENV_PROMPT '(venv_deepseek) '
+    set prompt = '(venv_oficial) '"$prompt"
+    setenv VIRTUAL_ENV_PROMPT '(venv_oficial) '
 endif
 
 alias pydoc python -m pydoc

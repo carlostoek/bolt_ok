@@ -1,4 +1,4 @@
-#!/home/azureuser/repos/bolt_ok/mybot/.venvs/venv_deepseek/bin/python
+#!/home/azureuser/repos/bolt_ok/.venvs/venv_oficial/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys
