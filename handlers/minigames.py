@@ -5,6 +5,10 @@ from services.config_service import ConfigService
 from services.point_service import PointService
 from utils.messages import BOT_MESSAGES
 import random
+import json
+import datetime
+from database.models import UserMilestone
+from sqlalchemy import select
 
 router = Router()
 
@@ -32,23 +36,18 @@ async def start_reaction_challenge(message: Message, session: AsyncSession, bot:
         BOT_MESSAGES.get("challenge_started", "¡Reto iniciado! Reacciona a {count} publicaciones en pocos minutos.").format(count=challenge.target_reactions)
     )
 
-TRIVIA = [
-    {
-        "q": "¿Capital de Francia?",
-        "opts": ["Madrid", "París", "Roma"],
-        "answer": 1,
-    },
-    {
-        "q": "¿Cuántos días tiene una semana?",
-        "opts": ["5", "7", "10"],
-        "answer": 1,
-    },
-    {
-        "q": "¿Color resultante de mezclar rojo y azul?",
-        "opts": ["Verde", "Morado", "Amarillo"],
-        "answer": 1,
-    },
-]
+import json
+
+TRIVIA = []
+try:
+    with open("data/trivia.json", "r", encoding="utf-8") as f:
+        TRIVIA = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    pass
+
+import datetime
+from database.models import UserMilestone
+from sqlalchemy import select
 
 @router.message(F.text.regexp("/dice"))
 async def play_dice(message: Message, session: AsyncSession, bot: Bot):
@@ -56,10 +55,47 @@ async def play_dice(message: Message, session: AsyncSession, bot: Bot):
     if (await config.get_value("minigames_enabled")) == "false":
         await message.answer(BOT_MESSAGES.get("minigames_disabled", "Minijuegos deshabilitados."))
         return
+
+    user_id = message.from_user.id
+    today = datetime.datetime.utcnow().date()
+
+    stmt = select(UserMilestone).where(
+        UserMilestone.user_id == user_id,
+        UserMilestone.milestone_type == "dice_plays"
+    )
+    result = await session.execute(stmt)
+    dice_milestone = result.scalar_one_or_none()
+
+    plays_today = 0
+    if dice_milestone:
+        last_play_date = datetime.datetime.fromisoformat(dice_milestone.data.get("last_play_at")).date()
+        if last_play_date == today:
+            plays_today = dice_milestone.data.get("plays_today", 0)
+
+    if plays_today >= 2:
+        await message.answer("Ya has usado tus dos tiradas de dados de hoy. ¡Vuelve mañana!")
+        return
+
     dice_msg = await bot.send_dice(message.chat.id)
     score = dice_msg.dice.value
-    await PointService(session).add_points(message.from_user.id, score, bot=bot)
+    await PointService(session).add_points(user_id, score, bot=bot)
     await message.answer(BOT_MESSAGES.get("dice_points", "Ganaste {points} puntos").format(points=score))
+
+    if not dice_milestone:
+        dice_milestone = UserMilestone(
+            user_id=user_id,
+            milestone_type="dice_plays",
+            data={"plays_today": 1, "last_play_at": today.isoformat()}
+        )
+        session.add(dice_milestone)
+    else:
+        if datetime.datetime.fromisoformat(dice_milestone.data.get("last_play_at")).date() != today:
+            dice_milestone.data["plays_today"] = 1
+        else:
+            dice_milestone.data["plays_today"] += 1
+        dice_milestone.data["last_play_at"] = today.isoformat()
+        
+    await session.commit()
 
 @router.message(F.text.regexp("/trivia"))
 async def send_trivia(message: Message, session: AsyncSession):

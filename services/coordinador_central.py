@@ -67,7 +67,6 @@ class AccionUsuario(enum.Enum):
     REACCIONAR_PUBLICACION = "reaccionar_publicacion"
     ACCEDER_NARRATIVA_VIP = "acceder_narrativa_vip"
     TOMAR_DECISION = "tomar_decision"
-    PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
     TEST_EVALUACION_EMOCIONAL = "test_evaluacion_emocional"
     ACCEDER_TIENDA = "acceder_tienda"
@@ -135,8 +134,7 @@ class CoordinadorCentral:
                 return await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
             elif accion == AccionUsuario.TOMAR_DECISION:
                 return await self._flujo_tomar_decision(user_id, **kwargs)
-            elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                return await self._flujo_participacion_canal(user_id, **kwargs)
+
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
                 return await self._flujo_verificar_engagement(user_id, **kwargs)
             elif accion == AccionUsuario.TEST_EVALUACION_EMOCIONAL:
@@ -286,8 +284,7 @@ class CoordinadorCentral:
                 # Generar mejoras contextuales (solo sugerencias, no modifican respuesta)
                 base_response = {
                     "message": mensaje,
-                    "type": "reaction_success",
-                    "points": 10
+                    "type": "reaction_success"
                 }
                 response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
                     user_id, base_response, emotional_context
@@ -299,7 +296,6 @@ class CoordinadorCentral:
         return {
             "success": True,
             "message": mensaje,
-            "points_awarded": 10,
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
             "action": "reaction_success",
@@ -563,109 +559,7 @@ class CoordinadorCentral:
                 "emotional_evolution": emotional_evolution
             }
     
-    async def _flujo_participacion_canal(self, user_id: int, channel_id: int, action_type: str, bot=None) -> Dict[str, Any]:
-        """
-        Flujo para manejar participación en canales (mensajes, comentarios, etc).
-        
-        Args:
-            user_id: ID del usuario
-            channel_id: ID del canal
-            action_type: Tipo de acción (post, comment, etc)
-            bot: Instancia del bot para enviar mensajes
-            
-        Returns:
-            Dict con resultados y mensajes
-        """
-        # 1. Análisis emocional de participación en canal (no bloquea funcionalidad)
-        emotional_context = None
-        if self.emotional_analysis:
-            try:
-                import datetime
-                # Analizar timing y patrones de participación
-                emotional_context = await self.emotional_analysis.analyze_response_timing(
-                    user_id, datetime.datetime.utcnow(), f"channel_participation_{action_type}"
-                )
-            except Exception as e:
-                logger.debug(f"Análisis emocional de participación falló para usuario {user_id}: {str(e)}")
-                # Graceful degradation
-        
-        # 2. Otorgar puntos por participación
-        participacion_exitosa = await self.channel_engagement.award_channel_participation(
-            user_id, channel_id, action_type, bot
-        )
-        
-        if not participacion_exitosa:
-            # Lucien maneja fallos de participación como custodio
-            participation_fail_message = self.character_voice.get_character_response(
-                CharacterType.LUCIEN,
-                EmotionalContext.PAUSA_REFLEXIVA,
-                "participation_failed",
-                emotional_context
-            )
-            
-            return {
-                "success": False,
-                "message": participation_fail_message,
-                "action": "participation_failed",
-                "emotional_context": emotional_context
-            }
-        
-        # 3. Determinar puntos otorgados según el tipo de acción
-        puntos = 5 if action_type == "post" else 2 if action_type == "comment" else 1
-        
-        # 4. Generar mensaje con voz auténtica según tipo de acción
-        user_points = await self.point_service.get_user_points(user_id)
-        user_history = {"total_interactions": user_points // 5}  # Aproximación
-        
-        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
-            emotional_context, emotional_context, None, user_history
-        )
-        
-        # Diana responde a participación social (conexión)
-        base_message = self.character_voice.get_character_response(
-            CharacterType.DIANA,
-            emotional_context_enum,
-            f"participation_{action_type}",
-            emotional_context,
-            user_history
-        )
-        
-        # Agregar puntos según acción
-        points_text = f"\n\n*+{puntos} besito{'s' if puntos > 1 else ''}* 💋 por tu {action_type}."
-        mensaje = f"{base_message}{points_text}"
-        
-        # 5. Análisis emocional post-participación y mejoras contextuales
-        behavioral_patterns = None
-        response_enhancements = None
-        if self.emotional_analysis:
-            try:
-                import datetime
-                # Detectar patrones de participación social
-                recent_actions = [{"timestamp": datetime.datetime.utcnow(), "type": "channel_participation", "action_type": action_type, "channel_id": channel_id}]
-                behavioral_patterns = await self.emotional_analysis.detect_behavioral_patterns(
-                    user_id, recent_actions
-                )
-                
-                # Generar mejoras contextuales
-                base_response = {"message": mensaje, "type": "participation_success", "points": puntos}
-                response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
-                    user_id, base_response, emotional_context
-                )
-            except Exception as e:
-                logger.debug(f"Análisis post-participación falló para usuario {user_id}: {str(e)}")
-                # Graceful degradation
-        
-        return {
-            "success": True,
-            "message": mensaje,
-            "points_awarded": puntos,
-            "action": "participation_success",
-            "action_type": action_type,
-            # Información adicional de análisis emocional
-            "emotional_context": emotional_context,
-            "behavioral_patterns": behavioral_patterns,
-            "response_enhancements": response_enhancements
-        }
+
     
     async def _flujo_verificar_engagement(self, user_id: int, bot=None) -> Dict[str, Any]:
         """
@@ -703,29 +597,26 @@ class CoordinadorCentral:
         user_history = {"streak": streak, "total_interactions": streak * 2}  # Aproximación
         
         if streak % 7 == 0:  # Racha semanal - alta dedicación
-            weekly_message = self.character_voice.get_character_response(
+            mensaje = self.character_voice.get_character_response(
                 CharacterType.DIANA,
                 EmotionalContext.ENGAGEMENT_ALTO,
                 "weekly_streak",
                 None,
                 user_history
             )
-            mensaje = f"{weekly_message}\n\n*+25 besitos* 💋 por tu constancia semanal."
         else:
-            daily_message = self.character_voice.get_character_response(
+            mensaje = self.character_voice.get_character_response(
                 CharacterType.DIANA,
                 EmotionalContext.USUARIO_AVANZADO if streak > 7 else EmotionalContext.NUEVO_USUARIO,
                 "daily_check",
                 None,
                 user_history
             )
-            mensaje = f"{daily_message}\n\n*+10 besitos* 💋 por tu visita diaria."
         
         return {
             "success": True,
             "message": mensaje,
             "streak": streak,
-            "points_awarded": 25 if streak % 7 == 0 else 10,
             "action": "daily_check_success"
         }
     

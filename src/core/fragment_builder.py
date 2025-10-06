@@ -8,14 +8,14 @@ class FragmentBuilder:
         self.personality_templates = self._load_personality_templates()
         
     def _load_base_fragments(self) -> Dict:
-        \"\"\"Load base fragments\"\"\"
+        """Load base fragments"""
         # In a real implementation, this would load from JSON files or a database
         return {
             # Base templates for different fragment types
         }
     
     def _load_personality_templates(self) -> Dict:
-        \"\"\"Load personality templates\"\"\"
+        """Load personality templates"""
         # In a real implementation, this would load from data files
         return {
             'filosofa': {
@@ -99,7 +99,7 @@ class FragmentBuilder:
         }
     
     def build_filosofa_fragment(self, fragment_level: str, diana: DianaPersonality) -> Dict:
-        \"\"\"Build fragment for philosophical route\"\"\"
+        """Build fragment for philosophical route"""
         
         base_template = self.personality_templates['filosofa'].get(fragment_level, 
             {
@@ -128,7 +128,7 @@ class FragmentBuilder:
         choices = self._build_adaptive_choices(base_template['choices'], diana, 'filosofa')
         
         return {
-            'id': f\"diana_{fragment_level}_filosofa_{sub_archetype}\",
+            'id': f"diana_{fragment_level}_filosofa_{sub_archetype}",
             'title': base_template['title'],
             'content': content,
             'choices': choices,
@@ -137,7 +137,7 @@ class FragmentBuilder:
         }
     
     def build_corazon_fragment(self, fragment_level: str, diana: DianaPersonality) -> Dict:
-        \"\"\"Build fragment for emotional route\"\"\"
+        """Build fragment for emotional route"""
         
         base_template = self.personality_templates['corazon'].get(fragment_level,
             {
@@ -161,7 +161,7 @@ class FragmentBuilder:
         choices = self._build_adaptive_choices(base_template['choices'], diana, 'corazon')
         
         return {
-            'id': f\"diana_{fragment_level}_corazon_{sub_archetype}\",
+            'id': f"diana_{fragment_level}_corazon_{sub_archetype}",
             'title': base_template['title'],
             'content': content,
             'choices': choices,
@@ -169,7 +169,7 @@ class FragmentBuilder:
         }
     
     def build_aventurera_fragment(self, fragment_level: str, diana: DianaPersonality) -> Dict:
-        \"\"\"Build fragment for adventure route\"\"\"
+        """Build fragment for adventure route"""
         
         base_template = self.personality_templates['aventurera'].get(fragment_level,
             {
@@ -193,7 +193,7 @@ class FragmentBuilder:
         choices = self._build_adaptive_choices(base_template['choices'], diana, 'aventurera')
         
         return {
-            'id': f\"diana_{fragment_level}_aventurera_{sub_archetype}\",
+            'id': f"diana_{fragment_level}_aventurera_{sub_archetype}",
             'title': base_template['title'],
             'content': content,
             'choices': choices,
@@ -201,52 +201,52 @@ class FragmentBuilder:
         }
     
     def _add_romantic_intellectual_layer(self, content: str) -> str:
-        \"\"\"Add romantic-intellectual layer to content\"\"\"
-        addition = \"\\n\\n*[A deep intellectual connection forms between you]*\\n\\nYour ideas intertwine like lovers of concepts...\"
+        """Add romantic-intellectual layer to content"""
+        addition = "\n\n*[A deep intellectual connection forms between you]*\n\nYour ideas intertwine like lovers of concepts..."
         return content + addition
     
     def _add_skeptical_approach(self, content: str) -> str:
-        \"\"\"Add skeptical approach to content\"\"\"
-        addition = \"\\n\\n*[With critical mind but open heart]*\\n\\nWe question together what's established, challenging ideas with intelligence...\"
+        """Add skeptical approach to content"""
+        addition = "\n\n*[With critical mind but open heart]*\n\nWe question together what's established, challenging ideas with intelligence..."
         return content + addition
     
     def _add_healing_dimension(self, content: str) -> str:
-        \"\"\"Add healing dimension to content\"\"\"
-        addition = \"\\n\\n*[Sacred space of emotional healing]*\\n\\nHere our wounds find the balm of mutual understanding...\"
+        """Add healing dimension to content"""
+        addition = "\n\n*[Sacred space of emotional healing]*\n\nHere our wounds find the balm of mutual understanding..."
         return content + addition
     
     def _intensify_emotional_content(self, content: str) -> str:
-        \"\"\"Intensify emotional content\"\"\"
-        addition = \"\\n\\n*[Palpable emotional intensity]*\\n\\nEverything feels deeper, more real, more connected...\"
+        """Intensify emotional content"""
+        addition = "\n\n*[Palpable emotional intensity]*\n\nEverything feels deeper, more real, more connected..."
         return content + addition
     
     def _emphasize_freedom_themes(self, content: str) -> str:
-        \"\"\"Emphasize freedom themes in content\"\"\"
-        addition = \"\\n\\n*[Without bindings or expectations]*\\n\\nPure freedom space where we can be authentically ourselves...\"
+        """Emphasize freedom themes in content"""
+        addition = "\n\n*[Without bindings or expectations]*\n\nPure freedom space where we can be authentically ourselves..."
         return content + addition
     
     def _add_collection_mechanics(self, content: str) -> str:
-        \"\"\"Add collection mechanics to content\"\"\"
-        addition = \"\\n\\n*[Each experience is a unique jewel]*\\n\\nWe collect moments no one else will live, exclusive treasures of our connection...\"
+        """Add collection mechanics to content"""
+        addition = "\n\n*[Each experience is a unique jewel]*\n\nWe collect moments no one else will live, exclusive treasures of our connection..."
         return content + addition
     
     def _adapt_by_memory(self, content: str, memory, route_type: str) -> str:
-        \"\"\"Adapt content based on Diana's memory of the player\"\"\"
+        """Adapt content based on Diana's memory of the player"""
         # Adapt based on observed behavior patterns
         if 'shows_emotional_courage' in memory.behavior_patterns:
             courage_count = memory.behavior_patterns.get('shows_emotional_courage', 0)
             if courage_count >= 2:
-                content += f\"\\n\\n*[Diana recognizes your emotional courage]*\\n\\nYour bravery to be vulnerable inspires me to open up more...\"
+                content += f"\n\n*[Diana recognizes your emotional courage]*\n\nYour bravery to be vulnerable inspires me to open up more..."
         
         if 'appreciates_complexity' in memory.behavior_patterns:
             complexity_count = memory.behavior_patterns.get('appreciates_complexity', 0)
             if complexity_count >= 2 and route_type == 'filosofa':
-                content += f\"\\n\\n*[Your appreciation for intellectual complexity is noted]*\\n\\nI enjoy exploring intricate ideas with you...\"
+                content += f"\n\n*[Your appreciation for intellectual complexity is noted]*\n\nI enjoy exploring intricate ideas with you..."
         
         return content
     
     def _build_adaptive_choices(self, base_choices: List[Dict], diana: DianaPersonality, route_type: str) -> List[Dict]:
-        \"\"\"Build adaptive choices based on Diana's personality and memory\"\"\"
+        """Build adaptive choices based on Diana's personality and memory"""
         adapted_choices = []
         
         for choice in base_choices:
@@ -255,22 +255,22 @@ class FragmentBuilder:
             # Adapt based on player's behavior patterns
             if 'safe_for_vulnerability' in diana.memory.behavior_patterns:
                 if 'vulnerable' in choice['id'] or 'open' in choice['id']:
-                    adapted_choice['text'] = f\"🔒 {adapted_choice['text']} [Diana feels safe]\"
+                    adapted_choice['text'] = f"🔒 {adapted_choice['text']} [Diana feels safe]"
             
             if 'appreciates_complexity' in diana.memory.behavior_patterns:
                 if 'think' in choice['id'] or 'analyze' in choice['id'] or 'understand' in choice['id']:
-                    adapted_choice['text'] = f\"🧠 {adapted_choice['text']} [Diana values your mind]\"
+                    adapted_choice['text'] = f"🧠 {adapted_choice['text']} [Diana values your mind]"
             
             if 'seeks_novelty' in diana.memory.behavior_patterns:
                 if 'explore' in choice['id'] or 'new' in choice['id'] or 'discover' in choice['id']:
-                    adapted_choice['text'] = f\"✨ {adapted_choice['text']} [Diana wants to explore with you]\"
+                    adapted_choice['text'] = f"✨ {adapted_choice['text']} [Diana wants to explore with you]"
             
             adapted_choices.append(adapted_choice)
         
         return adapted_choices
     
     def _get_state_requirements(self, route: str, fragment_level: str) -> Dict:
-        \"\"\"Get state requirements to access a fragment\"\"\"
+        """Get state requirements to access a fragment"""
         # Define minimum emotional state requirements for each route and level
         requirements = {
             'filosofa': {

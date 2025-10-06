@@ -10,7 +10,7 @@ class MiniGameService:
         self.session = session
         self.point_service = PointService(session)
 
-    async def play_roulette(self, user_id: int, bot: Bot, *, cost: int = 5) -> int:
+    async def play_roulette(self, user_id: int, bot: Bot, *, cost: int = 3) -> int:
         """Play roulette. Returns points won."""
         progress = await self.session.get(UserStats, user_id)
         if not progress:

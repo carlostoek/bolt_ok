@@ -1,1 +1,0 @@
-"""Sistema narrativo ramificado para Diana bot."""
