@@ -49,6 +49,7 @@ class DBSessionMiddleware(BaseMiddleware):
 from database.setup import init_db, get_session_factory
 from utils.message_safety import patch_message_methods
 from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
+from utils.localization import get_text
 
 # Handlers imports
 from handlers import start, free_user, daily_gift, minigames, setup as setup_handlers
@@ -104,7 +105,7 @@ async def global_error_handler(event: ErrorEvent) -> None:
     
     # Notificar errores críticos a admins (opcional)
     if isinstance(event.exception, (ConnectionError, TimeoutError)):
-        logger.critical("Error de conexión crítico detectado")
+        logger.critical(get_text("bot.critical_connection_error"))
         # Aquí podrías notificar a admins
     
     return True  # Marca el error como manejado
@@ -133,7 +134,7 @@ class BackgroundTaskManager:
     
     async def shutdown(self):
         """Cierre ordenado de todas las tareas"""
-        logging.info("Cerrando tareas en segundo plano...")
+        logging.info(get_text("bot.shutting_down_tasks"))
         
         for task in self.tasks:
             if not task.done():
@@ -142,7 +143,7 @@ class BackgroundTaskManager:
         if self.tasks:
             await asyncio.gather(*self.tasks, return_exceptions=True)
         
-        logging.info("Todas las tareas cerradas")
+        logging.info(get_text("bot.all_tasks_closed"))
 
 # --- FUNCIÓN PRINCIPAL MEJORADA ---
 async def main() -> None:
@@ -152,10 +153,10 @@ async def main() -> None:
     
     try:
         # Inicialización
-        logger.info("Inicializando base de datos...")
+        logger.info(get_text("bot.initializing_db"))
         await init_db()
         
-        logger.info("Aplicando parches de seguridad...")
+        logger.info(get_text("bot.applying_patches"))
         patch_message_methods()
         
         session_factory = get_session_factory()
@@ -206,7 +207,7 @@ async def main() -> None:
         dp.include_router(metrics_router)
 
         # Registrar routers en orden de prioridad
-        logger.info("Registrando handlers...")
+        logger.info(get_text("bot.registering_handlers"))
         # Import shop router
         from handlers.shop_handlers import router as shop_router
         
@@ -252,7 +253,7 @@ async def main() -> None:
         # Configurar tareas en segundo plano
         task_manager = BackgroundTaskManager()
         
-        logger.info("Iniciando tareas en segundo plano...")
+        logger.info(get_text("bot.starting_background_tasks"))
         task_manager.add_task(
             channel_request_scheduler(bot, session_factory), 
             "channel_requests"
@@ -279,20 +280,20 @@ async def main() -> None:
         )
 
         # Iniciar polling con reacciones nativas habilitadas
-        logger.info("Bot iniciado correctamente. Comenzando polling...")
+        logger.info(get_text("bot.bot_started"))
         allowed_updates = dp.resolve_used_update_types()
         # Agregar message_reaction explícitamente para reacciones nativas
         if "message_reaction" not in allowed_updates:
             allowed_updates.append("message_reaction")
-            logger.info("✓ Reacciones nativas de Telegram habilitadas")
+            logger.info(get_text("bot.native_reactions_enabled"))
 
         await dp.start_polling(bot, allowed_updates=allowed_updates)
         
     except Exception as e:
-        logger.critical(f"Error crítico en main(): {e}", exc_info=True)
+        logger.critical(f"{get_text('bot.fatal_error')}{e}", exc_info=True)
         raise
     finally:
-        logger.info("Cerrando bot...")
+        logger.info(get_text("bot.shutting_down_bot"))
         try:
             # Only shutdown task_manager if it was successfully created
             if 'task_manager' in locals():
@@ -300,14 +301,14 @@ async def main() -> None:
             if 'bot' in locals():
                 await bot.session.close()
         except Exception as e:
-            logger.error(f"Error durante el cierre: {e}", exc_info=True)
+            logger.error(f"{get_text('bot.shutdown_error')}{e}", exc_info=True)
 
 # --- PUNTO DE ENTRADA ---
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        logging.info("Bot detenido por el usuario")
+        logging.info(get_text("bot.bot_stopped_by_user"))
     except Exception as e:
-        logging.critical(f"Error fatal: {e}", exc_info=True)
+        logging.critical(f"{get_text('bot.fatal_error')}{e}", exc_info=True)
         sys.exit(1)

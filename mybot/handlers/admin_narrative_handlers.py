@@ -15,6 +15,7 @@ import tempfile
 from services.narrative_loader import NarrativeLoader
 from utils.user_roles import is_admin
 from utils.message_safety import safe_answer, safe_edit
+from utils.localization import get_text
 
 router = Router()
 
@@ -26,7 +27,7 @@ class NarrativeAdminStates(StatesGroup):
 async def load_narrative_command(message: Message, session: AsyncSession):
     """Carga fragmentos narrativos desde la carpeta narrative_fragments."""
     if not await is_admin(message.from_user.id, session):
-        await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
+        await safe_answer(message, get_text("admin_narrative_handlers.admins_only"))
         return
     
     try:
@@ -38,39 +39,21 @@ async def load_narrative_command(message: Message, session: AsyncSession):
         # Si no hay archivos, cargar narrativa por defecto
         await loader.load_default_narrative()
         
-        await safe_answer(message, "✅ **Narrativa Cargada**\n\nLos fragmentos narrativos han sido cargados exitosamente.")
+        await safe_answer(message, get_text("admin_narrative_handlers.narrative_loaded"))
         
     except Exception as e:
-        await safe_answer(message, f"❌ **Error**: {str(e)}")
+        await safe_answer(message, get_text("admin_narrative_handlers.error", error=str(e)))
 
 @router.message(Command("upload_narrative"))
 async def upload_narrative_command(message: Message, session: AsyncSession, state: FSMContext):
     """Inicia el proceso para subir un archivo narrativo."""
     if not await is_admin(message.from_user.id, session):
-        await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
+        await safe_answer(message, get_text("admin_narrative_handlers.admins_only"))
         return
     
     await safe_answer(
         message,
-        "📤 **Subir Narrativa**\n\n"
-        "Envía un archivo JSON con el fragmento narrativo.\n\n"
-        "**Formato esperado:**\n"
-        "```json\n"
-        "{\n"
-        '  "fragment_id": "UNIQUE_ID",\n'
-        '  "content": "Texto del fragmento",\n'
-        '  "character": "Lucien",\n'
-        '  "level": 1,\n'
-        '  "required_besitos": 0,\n'
-        '  "reward_besitos": 5,\n'
-        '  "decisions": [\n'
-        '    {\n'
-        '      "text": "Opción 1",\n'
-        '      "next_fragment": "NEXT_ID"\n'
-        '    }\n'
-        '  ]\n'
-        "}\n"
-        "```"
+        get_text("admin_narrative_handlers.upload_narrative_prompt")
     )
     await state.set_state(NarrativeAdminStates.waiting_for_narrative_file)
 
@@ -78,11 +61,11 @@ async def upload_narrative_command(message: Message, session: AsyncSession, stat
 async def handle_narrative_file(message: Message, session: AsyncSession, state: FSMContext):
     """Procesa un archivo JSON de fragmento narrativo."""
     if not message.document:
-        await safe_answer(message, "❌ No se detectó ningún documento.")
+        await safe_answer(message, get_text("admin_narrative_handlers.no_document_detected"))
         return
     
     if not message.document.file_name.endswith('.json'):
-        await safe_answer(message, "❌ El archivo debe ser un JSON (.json).")
+        await safe_answer(message, get_text("admin_narrative_handlers.file_must_be_json"))
         return
     
     try:
@@ -98,12 +81,12 @@ async def handle_narrative_file(message: Message, session: AsyncSession, state: 
         loader = NarrativeLoader(session)
         await loader.load_fragment_from_file(temp_path)
         
-        await safe_answer(message, "✅ **Fragmento Cargado**\n\nEl fragmento narrativo se ha cargado exitosamente.")
+        await safe_answer(message, get_text("admin_narrative_handlers.fragment_loaded"))
         
     except json.JSONDecodeError as e:
-        await safe_answer(message, f"❌ **Error de JSON**: {str(e)}")
+        await safe_answer(message, get_text("admin_narrative_handlers.json_error", error=str(e)))
     except Exception as e:
-        await safe_answer(message, f"❌ **Error**: {str(e)}")
+        await safe_answer(message, get_text("admin_narrative_handlers.error", error=str(e)))
     finally:
         # Limpiar archivo temporal
         if 'temp_path' in locals() and os.path.exists(temp_path):
@@ -114,7 +97,7 @@ async def handle_narrative_file(message: Message, session: AsyncSession, state: 
 async def narrative_admin_stats(message: Message, session: AsyncSession):
     """Muestra estadísticas del sistema narrativo."""
     if not await is_admin(message.from_user.id, session):
-        await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
+        await safe_answer(message, get_text("admin_narrative_handlers.admins_only"))
         return
     
     try:
@@ -141,30 +124,25 @@ async def narrative_admin_stats(message: Message, session: AsyncSession):
         level_result = await session.execute(level_stmt)
         level_distribution = dict(level_result.all())
         
-        stats_text = f"""📊 **Estadísticas del Sistema Narrativo**
-
-📚 **Contenido**:
-• Fragmentos totales: {total_fragments}
-• Decisiones totales: {total_choices}
-• Usuarios activos: {active_users}
-
-📈 **Distribución por Nivel**:"""
+        stats_text = f'{get_text("admin_narrative_handlers.narrative_stats_title")}\n\n'
+        stats_text += f'{get_text("admin_narrative_handlers.narrative_stats_content", total_fragments=total_fragments, total_choices=total_choices, active_users=active_users)}\n\n'
+        stats_text += f'{get_text("admin_narrative_handlers.narrative_stats_distribution")}'
         
         for level in sorted(level_distribution.keys()):
             count = level_distribution[level]
-            level_type = "Gratuito" if level <= 3 else "VIP"
-            stats_text += f"\n• Nivel {level} ({level_type}): {count} fragmentos"
+            level_type = get_text("admin_narrative_handlers.level_type_free") if level <= 3 else get_text("admin_narrative_handlers.level_type_vip")
+            stats_text += get_text("admin_narrative_handlers.level_distribution_item", level=level, level_type=level_type, count=count)
         
         await safe_answer(message, stats_text)
         
     except Exception as e:
-        await safe_answer(message, f"❌ **Error**: {str(e)}")
+        await safe_answer(message, get_text("admin_narrative_handlers.error", error=str(e)))
 
 @router.message(Command("reset_narrative"))
 async def reset_user_narrative(message: Message, session: AsyncSession):
     """Reinicia la narrativa de un usuario (solo admins)."""
     if not await is_admin(message.from_user.id, session):
-        await safe_answer(message, "❌ Solo los administradores pueden usar este comando.")
+        await safe_answer(message, get_text("admin_narrative_handlers.admins_only"))
         return
     
     # Extraer user_id del comando
@@ -172,8 +150,7 @@ async def reset_user_narrative(message: Message, session: AsyncSession):
     if len(command_parts) < 2:
         await safe_answer(
             message, 
-            "❌ **Uso**: `/reset_narrative <user_id>`\n\n"
-            "Ejemplo: `/reset_narrative 123456789`"
+            get_text("admin_narrative_handlers.reset_narrative_usage")
         )
         return
     
@@ -189,11 +166,11 @@ async def reset_user_narrative(message: Message, session: AsyncSession):
         if user_state:
             await session.delete(user_state)
             await session.commit()
-            await safe_answer(message, f"✅ **Narrativa Reiniciada**\n\nLa historia del usuario {target_user_id} ha sido reiniciada.")
+            await safe_answer(message, get_text("admin_narrative_handlers.narrative_reset_success", target_user_id=target_user_id))
         else:
-            await safe_answer(message, f"❌ El usuario {target_user_id} no tiene progreso narrativo.")
+            await safe_answer(message, get_text("admin_narrative_handlers.user_has_no_narrative_progress", target_user_id=target_user_id))
             
     except ValueError:
-        await safe_answer(message, "❌ ID de usuario inválido.")
+        await safe_answer(message, get_text("admin_narrative_handlers.invalid_user_id"))
     except Exception as e:
-        await safe_answer(message, f"❌ **Error**: {str(e)}")
+        await safe_answer(message, get_text("admin_narrative_handlers.error", error=str(e)))

@@ -1,12 +1,11 @@
-"""
-Enhanced shop handlers for users with improved UX.
+"Enhanced shop handlers for users with improved UX.
 
 Flow:
 1. Shop list → Shows available products with visual indicators
 2. Product detail → Shows full product information
 3. Purchase confirmation → Summary with confirm/cancel buttons
 4. Result → Success message with unlocks or clear error
-"""
+"
 import logging
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InputMediaPhoto
@@ -40,7 +39,7 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
 
         if not items:
             await callback.answer(
-                "🛒 La tienda está vacía o no tienes acceso a ningún producto actualmente.",
+                get_text("shop.empty_shop"),
                 show_alert=True
             )
             return
@@ -50,17 +49,15 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
         user = await session.get(User, user_id)
         user_points = user.points if user else 0
 
-        text = f"""🛍️ **Bienvenido a la Tienda de Diana**
+        text = f"""⛓️ **{get_text("shop.welcome_title")}**
 
-💰 Tus besitos: **{user_points:.0f}**
+💰 {get_text("shop.current_besitos", user_points=user_points)}
 
-Aquí puedes canjear tus besitos por recompensas exclusivas.
+{get_text("shop.recommendation")}
 
-💎 **Recomendación:** Comienza con los sets básicos y ve subiendo según acumules más besitos.
+📦 {get_text("shop.products_available", count=len(items))}
 
-📦 **Productos disponibles:** {len(items)}
-
-Selecciona un producto para ver sus detalles."""
+{get_text("shop.select_product")}"""
 
         # Build keyboard with product buttons
         builder = InlineKeyboardBuilder()
@@ -79,9 +76,9 @@ Selecciona un producto para ver sus detalles."""
                 remaining = item.stock_limit - total_purchases
 
                 if remaining <= 5:
-                    button_text += f" [¡Solo {remaining}!]"
+                    button_text += f" [{get_text("shop.stock_remaining_alert", remaining=remaining)}]"
                 elif remaining <= 10:
-                    button_text += f" [{remaining} disponibles]"
+                    button_text += f" [{get_text("shop.stock_remaining", remaining=remaining)}]"
 
             builder.button(
                 text=button_text,
@@ -102,7 +99,7 @@ Selecciona un producto para ver sus detalles."""
 
     except Exception as e:
         logger.error(f"Error in show_shop: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar la tienda. Intenta más tarde.", show_alert=True)
+        await callback.answer(get_text("shop.load_error"), show_alert=True)
 
 @router.callback_query(F.data.startswith("view_product:"))
 async def view_product_detail(callback: CallbackQuery, session: AsyncSession):
@@ -114,7 +111,7 @@ async def view_product_detail(callback: CallbackQuery, session: AsyncSession):
         # Get product
         item = await session.get(ShopItem, item_id)
         if not item or not item.is_active:
-            await callback.answer("❌ Producto no encontrado", show_alert=True)
+            await callback.answer(get_text("shop.product_not_found"), show_alert=True)
             return
 
         # Get user points
@@ -133,28 +130,26 @@ async def view_product_detail(callback: CallbackQuery, session: AsyncSession):
         already_owns = user_purchases_count > 0
 
         # Build detailed description
-        text = f"""📦 **{item.name}**
+        text = f"""👜 **{get_text("shop.product_detail_title", name=item.name)}**
 
-**Descripción:**
-{item.description or '_Un producto exclusivo de la tienda_'}
+{get_text("shop.product_description", description=item.description or get_text("shop.default_product_description"))}
 
-💰 **Precio:** {item.price} besitos
+💰 {get_text("shop.price", price=item.price)}
 """
 
         # Add your current points
         can_afford = user_points >= item.price
-        text += f"💎 **Tus besitos:** {user_points:.0f} besitos"
+        text += f"💎 {get_text("shop.your_besitos", user_points=user_points)}"
         if not can_afford:
-            text += f" _(Necesitas {item.price - user_points:.0f} más)_"
+            text += f" {get_text("shop.besitos_needed", missing=item.price - user_points)}"
         text += "\n\n"
 
         # Show what it unlocks
         if item.unlocks_lore_piece_id:
             lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
             if lore_piece:
-                text += f"""🔓 **Desbloquea contenido narrativo:**
-• {lore_piece.title}
-_{lore_piece.description or 'Contenido exclusivo de la historia'}_
+                text += f"""
+🔓 {get_text("shop.unlocks_lore", title=lore_piece.title, description=lore_piece.description or get_text("shop.default_lore_description"))}
 
 """
 
@@ -166,20 +161,20 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
             total_purchases = (await session.execute(purchases_stmt)).scalar() or 0
             remaining = item.stock_limit - total_purchases
 
-            text += f"📦 **Stock:** {remaining} de {item.stock_limit} disponibles\n"
+            text += f"📦 {get_text("shop.stock_info", remaining=remaining, stock_limit=item.stock_limit)}\n"
 
             if remaining <= 5:
-                text += "⚠️ _¡Edición limitada! Quedan pocas unidades_\n"
+                text += f"⚠️ {get_text("shop.limited_edition_warning")}\n"
 
         # Purchase limit info
         if item.max_purchases_per_user > 0:
             remaining_purchases = item.max_purchases_per_user - user_purchases_count
             if already_owns:
                 if remaining_purchases > 0:
-                    text += f"\n✅ **Ya lo compraste** ({user_purchases_count}/{item.max_purchases_per_user} veces)\n"
-                    text += f"_Puedes comprar {remaining_purchases} {'vez' if remaining_purchases == 1 else 'veces'} más_\n"
+                    text += f"\n✅ {get_text("shop.already_owned_can_buy", count=user_purchases_count, limit=item.max_purchases_per_user)}\n"
+                    text += f"{get_text("shop.can_buy_more", remaining=remaining_purchases, times=get_text('shop.times_single') if remaining_purchases == 1 else get_text('shop.times_plural'))}\n"
                 else:
-                    text += f"\n✅ **Ya lo compraste** (límite alcanzado: {user_purchases_count}/{item.max_purchases_per_user})\n"
+                    text += f"\n✅ {get_text("shop.already_owned_limit", count=user_purchases_count, limit=item.max_purchases_per_user)}\n"
 
         # Availability info
         if item.available_until:
@@ -188,7 +183,7 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
             days_remaining = (item.available_until - now).days
 
             if days_remaining > 0:
-                text += f"\n⏰ **Disponible por tiempo limitado:** {days_remaining} días restantes\n"
+                text += f"\n⏰ {get_text("shop.time_limited", days=days_remaining)}\n"
 
         # Build keyboard
         builder = InlineKeyboardBuilder()
@@ -200,15 +195,15 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
         )
 
         if can_purchase:
-            builder.button(text="🛒 Comprar", callback_data=f"confirm_purchase:{item_id}")
+            builder.button(text=get_text("shop.buy_button"), callback_data=f"confirm_purchase:{item_id}")
         elif not can_afford:
             # CRÍTICO: Momento de conversión - ofrecer compra de besitos
             missing = item.price - user_points
-            builder.button(text="💰 Comprar besitos", callback_data=f"besitos_insufficient:{item_id}:{int(missing)}")
+            builder.button(text=get_text("shop.buy_besitos_button"), callback_data=f"besitos_insufficient:{item_id}:{int(missing)}")
         elif user_purchases_count >= item.max_purchases_per_user:
-            builder.button(text="✅ Ya lo compraste (límite alcanzado)", callback_data="noop")
+            builder.button(text=get_text("shop.owned_limit_reached_button"), callback_data="noop")
 
-        builder.button(text="🔙 Volver a la tienda", callback_data="shop_access")
+        builder.button(text=get_text("shop.back_to_shop_button"), callback_data="shop_access")
         builder.adjust(1)
 
         # Send product image if available
@@ -239,10 +234,10 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
         await callback.answer()
 
     except ValueError:
-        await callback.answer("❌ ID de producto inválido", show_alert=True)
+        await callback.answer(get_text("shop.invalid_product_id"), show_alert=True)
     except Exception as e:
         logger.error(f"Error viewing product: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar producto", show_alert=True)
+        await callback.answer(get_text("shop.product_load_error"), show_alert=True)
 
 
 @router.callback_query(F.data.startswith("confirm_purchase:"))
@@ -253,17 +248,14 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
         user_id = callback.from_user.id
 
         # Immediate emotional feedback
-        await callback.answer("🌸 Diana espera tu decisión...")
+        await callback.answer(get_text("shop.emotional_feedback_processing"))
         
         # Show visual processing feedback
         from aiogram.utils.keyboard import InlineKeyboardBuilder
         processing_builder = InlineKeyboardBuilder()
-        processing_builder.button(text="⏳ Preparando detalles...", callback_data="noop")
+        processing_builder.button(text=get_text("shop.preparing_details"), callback_data="noop")
         
-        processing_text = f"""🌸 **Diana**:
-
-¿Vas a desbloquear este secreto?...
-*Tu elección me emociona...*
+        processing_text = f"""✩ **{get_text("shop.diana_emotional_choice")}**
 """
         
         # Update message with processing feedback
@@ -280,7 +272,7 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
         # Get product
         item = await session.get(ShopItem, item_id)
         if not item:
-            await callback.answer("❌ Producto no encontrado", show_alert=True)
+            await callback.answer(get_text("shop.product_not_found"), show_alert=True)
             return
 
         # Get user points
@@ -289,26 +281,26 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
         user_points = user.points if user else 0
 
         # Build confirmation message
-        text = f"""🛒 **Confirmación de Compra**
+        text = f"""📦 **{get_text("shop.purchase_confirmation_title")}**
 
-**Producto:** {item.name}
-**Precio:** {item.price} besitos
+**{get_text("shop.product")}:** {item.name}
+**{get_text("shop.price", price=item.price)}**
 
-💰 **Tus besitos actuales:** {user_points:.0f}
-💎 **Tras la compra:** {user_points - item.price:.0f} besitos
+💰 **{get_text("shop.your_current_besitos")}:** {user_points:.0f}
+💎 **{get_text("shop.besitos_after_purchase")}:** {user_points - item.price:.0f} besitos
 """
 
         if item.unlocks_lore_piece_id:
             lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
             if lore_piece:
-                text += f"\n🔓 **Se desbloqueará:** {lore_piece.title}\n"
+                text += f"\n🔓 **{get_text("shop.will_unlock")}:** {lore_piece.title}\n"
 
-        text += "\n**¿Confirmas la compra?**"
+        text += f"\n**{get_text("shop.confirm_purchase_prompt")}**"
 
         # Build keyboard
         builder = InlineKeyboardBuilder()
-        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item_id}")
-        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item_id}")
+        builder.button(text=get_text("shop.confirm_button"), callback_data=f"buy_item:{item_id}")
+        builder.button(text=get_text("shop.cancel_button"), callback_data=f"view_product:{item_id}")
         builder.adjust(1)
 
         await callback.message.edit_text(
@@ -316,38 +308,13 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
             reply_markup=builder.as_markup(),
             parse_mode="Markdown"
         )
-        await callback.answer("✨ Listo para confirmar...")
+        await callback.answer(get_text("shop.ready_to_confirm"))
 
     except ValueError:
-        await callback.answer("❌ ID de producto inválido", show_alert=True)
+        await callback.answer(get_text("shop.invalid_product_id"), show_alert=True)
     except Exception as e:
         logger.error(f"Error in confirm_purchase: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar", show_alert=True)
-        if item.unlocks_lore_piece_id:
-            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
-            if lore_piece:
-                text += f"\n🔓 **Se desbloqueará:** {lore_piece.title}\n"
-
-        text += "\n**¿Confirmas la compra?**"
-
-        # Build keyboard
-        builder = InlineKeyboardBuilder()
-        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item_id}")
-        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item_id}")
-        builder.adjust(1)
-
-        await callback.message.edit_text(
-            text,
-            reply_markup=builder.as_markup(),
-            parse_mode="Markdown"
-        )
-        await callback.answer("✨ Listo para confirmar...")
-
-    except ValueError:
-        await callback.answer("❌ ID de producto inválido", show_alert=True)
-    except Exception as e:
-        logger.error(f"Error in confirm_purchase: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar", show_alert=True)
+        await callback.answer(get_text("shop.purchase_processing_error"), show_alert=True)
 
 
 @router.callback_query(F.data.startswith("buy_item:"))
@@ -364,12 +331,11 @@ async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
             # Get item info for success message
             item = await session.get(ShopItem, item_id)
 
-            success_text = f"""💝 **¡Compra Exitosa!**
+            success_text = f"""💕 **{get_text("shop.purchase_success_title")}**
 
-🌸 **Diana sonríe...** has adquirido: **{item.name}**
+✩ **{get_text("shop.diana_smiles", name=item.name)}**
 
-💰 *Has invertido {item.price} besitos en algo especial...*
-*Tu conexión con Diana acaba de profundizar...*
+💰 {get_text("shop.investment_thanks", price=item.price)}
 """
 
             # Check if lore was unlocked
@@ -377,15 +343,11 @@ async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
             if unlocked_lore:
                 success_text += f"""
 
-🎉 **¡Contenido Íntimo Desbloqueado!**
+🎉 **{get_text("shop.lore_unlocked_title")}**
 
-Diana te revela un nuevo secreto:
-📜 **{unlocked_lore.get("title", "Secreto de Diana")}**
+{get_text("shop.diana_reveals_secret", title=unlocked_lore.get("title", get_text("shop.default_secret_title")), description=unlocked_lore.get("description", get_text("shop.default_secret_description")))}
 
-_{unlocked_lore.get("description", "Nuevo contenido disponible")}_
-
-📖 Puedes acceder a este contenido exclusivo desde el menú narrativo.
-*Diana espera ansiosa a que lo explores...*
+{get_text("shop.access_from_narrative_menu")} 
 """
 
             # Check if narrative fragment was unlocked
@@ -393,17 +355,14 @@ _{unlocked_lore.get("description", "Nuevo contenido disponible")}_
             if unlocked_fragment:
                 success_text += f"""
 
-📖 **¡Nuevo Capítulo Revelado!**
+📚 **{get_text("shop.fragment_unlocked_title")}**
 
-Diana ha desbloqueado un fragmento especial solo para ti.
-📖 Usa "📖 Continuar historia" para sumergirte más profundo en su mundo.
-*¿Te atreves a seguir descubriendo sus secretos?*
+{get_text("shop.fragment_unlocked_message")} 
 """
 
-            success_text += """
+            success_text += f"""
 
-🎒 *Tu colección personal acaba de crecer...*
-*Gracias por valorar lo que Diana comparte contigo...*
+💰 {get_text("shop.collection_grew")} 
 """
 
             # ========================================
@@ -437,7 +396,7 @@ Diana ha desbloqueado un fragmento especial solo para ti.
                 reply_markup=keyboard,
                 parse_mode="Markdown"
             )
-            await callback.answer("✅ Compra realizada!", show_alert=False)
+            await callback.answer(get_text("shop.purchase_complete"), show_alert=False)
 
         else:
             # CRÍTICO: Detectar error de insufficient_points y ofrecer besitos
@@ -450,22 +409,22 @@ Diana ha desbloqueado un fragmento especial solo para ti.
                 missing = item.price - (user.points if user else 0)
 
                 # Redirigir a oferta de besitos
-                await callback.answer("💰 Necesitas más besitos...", show_alert=False)
+                await callback.answer(get_text("shop.insufficient_points_error"), show_alert=False)
                 await offer_besitos_packs(callback, session, item_id, int(missing))
                 return
 
             # Otros errores: mostrar mensaje y volver a shop
-            error_msg = result.get('message', 'Error desconocido')
+            error_msg = result.get('message', get_text("shop.unknown_purchase_error"))
             await callback.answer(f"❌ {error_msg}", show_alert=True)
 
             # Return to shop
             await show_shop(callback, session)
 
     except ValueError:
-        await callback.answer("❌ ID de artículo inválido", show_alert=True)
+        await callback.answer(get_text("shop.item_invalid_id"), show_alert=True)
     except Exception as e:
         logger.error(f"Error handling purchase: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar la compra", show_alert=True)
+        await callback.answer(get_text("shop.purchase_process_error"), show_alert=True)
 
 
 @router.callback_query(F.data == "view_inventory")
@@ -564,7 +523,7 @@ async def offer_besitos_packs(callback: CallbackQuery, session: AsyncSession, it
     try:
         # Obtener información del producto para context
         item = await session.get(ShopItem, item_id)
-        item_name = item.name if item else "este producto"
+        item_name = item.name if item else get_text("shop.this_product")
 
         # Determinar pack recomendado según lo que falta
         recommended_pack = 1  # Basic por default
@@ -577,7 +536,8 @@ async def offer_besitos_packs(callback: CallbackQuery, session: AsyncSession, it
         text = BOT_MESSAGES["besitos_packs_intro"].format(missing=missing)
 
         # Modificar mensaje para mencionar el producto
-        text += f"\n\n🎁 **Recordatorio:** Querías comprar *{item_name}*\n"
+        text += f"\n\n🎁 **Recordatorio:** Querías comprar *{item_name}*
+"
         text += "Con besitos suficientes, podrás conseguirlo.\n"
 
         await callback.message.edit_text(
@@ -588,25 +548,14 @@ async def offer_besitos_packs(callback: CallbackQuery, session: AsyncSession, it
 
     except Exception as e:
         logger.error(f"Error offering besitos packs: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar packs", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.load_error"), show_alert=True)
 
 
 @router.callback_query(F.data == "besitos_packs_list")
 async def show_besitos_packs(callback: CallbackQuery, session: AsyncSession):
     """Muestra lista de paquetes de besitos disponibles"""
     try:
-        text = """💰 **Paquetes de Besitos**
-
-*Lucien te muestra las opciones*
-
-—Estos packs te darán los besitos que necesitas para conseguir lo que deseas...
-
-**Todos los pagos incluyen:**
-✅ Entrega instantánea
-✅ Bonos de lealtad
-✅ Soporte directo
-
-Selecciona el pack que prefieras."""
+        text = get_text("shop.besitos_packs.intro")
 
         await callback.message.edit_text(
             text,
@@ -617,7 +566,7 @@ Selecciona el pack que prefieras."""
 
     except Exception as e:
         logger.error(f"Error showing besitos packs: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar packs", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.load_error"), show_alert=True)
 
 
 @router.callback_query(F.data.startswith("besitos_insufficient:"))
@@ -631,12 +580,12 @@ async def handle_besitos_insufficient(callback: CallbackQuery, session: AsyncSes
         item_id = int(parts[1])
         missing = int(parts[2])
 
-        await callback.answer("💰 Cargando opciones...")
+        await callback.answer(get_text("shop.besitos_packs.loading_options"))
         await offer_besitos_packs(callback, session, item_id, missing)
 
     except Exception as e:
         logger.error(f"Error handling besitos insufficient: {e}", exc_info=True)
-        await callback.answer("❌ Error", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.insufficient_redirect_error"), show_alert=True)
 
 
 @router.callback_query(F.data.startswith("besitos_pack_"))
@@ -646,7 +595,7 @@ async def show_besitos_pack_details(callback: CallbackQuery, session: AsyncSessi
         pack_id = int(callback.data.split("_")[-1])
 
         # Get pack details from messages
-        text = BOT_MESSAGES.get(f"besitos_pack_{pack_id}_details", "Pack no disponible")
+        text = BOT_MESSAGES.get(f"besitos_pack_{pack_id}_details", get_text("shop.besitos_packs.pack_not_available"))
 
         await callback.message.edit_text(
             text,
@@ -657,7 +606,7 @@ async def show_besitos_pack_details(callback: CallbackQuery, session: AsyncSessi
 
     except Exception as e:
         logger.error(f"Error showing pack details: {e}", exc_info=True)
-        await callback.answer("❌ Error al cargar pack", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.pack_load_error"), show_alert=True)
 
 
 @router.callback_query(F.data.startswith("besitos_interest_"))
@@ -691,14 +640,8 @@ async def handle_besitos_interest(callback: CallbackQuery, session: AsyncSession
         current_points = db_user.points if db_user else 0
 
         admin_msg = (
-            f"💰 **INTERÉS EN PAQUETE DE BESITOS**\n\n"
-            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
-            f"**ID:** {user.id}\n"
-            f"**Pack:** {pack['name']} - ${pack['price']} MXN\n"
-            f"**Besitos:** {pack['besitos']}\n"
-            f"**Besitos actuales:** {current_points:.0f}\n"
-            f"**Contexto:** Usuario en tienda sin suficientes puntos\n\n"
-            f"Contactar para coordinar pago."
+            f'{get_text("shop.besitos_packs.interest_admin_notification_title")}\n\n'
+            f'{get_text("shop.besitos_packs.interest_admin_notification_body", first_name=user.first_name, username=user.username or user.id, user_id=user.id, pack_name=pack["name"], price=pack["price"], besitos=pack["besitos"], current_points=current_points)}'
         )
 
         await notify_admins(callback.bot, admin_msg)
@@ -711,11 +654,11 @@ async def handle_besitos_interest(callback: CallbackQuery, session: AsyncSession
             auto_delete_seconds=10
         )
 
-        await callback.answer("✅ Solicitud enviada", show_alert=False)
+        await callback.answer(get_text("shop.besitos_packs.interest_request_sent"), show_alert=False)
 
     except Exception as e:
         logger.error(f"Error handling besitos interest: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar solicitud", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.interest_request_error"), show_alert=True)
 
 
 @router.callback_query(F.data == "besitos_packs_bonus")
@@ -729,10 +672,10 @@ async def show_besitos_packs_bonus(callback: CallbackQuery, session: AsyncSessio
 
         # Keyboard con bonus destacado
         builder = InlineKeyboardBuilder()
-        builder.button(text="✨ Pack 500 + 150 bonus = 650 - $50 MXN", callback_data="besitos_pack_1")
-        builder.button(text="✨ Pack 1000 + 300 bonus = 1,300 - $90 MXN", callback_data="besitos_pack_2")
-        builder.button(text="✨ Pack 2500 + 750 bonus = 3,250 - $200 MXN", callback_data="besitos_pack_3")
-        builder.button(text="🔙 Volver", callback_data="shop_access")
+        builder.button(text=get_text("shop.besitos_packs.bonus_pack_button", base=500, bonus=150, total=650, price=50), callback_data="besitos_pack_1")
+        builder.button(text=get_text("shop.besitos_packs.bonus_pack_button", base=1000, bonus=300, total=1300, price=90), callback_data="besitos_pack_2")
+        builder.button(text=get_text("shop.besitos_packs.bonus_pack_button", base=2500, bonus=750, total=3250, price=200), callback_data="besitos_pack_3")
+        builder.button(text=get_text("shop.besitos_packs.back_button"), callback_data="shop_access")
         builder.adjust(1)
 
         await callback.message.edit_text(
@@ -744,7 +687,7 @@ async def show_besitos_packs_bonus(callback: CallbackQuery, session: AsyncSessio
 
     except Exception as e:
         logger.error(f"Error showing bonus packs: {e}", exc_info=True)
-        await callback.answer("❌ Error", show_alert=True)
+        await callback.answer(get_text("shop.besitos_packs.load_error"), show_alert=True)
 
 
 # ============================================================================
@@ -792,15 +735,8 @@ async def handle_session_interest(callback: CallbackQuery, session: AsyncSession
         current_points = db_user.points if db_user else 0
 
         admin_msg = (
-            f"💋 **SOLICITUD DE SESIÓN INDIVIDUAL**\n\n"
-            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
-            f"**ID:** {user.id}\n"
-            f"**Tipo sesión:** {session_info['name']}\n"
-            f"**Precio:** ${session_info['price']} MXN\n"
-            f"**VIP desde:** {vip_since_str}\n"
-            f"**Besitos actuales:** {current_points:.0f}\n"
-            f"**Trigger:** {trigger_reason}\n\n"
-            f"Contactar para coordinar sesión."
+            f'{get_text("shop.upsell.session_interest_admin_title")}\n\n'
+            f'{get_text("shop.upsell.session_interest_admin_body", first_name=user.first_name, username=user.username or user.id, user_id=user.id, session_name=session_info["name"], price=session_info["price"], vip_since=vip_since_str, current_points=current_points, trigger_reason=trigger_reason)}'
         )
 
         await notify_admins(callback.bot, admin_msg)
@@ -810,20 +746,21 @@ async def handle_session_interest(callback: CallbackQuery, session: AsyncSession
             BOT_MESSAGES["session_interest_reply"],
             parse_mode="Markdown",
             reply_markup=InlineKeyboardBuilder()
-                .button(text="🔙 Volver al menú", callback_data="narrative_main_menu")
+                .button(text=get_text("shop.upsell.back_to_menu_button"), callback_data="narrative_main_menu")
                 .as_markup()
         )
 
-        await callback.answer("✅ Solicitud enviada a Diana", show_alert=False)
+        await callback.answer(get_text("shop.upsell.session_request_sent_to_diana"), show_alert=False)
 
         # Actualizar timestamp de última oferta de sesión
         if db_user:
+            from datetime import datetime
             db_user.last_session_offer_at = datetime.utcnow()
             await session.commit()
 
     except Exception as e:
         logger.error(f"Error handling session interest: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar solicitud", show_alert=True)
+        await callback.answer(get_text("shop.upsell.session_request_error"), show_alert=True)
 
 
 @router.callback_query(F.data == "vip_interest_special")
@@ -837,6 +774,7 @@ async def handle_vip_interest_special(callback: CallbackQuery, session: AsyncSes
 
         # Get user data
         from database.models import User as UserModel
+        from datetime import datetime
         db_user = await session.get(UserModel, user.id)
 
         days_active = (datetime.utcnow() - db_user.created_at).days if db_user else 0
@@ -846,15 +784,8 @@ async def handle_vip_interest_special(callback: CallbackQuery, session: AsyncSes
         from utils.notify_admins import notify_admins
 
         admin_msg = (
-            f"💎 **INTERÉS EN MEMBRESÍA VIP** (Upsell Post-Compra)\n\n"
-            f"**Usuario:** {user.first_name} (@{user.username or user.id})\n"
-            f"**ID:** {user.id}\n"
-            f"**Tipo:** Primera semana GRATIS\n"
-            f"**Días activo:** {days_active}\n"
-            f"**Besitos:** {current_points:.0f}\n"
-            f"**Contexto:** Usuario acabó de comprar en tienda\n\n"
-            f"⚡ **ALTA PROBABILIDAD DE CONVERSIÓN**\n\n"
-            f"Contactar para activar VIP."
+            f'{get_text("shop.upsell.vip_interest_admin_title")}\n\n'
+            f'{get_text("shop.upsell.vip_interest_admin_body", first_name=user.first_name, username=user.username or user.id, user_id=user.id, days_active=days_active, current_points=current_points)}'
         )
 
         await notify_admins(callback.bot, admin_msg)
@@ -864,15 +795,15 @@ async def handle_vip_interest_special(callback: CallbackQuery, session: AsyncSes
             BOT_MESSAGES["vip_interest_standard"],
             parse_mode="Markdown",
             reply_markup=InlineKeyboardBuilder()
-                .button(text="🔙 Volver al menú", callback_data="narrative_main_menu")
+                .button(text=get_text("shop.upsell.back_to_menu_button"), callback_data="narrative_main_menu")
                 .as_markup()
         )
 
-        await callback.answer("✅ Solicitud enviada", show_alert=False)
+        await callback.answer(get_text("shop.upsell.vip_request_sent"), show_alert=False)
 
     except Exception as e:
         logger.error(f"Error handling VIP interest special: {e}", exc_info=True)
-        await callback.answer("❌ Error", show_alert=True)
+        await callback.answer(get_text("shop.upsell.vip_request_error"), show_alert=True)
 
 
 @router.callback_query(F.data == "continue_narrative_after_purchase")
@@ -882,7 +813,7 @@ async def continue_narrative_after_purchase(callback: CallbackQuery, session: As
     Procesa cualquier decisión pendiente y muestra siguiente fragmento
     """
     try:
-        await callback.answer("📖 Regresando a la historia...")
+        await callback.answer(get_text("shop.upsell.continue_narrative_button"))
 
         # Redirigir al handler de narrativa
         # Este handler ya existe y maneja el shop_redirect_fragment_key
@@ -893,4 +824,4 @@ async def continue_narrative_after_purchase(callback: CallbackQuery, session: As
 
     except Exception as e:
         logger.error(f"Error continuing narrative after purchase: {e}", exc_info=True)
-        await callback.answer("❌ Error", show_alert=True)
+        await callback.answer(get_text("shop.upsell.continue_narrative_error"), show_alert=True)
