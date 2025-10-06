@@ -1,0 +1,562 @@
+[
+  {
+    "q": "¿Cuál es la capital de Francia?",
+    "opts": ["Madrid", "París", "Roma"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuántos días tiene una semana?",
+    "opts": ["5", "7", "10"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué color se obtiene al mezclar rojo y azul?",
+    "opts": ["Verde", "Morado", "Amarillo"],
+    "answer": 1
+  },
+  {
+    "q": "¿En qué año se estrenó la primera película de 'Iron Man'?",
+    "opts": ["2006", "2008", "2010"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál de estos videojuegos fue desarrollado por Rockstar Games?",
+    "opts": ["The Last of Us", "Red Dead Redemption 2", "God of War"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué consola pertenece a Sony?",
+    "opts": ["Xbox Series X", "Nintendo Switch", "PlayStation 5"],
+    "answer": 2
+  },
+  {
+    "q": "¿Quién interpretó a Tony Stark en el MCU?",
+    "opts": ["Chris Evans", "Robert Downey Jr.", "Chris Hemsworth"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del protagonista de 'The Witcher' en la serie de Netflix?",
+    "opts": ["Geralt de Rivia", "Ciri", "Yennefer"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué deporte practica Conor McGregor?",
+    "opts": ["Boxeo", "Artes Marciales Mixtas (MMA)", "Lucha libre profesional"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál de estas marcas es conocida por sus motocicletas?",
+    "opts": ["Tesla", "Harley-Davidson", "Ferrari"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué banda lanzó el álbum 'Master of Puppets'?",
+    "opts": ["Metallica", "Iron Maiden", "Slayer"],
+    "answer": 0
+  },
+  {
+    "q": "¿En qué ciudad se celebra el festival de música Coachella?",
+    "opts": ["Austin", "Indio", "Las Vegas"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del creador de 'Dragon Ball'?",
+    "opts": ["Hayao Miyazaki", "Akira Toriyama", "Osamu Tezuka"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué red social es conocida por su contenido de 'OnlyFans'?",
+    "opts": ["Instagram", "OnlyFans", "TikTok"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el país de origen de la cerveza Heineken?",
+    "opts": ["Alemania", "Bélgica", "Países Bajos"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué significa 'NSFW' en internet?",
+    "opts": ["Not Safe For Work", "New Style For Women", "No Streaming From Web"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál de estos no es un navegador web?",
+    "opts": ["Chrome", "Firefox", "Photoshop"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del protagonista de 'Breaking Bad'?",
+    "opts": ["Jesse Pinkman", "Walter White", "Saul Goodman"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué plataforma de streaming lanzó 'Stranger Things'?",
+    "opts": ["Hulu", "Amazon Prime", "Netflix"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema operativo móvil de Google?",
+    "opts": ["iOS", "Windows Mobile", "Android"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué tipo de contenido es más común en OnlyFans?",
+    "opts": ["Educación financiera", "Contenido para adultos", "Recetas de cocina"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del torneo más importante de fútbol a nivel de selecciones?",
+    "opts": ["Copa América", "Eurocopa", "Copa del Mundo"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué superhéroe es conocido como 'El Hombre Araña'?",
+    "opts": ["Bruce Wayne", "Peter Parker", "Clark Kent"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál de estos es un lenguaje de programación?",
+    "opts": ["HTML", "JPEG", "MP3"],
+    "answer": 0
+  },
+  {
+    "q": "¿En qué año se lanzó el primer iPhone?",
+    "opts": ["2005", "2007", "2009"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué banda lanzó el álbum 'The Dark Side of the Moon'?",
+    "opts": ["Led Zeppelin", "Pink Floyd", "The Beatles"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje principal de 'Attack on Titan'?",
+    "opts": ["Levi", "Eren Yeager", "Mikasa"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de vehículo es el Tesla Model S?",
+    "opts": ["Motocicleta eléctrica", "Coche eléctrico", "Camión híbrido"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del creador de 'Rick and Morty'?",
+    "opts": ["Seth MacFarlane", "Dan Harmon", "Matt Groening"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué red social es conocida por sus 'subreddits'?",
+    "opts": ["Twitter", "Reddit", "Discord"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del villano principal en 'The Dark Knight'?",
+    "opts": ["Two-Face", "Joker", "Bane"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué juego de la saga 'Grand Theft Auto' se desarrolla en Liberty City?",
+    "opts": ["GTA: San Andreas", "GTA V", "GTA IV"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del fundador de Tesla?",
+    "opts": ["Elon Musk", "Jeff Bezos", "Bill Gates"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué anime sigue la historia de un shinigami y un cuaderno de la muerte?",
+    "opts": ["Naruto", "Death Note", "Bleach"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje de Keanu Reeves en 'John Wick'?",
+    "opts": ["Neo", "Wick", "Johnny"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de música es conocida por usar 'drops' y 'beats electrónicos'?",
+    "opts": ["EDM", "Country", "Clásica"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del torneo de artes marciales mixtas más famoso?",
+    "opts": ["WWE", "UFC", "NBA"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué plataforma permite a los creadores monetizar contenido exclusivo?",
+    "opts": ["YouTube", "OnlyFans", "Spotify"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del protagonista de 'The Matrix'?",
+    "opts": ["Morpheus", "Trinity", "Neo"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué país es famoso por su Oktoberfest?",
+    "opts": ["Austria", "Alemania", "Suiza"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del estudio detrás de 'The Legend of Zelda'?",
+    "opts": ["Capcom", "Square Enix", "Nintendo"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué red social fue comprada por Elon Musk en 2022?",
+    "opts": ["Instagram", "Twitter", "Snapchat"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del actor que interpreta a Deadpool?",
+    "opts": ["Chris Pratt", "Ryan Reynolds", "Tom Hardy"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué bebida alcohólica se asocia con el cóctel 'Mojito'?",
+    "opts": ["Whisky", "Ron", "Tequila"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del robot de Boston Dynamics famoso por caminar como humano?",
+    "opts": ["Atlas", "Spot", "Roomba"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué serie de Netflix se basa en un juego de supervivencia coreano?",
+    "opts": ["Parásitos", "El juego del calamar", "Crash Landing on You"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del fundador de Amazon?",
+    "opts": ["Mark Zuckerberg", "Jeff Bezos", "Tim Cook"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué videojuego incluye elementos como 'Ender Pearls' y 'Creepers'?",
+    "opts": ["Fortnite", "Roblox", "Minecraft"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del coche más vendido de Tesla?",
+    "opts": ["Model X", "Model 3", "Cybertruck"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué banda lanzó 'Bohemian Rhapsody'?",
+    "opts": ["The Rolling Stones", "Queen", "The Who"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de pago digital de Apple?",
+    "opts": ["Apple Wallet", "Apple Pay", "iPay"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué deporte practica Lionel Messi?",
+    "opts": ["Baloncesto", "Fútbol", "Tenis"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje de anime con cabello blanco y ojos rojos en 'Jujutsu Kaisen'?",
+    "opts": ["Gojo Satoru", "Itadori Yuji", "Megumi"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué consola fue lanzada por Microsoft?",
+    "opts": ["PlayStation", "Xbox", "Switch"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del creador de 'The Simpsons'?",
+    "opts": ["Seth MacFarlane", "Matt Groening", "Trey Parker"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué red social se enfoca en videos cortos tipo TikTok?",
+    "opts": ["Instagram Reels", "YouTube Shorts", "Ambas anteriores"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del antagonista en 'Avengers: Infinity War'?",
+    "opts": ["Loki", "Thanos", "Ultron"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de contenido suele compartirse en Reddit?",
+    "opts": ["Solo memes", "Foros temáticos y debates", "Solo noticias"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del coche eléctrico de Porsche?",
+    "opts": ["Taycan", "911", "Cayenne"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué anime trata sobre un grupo de piratas buscando el tesoro 'One Piece'?",
+    "opts": ["Naruto", "One Piece", "Dragon Ball"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de mensajería de criptomonedas descentralizado?",
+    "opts": ["Telegram", "Signal", "Matrix"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué banda lanzó 'Smells Like Teen Spirit'?",
+    "opts": ["Pearl Jam", "Soundgarden", "Nirvana"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del protocolo de privacidad en navegadores?",
+    "opts": ["HTTPS", "HTTP", "FTP"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué juego de lucha es conocido por sus personajes de DC y Marvel?",
+    "opts": ["Street Fighter", "Mortal Kombat", "Injustice"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del cofundador de Apple junto a Steve Jobs?",
+    "opts": ["Steve Wozniak", "Tim Cook", "Ronald Wayne"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué país es conocido por su cultura del 'hygge'?",
+    "opts": ["Suecia", "Dinamarca", "Noruega"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema operativo de Apple para móviles?",
+    "opts": ["macOS", "iOS", "watchOS"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de contenido se considera 'ASMR'?",
+    "opts": ["Música rápida", "Sonidos relajantes", "Videos de acción"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del creador de 'South Park'?",
+    "opts": ["Seth MacFarlane", "Trey Parker y Matt Stone", "Mike Judge"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué red social permite 'Spaces' para audio en vivo?",
+    "opts": ["Instagram", "Twitter", "Facebook"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje de 'Peaky Blinders' interpretado por Cillian Murphy?",
+    "opts": ["Tommy Shelby", "Arthur Shelby", "Michael Gray"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué motor de búsqueda es propiedad de Microsoft?",
+    "opts": ["Google", "DuckDuckGo", "Bing"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del estándar de encriptación más usado en Wi-Fi?",
+    "opts": ["WEP", "WPA2", "HTTP"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué videojuego tiene como protagonista a una princesa llamada Zelda?",
+    "opts": ["Zelda no es la protagonista", "Princess Peach", "Samus Aran"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del cofundador de Reddit?",
+    "opts": ["Steve Huffman", "Mark Zuckerberg", "Jack Dorsey"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué anime trata sobre un estudiante que obtiene un cuaderno que mata?",
+    "opts": ["Tokyo Ghoul", "Death Note", "Parasyte"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de pago de criptomonedas de Elon Musk?",
+    "opts": ["Dogecoin", "Bitcoin", "Ethereum"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué banda lanzó 'Enter Sandman'?",
+    "opts": ["Megadeth", "Metallica", "Slayer"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del formato de archivo de imagen sin compresión?",
+    "opts": ["JPEG", "PNG", "RAW"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué consola tiene como mascota a Mario?",
+    "opts": ["PlayStation", "Xbox", "Nintendo"],
+    "answer": 2
+  },
+  {
+    "q": "¿Cuál es el nombre del protocolo usado para enviar correos electrónicos?",
+    "opts": ["SMTP", "HTTP", "FTP"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué serie de HBO trata sobre dragones y reinos?",
+    "opts": ["The Witcher", "Game of Thrones", "Westworld"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del lenguaje usado para estilizar páginas web?",
+    "opts": ["JavaScript", "CSS", "Python"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué red social fue la primera en popularizar los 'filtros' faciales?",
+    "opts": ["Instagram", "Snapchat", "TikTok"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del creador de 'Stranger Things'?",
+    "opts": ["The Duffer Brothers", "J.J. Abrams", "Ryan Murphy"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué tipo de contenido es más valorado por el buyer persona Alex?",
+    "opts": ["Contenido genérico", "Contenido exclusivo y auténtico", "Noticias internacionales"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de autenticación de dos factores más común?",
+    "opts": ["2FA", "SSL", "VPN"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué anime sigue la historia de un shinobi rubio llamado Naruto?",
+    "opts": ["Bleach", "Naruto", "One Piece"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del estándar de privacidad GDPR?",
+    "opts": ["General Data Protection Regulation", "Global Digital Privacy Rule", "Generic Data Privacy Regulation"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué videojuego es conocido por su modo 'Battle Royale'?",
+    "opts": ["Minecraft", "Fortnite", "The Sims"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del cofundador de Twitter?",
+    "opts": ["Jack Dorsey", "Elon Musk", "Mark Zuckerberg"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué banda lanzó 'Back in Black'?",
+    "opts": ["AC/DC", "Led Zeppelin", "Guns N' Roses"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del formato de video más usado en YouTube?",
+    "opts": ["MP4", "AVI", "MOV"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué red social permite 'Stories' de 24 horas?",
+    "opts": ["Instagram", "Twitter", "LinkedIn"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje de 'The Mandalorian'?",
+    "opts": ["Luke Skywalker", "Din Djarin", "Han Solo"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de contenido busca evitar Alex según sus 'puntos de dolor'?",
+    "opts": ["Contenido de alta calidad", "Contenido genérico y repetitivo", "Contenido interactivo"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del protocolo de seguridad para navegación web segura?",
+    "opts": ["HTTP", "HTTPS", "FTP"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué consola fue la primera en usar discos Blu-ray?",
+    "opts": ["Xbox 360", "PlayStation 3", "Wii"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de mensajería cifrado más usado?",
+    "opts": ["WhatsApp", "Telegram", "Signal"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué anime trata sobre un mundo post-apocalíptico con titanes?",
+    "opts": ["Neon Genesis Evangelion", "Attack on Titan", "Akira"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del estándar de encriptación de extremo a extremo?",
+    "opts": ["AES", "RSA", "E2EE"],
+    "answer": 2
+  },
+  {
+    "q": "¿Qué videojuego incluye un modo zombie muy popular?",
+    "opts": ["Call of Duty", "Battlefield", "Halo"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del cofundador de OnlyFans?",
+    "opts": ["Tim Stokely", "Elon Musk", "Mark Zuckerberg"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué banda lanzó 'Sweet Child O' Mine'?",
+    "opts": ["Nirvana", "Guns N' Roses", "Aerosmith"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del formato de compresión de archivos más común?",
+    "opts": ["ZIP", "RAR", "7Z"],
+    "answer": 0
+  },
+  {
+    "q": "¿Qué red social es conocida por su comunidad de 'geeks' y 'nerds'?",
+    "opts": ["Reddit", "TikTok", "Pinterest"],
+    "answer": 0
+  },
+  {
+    "q": "¿Cuál es el nombre del personaje de 'Breaking Bad' que se convierte en Heisenberg?",
+    "opts": ["Jesse Pinkman", "Walter White", "Gus Fring"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué tipo de contenido promueve la 'dualidad' en la estrategia de redes sociales?",
+    "opts": ["Solo sensualidad", "Confianza y vulnerabilidad", "Solo logros profesionales"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del protocolo usado para recibir correos electrónicos?",
+    "opts": ["SMTP", "IMAP", "FTP"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué consola tiene el juego exclusivo 'Halo'?",
+    "opts": ["PlayStation", "Xbox", "Nintendo"],
+    "answer": 1
+  },
+  {
+    "q": "¿Cuál es el nombre del sistema de pago móvil de Google?",
+    "opts": ["Google Wallet", "Google Pay", "Android Pay"],
+    "answer": 1
+  },
+  {
+    "q": "¿Qué anime trata sobre un estudiante que se convierte en un dios de la muerte?",
+    "opts": ["Death Note", "Tokyo Ghoul", "Demon Slayer"],
+    "answer": 0
+  }
+]

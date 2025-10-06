@@ -1,0 +1,221 @@
+{
+  "fragments": [
+    {
+      "fragment_id": "diana_welcome",
+      "content": "🌸 **Diana:** Holis hermoso.\n\nSabes qué? No todos ven las puertas que hay aquí. Algunos ven una. Tú… tú ves varias, ¿verdad?\n\nY lo mejor no es que las veas… es que no sabes cuál elegir. Porque intuyes que cada una me mostraría de una manera distinta.\n\n¿Quieres jugar a descubrir cuál soy *realmente*… o prefieres que te muestre cómo *cambio* según quién me mira?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 5,
+      "decisions": [
+        {
+          "text": "🚪 Descubrir más",
+          "next_fragment": "lucien_first_challenge"
+        },
+        {
+          "text": "¿Por qué hay tantas versiones de ti?",
+          "next_fragment": "diana_versions_question"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_versions_question",
+      "content": "🌸 **Diana:** *Con una sonrisa enigmática*\n\nPorque no soy un espejo fijo. Soy un río. Cambio con quien me atraviesa.\n\nPero hay una versión… la más real… que solo se muestra cuando alguien entiende que no necesita *elegir* una puerta.\n\nNecesita entender que todas llevan a mí.\n\n¿Quieres intentar verme completa?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 3,
+      "decisions": [
+        {
+          "text": "Sí, quiero verte completa",
+          "next_fragment": "lucien_first_challenge"
+        },
+        {
+          "text": "Tal vez no estoy listo",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "lucien_first_challenge",
+      "content": "🎩 **Lucien:** Ah, otro visitante de Diana.\n\nPermíteme presentarme: Lucien, no su guardián… soy su espejo roto.\n\nElla me dejó aquí para ver si tú, como tantos, intentas arreglarme… o si, por primera vez, aceptas que algunos reflejos están hechos para distorsionar.\n\nMisión: Reacciona al último mensaje del canal. Pero hazlo porque realmente quieres entender, no porque se te ordena.",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 0
+    },
+    {
+      "fragment_id": "diana_immediate_reaction",
+      "content": "🌸 **Diana:** *Con una sonrisa apenas perceptible*\n\nImpulsivo... pero no imprudente. Hay una diferencia que pocos entienden.\n\nMe gusta eso de ti.\n\n🎩 **Lucien:** Tu Mochila del Viajero. Dentro encontrarás tu primera pista. Diana la eligió específicamente para alguien como tú: alguien que actúa cuando siente que algo es correcto.",
+      "character": "Diana",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 10,
+      "unlocks_achievement_id": "first_impulse",
+      "decisions": [
+        {
+          "text": "Abrir la mochila",
+          "next_fragment": "first_clue"
+        },
+        {
+          "text": "¿Qué hay en la mochila?",
+          "next_fragment": "lucien_mochila_tease"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_delayed_reaction",
+      "content": "🌸 **Diana:** *Con mirada pensativa*\n\nMe fascina cómo algunos saben que lo genuino no debe apresurarse.\n\nTu manera de aproximarte dice más de ti que cualquier reacción impulsiva.\n\n🎩 **Lucien:** Tu Mochila del Viajero. La pista que encontrarás dentro fue seleccionada para alguien que comprende que los mejores secretos se revelan a quienes saben esperar el momento correcto.",
+      "character": "Diana",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 10,
+      "unlocks_achievement_id": "patient_observer",
+      "decisions": [
+        {
+          "text": "Abrir la mochila",
+          "next_fragment": "first_clue"
+        },
+        {
+          "text": "¿Por qué me diste esta mochila?",
+          "next_fragment": "diana_mochila_meaning"
+        }
+      ]
+    },
+    {
+      "fragment_id": "lucien_mochila_tease",
+      "content": "🎩 **Lucien:** *Con una sonrisa traviesa*\n\nSi te lo digo… pierde la magia.\n\nPero te diré esto: dentro no hay un objeto. Hay una *pregunta*.\n\nY la respuesta… solo la sabrás cuando estés listo para hacerla.",
+      "character": "Lucien",
+      "level": 1,
+      "reward_besitos": 2,
+      "decisions": [
+        {
+          "text": "Abrir la mochila ahora",
+          "next_fragment": "first_clue"
+        },
+        {
+          "text": "Volver al inicio",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_mochila_meaning",
+      "content": "🌸 **Diana:** *Suavemente*\n\nPorque la mochila no es mía. Es tuya.\n\nTodo lo que encuentres en ella… ya estaba en ti. Solo necesitabas un espejo para verlo.\n\n¿Quieres ver lo que llevas dentro?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 2,
+      "decisions": [
+        {
+          "text": "Sí, muéstramelo",
+          "next_fragment": "first_clue"
+        },
+        {
+          "text": "Tal vez después",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "first_clue",
+      "content": "🎩 **Lucien:** Un mapa incompleto. Pero claro... solo tienes la mitad.\n\nDiana no cree en las respuestas fáciles.\n\n🌸 **Diana:** *Mirando directamente al usuario*\n\nLa otra mitad... no existe en este mundo que conoces. Está donde las reglas cambian, donde yo puedo ser... más de lo que aquí me permito ser.\n\n¿Estás preparado para buscar en lugares donde no todos pueden entrar?\n\nPorque una vez que cruces completamente hacia mí... no hay vuelta atrás.",
+      "character": "Diana",
+      "level": 1,
+      "required_besitos": 10,
+      "reward_besitos": 5,
+      "decisions": [
+        {
+          "text": "Entrar al Diván",
+          "next_fragment": "divan_preview"
+        },
+        {
+          "text": "¿Y si no quiero cruzar?",
+          "next_fragment": "diana_no_cross"
+        },
+        {
+          "text": "Volver al comienzo",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_no_cross",
+      "content": "🌸 **Diana:** *Con una mezcla de tristeza y admiración*\n\nEntonces eres más sabio de lo que pensaba.\n\nPorque saber cuándo *no* cruzar… es la forma más profunda de respeto.\n\nPero… ¿y si te digo que no cruzar *también* es una forma de cruzar?\n\nQue al elegir no entrar… ya estás dentro de una versión de mí que pocos ven.\n\n¿Quieres explorar *esta* versión?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 8,
+      "decisions": [
+        {
+          "text": "Sí, explora esta versión",
+          "next_fragment": "diana_hidden_path"
+        },
+        {
+          "text": "No, prefiero irme",
+          "next_fragment": "diana_farewell"
+        },
+        {
+          "text": "Volver al mapa",
+          "next_fragment": "first_clue"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_hidden_path",
+      "content": "🌸 **Diana:** *En un tono íntimo, casi susurrado*\n\nEsta es la Diana que existe en los márgenes… en las decisiones no tomadas, en los caminos no elegidos.\n\nAquí no hay recompensas. Solo preguntas.\n\n¿Estás listo para hacerlas?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 0,
+      "decisions": [
+        {
+          "text": "¿Por qué me muestras esto?",
+          "next_fragment": "diana_hidden_purpose"
+        },
+        {
+          "text": "Volver al comienzo",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_hidden_purpose",
+      "content": "🌸 **Diana:** Porque necesito saber si me buscas a *mí*… o solo a la versión que te conviene.\n\nY esta… esta es la versión que no conviene a nadie.\n\nEs la que duele. La que duda. La que se cierra.\n\n¿Todavía me quieres ver?",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 15,
+      "unlocks_achievement_id": "shadow_seeker",
+      "decisions": [
+        {
+          "text": "Sí, toda tú",
+          "next_fragment": "first_clue"
+        },
+        {
+          "text": "Necesito tiempo",
+          "next_fragment": "diana_welcome"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_farewell",
+      "content": "🌸 **Diana:** *Con calma serena*\n\nGracias por haber llegado hasta aquí.\n\nNo todos tienen el coraje de decir “no”.\n\nPero recuerda: las puertas no se cierran. Solo esperan.\n\nHasta pronto, hermoso.",
+      "character": "Diana",
+      "level": 1,
+      "reward_besitos": 5,
+      "auto_next_fragment_key": null
+    },
+    {
+      "fragment_id": "divan_preview",
+      "content": "🎩 **Lucien:** El Diván te espera… pero no está completo.\n\nFalta una pieza. Y esa pieza… solo tú puedes encontrarla.\n\nVuelve cuando hayas explorado *todas* las puertas.",
+      "character": "Lucien",
+      "level": 1,
+      "required_role": "vip",
+      "decisions": [
+        {
+          "text": "Volver al comienzo",
+          "next_fragment": "diana_welcome"
+        },
+        {
+          "text": "Explorar otras puertas",
+          "next_fragment": "diana_versions_question"
+        }
+      ]
+    }
+  ]
+}

@@ -157,53 +157,6 @@ class GamificationMiddleware(BaseMiddleware):
                     await journey_service.send_contextual_onboarding_message(
                         user, bot, f"first_{command_name}_visit"
                     )
-            
-            # STRATEGIC: Detectar interacciones específicas para badges
-            message_text = event.text or ""
-            message_text_lower = message_text.lower()
-            
-            # Badge por primera interacción extensa
-            if len(message_text) > 20 and "diana" in message_text_lower:
-                # Usuario mencionó a Diana en mensaje largo
-                try:
-                    from database.models import UserBadge
-                    
-                    # Verificar si ya tiene el badge
-                    stmt = select(UserBadge).where(
-                        UserBadge.user_id == user.id,
-                        UserBadge.badge_type == "diana_mention"
-                    )
-                    result = await journey_service.session.execute(stmt)
-                    existing_badge = result.scalar_one_or_none()
-                    
-                    if not existing_badge:
-                        # Otorgar badge
-                        new_badge = UserBadge(
-                            user_id=user.id,
-                            badge_type="diana_mention",
-                            earned_at=datetime.utcnow()
-                        )
-                        journey_service.session.add(new_badge)
-                        
-                        # Otorgar puntos - using keyword argument
-                        await point_service.add_points(user.id, 25)
-                        
-                        # Enviar notificación
-                        badge_message = (
-                            "🏅 **¡Badge Desbloqueado!**\n\n"
-                            "💬 **Mencionador de Diana**\n"
-                            "Mencionaste a Diana en un mensaje significativo\n\n"
-                            "💰 **Recompensa:** +25 besitos\n"
-                            "✨ ¡Sigue conectando con la historia!"
-                        )
-                        
-                        await bot.send_message(user.id, badge_message, parse_mode="Markdown")
-                        badges_unlocked += 1
-                        logger.info(f"🎖️ Badge unlocked: diana_mention for user={user.id}")
-                        
-                except Exception as badge_error:
-                    logger.debug(f"No se pudo otorgar badge de mención: {badge_error}")
-            
         except Exception as e:
             logger.error(f"Error en procesamiento de mensaje para gamificación: {e}")
         
@@ -228,7 +181,6 @@ class GamificationMiddleware(BaseMiddleware):
                 )
             
             # Otorgar puntos por interacción básica de callback
-            await point_service.add_points(user.id, 1)
             
         except Exception as e:
             logger.error(f"Error en procesamiento de callback para gamificación: {e}")

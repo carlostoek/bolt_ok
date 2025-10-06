@@ -12,9 +12,6 @@ from sqlalchemy.orm import sessionmaker
 import json
 from dataclasses import dataclass, field
 
-# Test configuration
-pytest_plugins = ('pytest_asyncio',)
-
 @dataclass
 class UserBehaviorProfile:
     """Represents a simulated user's behavioral patterns for testing."""
