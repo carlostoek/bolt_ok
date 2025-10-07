@@ -210,7 +210,7 @@
     "subscription_title": "\n*🎫 Tu Membresía VIP*",
     "status_active": "✨ Activa",
     "status_expires_soon": "⏰ Expira en {days} días",
-    "status_expires_warning": "⚠️ ¡Expira en {days} días!",
+    "status_expires_warning": "⚠️ ¡Expira en {days} días!}",
     "status_permanent": "👑 Acceso Permanente",
     "status_verified": "✅ Acceso VIP Activo",
     "expires_unlimited": "Ilimitado",
