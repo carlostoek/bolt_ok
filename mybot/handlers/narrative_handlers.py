@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from keyboards.narrative_kb import get_decision_keyboard
+from utils.constants import NarrativeAction
 
 router = Router()
 logger = logging.getLogger(__name__)
