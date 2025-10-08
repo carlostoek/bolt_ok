@@ -3,7 +3,6 @@ from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship, declared_attr
 from sqlalchemy.sql import func
 from .base import Base
-from utils.constants import CharacterType
 
 class StoryFragment(Base):
     __tablename__ = 'story_fragments'
@@ -12,7 +11,7 @@ class StoryFragment(Base):
     key = Column(String(50), unique=True, nullable=False)  # Cambiado de fragment_id a key
     text = Column(Text, nullable=False)  # Cambiado de content a text
     image_url = Column(String(500), nullable=True)  # URL de imagen opcional para el fragmento
-    character = Column(String(50), default=CharacterType.LUCIEN)
+    character = Column(String(50), default="Lucien")
     level = Column(Integer, default=1)
     min_besitos = Column(Integer, default=0)
     required_role = Column(String, nullable=True, index=True)

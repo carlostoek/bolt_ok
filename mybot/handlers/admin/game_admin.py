@@ -1670,10 +1670,10 @@ async def process_main_story(callback: CallbackQuery, session: AsyncSession, sta
     await state.update_data(is_main_story=is_main)
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📝 Texto", callback_data=f"lore_type_{ContentType.TEXT}")],
-            [InlineKeyboardButton(text="🖼 Imagen", callback_data=f"lore_type_{ContentType.IMAGE}")],
-            [InlineKeyboardButton(text="🎵 Audio", callback_data=f"lore_type_{ContentType.AUDIO}")],
-            [InlineKeyboardButton(text="🎞 Video", callback_data=f"lore_type_{ContentType.VIDEO}")],
+            [InlineKeyboardButton(text="📝 Texto", callback_data="lore_type_text")],
+            [InlineKeyboardButton(text="🖼 Imagen", callback_data="lore_type_image")],
+            [InlineKeyboardButton(text="🎵 Audio", callback_data="lore_type_audio")],
+            [InlineKeyboardButton(text="🎞 Video", callback_data="lore_type_video")],
         ]
     )
     await callback.message.edit_text("Selecciona el tipo de contenido:", reply_markup=kb)
@@ -1687,7 +1687,7 @@ async def choose_content_type(callback: CallbackQuery, session: AsyncSession, st
         return await callback.answer()
     ctype = callback.data.split("lore_type_")[-1]
     await state.update_data(content_type=ctype)
-    if ctype == ContentType.TEXT:
+    if ctype == "text":
         await callback.message.edit_text("Ingresa el texto de la pista:")
         await state.set_state(LorePieceAdminStates.entering_text_content)
     else:
@@ -1907,10 +1907,10 @@ async def edit_lore_type_start(callback: CallbackQuery, session: AsyncSession, s
     code = data.get("edit_lore_code")
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📝 Texto", callback_data=f"lore_type_edit_{ContentType.TEXT}")],
-            [InlineKeyboardButton(text="🖼 Imagen", callback_data=f"lore_type_edit_{ContentType.IMAGE}")],
-            [InlineKeyboardButton(text="🎵 Audio", callback_data=f"lore_type_edit_{ContentType.AUDIO}")],
-            [InlineKeyboardButton(text="🎞 Video", callback_data=f"lore_type_edit_{ContentType.VIDEO}")],
+            [InlineKeyboardButton(text="📝 Texto", callback_data="lore_type_edit_text")],
+            [InlineKeyboardButton(text="🖼 Imagen", callback_data="lore_type_edit_image")],
+            [InlineKeyboardButton(text="🎵 Audio", callback_data="lore_type_edit_audio")],
+            [InlineKeyboardButton(text="🎞 Video", callback_data="lore_type_edit_video")],
         ]
     )
     await callback.message.edit_text(
@@ -1962,11 +1962,11 @@ async def edit_lore_file_content(message: Message, state: FSMContext, session: A
     code = data.get("edit_lore_code")
     ctype = data.get("new_content_type")
     file_id = None
-    if ctype == ContentType.IMAGE and message.photo:
+    if ctype == "image" and message.photo:
         file_id = message.photo[-1].file_id
-    elif ctype == ContentType.AUDIO and message.audio:
+    elif ctype == "audio" and message.audio:
         file_id = message.audio.file_id
-    elif ctype == ContentType.VIDEO and message.video:
+    elif ctype == "video" and message.video:
         file_id = message.video.file_id
     if not file_id:
         await send_temporary_reply(message, "Envía un archivo válido.")
