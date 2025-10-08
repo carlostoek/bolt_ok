@@ -16,7 +16,7 @@ from utils.admin_state import AdminShopStates
 from keyboards.common import get_back_kb
 from database.models import ShopItem, LorePiece, UserPurchase
 from services.shop_service import ShopService
-from utils.constants import ConditionOperator, ConditionType, ComparisonOperator
+from utils.constants import ConditionOperator, ConditionType, ComparisonOperator, LoreCategory
 
 logger = logging.getLogger(__name__)
 router = Router()

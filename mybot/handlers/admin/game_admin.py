@@ -33,7 +33,7 @@ from utils.admin_state import (
 from services.mission_service import MissionService
 from services.reward_service import RewardService
 from services.level_service import LevelService
-from database.models import User, Mission, LorePiece, TriviaAttempt
+from database.models import User, Mission, LorePiece, TriviaAttempt, Badge, Level
 from services.lore_piece_service import LorePieceService
 from services.point_service import PointService
 from services.config_service import ConfigService
