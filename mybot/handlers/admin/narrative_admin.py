@@ -7,14 +7,18 @@ import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from aiogram import Router, F
-from aiogram.types import CallbackQuery, Message
+from aiogram.types import CallbackQuery, Message, Document
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, delete
+import os
+import json
+import tempfile
 
+from services.narrative_loader import NarrativeLoader
 from database.narrative_models import StoryFragment, NarrativeChoice, UserNarrativeState
 from database.models import Achievement, LorePiece, ShopItem
 from utils.user_roles import is_admin
@@ -53,6 +57,9 @@ class NarrativeAdminStates(StatesGroup):
     # Vinculación con productos
     link_waiting_fragment = State()
     link_waiting_product = State()
+    
+    # Carga de archivos
+    waiting_for_narrative_file = State()
 
 
 # ==================== MENÚ PRINCIPAL ====================
@@ -89,14 +96,109 @@ Selecciona una opción:"""
     builder = InlineKeyboardBuilder()
     builder.button(text="📚 Gestionar Fragmentos", callback_data="narrative_admin_fragments")
     builder.button(text="🔀 Gestionar Decisiones", callback_data="narrative_admin_choices")
+    builder.button(text="📥 Cargar desde Directorio", callback_data="narrative_admin_load_directory")
+    builder.button(text="📤 Subir Archivo JSON", callback_data="narrative_admin_upload")
     builder.button(text="🔗 Vincular Productos", callback_data="narrative_admin_link_products")
     builder.button(text="✅ Validar Narrativa", callback_data="narrative_admin_validate")
     builder.button(text="📊 Estadísticas Detalladas", callback_data="narrative_admin_stats")
     builder.button(text="🔙 Volver", callback_data="admin_main_menu")
-    builder.adjust(1)
+    builder.adjust(2, 2, 2, 1, 1)
 
     await safe_edit(callback.message, text, reply_markup=builder.as_markup())
     await callback.answer()
+
+# ================= CARGA DE NARRATIVA =================
+
+@router.callback_query(F.data == "narrative_admin_load_directory")
+async def load_narrative_from_directory(callback: CallbackQuery, session: AsyncSession):
+    """Carga fragmentos narrativos desde la carpeta narrative_fragments."""
+    if not await is_admin(callback.from_user.id, session):
+        await callback.answer("❌ Acceso denegado", show_alert=True)
+        return
+    
+    try:
+        loader = NarrativeLoader(session)
+        
+        # Intentar cargar desde directorio
+        await loader.load_fragments_from_directory("mybot/narrative_fragments")
+        
+        # Si no hay archivos, cargar narrativa por defecto
+        await loader.load_default_narrative()
+        
+        await safe_answer(callback.message, "✅ **Narrativa Cargada**\n\nLos fragmentos narrativos han sido cargados exitosamente.")
+        
+    except Exception as e:
+        await safe_answer(callback.message, f"❌ **Error**: {str(e)}")
+    await callback.answer()
+
+@router.callback_query(F.data == "narrative_admin_upload")
+async def upload_narrative_file(callback: CallbackQuery, state: FSMContext):
+    """Inicia el proceso para subir un archivo narrativo."""
+    await safe_answer(
+        callback.message,
+        """📤 **Subir Narrativa**
+
+Envía un archivo JSON con el fragmento o fragmentos narrativos.
+
+**Formato esperado (un solo fragmento):**
+```json
+{
+  "fragment_id": "UNIQUE_ID",
+  "content": "Texto del fragmento",
+  "character": "Lucien",
+  "level": 1,
+  "decisions": [
+    {"text": "Opción 1", "next_fragment": "NEXT_ID"}
+  ]
+}
+```
+
+**Formato esperado (múltiples fragmentos):**
+```json
+{
+  "fragments": [
+    { "fragment_id": "ID_1", ... },
+    { "fragment_id": "ID_2", ... }
+  ]
+}
+```
+"""
+    )
+    await state.set_state(NarrativeAdminStates.waiting_for_narrative_file)
+    await callback.answer("Esperando archivo JSON...")
+
+@router.message(NarrativeAdminStates.waiting_for_narrative_file, F.document)
+async def handle_narrative_file(message: Message, session: AsyncSession, state: FSMContext):
+    """Procesa un archivo JSON de fragmento narrativo."""
+    if not message.document:
+        await safe_answer(message, "❌ No se detectó ningún documento.")
+        return
+    
+    if not message.document.file_name.endswith('.json'):
+        await safe_answer(message, "❌ El archivo debe ser un JSON (.json).")
+        return
+    
+    temp_path = None
+    try:
+        file = await message.bot.get_file(message.document.file_id)
+        
+        with tempfile.NamedTemporaryFile(mode='w+b', suffix='.json', delete=False) as temp_file:
+            await message.bot.download_file(file.file_path, temp_file.name)
+            temp_path = temp_file.name
+        
+        loader = NarrativeLoader(session)
+        await loader.load_fragment_from_file(temp_path)
+        
+        await safe_answer(message, "✅ **Fragmento(s) Cargado(s)**\n\nEl contenido del archivo se ha procesado exitosamente.")
+        
+    except json.JSONDecodeError as e:
+        await safe_answer(message, f"❌ **Error de JSON**: {str(e)}")
+    except Exception as e:
+        await safe_answer(message, f"❌ **Error**: {str(e)}")
+    finally:
+        if temp_path and os.path.exists(temp_path):
+            os.remove(temp_path)
+        await state.clear()
 
 
 # ==================== GESTIÓN DE FRAGMENTOS ====================
