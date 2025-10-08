@@ -34,7 +34,18 @@ async def procesar_combinacion(message: Message, state: FSMContext):
         for combinacion in combinaciones:
             pistas_requeridas = sorted(combinacion.required_hints.split(","))
             if user_hints == pistas_requeridas:
-                await desbloquear_pista(bot=message.bot, user_id=user_id, pista_code=combinacion.reward_code)
+                from services.lore_piece_service import LorePieceService
+                service = LorePieceService(session)
+                await service.unlock_lore_piece_for_user(
+                    user_id=user_id,
+                    lore_piece_code=combinacion.reward_code,
+                    context={
+                        "source": "combination", 
+                        "combined_hints": user_hints,
+                        "combination_code": combinacion.combination_code
+                    },
+                    bot=message.bot
+                )
                 await safe_answer(message, "\u00a1Combinaci\u00f3n correcta! Has desbloqueado una nueva pista.")
                 await state.clear()
                 return
