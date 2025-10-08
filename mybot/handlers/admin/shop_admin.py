@@ -1047,10 +1047,10 @@ Elige qué pieza narrativa se desbloqueará al comprar este producto:
 
     for lore in lore_pieces[:15]:  # Limit to 15 for keyboard size
         category_emoji = {
-            LoreCategory.FRAGMENTOS: '🗺️',
-            LoreCategory.MEMORIAS: '💭',
-            LoreCategory.SECRETOS: '🔮',
-            LoreCategory.LLAVES: '🗝️'
+            "fragmentos": '🗺️',
+            "memorias": '💭',
+            "secretos": '🔮',
+            "llaves": '🗝️'
         }.get(lore.category, '📜')
 
         builder.button(

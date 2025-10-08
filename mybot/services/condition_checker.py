@@ -286,7 +286,7 @@ class ConditionChecker:
             summary = await self._get_condition_summary(condition)
             summaries.append(summary)
 
-        operator_text = " Y " if operator == ConditionOperator.AND else " O "
+        operator_text = " Y " if operator == "AND" else " O "
         return operator_text.join(summaries)
 
     async def _get_condition_summary(self, condition: Dict[str, Any]) -> str:
@@ -295,27 +295,27 @@ class ConditionChecker:
         value = condition.get("value")
         comparison = condition.get("comparison", ">=")
 
-        if cond_type == ConditionType.LEVEL:
+        if cond_type == "level":
             return f"Nivel {comparison} {value}"
-        elif cond_type == ConditionType.VIP_STATUS:
+        elif cond_type == "vip_status":
             return "Ser VIP" if value else "Ser usuario Free"
-        elif cond_type == ConditionType.OWNS_ITEM:
+        elif cond_type == "owns_item":
             if isinstance(value, int):
                 item = await self.session.get(ShopItem, value)
                 item_name = item.name if item else f"Item #{value}"
             else:
                 item_name = str(value)
             return f"Tener: {item_name}"
-        elif cond_type == ConditionType.POINTS:
+        elif cond_type == "points":
             return f"{value} besitos {comparison}"
-        elif cond_type == ConditionType.OWNS_LORE_PIECE:
+        elif cond_type == "owns_lore_piece":
             from database.models import LorePiece
             lore_stmt = select(LorePiece).where(LorePiece.code_name == value)
             lore_result = await self.session.execute(lore_stmt)
             lore = lore_result.scalar_one_or_none()
             lore_name = lore.title if lore else value
             return f"Desbloquear: {lore_name}"
-        elif cond_type == ConditionType.COMPLETED_MISSION:
+        elif cond_type == "completed_mission":
             mission = await self.session.get(Mission, value)
             mission_name = mission.name if mission else value
             return f"Completar: {mission_name}"
