@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.coordinador_central import CoordinadorCentral, AccionUsuario
 from keyboards.narrative_kb import get_decision_keyboard
+from utils.localization import get_text
 
 router = Router()
 logger = logging.getLogger(__name__)
@@ -41,7 +42,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
     engine = NarrativeEngine(session)
     fragment = await engine.get_fragment(fragment_id)
     if not fragment or choice_index >= len(fragment.decisions):
-        await callback.answer("Opción no válida", show_alert=True)
+        await callback.answer(get_text("narrative_handlers.invalid_option"), show_alert=True)
         return
     
     decision_id = fragment.decisions[choice_index].id
@@ -71,10 +72,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
         if result.get("action") == "points_required":
             await callback.bot.send_message(
                 user_id,
-                "Para conseguir más besitos, puedes:\n"
-                "• Participar en los canales oficiales\n"
-                "• Reaccionar a publicaciones\n"
-                "• Completar misiones diarias con /misiones"
+                get_text("narrative_handlers.get_more_kisses")
             )
 
 @router.message(Command("vip_content"))
@@ -116,9 +114,9 @@ def get_subscription_keyboard():
     from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
     
     keyboard = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💎 Suscripción Mensual (9.99€)", callback_data="subscribe:monthly")],
-        [InlineKeyboardButton(text="💎💎 Suscripción Anual (89.99€)", callback_data="subscribe:yearly")],
-        [InlineKeyboardButton(text="❓ Beneficios VIP", callback_data="vip_benefits")]
+        [InlineKeyboardButton(text=get_text("narrative_handlers.monthly_subscription"), callback_data="subscribe:monthly")],
+        [InlineKeyboardButton(text=get_text("narrative_handlers.annual_subscription"), callback_data="subscribe:yearly")],
+        [InlineKeyboardButton(text=get_text("narrative_handlers.vip_benefits"), callback_data="vip_benefits")]
     ])
     
     return keyboard
