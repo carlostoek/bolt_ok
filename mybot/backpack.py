@@ -70,15 +70,35 @@ async def _mostrar_mochila_con_session(message: Message, session, user_id: int =
         await message.answer("❌ Error: No se pudo identificar al usuario")
         return
 
-    # Obtener todas las pistas del usuario
-    result = await session.execute(
-        select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-        .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-        .where(UserLorePiece.user_id == user_id)
-        .order_by(UserLorePiece.unlocked_at.desc())
-    )
-
-    pistas_data = result.all()
+    # Obtener todas las pistas del usuario usando NarrativeService
+    from services.narrative_service import NarrativeService
+    narrative_service = NarrativeService(session)
+    lore_pieces = await narrative_service.get_unlocked_lore_pieces(user_id)
+        
+    # Convert to similar format for compatibility
+    pistas_data = []
+    for piece in lore_pieces:
+        # Extract lore piece info from metadata
+        metadata = piece.metadata or {}
+        # Create a mock object with the expected attributes
+        class MockLorePiece:
+            def __init__(self, fragment, metadata):
+                self.id = fragment.id
+                self.code_name = fragment.key.replace("lore_", "")
+                self.title = metadata.get('lore_title', 'Untitled')
+                self.description = metadata.get('lore_description')
+                self.content_type = metadata.get('original_content_type', 'text')
+                self.content = fragment.text
+                self.category = metadata.get('original_category')
+                self.is_main_story = False
+                self.is_active = True
+            
+        mock_piece = MockLorePiece(piece, metadata)
+        pistas_data.append((
+            mock_piece,
+            None,   # unlocked_at - not available in new system
+            {}      # context - not available in new system
+        ))
 
     # Obtener items comprados (independiente del rol actual - si compró como VIP, debe verlos)
     purchases_result = await session.execute(
@@ -241,20 +261,35 @@ async def mostrar_categoria(callback: CallbackQuery):
                 ])
 
         else:
-            # Para otras categorías, mostrar lore pieces
-            result = await session.execute(
-                select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-                .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-                .where(
-                    and_(
-                        UserLorePiece.user_id == user_id,
-                        LorePiece.category == category
-                    )
-                )
-                .order_by(UserLorePiece.unlocked_at.desc())
-            )
-
-            pistas_data = result.all()
+            # Para otras categorías, mostrar lore pieces usando NarrativeService
+            from services.narrative_service import NarrativeService
+            narrative_service = NarrativeService(session)
+            lore_pieces = await narrative_service.get_unlocked_lore_pieces(user_id)
+        
+            # Filter by category using metadata
+            pistas_data = []
+            for piece in lore_pieces:
+                metadata = piece.metadata or {}
+                if metadata.get('original_category') == category:
+                    # Create a mock object with the expected attributes
+                    class MockLorePiece:
+                        def __init__(self, fragment, metadata):
+                            self.id = fragment.id
+                            self.code_name = fragment.key.replace("lore_", "")
+                            self.title = metadata.get('lore_title', 'Untitled')
+                            self.description = metadata.get('lore_description')
+                            self.content_type = metadata.get('original_content_type', 'text')
+                            self.content = fragment.text
+                            self.category = metadata.get('original_category')
+                            self.is_main_story = False
+                            self.is_active = True
+                
+                    mock_piece = MockLorePiece(piece, metadata)
+                    pistas_data.append((
+                        mock_piece,
+                        None,   # unlocked_at
+                        {}      # context
+                    ))
 
             for pista, unlocked_at, context in pistas_data:
                 # Agregar indicadores especiales
