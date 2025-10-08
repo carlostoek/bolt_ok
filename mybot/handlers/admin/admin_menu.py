@@ -51,9 +51,11 @@ async def admin_start(message: Message, session: AsyncSession):
     if not await is_admin(message.from_user.id, session):
         return await message.answer("Acceso denegado")
     
+    # Use the admin main keyboard instead of undefined get_admin_kb
+    from keyboards.admin_main_kb import get_admin_main_kb
     await message.answer(
         "Panel de Administración",
-        reply_markup=get_admin_kb()
+        reply_markup=get_admin_main_kb()
     )
 
 @router.message(Command("admin_menu"))
