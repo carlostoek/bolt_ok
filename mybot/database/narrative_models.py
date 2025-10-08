@@ -30,7 +30,7 @@ class StoryFragment(Base):
     archetype_variant = Column(String(20), nullable=True, index=True)
 
     # Metadata for extended functionality (e.g., migrated lore pieces)
-    metadata = Column(JSON, nullable=True)
+    fragment_metadata = Column(JSON, nullable=True)
 
     # Timestamps
     created_at = Column(DateTime, default=func.now())
