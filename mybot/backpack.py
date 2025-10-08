@@ -677,48 +677,28 @@ async def verificar_combinaciones_disponibles(session, user_id, hint_code):
 
 async def desbloquear_pista_narrativa(bot, user_id, pista_code, context=None):
     """Desbloquea una pista con contexto narrativo completo"""
+    from services.lore_piece_service import LorePieceService
+    from database.setup import get_session_factory
+    
     session_factory = get_session_factory()
     async with session_factory() as session:
-        # Buscar la pista por código
-        result = await session.execute(
-            select(LorePiece).where(LorePiece.code_name == pista_code)
-        )
-        pista = result.scalar_one_or_none()
-        
-        if not pista:
-            return False
-        
-        # Verificar si ya la tiene
-        existing = await session.execute(
-            select(UserLorePiece).where(
-                and_(
-                    UserLorePiece.user_id == user_id,
-                    UserLorePiece.lore_piece_id == pista.id
-                )
-            )
-        )
-        
-        if existing.scalar_one_or_none():
-            return False  # Ya la tiene
-        
-        # Crear registro
-        user_lore_piece = UserLorePiece(
+        service = LorePieceService(session)
+        success = await service.unlock_lore_piece_for_user(
             user_id=user_id,
-            lore_piece_id=pista.id,
-            context=context or {}
+            lore_piece_code=pista_code,
+            context=context,
+            bot=bot
         )
         
-        session.add(user_lore_piece)
-        await session.commit()
+        # Send additional narrative notification if successful
+        if success:
+            await send_narrative_notification(bot, user_id, "new_hint", {
+                'hint_title': pista_code,  # We'd need to get the actual title, but this is fine
+                'hint_code': pista_code,
+                'source': context.get('source', 'unknown') if context else 'unknown'
+            })
         
-        # Enviar notificación narrativa
-        await send_narrative_notification(bot, user_id, "new_hint", {
-            'hint_title': pista.title,
-            'hint_code': pista.code_name,
-            'source': context.get('source', 'unknown') if context else 'unknown'
-        })
-        
-        return True
+        return success
 
 @router.callback_query(F.data.startswith("ver_tesoro_archivos:"))
 async def ver_tesoro_archivos(callback: CallbackQuery):

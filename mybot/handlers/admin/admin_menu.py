@@ -360,7 +360,7 @@ async def admin_free_channel_redirect(callback: CallbackQuery, session: AsyncSes
 
 
 @router.message(F.text.startswith("/give_hint "))
-async def cmd_give_hint(message: Message):
+async def cmd_give_hint(message: Message, session: AsyncSession):
     """Comando de admin para dar una pista a un usuario."""
     if not await is_admin(message.from_user.id, session):
         await message.answer(
@@ -375,11 +375,13 @@ async def cmd_give_hint(message: Message):
             target_user_id = int(parts[1])
             hint_code_to_give = parts[2]
 
-            success = await desbloquear_pista_narrativa(
-                message.bot,
-                target_user_id,
-                hint_code_to_give,
-                {"source": "admin_command", "admin_id": message.from_user.id},
+            from services.lore_piece_service import LorePieceService
+            service = LorePieceService(session)
+            success = await service.unlock_lore_piece_for_user(
+                user_id=target_user_id,
+                lore_piece_code=hint_code_to_give,
+                context={"source": "admin_command", "admin_id": message.from_user.id},
+                bot=message.bot
             )
 
             if success:
