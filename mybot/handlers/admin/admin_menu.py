@@ -377,13 +377,11 @@ async def cmd_give_hint(message: Message, session: AsyncSession):
             target_user_id = int(parts[1])
             hint_code_to_give = parts[2]
 
-            from services.lore_piece_service import LorePieceService
-            service = LorePieceService(session)
-            success = await service.unlock_lore_piece_for_user(
+            from services.narrative_service import NarrativeService
+            service = NarrativeService(session)
+            success = await service.unlock_lore_piece(
                 user_id=target_user_id,
-                lore_piece_code=hint_code_to_give,
-                context={"source": "admin_command", "admin_id": message.from_user.id},
-                bot=message.bot
+                lore_piece_code=hint_code_to_give
             )
 
             if success:
