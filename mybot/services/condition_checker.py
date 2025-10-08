@@ -17,6 +17,7 @@ from database.models import (
     User, ShopItem, UserPurchase, UserLorePiece,
     UserMissionEntry, Mission
 )
+from utils.constants import ConditionOperator, ConditionType, ComparisonOperator
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class ConditionChecker:
         if requirements is None:
             return True, []
 
-        operator = requirements.get("operator", "AND")
+        operator = requirements.get("operator", ConditionOperator.AND)
         conditions = requirements.get("conditions", [])
 
         if not conditions:
@@ -64,10 +65,10 @@ class ConditionChecker:
                 failed_messages.append(fail_message)
 
         # Apply operator logic
-        if operator == "AND":
+        if operator == ConditionOperator.AND:
             meets_all = all(results)
             return meets_all, failed_messages if not meets_all else []
-        elif operator == "OR":
+        elif operator == ConditionOperator.OR:
             meets_any = any(results)
             return meets_any, failed_messages if not meets_any else []
         else:
@@ -87,20 +88,20 @@ class ConditionChecker:
         """
         cond_type = condition.get("type")
         value = condition.get("value")
-        comparison = condition.get("comparison", ">=")
+        comparison = condition.get("comparison", ComparisonOperator.GREATER_EQUAL)
 
         try:
-            if cond_type == "level":
+            if cond_type == ConditionType.LEVEL:
                 return await self._check_level(user_id, value, comparison)
-            elif cond_type == "vip_status":
+            elif cond_type == ConditionType.VIP_STATUS:
                 return await self._check_vip_status(user_id, value)
-            elif cond_type == "owns_item":
+            elif cond_type == ConditionType.OWNS_ITEM:
                 return await self._check_owns_item(user_id, value)
-            elif cond_type == "points":
+            elif cond_type == ConditionType.POINTS:
                 return await self._check_points(user_id, value, comparison)
-            elif cond_type == "owns_lore_piece":
+            elif cond_type == ConditionType.OWNS_LORE_PIECE:
                 return await self._check_owns_lore_piece(user_id, value)
-            elif cond_type == "completed_mission":
+            elif cond_type == ConditionType.COMPLETED_MISSION:
                 return await self._check_completed_mission(user_id, value)
             else:
                 logger.error(f"Unknown condition type: {cond_type}")
@@ -247,15 +248,15 @@ class ConditionChecker:
 
     def _compare_values(self, actual: float, required: float, comparison: str) -> bool:
         """Compare two values using the specified operator."""
-        if comparison == ">=":
+        if comparison == ComparisonOperator.GREATER_EQUAL:
             return actual >= required
-        elif comparison == ">":
+        elif comparison == ComparisonOperator.GREATER:
             return actual > required
-        elif comparison == "==":
+        elif comparison == ComparisonOperator.EQUAL:
             return actual == required
-        elif comparison == "<=":
+        elif comparison == ComparisonOperator.LESS_EQUAL:
             return actual <= required
-        elif comparison == "<":
+        elif comparison == ComparisonOperator.LESS:
             return actual < required
         else:
             logger.error(f"Unknown comparison operator: {comparison}")
@@ -285,7 +286,7 @@ class ConditionChecker:
             summary = await self._get_condition_summary(condition)
             summaries.append(summary)
 
-        operator_text = " Y " if operator == "AND" else " O "
+        operator_text = " Y " if operator == ConditionOperator.AND else " O "
         return operator_text.join(summaries)
 
     async def _get_condition_summary(self, condition: Dict[str, Any]) -> str:
@@ -294,27 +295,27 @@ class ConditionChecker:
         value = condition.get("value")
         comparison = condition.get("comparison", ">=")
 
-        if cond_type == "level":
+        if cond_type == ConditionType.LEVEL:
             return f"Nivel {comparison} {value}"
-        elif cond_type == "vip_status":
+        elif cond_type == ConditionType.VIP_STATUS:
             return "Ser VIP" if value else "Ser usuario Free"
-        elif cond_type == "owns_item":
+        elif cond_type == ConditionType.OWNS_ITEM:
             if isinstance(value, int):
                 item = await self.session.get(ShopItem, value)
                 item_name = item.name if item else f"Item #{value}"
             else:
                 item_name = str(value)
             return f"Tener: {item_name}"
-        elif cond_type == "points":
+        elif cond_type == ConditionType.POINTS:
             return f"{value} besitos {comparison}"
-        elif cond_type == "owns_lore_piece":
+        elif cond_type == ConditionType.OWNS_LORE_PIECE:
             from database.models import LorePiece
             lore_stmt = select(LorePiece).where(LorePiece.code_name == value)
             lore_result = await self.session.execute(lore_stmt)
             lore = lore_result.scalar_one_or_none()
             lore_name = lore.title if lore else value
             return f"Desbloquear: {lore_name}"
-        elif cond_type == "completed_mission":
+        elif cond_type == ConditionType.COMPLETED_MISSION:
             mission = await self.session.get(Mission, value)
             mission_name = mission.name if mission else value
             return f"Completar: {mission_name}"

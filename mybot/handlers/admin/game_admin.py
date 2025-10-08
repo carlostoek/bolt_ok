@@ -5,6 +5,7 @@ from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 import datetime
+from utils.constants import MissionType, ContentType, LoreCategory
 
 from utils.user_roles import is_admin
 from utils.menu_utils import update_menu, send_temporary_reply
@@ -279,10 +280,10 @@ async def admin_select_mission_type(callback: CallbackQuery, session: AsyncSessi
         return await callback.answer()
     m_type = callback.data.split("mission_type_")[-1]
     mapping = {
-        "reaction": "reaction",
-        "messages": "messages",
-        "login": "login_streak",
-        "custom": "custom",
+        "reaction": MissionType.REACTION,
+        "messages": MissionType.MESSAGES,
+        "login": MissionType.LOGIN_STREAK,
+        "custom": MissionType.CUSTOM,
     }
     await state.update_data(type=mapping.get(m_type, m_type))
     await callback.message.edit_text("📊 Cantidad requerida")
@@ -1669,10 +1670,10 @@ async def process_main_story(callback: CallbackQuery, session: AsyncSession, sta
     await state.update_data(is_main_story=is_main)
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📝 Texto", callback_data="lore_type_text")],
-            [InlineKeyboardButton(text="🖼 Imagen", callback_data="lore_type_image")],
-            [InlineKeyboardButton(text="🎵 Audio", callback_data="lore_type_audio")],
-            [InlineKeyboardButton(text="🎞 Video", callback_data="lore_type_video")],
+            [InlineKeyboardButton(text="📝 Texto", callback_data=f"lore_type_{ContentType.TEXT}")],
+            [InlineKeyboardButton(text="🖼 Imagen", callback_data=f"lore_type_{ContentType.IMAGE}")],
+            [InlineKeyboardButton(text="🎵 Audio", callback_data=f"lore_type_{ContentType.AUDIO}")],
+            [InlineKeyboardButton(text="🎞 Video", callback_data=f"lore_type_{ContentType.VIDEO}")],
         ]
     )
     await callback.message.edit_text("Selecciona el tipo de contenido:", reply_markup=kb)
@@ -1686,7 +1687,7 @@ async def choose_content_type(callback: CallbackQuery, session: AsyncSession, st
         return await callback.answer()
     ctype = callback.data.split("lore_type_")[-1]
     await state.update_data(content_type=ctype)
-    if ctype == "text":
+    if ctype == ContentType.TEXT:
         await callback.message.edit_text("Ingresa el texto de la pista:")
         await state.set_state(LorePieceAdminStates.entering_text_content)
     else:
@@ -1906,10 +1907,10 @@ async def edit_lore_type_start(callback: CallbackQuery, session: AsyncSession, s
     code = data.get("edit_lore_code")
     kb = InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📝 Texto", callback_data="lore_type_edit_text")],
-            [InlineKeyboardButton(text="🖼 Imagen", callback_data="lore_type_edit_image")],
-            [InlineKeyboardButton(text="🎵 Audio", callback_data="lore_type_edit_audio")],
-            [InlineKeyboardButton(text="🎞 Video", callback_data="lore_type_edit_video")],
+            [InlineKeyboardButton(text="📝 Texto", callback_data=f"lore_type_edit_{ContentType.TEXT}")],
+            [InlineKeyboardButton(text="🖼 Imagen", callback_data=f"lore_type_edit_{ContentType.IMAGE}")],
+            [InlineKeyboardButton(text="🎵 Audio", callback_data=f"lore_type_edit_{ContentType.AUDIO}")],
+            [InlineKeyboardButton(text="🎞 Video", callback_data=f"lore_type_edit_{ContentType.VIDEO}")],
         ]
     )
     await callback.message.edit_text(
@@ -1929,7 +1930,7 @@ async def edit_lore_type(callback: CallbackQuery, state: FSMContext, session: As
     service = LorePieceService(session)
     await service.update_lore_piece(code, content_type=ctype)
     await state.update_data(new_content_type=ctype)
-    if ctype == "text":
+    if ctype == ContentType.TEXT:
         await callback.message.edit_text("Ingresa el nuevo texto:")
         await state.set_state(LorePieceAdminStates.editing_text_content)
     else:
@@ -1961,11 +1962,11 @@ async def edit_lore_file_content(message: Message, state: FSMContext, session: A
     code = data.get("edit_lore_code")
     ctype = data.get("new_content_type")
     file_id = None
-    if ctype == "image" and message.photo:
+    if ctype == ContentType.IMAGE and message.photo:
         file_id = message.photo[-1].file_id
-    elif ctype == "audio" and message.audio:
+    elif ctype == ContentType.AUDIO and message.audio:
         file_id = message.audio.file_id
-    elif ctype == "video" and message.video:
+    elif ctype == ContentType.VIDEO and message.video:
         file_id = message.video.file_id
     if not file_id:
         await send_temporary_reply(message, "Envía un archivo válido.")

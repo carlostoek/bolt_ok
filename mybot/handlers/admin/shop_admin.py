@@ -16,6 +16,7 @@ from utils.admin_state import AdminShopStates
 from keyboards.common import get_back_kb
 from database.models import ShopItem, LorePiece, UserPurchase
 from services.shop_service import ShopService
+from utils.constants import ConditionOperator, ConditionType, ComparisonOperator
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -1046,10 +1047,10 @@ Elige qué pieza narrativa se desbloqueará al comprar este producto:
 
     for lore in lore_pieces[:15]:  # Limit to 15 for keyboard size
         category_emoji = {
-            'fragmentos': '🗺️',
-            'memorias': '💭',
-            'secretos': '🔮',
-            'llaves': '🗝️'
+            LoreCategory.FRAGMENTOS: '🗺️',
+            LoreCategory.MEMORIAS: '💭',
+            LoreCategory.SECRETOS: '🔮',
+            LoreCategory.LLAVES: '🗝️'
         }.get(lore.category, '📜')
 
         builder.button(
@@ -2587,26 +2588,26 @@ async def admin_shop_apply_requirement_template(callback: CallbackQuery, session
         template_name = "Sin requisitos"
     elif template == "vip":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "vip_status", "value": True}
+                {"type": ConditionType.VIP_STATUS, "value": True}
             ]
         }
         template_name = "👑 Solo VIP"
     elif template == "level5":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "level", "value": 5, "comparison": ">="}
+                {"type": ConditionType.LEVEL, "value": 5, "comparison": ComparisonOperator.GREATER_EQUAL}
             ]
         }
         template_name = "⭐ Nivel 5+"
     elif template == "vip_level10":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "vip_status", "value": True},
-                {"type": "level", "value": 10, "comparison": ">="}
+                {"type": ConditionType.VIP_STATUS, "value": True},
+                {"type": ConditionType.LEVEL, "value": 10, "comparison": ComparisonOperator.GREATER_EQUAL}
             ]
         }
         template_name = "💎 VIP + Nivel 10"
@@ -2737,7 +2738,7 @@ async def admin_shop_receive_manual_requirements(message: Message, state: FSMCon
             await message.answer("❌ El JSON debe tener 'operator' y 'conditions'")
             return
 
-        if requirements["operator"] not in ["AND", "OR"]:
+        if requirements["operator"] not in [ConditionOperator.AND, ConditionOperator.OR]:
             await message.answer("❌ El operador debe ser 'AND' o 'OR'")
             return
 
