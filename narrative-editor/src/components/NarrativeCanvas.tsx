@@ -35,6 +35,7 @@ export default function NarrativeCanvas() {
   const selectedNodeId = useNarrativeStore((state) => state.selectedNodeId);
   const setSelectedNode = useNarrativeStore((state) => state.setSelectedNode);
   const addChoice = useNarrativeStore((state) => state.addChoice);
+  const updateFragment = useNarrativeStore((state) => state.updateFragment);
 
   // Convert narrative data to React Flow nodes
   const initialNodes = useMemo((): Node[] => {
@@ -146,6 +147,19 @@ export default function NarrativeCanvas() {
     [setSelectedNode]
   );
 
+  const onNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: Node) => {
+      // Update fragment position when node is dragged
+      if (node.id.startsWith('fragment-')) {
+        const key = node.id.replace('fragment-', '');
+        updateFragment(key, {
+          visual_position: { x: node.position.x, y: node.position.y },
+        });
+      }
+    },
+    [updateFragment]
+  );
+
   if (!narrative) {
     return (
       <div className="flex items-center justify-center h-full bg-gray-100">
@@ -170,6 +184,7 @@ export default function NarrativeCanvas() {
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
         onNodeClick={onNodeClick}
+        onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         connectionMode={ConnectionMode.Loose}
         fitView
