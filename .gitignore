@@ -1,6 +1,6 @@
 # Aider-managed files
 .aider*
-
+mybot/agents/
 # DBs and logs
 *.db
 *.log
