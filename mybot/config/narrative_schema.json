@@ -1,0 +1,230 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Narrative Configuration Schema",
+  "description": "Complete narrative configuration for the bot",
+  "type": "object",
+  "required": ["version", "fragments"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "last_updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_by": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "fragments": {
+      "type": "array",
+      "description": "Story fragments (nodes)",
+      "items": {
+        "type": "object",
+        "required": ["key", "text", "character"],
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "Unique identifier for the fragment"
+          },
+          "text": {
+            "type": "string",
+            "description": "Fragment content/narrative text"
+          },
+          "character": {
+            "type": "string",
+            "enum": ["Lucien", "Diana"],
+            "description": "Character speaking"
+          },
+          "level": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "min_besitos": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "reward_besitos": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          },
+          "required_role": {
+            "type": ["string", "null"],
+            "enum": ["free", "vip", null]
+          },
+          "image_url": {
+            "type": ["string", "null"],
+            "format": "uri"
+          },
+          "unlocks_achievement_id": {
+            "type": ["string", "null"]
+          },
+          "auto_next_fragment_key": {
+            "type": ["string", "null"],
+            "description": "Auto-navigate to this fragment (no choices)"
+          },
+          "archetype_variant": {
+            "type": ["string", "null"],
+            "enum": ["adventurer", "romantic", "explorer", "balanced", null]
+          },
+          "choices": {
+            "type": "array",
+            "description": "Decision options from this fragment",
+            "items": {
+              "type": "object",
+              "required": ["text", "destination_fragment_key"],
+              "properties": {
+                "text": {
+                  "type": "string",
+                  "description": "Choice text shown to user"
+                },
+                "destination_fragment_key": {
+                  "type": "string",
+                  "description": "Key of fragment to navigate to"
+                },
+                "required_besitos": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "default": 0
+                },
+                "required_role": {
+                  "type": ["string", "null"],
+                  "enum": ["free", "vip", null]
+                }
+              }
+            }
+          },
+          "visual_position": {
+            "type": "object",
+            "description": "Position in visual editor",
+            "properties": {
+              "x": { "type": "number" },
+              "y": { "type": "number" }
+            }
+          }
+        }
+      }
+    },
+    "shop_items": {
+      "type": "array",
+      "description": "Products in the shop",
+      "items": {
+        "type": "object",
+        "required": ["name", "price"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "price": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "is_vip_only": {
+            "type": "boolean",
+            "default": false
+          },
+          "unlocks_fragment_key": {
+            "type": ["string", "null"],
+            "description": "Fragment unlocked by purchasing"
+          },
+          "unlocks_lore_piece_code": {
+            "type": ["string", "null"],
+            "description": "Lore piece unlocked by purchasing"
+          },
+          "image_file_id": {
+            "type": ["string", "null"]
+          },
+          "stock_limit": {
+            "type": ["integer", "null"]
+          },
+          "max_purchases_per_user": {
+            "type": "integer",
+            "default": 1
+          },
+          "is_active": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      }
+    },
+    "lore_pieces": {
+      "type": "array",
+      "description": "Collectible hints/clues",
+      "items": {
+        "type": "object",
+        "required": ["code_name", "title", "content"],
+        "properties": {
+          "code_name": {
+            "type": "string",
+            "description": "Unique code identifier"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string",
+            "description": "Actual hint/clue content"
+          },
+          "content_type": {
+            "type": "string",
+            "enum": ["text", "image", "video"],
+            "default": "text"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category for organization"
+          },
+          "is_main_story": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "hint_combinations": {
+      "type": "array",
+      "description": "Combinations of hints that unlock rewards",
+      "items": {
+        "type": "object",
+        "required": ["combination_code", "required_hints", "reward_code"],
+        "properties": {
+          "combination_code": {
+            "type": "string",
+            "description": "Unique identifier for this combination"
+          },
+          "required_hints": {
+            "type": "array",
+            "description": "Array of lore piece code_names required",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 2
+          },
+          "reward_code": {
+            "type": "string",
+            "description": "code_name of lore piece awarded"
+          }
+        }
+      }
+    }
+  }
+}

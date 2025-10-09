@@ -1567,3 +1567,50 @@ Por ahora, los productos pueden desbloquear **LorePiece** a través del campo `u
 
     await safe_edit(callback.message, text, reply_markup=builder.as_markup())
     await callback.answer()
+
+
+# ==================== RELOAD NARRATIVE ====================
+
+@router.message(Command("reload_narrative"))
+async def reload_narrative_command(message: Message, session: AsyncSession):
+    """
+    Recarga la narrativa completa desde el archivo JSON.
+    Solo disponible para administradores.
+    """
+    if not await is_admin(message.from_user.id):
+        await message.answer("❌ Este comando solo está disponible para administradores.")
+        return
+
+    try:
+        from services.complete_narrative_loader import CompleteNarrativeLoader
+
+        await message.answer("🔄 **Recargando narrativa completa...**\n\nEsto puede tardar unos segundos.")
+
+        # Load from the complete JSON file
+        loader = CompleteNarrativeLoader(session)
+        stats = await loader.load_from_file("config/narrative_complete.json")
+
+        # Format stats message
+        stats_text = f"""✅ **Narrativa recargada exitosamente**
+
+📊 **Estadísticas:**
+• Fragmentos creados: {stats['fragments_created']}
+• Fragmentos actualizados: {stats['fragments_updated']}
+• Decisiones creadas: {stats['choices_created']}
+• Productos de tienda creados: {stats['shop_items_created']}
+• Productos de tienda actualizados: {stats['shop_items_updated']}
+• Pistas creadas: {stats['lore_pieces_created']}
+• Pistas actualizadas: {stats['lore_pieces_updated']}
+• Combinaciones creadas: {stats['combinations_created']}
+• Combinaciones actualizadas: {stats['combinations_updated']}
+
+⏰ {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"""
+
+        await message.answer(stats_text)
+        logger.info(f"Narrative reloaded by admin {message.from_user.id}: {stats}")
+
+    except FileNotFoundError:
+        await message.answer("❌ **Error:** Archivo `config/narrative_complete.json` no encontrado.")
+    except Exception as e:
+        logger.error(f"Error reloading narrative: {e}")
+        await message.answer(f"❌ **Error al recargar narrativa:**\n\n`{str(e)}`")
