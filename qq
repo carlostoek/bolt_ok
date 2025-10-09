@@ -1,0 +1,127 @@
+* [33mffb111e[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfull_tienda[m[33m)[m fix: replace undefined get_admin_kb with get_admin_main_kb
+* [33m048e80e[m refactor: consolidate lore piece unlocking into canonical service method
+* [33m0f81fcc[m[33m ([m[1;31morigin/full_tienda[m[33m)[m refactor: replace enum constants with string literals
+* [33m34dc89b[m fix: add missing imports for LoreCategory, Badge, and Level
+* [33m3761525[m refactor: replace magic strings with centralized constants
+* [33m754ac74[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m plan
+* [33md5acdfc[m mapa narrativa
+* [33m528dab2[m feat(narrative): centralize narrative management in admin panel
+* [33m25ecb57[m feat: add trivia statistics to admin panel
+* [33mb965f9b[m move
+* [33m63750ac[m mejorar minigames
+* [33m37d6cee[m mejoras
+* [33mb734541[m[33m ([m[1;31morigin/backup/project-structure-fix[m[33m)[m chore: Backup before fixing project structure
+* [33mb51c9b9[m feat: Enhance user experience with empathetic microcopy and feedback
+* [33m7160b1b[m feat: improve user experience with enhanced backpack message formatting
+* [33mc74444f[m feat: add view files button to backpack item details
+* [33m9a2bc6e[m feat: add product file delivery after purchase
+* [33mb85fe5a[m feat: add product file delivery with purchase logging
+* [33me8c22b7[m fix: migrate product_files table using async database engine
+* [33m72a9433[m fix: convert migration script to synchronous approach
+* [33mb7b84e8[m feat: add ProductFile model and migration for multi-file products
+* [33mb5052f5[m feat: add file upload support for shop products
+* [33m5a5eacb[m fix: add missing imports and states for file upload
+* [33md9eb0a7[m feat: add product file upload to admin shop creation flow
+* [33m932f027[m move
+* [33mfc39341[m feat: add multi-file product support for photo sessions
+* [33mf50923d[m fixs y vip grant
+* [33m804611f[m fragmebtos
+* [33m81666a1[m fix: remove unsupported reason parameter from PointService.add_points calls
+* [33m4465d33[m feat: add persistent notifications and narrative menu home button
+* [33ma72de8c[m feat: add home button to all menus and improve message editing
+* [33mc0e5989[m feat: improve narrative progress persistence and mission UI
+* [33m3e262f5[m feat: fix add_points calls to use keyword arguments
+* [33mde898d8[m fix: use keyword args for point_service.add_points calls
+* [33m9255463[m fix: simplify admin check to use config ADMIN_IDS only
+* [33m823a35d[m fix: resolve import errors and improve shutdown handling
+* [33m119603c[m fix: resolve undefined name errors in start handler and metrics service
+* [33mabf5ea6[m feat: integrate strategic enhancements with metrics and gamification
+* [33m10c3923[m fix: improve type hints and add compatibility fallbacks
+* [33mb1bbc35[m fix: import get_daily_streak_message in gamification middleware
+* [33m34f94ad[m fix: resolve syntax errors and add missing imports
+* [33m095c23a[m feat: add strategic enhancements for onboarding and gamification
+*   [33m59775fb[m Merge pull request #59 from carlostoek/full_tienda_qwen
+[32m|[m[33m\[m  
+[32m|[m * [33md884174[m feat: add visual feedback, loading states and empty state improvements
+* [33m|[m [33m3d5d17b[m arquetipos 2
+* [33m|[m [33m1cbc965[m arquetipos
+* [33m|[m [33m427ef7a[m mejoras
+* [33m|[m [33md2d1436[m analisis
+[33m|[m[33m/[m  
+* [33m094428c[m fix
+* [33mc512781[m rdesing menu free
+* [33m138b20e[m fix
+* [33m6bcd6c5[m script setup
+* [33m83b800f[m fix locale
+* [33m3d1f141[m Update es.json
+* [33m4734bea[m ux fukl
+* [33mbafa963[m Update es.json
+* [33mb313235[m ux1
+* [33maed962f[m gift service
+* [33m6523751[m chkpnt
+* [33mf612255[m user journey
+* [33m91e7765[m fase 1 uservcperience
+* [33m32b1a5a[m readme
+* [33m8f98857[m mi divan
+* [33md2bf430[m Update es.json
+* [33m87473f9[m Update es.json
+* [33mc9f8aa4[m centralizar textos
+* [33mecb2288[m onboarding
+* [33m2d8de8f[m imagenes en fragmentos
+* [33ma6e81c0[m fixs
+* [33m6683c93[m feat: add pending decision handling with error recovery
+* [33m888861a[m feat: improve narrative flow after shop purchases
+* [33m7802b89[m feat: add pending decision processing after shop purchases
+* [33m0d74a34[m fix: restore narrative position after shop redirect
+* [33mce53975[m menu user vip
+* [33m1b66369[m full tienda admin & user
+* [33mdea7f1f[m full sdmin shop panel
+* [33m1931632[m mejora5
+* [33mdd208c0[m mejora tienda/admin panel
+* [33m8b791b7[m up
+* [33m2256d55[m refactor: Move keyboard creation functions to keyboards/ directory
+* [33ma76f73e[m refactor y fase 1
+* [33m3e10987[m refactor menus
+* [33m9c0026d[m pre refactor menus
+* [33m953df94[m[33m ([m[1;31morigin/qwenflows[m[33m)[m update
+* [33mf60091a[m flow tienda-item-mocjila-nsrrativa ok
+* [33m59f1194[m[33m ([m[1;31morigin/deepseek[m[33m)[m limpieza
+* [33m5d55ca6[m refactor: move backpack logic to ShopService to break circular dependency
+* [33m54d47cb[m chore: Ignore temporary files
+* [33m514ff0c[m feat: add item requirement check for first narrative decision
+* [33m9e953b3[m feat: add Diario Íntimo level and debug shop items
+* [33me6731e6[m feat: add cross-module integration for narrative level unlock via shop purchase
+* [33m4660fd3[m feat: show purchased items in backpack with details
+* [33m365b27d[m fix: use CoordinadorCentral to add purchased lore pieces to backpack
+* [33ma528a84[m fix: resolve circular import in shop purchase by handling directly
+* [33ma5cd208[m fix: add missing sqlalchemy select import
+* [33me8847da[m feat: integrate shop purchases with backpack via coordinador
+* [33m104116f[m fix: replace isinstance check with direct handler calls
+* [33m5335623[m fix: add missing imports for aiogram types and filters
+* [33m9827577[m feat: fix backpack button and add purchased items to user lore
+* [33m563d43e[m fix: resolve transaction conflict in shop item purchase flow
+* [33m02e0257[m fix: handle dict items in shop keyboard and improve error handling
+* [33mb68cf07[m fix: resolve shop purchase errors with proper item handling and error management
+* [33m239c257[m tienda 90%
+* [33mbbd8619[m feat: populate shop with initial items on database setup
+* [33m3b5db84[m refactor: update import path for Config in database setup
+* [33m897b853[m fix: use absolute import for database module
+* [33m55cd547[m feat: add shop router with error handling and logging
+* [33me3577f6[m fix: adjust import path for config in database setup
+* [33m30dfd9d[m feat: add missing tables to database initialization
+* [33mec52952[m fix: create missing user_purchases table and fix model relationships
+* [33m77cc571[m feat: add shop system with items and user purchases
+* [33m84ea0a3[m feat: add shop module with item purchasing and integration
+* [33m7dce746[m feat: add shop module with points, VIP items, and narrative unlocks
+* [33m5895996[m venv ok
+* [33m99c70e7[m empezat
+* [33m0328a2c[m feat: Integrar botón de Historia y guardar cambios pendientes
+* [33m5d01652[m full ok
+* [33md1ed51e[m funviona
+* [33me56b37e[m interacción funcional
+* [33mb6bd4a5[m Initial commit
+* [33mb8b5bc6[m Update setup.py
+* [33m18f6fb1[m Update setup.py
+* [33m1fa6104[m Update complete_story.json
+* [33m7c73c16[m Update requirements.txt
+* [33mf1b49c4[m Inicio nuevo del proyecto
