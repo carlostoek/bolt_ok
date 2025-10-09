@@ -2,7 +2,7 @@
  * Main Canvas Component with React Flow
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -115,8 +115,17 @@ export default function NarrativeCanvas() {
     return edges;
   }, [narrative]);
 
-  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  // Update nodes and edges when narrative changes
+  useEffect(() => {
+    setNodes(initialNodes);
+  }, [initialNodes, setNodes]);
+
+  useEffect(() => {
+    setEdges(initialEdges);
+  }, [initialEdges, setEdges]);
 
   const onConnect = useCallback(
     (connection: Connection) => {
