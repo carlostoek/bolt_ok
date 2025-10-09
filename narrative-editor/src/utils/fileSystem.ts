@@ -20,7 +20,7 @@ export async function openNarrativeFile(): Promise<FileHandle> {
   }
 
   try {
-    const [fileHandle] = await window.showOpenFilePicker({
+    const [fileHandle] = await (window as any).showOpenFilePicker({
       types: [
         {
           description: 'JSON Files',
@@ -71,7 +71,7 @@ export async function createNewNarrativeFile(): Promise<FileHandle> {
   }
 
   try {
-    const handle = await window.showSaveFilePicker({
+    const handle = await (window as any).showSaveFilePicker({
       suggestedName: 'narrative_complete.json',
       types: [
         {

@@ -9,7 +9,7 @@ export function validateNarrative(data: NarrativeConfig): ValidationResult {
 
   // Create sets for quick lookup
   const fragmentKeys = new Set(data.fragments.map((f) => f.key));
-  const loreCode Names = new Set(data.lore_pieces?.map((l) => l.code_name) || []);
+  const loreCodeNames = new Set(data.lore_pieces?.map((l) => l.code_name) || []);
 
   // Track referenced fragments
   const referencedFragments = new Set<string>();
