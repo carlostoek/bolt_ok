@@ -107,15 +107,17 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
                 # Check if this is the "Go to shop" special action from teaser
                 if "🛒" in selected_choice.text and ("tienda" in selected_choice.text.lower() or "shop" in selected_choice.text.lower()):
                     logger.info(f"User {user_id} selecting 'Go to Shop' from narrative teaser")
-                    # Store the current fragment key in user state to return later
-                    # But only if there isn't already a redirect key set (to preserve the original fragment)
-                    user_state = await service._get_or_create_user_state(user_id)
-                    if not user_state.shop_redirect_fragment_key:
-                        user_state.shop_redirect_fragment_key = current_fragment.key
-                        await session.commit()
-                        logger.info(f"Set shop_redirect_fragment_key to {current_fragment.key} for user {user_id}")
+                    # Use State Machine for atomic shop transition
+                    from services.narrative_state_machine import NarrativeStateMachine
+                    state_machine = NarrativeStateMachine(session)
+                    success = await state_machine.transition_to_shop(
+                        user_id=user_id,
+                        current_fragment_key=current_fragment.key
+                    )
+                    if success:
+                        logger.info(f"[STATE_MACHINE] User {user_id} transitioned to SHOPPING from {current_fragment.key}")
                     else:
-                        logger.info(f"Preserving existing shop_redirect_fragment_key {user_state.shop_redirect_fragment_key} for user {user_id}")
+                        logger.warning(f"[STATE_MACHINE] Failed to transition user {user_id} to shop")
                     
                     # Show shop directly instead of going to next fragment
                     from handlers.shop_handlers import show_shop
@@ -398,16 +400,22 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
     user_id = callback.from_user.id
 
     try:
+        from services.narrative_state_machine import NarrativeStateMachine
         service = NarrativeService(session, callback.bot)
+        state_machine = NarrativeStateMachine(session)
 
-        # Check if user has a shop redirect fragment to return to
-        user_state = await service._get_or_create_user_state(user_id)
-        logger.info(f"[SHOP_RETURN_DEBUG] User {user_id} returning from shop - state: shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}, current_fragment={user_state.current_fragment_key}")
+        # Use State Machine to handle shop return
+        return_result = await state_machine.return_from_shop(user_id)
 
-        if user_state.shop_redirect_fragment_key:
+        if return_result["success"]:
+            return_fragment_key = return_result.get("return_fragment_key")
+            pending_decision_id = return_result.get("pending_decision_id")
+
+            logger.info(f"[STATE_MACHINE] User {user_id} returned from shop - fragment: {return_fragment_key}, pending_decision: {pending_decision_id}")
+
             # Check if there's a pending decision to process
-            if user_state.pending_decision_id:
-                logger.info(f"[SHOP_RETURN_DEBUG] Processing pending decision {user_state.pending_decision_id} for user {user_id} after shop return")
+            if pending_decision_id:
+                logger.info(f"[SHOP_RETURN_DEBUG] Processing pending decision {pending_decision_id} for user {user_id} after shop return")
                 # Process the pending decision
                 from services.coordinador_central import CoordinadorCentral, AccionUsuario
                 coordinador = CoordinadorCentral(session)
@@ -416,7 +424,7 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
                     result = await coordinador.ejecutar_flujo(
                         user_id,
                         AccionUsuario.TOMAR_DECISION,
-                        decision_id=user_state.pending_decision_id
+                        decision_id=pending_decision_id
                     )
 
                     logger.info(f"[SHOP_RETURN_DEBUG] Coordinator result: success={result['success']}, has_fragment={result.get('fragment') is not None}")
@@ -424,11 +432,9 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
                         logger.info(f"[SHOP_RETURN_DEBUG] Fragment returned: key={result['fragment'].key}")
 
                     if result["success"]:
-                        # Clear both redirect and pending decision
-                        user_state.shop_redirect_fragment_key = None
-                        user_state.pending_decision_id = None
-                        await session.commit()
-                        logger.info(f"[SHOP_RETURN_DEBUG] Cleared flags for user {user_id}")
+                        # CRITICAL FIX: Clear shop context ONLY after successful decision processing
+                        logger.info(f"[SHOP_RETURN_DEBUG] Decision processed successfully, clearing shop context")
+                        await state_machine.clear_shop_context(user_id)
 
                         # Show the next fragment
                         next_fragment = result.get("fragment")
@@ -440,29 +446,29 @@ async def return_from_shop(callback: CallbackQuery, session: AsyncSession):
                         else:
                             logger.warning(f"[SHOP_RETURN_DEBUG] No fragment returned from pending decision processing for user {user_id}")
                     else:
-                        logger.warning(f"[SHOP_RETURN_DEBUG] Pending decision still failed for user {user_id}: {result.get('message')}")
-                        user_state.pending_decision_id = None
-                        await session.commit()
+                        # Decision failed - context preserved for retry
+                        logger.warning(f"[SHOP_RETURN_DEBUG] Pending decision still failed for user {user_id}: {result.get('message')} - preserving shop context")
                 except Exception as e:
-                    logger.error(f"[SHOP_RETURN_DEBUG] Error processing pending decision for user {user_id}: {e}", exc_info=True)
-                    user_state.pending_decision_id = None
-                    await session.commit()
+                    # Error during decision processing - context preserved for retry
+                    logger.error(f"[SHOP_RETURN_DEBUG] Error processing pending decision for user {user_id}: {e} - preserving shop context", exc_info=True)
 
             # Return to the fragment where user was redirected to shop
-            logger.info(f"[SHOP_RETURN_DEBUG] Returning to fragment {user_state.shop_redirect_fragment_key} for user {user_id}")
-            return_fragment = await service._get_fragment_by_key(user_state.shop_redirect_fragment_key)
-            if return_fragment:
-                logger.info(f"[SHOP_RETURN_DEBUG] Found return fragment: key={return_fragment.key}")
-                # Clear the redirect flag and set as current fragment
-                user_state.current_fragment_key = user_state.shop_redirect_fragment_key
-                user_state.shop_redirect_fragment_key = None
-                user_state.pending_decision_id = None
-                await session.commit()
-                logger.info(f"[SHOP_RETURN_DEBUG] Cleared flags and set current_fragment to {user_state.current_fragment_key} for user {user_id}")
+            if return_fragment_key:
+                logger.info(f"[SHOP_RETURN_DEBUG] Returning to fragment {return_fragment_key} for user {user_id}")
+                return_fragment = await service._get_fragment_by_key(return_fragment_key)
+                if return_fragment:
+                    logger.info(f"[SHOP_RETURN_DEBUG] Found return fragment: key={return_fragment.key}")
+                    # Update current fragment
+                    user_state = await service._get_or_create_user_state(user_id)
+                    user_state.current_fragment_key = return_fragment_key
+                    await session.commit()
+                    logger.info(f"[SHOP_RETURN_DEBUG] Set current_fragment to {user_state.current_fragment_key} for user {user_id}")
 
-                await _display_narrative_fragment(callback.message, return_fragment, session, is_callback=True)
-                await callback.answer(get_text("narrative.handler.return_to_story"))
-                return
+                    await _display_narrative_fragment(callback.message, return_fragment, session, is_callback=True)
+                    await callback.answer(get_text("narrative.handler.return_to_story"))
+                    return
+        else:
+            logger.warning(f"[STATE_MACHINE] User {user_id} not in shop state: {return_result.get('error')}")
 
         # No shop redirect, just continue normally
         current_fragment = await service.get_user_current_fragment(user_id)
