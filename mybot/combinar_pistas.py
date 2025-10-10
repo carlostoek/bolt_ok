@@ -8,7 +8,6 @@ from sqlalchemy.future import select
 from database.setup import get_session
 from database.models import UserLorePiece, LorePiece
 from database.hint_combination import HintCombination
-from narrativa import desbloquear_pista
 
 router = Router()
 
