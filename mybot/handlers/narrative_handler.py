@@ -84,7 +84,7 @@ async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession
             await callback.message.edit_text(
                 processing_text,
                 reply_markup=processing_builder.as_markup(),
-                parse_mode="Markdown"
+                parse_mode="MarkdownV2"
             )
         except Exception:
             # If message edit fails, continue with the flow
@@ -235,7 +235,7 @@ async def handle_enhanced_l1f1_choice(callback: CallbackQuery, session: AsyncSes
             await callback.message.edit_text(
                 processing_text,
                 reply_markup=processing_builder.as_markup(),
-                parse_mode="Markdown"
+                parse_mode="MarkdownV2"
             )
         except Exception:
             # If message edit fails, continue with the flow
@@ -636,7 +636,7 @@ async def _display_narrative_fragment(
                     photo=fragment.image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="Markdown"
+                    parse_mode="MarkdownV2"
                 )
             else:
                 # En mensaje normal, enviar directamente
@@ -644,7 +644,7 @@ async def _display_narrative_fragment(
                     photo=fragment.image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="Markdown"
+                    parse_mode="MarkdownV2"
                 )
         except Exception as e:
             logger.error(f"Error enviando fragmento con imagen: {e}")
@@ -799,7 +799,7 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
                     photo=image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="Markdown"
+                    parse_mode="MarkdownV2"
                 )
             except Exception as e:
                 logger.error(f"Error enviando enhanced L1F1 con imagen: {e}")
@@ -1150,7 +1150,7 @@ async def _display_enhanced_followup_fragment(
                     photo=image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="Markdown"
+                    parse_mode="MarkdownV2"
                 )
             except Exception as e:
                 logger.error(f"Error enviando followup con imagen: {e}")
@@ -1315,7 +1315,7 @@ async def _show_requirements_message(callback: CallbackQuery, requirements_info:
         await callback.message.edit_text(
             message_text,
             reply_markup=builder.as_markup(),
-            parse_mode="Markdown"
+            parse_mode="MarkdownV2"
         )
         await callback.answer()
     except Exception as e:
