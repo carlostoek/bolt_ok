@@ -37,17 +37,35 @@ class NarrativeService:
 
         # Si el usuario ya tiene un fragmento actual, continuar desde ahí
         if user_state.current_fragment_key:
-            current_fragment = await self._get_fragment_by_key(user_state.current_fragment_key)
+            logger.info(f"[PROGRESS_DEBUG] User {user_id} has saved fragment: '{user_state.current_fragment_key}' (visited: {user_state.fragments_visited})")
+
+            current_fragment = await self._get_fragment_by_key(user_state.current_fragment_key, user_id=user_id)
+
             if current_fragment:
-                logger.info(f"Usuario {user_id} continúa desde fragmento: {user_state.current_fragment_key}")
+                logger.info(f"[PROGRESS_DEBUG] Successfully loaded fragment '{current_fragment.key}' for user {user_id}")
                 return current_fragment
             else:
-                # Fragmento no encontrado, resetear al inicio
-                logger.warning(f"Fragmento {user_state.current_fragment_key} no encontrado para usuario {user_id}, reseteando al inicio")
-                user_state.current_fragment_key = None
+                # CRITICAL: Fragment not found - DON'T reset immediately
+                logger.error(
+                    f"[CRITICAL] Fragment '{user_state.current_fragment_key}' NOT FOUND for user {user_id}! "
+                    f"User has visited {user_state.fragments_visited} fragments. "
+                    f"Returning 'start' but preserving state for investigation."
+                )
+
+                # Return start fragment but DON'T clear current_fragment_key
+                # This preserves the broken state for debugging while still allowing user to continue
+                start_fragment = await self._get_fragment_by_key("start", user_id=user_id)
+                if start_fragment:
+                    logger.warning(f"[RECOVERY] Returning 'start' fragment for user {user_id} as fallback")
+                    return start_fragment
+                else:
+                    logger.error(f"[CRITICAL] Even 'start' fragment not found! Database may be empty.")
+                    return None
 
         # Si no hay fragmento actual, iniciar narrativa
-        start_fragment = await self._get_fragment_by_key("start")
+        logger.info(f"[PROGRESS_DEBUG] User {user_id} has no saved fragment - starting new narrative")
+        start_fragment = await self._get_fragment_by_key("start", user_id=user_id)
+
         if start_fragment:
             user_state.current_fragment_key = start_fragment.key
             user_state.narrative_started_at = datetime.utcnow()
@@ -303,11 +321,20 @@ class NarrativeService:
         Returns:
             StoryFragment o None
         """
+        logger.info(f"[FRAGMENT_LOOKUP] Searching for fragment '{key}' (user_id: {user_id})")
+
         # Si no hay user_id, retornar fragmento genérico
         if not user_id:
             stmt = select(StoryFragment).where(StoryFragment.key == key)
             result = await self.session.execute(stmt)
-            return result.scalar_one_or_none()
+            fragment = result.scalar_one_or_none()
+
+            if fragment:
+                logger.info(f"[FRAGMENT_LOOKUP] Found generic fragment '{key}'")
+            else:
+                logger.warning(f"[FRAGMENT_LOOKUP] Fragment '{key}' NOT FOUND in database")
+
+            return fragment
 
         # Obtener arquetipo del usuario
         from utils.archetype_analyzer import analyze_user_archetype
@@ -316,21 +343,34 @@ class NarrativeService:
         choices_made = user_state.choices_made or []
         archetype = analyze_user_archetype(choices_made)
 
+        logger.info(f"[FRAGMENT_LOOKUP] User {user_id} archetype: '{archetype}' (based on {len(choices_made)} choices)")
+
         # Si el arquetipo está indeterminado o es balanced, usar fragmento genérico
         if archetype in ["undetermined", "balanced"]:
             stmt = select(StoryFragment).where(StoryFragment.key == key)
             result = await self.session.execute(stmt)
-            return result.scalar_one_or_none()
+            fragment = result.scalar_one_or_none()
+
+            if fragment:
+                logger.info(f"[FRAGMENT_LOOKUP] Found generic fragment '{key}' for {archetype} user")
+            else:
+                logger.error(f"[FRAGMENT_LOOKUP] Generic fragment '{key}' NOT FOUND for {archetype} user {user_id}")
+
+            return fragment
 
         # Buscar variante específica del arquetipo
         variant_key = f"{key}_{archetype}"
+        logger.info(f"[FRAGMENT_LOOKUP] Looking for archetype variant: '{variant_key}'")
+
         stmt_variant = select(StoryFragment).where(StoryFragment.key == variant_key)
         result_variant = await self.session.execute(stmt_variant)
         variant_fragment = result_variant.scalar_one_or_none()
 
         if variant_fragment:
-            logger.info(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → variant fragment: {variant_key}")
+            logger.info(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → variant fragment: {variant_key} ✅")
             return variant_fragment
+        else:
+            logger.info(f"[FRAGMENT_LOOKUP] Variant '{variant_key}' not found, trying generic")
 
         # Si no existe variante, retornar fragmento genérico
         stmt = select(StoryFragment).where(StoryFragment.key == key)
@@ -338,7 +378,9 @@ class NarrativeService:
         generic_fragment = result.scalar_one_or_none()
 
         if generic_fragment:
-            logger.debug(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → generic fragment: {key} (no variant found)")
+            logger.info(f"[ARCHETYPE_ROUTING] User {user_id} ({archetype}) → generic fragment: {key} (no variant) ✅")
+        else:
+            logger.error(f"[CRITICAL] Neither variant '{variant_key}' nor generic '{key}' found for user {user_id}!")
 
         return generic_fragment
 
