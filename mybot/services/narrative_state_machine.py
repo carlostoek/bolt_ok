@@ -305,10 +305,14 @@ class NarrativeStateMachine:
 
     async def return_from_shop(self, user_id: int) -> Dict[str, Any]:
         """
-        Transition user from shopping back to narrative.
+        Get shop return context WITHOUT modifying state (READ-ONLY).
 
-        This method atomically retrieves the return context and clears
-        the shopping state.
+        CRITICAL: This method is READ-ONLY. It returns the shop context
+        but does NOT clear it. The caller must explicitly call
+        clear_shop_context() ONLY after successful decision processing.
+
+        This prevents the race condition where context is lost if decision
+        processing fails after returning from shop.
 
         Args:
             user_id: The user's ID
@@ -325,7 +329,7 @@ class NarrativeStateMachine:
             user_state = await self._get_or_create_user_state(user_id)
             current_state = await self.get_current_state(user_id)
 
-            # Must be returning from shop-related state
+            # Must be in shop-related state
             if current_state not in {
                 NarrativeFlowState.SHOPPING,
                 NarrativeFlowState.PROCESSING_PURCHASE,
@@ -340,31 +344,17 @@ class NarrativeStateMachine:
                     'pending_decision_id': None,
                 }
 
-            # Extract return context
+            # Extract return context (READ-ONLY - no modifications)
             shop_context = user_state.shop_context or {}
             return_fragment_key = shop_context.get('return_fragment_key')
             pending_decision_id = shop_context.get('pending_decision_id')
             previous_state = shop_context.get('previous_state')
 
-            # Determine target state
-            if pending_decision_id:
-                target_state = NarrativeFlowState.MAKING_DECISION
-            else:
-                target_state = NarrativeFlowState.READING_FRAGMENT
-
-            # Clear shop context atomically
-            user_state.shop_context = {
-                'state': target_state.value,
-                'return_timestamp': datetime.utcnow().isoformat(),
-            }
-
-            await self.session.commit()
-
             logger.info(
-                f"[STATE_MACHINE] User {user_id} returned from shop to "
-                f"{target_state.value}. "
+                f"[STATE_MACHINE] User {user_id} shop context retrieved (READ-ONLY): "
                 f"Return fragment: {return_fragment_key}, "
-                f"Pending decision: {pending_decision_id}"
+                f"Pending decision: {pending_decision_id} "
+                f"- Context will be cleared by caller on success"
             )
 
             return {
@@ -376,10 +366,9 @@ class NarrativeStateMachine:
 
         except Exception as e:
             logger.error(
-                f"[STATE_MACHINE] Error returning user {user_id} from shop: {e}",
+                f"[STATE_MACHINE] Error reading shop context for user {user_id}: {e}",
                 exc_info=True
             )
-            await self.session.rollback()
             return {
                 'success': False,
                 'error': str(e),
