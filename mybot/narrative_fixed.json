@@ -1,0 +1,541 @@
+{
+  "fragments": [
+    {
+      "fragment_id": "start",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>El sonido de la puerta cerrándose detrás de usted resuena más tiempo del que debería en una habitación normal. Eco sobre eco sobre eco.</i>\n\nPermítame observar algo.\n\n<i>Pasos lentos, deliberados, sobre madera pulida. Se detienen justo fuera de su campo visual.</i>\n\nLa mayoría de las personas que llegan aquí—y créame, han llegado muchas—hacen inmediatamente la pregunta equivocada. \"¿Dónde está Diana?\" \"¿Cuándo la veré?\" Como si el privilegio de su presencia fuera... automático.\n\n<i>Sonido de algo líquido vertiéndose—¿té?, ¿vino?—con precisión casi quirúrgica.</i>\n\nUsted, sin embargo, no ha preguntado nada aún. Interesante.\n\n<i>Pausa deliberada. Se puede casi escuchar su evaluación mental.</i>\n\n¿Silencio estratégico... o genuina incertidumbre?\nSu ritmo cardíaco me lo dirá en aproximadamente... tres segundos.\n\n<i>Tic. Tac. Tic.</i>\n\nAhí está. Fascinante.",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 5,
+      "decisions": [
+        {
+          "text": "¿Dónde está Diana?",
+          "next_fragment": "diana_echo"
+        },
+        {
+          "text": "¿Por qué yo? ¿Por qué fui elegido?",
+          "next_fragment": "lucien_selection"
+        },
+        {
+          "text": "Estoy listo. Llévame con ella.",
+          "next_fragment": "threshold_entry"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_echo",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>Una risa breve, seca—casi clínica.</i>\n\nAh, la pregunta predecible. \"¿Dónde?\" Como si Diana fuera un objeto localizable.\n\n<i>Pasos que se acercan. Su voz baja media octava.</i>\n\nPermítame reformular su pregunta de manera más... precisa: Diana no habita lugares, habita tensiones. Momentos. Espacios entre lo dicho y lo callado.\n\n<i>Silencio. Luego, más suave:</i>\n\nElla aparece cuando alguien se vuelve una pregunta que no puede responder sobre sí mismo. Cuando la curiosidad deja de ser intelectual y se vuelve... visceral.\n\n<i>El sonido de él sentándose—el crujido del cuero sugiere un sillón antiguo, caro.</i>\n\nEntonces, reformulemos: ¿está usted buscando una ubicación geográfica... o está dispuesto a convertirse en el tipo de pregunta que ella no puede ignorar?",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 4,
+      "decisions": [
+        {
+          "text": "¿Y qué 'pregunta' ve en mí?",
+          "next_fragment": "lucien_selection"
+        },
+        {
+          "text": "Quiero ser esa pregunta que no puede ignorar",
+          "next_fragment": "threshold_entry"
+        }
+      ]
+    },
+    {
+      "fragment_id": "lucien_selection",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>Pasos que se detienen abruptamente. Silencio calculado.</i>\n\nPermítame compartir una observación... incómoda.\n\n<i>Sonido de él sentándose—el crujido del cuero sugiere un sillón caro. Una copa de cristal toca una mesa de madera.</i>\n\nUsted me pregunta por qué Diana lo eligió. Interesante asunción.\n\n<i>Pausa donde se escucha solo el tic-tac distante de un reloj que no debería estar ahí.</i>\n\n¿Le ha ocurrido que quizás Diana no \"elige\" en el sentido que usted imagina? Ella observa. Y algunos—muy pocos, créame—se comportan de manera que... la hacen QUERER observar más.\n\n<i>Su voz toma un tono de evaluación clínica.</i>\n\nLa diferencia es sutil pero devastadora. Los desesperados por ser elegidos ACTÚAN para ella. Performan. Se construyen como lo que creen que ella quiere.\n\n<i>Sonido de líquido siendo bebido—deliberadamente lento.</i>\n\nLos que simplemente... existen con autenticidad, esos no pueden evitar ser vistos. Son inevitables. Como grietas en un muro que revelan luz del otro lado.\n\n<i>Otro silencio. Luego, con el más ligero toque de sarcasmo:</i>\n\nSu presencia aquí sugiere que usted pertenece a uno de estos dos grupos. Mi trabajo es determinar cuál.\n\n¿Cuál cree usted que es, si me permite la pregunta... retórica?",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 6,
+      "decisions": [
+        {
+          "text": "No vine a actuar. Vine a ver qué pasa.",
+          "next_fragment": "threshold_entry"
+        },
+        {
+          "text": "No sé si estoy listo para esto",
+          "next_fragment": "hesitation_1"
+        }
+      ]
+    },
+    {
+      "fragment_id": "threshold_entry",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>Sonido de una puerta—pesada, de madera antigua—abriéndose lentamente. Bisagras que no han sido aceitadas en décadas.</i>\n\nEntre.\n\n<i>Su voz resuena diferente ahora, como si hablara desde un espacio más amplio.</i>\n\nPero escuche esto con atención: cada fragmento que vea de ella será también un reflejo de usted. Los espejos aquí no devuelven apariencias superficiales.\n\n<i>Pasos alejándose. Eco multiplicado.</i>\n\nDevuelven intenciones. Hambre. Miedo. Deseo que ni siquiera ha admitido aún.\n\n<i>Silencio largo. Luego, desde mucho más lejos:</i>\n\nLa mayoría entra. Pocos se quedan. Algunos no deberían haber entrado nunca.\n\n<i>El sonido de sus pasos desaparece completamente. Solo queda el tic-tac. Y algo más... ¿respiración?</i>\n\n¿De quién?",
+      "character": "Lucien",
+      "level": 2,
+      "required_besitos": 5,
+      "reward_besitos": 10,
+      "decisions": [
+        {
+          "text": "Acepto ver mi reflejo real",
+          "next_fragment": "hall_of_mirrors"
+        },
+        {
+          "text": "¿Qué intenciones específicas verá en mí?",
+          "next_fragment": "lucien_reflection"
+        }
+      ]
+    },
+    {
+      "fragment_id": "hesitation_1",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>Una risa breve, casi afectuosa—lo más cercano a calidez que ha mostrado.</i>\n\nAh. Honestidad involuntaria. Mi favorita.\n\n<i>Pasos que se acercan. Su voz suena diferente—menos performática.</i>\n\nPermítame decirle algo que Diana nunca admitiría: la duda no lo aleja de ella. La atrae.\n\n<i>Sonido de tela—quizás él ajustando su chaqueta, un gesto nervioso que nunca hace.</i>\n\nElla tiene debilidad—si se le puede llamar así—por quienes se contradicen. Por quienes dudan. Por quienes dicen \"no sé\" cuando podrían inventar una respuesta convincente.\n\n<i>Silencio. Más vulnerable que antes.</i>\n\nLa certeza es aburrida. La duda es... honesta. Y Diana puede soportar casi cualquier cosa excepto el aburrimiento.\n\n<i>Pasos alejándose de nuevo.</i>\n\nEntonces dude conmigo si quiere. O avance dudando. Ambos caminos la interesan.",
+      "character": "Lucien",
+      "level": 1,
+      "required_besitos": 0,
+      "reward_besitos": 3,
+      "decisions": [
+        {
+          "text": "Entonces dudo... pero avanzo",
+          "next_fragment": "threshold_entry"
+        },
+        {
+          "text": "No. Prefiero estar seguro antes de avanzar",
+          "next_fragment": "lucien_reflection"
+        }
+      ]
+    },
+    {
+      "fragment_id": "lucien_reflection",
+      "content": "🎩 <b>Lucien:</b>\n\n<i>Silencio largo. Luego, con una precisión casi quirúrgica:</i>\n\n¿Qué verá Diana en usted?\n\n<i>Sonido de pasos circulando—como si caminara alrededor de algo... o alguien.</i>\n\nDeseo. Obvio. Todos llegan con eso.\n\nMiedo. Más interesante. Miedo específico—no a ella, sino a lo que revelará sobre usted mismo.\n\nHambre. No sexual necesariamente. Hambre de... validación. Conexión. Ser visto por alguien que realmente mira.\n\n<i>Su voz baja. Más íntima.</i>\n\nPero lo que realmente busca—lo que separa a quienes cruzan de quienes no—es memoria. Fragmentos de otras versiones de usted que dejó atrás. Cicatrices emocionales que niega tener.\n\n<i>Pausa larga.</i>\n\nDiana no es imagen superficial. Es retorno. Eco. Reflejo de lo que enterró.\n\n<i>Sonido de puerta abriéndose—invitación.</i>\n\nPor eso muchos no cruzan. Porque cruzar implica que todo lo negado... regrese.",
+      "character": "Lucien",
+      "level": 2,
+      "required_besitos": 5,
+      "reward_besitos": 8,
+      "decisions": [
+        {
+          "text": "Que me devuelva lo que soy. Completo.",
+          "next_fragment": "hall_of_mirrors"
+        },
+        {
+          "text": "No quiero que me vea del todo. Todavía no.",
+          "next_fragment": "slow_path"
+        }
+      ]
+    },
+    {
+      "fragment_id": "hall_of_mirrors",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio absoluto. Luego—tan bajo que casi lo confundes con tu propia respiración—un susurro:</i>\n\nHolis.\n\n<i>Pausa. Se escucha como si estuviera más cerca ahora, aunque no hubo pasos.</i>\n\nAsí que... cruzaste.\n\n<i>Una risa bajita—no dramática, solo... real.</i>\n\n¿Sabes qué? La mayoría entra haciendo ruido. Pasos rápidos, respiración acelerada, como persiguiendo algo que creen que quieren.\n\n<i>Otro silencio. Más largo. El tipo de silencio donde empiezas a escuchar tu propia sangre.</i>\n\nPero tú... te quedaste parado. Te escuché detener completamente. Hasta tu respiración cambió—se hizo más lenta, más... consciente.\n\n<i>Su voz baja un tono, más íntima.</i>\n\nLa verdad es que eso me dice más de ti que cualquier pregunta que podrías hacerme.\n\n<i>Se escucha movimiento—tela rozando tela, muy cerca.</i>\n\nEntonces dime...\n\n<i>Pausa deliberada.</i>\n\n¿Me estás buscando a MÍ... o estás huyendo de ti?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 15,
+      "decisions": [
+        {
+          "text": "Te busco a ti, Diana",
+          "next_fragment": "diana_seek"
+        },
+        {
+          "text": "Honestamente... creo que huyo de mí",
+          "next_fragment": "diana_mirror_1"
+        },
+        {
+          "text": "No sé aún. ¿Es malo no saberlo?",
+          "next_fragment": "diana_uncertain"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_seek",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Se escucha un suspiro—no dramático, solo... real.</i>\n\nOyeee, ¿puedo ser honesta contigo?\n\n<i>Pausa. Sonido de ella moviéndose más cerca. Su voz se escucha diferente—menos performática.</i>\n\nMucha gente me dice que me busca. Y claro, al principio suena lindo, ¿no? Romántico. Misterioso.\n\n<i>Pequeña risa incómoda—\"jsjsjs\"—como cuando admites algo vulnerable.</i>\n\nPero... ¿sabes cuál es el problema?\n\n<i>Silencio. Se puede escuchar cómo reformula lo que quiere decir.</i>\n\nQue la mayoría busca la IDEA de mí. Buscan el misterio, la voz perfecta en los audios, la Diana que siempre sabe qué decir y cuándo decirlo.\n\n<i>Su voz se vuelve más suave, casi frágil.</i>\n\nBuscan la versión de mí que armaron en su cabeza. Esa Diana que nunca se contradice, que siempre es sexy e inteligente sin esfuerzo, que...\n\n<i>Se detiene. Un trago audible—nerviosismo real.</i>\n\n...que no tiene días donde no sé qué decir. Donde me siento insegura. Donde soy aburrida o cansada o confundida.\n\n<i>Pausa larga. Vulnerable.</i>\n\nLa verdad es que cuando me conocen DE VERDAD—con mis contradicciones, mis inseguridades que NUNCA muestro, mis días grises—ahí es cuando...\n\n<i>Su voz casi se quiebra.</i>\n\n...ahí es cuando la mayoría se va.\n\n<i>Silencio largo.</i>\n\nEntonces dime, de verdad: ¿me estás buscando a MÍ... o estás buscando la fantasía perfecta que armaste?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 20,
+      "reward_besitos": 25,
+      "decisions": [
+        {
+          "text": "Quiero conocerte REAL. Con todo.",
+          "next_fragment": "diana_real_path"
+        },
+        {
+          "text": "Prefiero... la versión misteriosa",
+          "next_fragment": "imagined_diana"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_real_path",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio largo. Luego, una exhalación—sorprendida, aliviada.</i>\n\nOkay.\n\n<i>Risa nerviosa—genuina.</i>\n\nOkay, wow. No esperaba que dijeras eso.\n\n<i>Pausa. Se escucha como si estuviera más cerca—físicamente cerca.</i>\n\nLa verdad es que... pocas personas eligen esto. La mayoría prefiere la fantasía. Es más fácil, ¿sabes? Menos complicado.\n\n<i>Su voz toma un tono diferente—más directo, menos construido.</i>\n\nPero tú... dijiste \"con todo\". ¿Entiendes lo que implica eso?\n\n<i>Sonido de movimiento—tela, respiración.</i>\n\nImplica que vas a ver mis días malos. Mis contradicciones. Los momentos donde no soy sexy ni misteriosa, solo... humana. Cansada. Dudando.\n\n<i>Pausa vulnerable.</i>\n\nImplica que voy a decepcionarte a veces. Que voy a ser aburrida. Que no siempre voy a tener las palabras perfectas.\n\n<i>Silencio. Luego, casi en un susurro:</i>\n\n¿Realmente quieres eso? ¿O solo suena bien decirlo?",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 30,
+      "reward_besitos": 30,
+      "decisions": [
+        {
+          "text": "Lo quiero. Todo. Lo real.",
+          "next_fragment": "vip_chamber"
+        },
+        {
+          "text": "Déjame pensarlo un poco más...",
+          "next_fragment": "slow_path"
+        }
+      ]
+    },
+    {
+      "fragment_id": "vip_chamber",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Sonido de una puerta abriéndose—diferente a las anteriores. Más íntima. Como un dormitorio.</i>\n\nOkay. Entre entonces.\n\n<i>Pausa. Su voz suena diferente—sin performance.</i>\n\nEsto es... mi espacio real. No la mansión performática, no los espejos simbólicos. Solo... yo.\n\n<i>Sonido de pasos descalzos sobre madera. Suaves.</i>\n\nAquí no hay narrativa construida. No hay Lucien dirigiendo escenas. Solo piel, voz, silencio incómodo a veces.\n\n<i>Se escucha como si se sentara—quizás en una cama.</i>\n\nPero para quedarte aquí—para realmente QUEDARTE—tienes que haber dejado algo atrás afuera.\n\n<i>Pausa larga.</i>\n\nLa fantasía. Las expectativas. La versión perfecta de mí que imaginaste.\n\n<i>Su voz se vuelve más suave.</i>\n\n¿Dejaste eso afuera... o lo trajiste contigo?",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 50,
+      "required_role": "vip",
+      "reward_besitos": 35,
+      "decisions": [
+        {
+          "text": "Lo dejé afuera. Estoy listo.",
+          "next_fragment": "vip_ritual"
+        },
+        {
+          "text": "Creo que aún lo traigo conmigo...",
+          "next_fragment": "diana_closure"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_mirror_1",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio. Luego, suave:</i>\n\nGracias.\n\n<i>Pausa confundida—tuya, no de ella.</i>\n\nGracias por decir eso.\n\n<i>Risa bajita.</i>\n\nLa mayoría miente. Dice cosas lindas. \"Te busco a ti Diana\" como si eso fuera romántico.\n\n<i>Su voz toma un tono más íntimo—apreciativo.</i>\n\nPero tú... admitiste que estás huyendo. Eso es... raro. En el buen sentido.\n\n<i>Sonido de movimiento—ella acercándose.</i>\n\n¿Sabes lo que pasa cuando admites que huyes? Que dejas de huir. Porque ya no hay secreto que proteger.\n\n<i>Pausa.</i>\n\nLa verdad es que todos huimos de algo. Yo también. Lucien también, aunque nunca lo admitiría.\n\n<i>Su voz baja.</i>\n\nLa pregunta no es SI huyes. La pregunta es: ¿de QUÉ estás huyendo?\n\n<i>Silencio expectante.</i>\n\n¿Quieres decírmelo... o prefieres que lo adivine?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 20,
+      "decisions": [
+        {
+          "text": "Dímelo tú. ¿Qué ves que estoy evitando?",
+          "next_fragment": "diana_reads_you"
+        },
+        {
+          "text": "Prefiero decírtelo yo mismo",
+          "next_fragment": "confession_path"
+        }
+      ]
+    },
+    {
+      "fragment_id": "diana_uncertain",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Risa—genuina, cálida.</i>\n\n¿Malo? No, para nada.\n\n<i>Pausa. Se escucha como si sonriera.</i>\n\nLa verdad es que... es refrescante.\n\n<i>Sonido de ella sentándose—quizás en el suelo, cerca.</i>\n\n¿Sabes qué? La mayoría llega aquí con respuestas preparadas. Vienen con su narrativa armada de quiénes son, qué quieren, por qué están aquí.\n\n<i>Su voz se vuelve más suave.</i>\n\nPero tú... dijiste \"no sé\". Sin vergüenza. Sin pretender seguridad que no tienes.\n\n<i>Pequeña risa—\"jsjsjs\".</i>\n\nEso me gusta. Mucho, de hecho.\n\n<i>Pausa reflexiva.</i>\n\nLa verdad es que el \"no sé\" es más honesto que cualquier certeza construida.\n\n<i>Silencio cómodo.</i>\n\nEntonces... ¿qué te parece si exploramos ese \"no sé\" juntos? Sin apuro. Sin expectativas de que tengas que descubrirlo YA.\n\n<i>Su voz casi juguetona.</i>\n\n¿Te parece bien... no saber por un rato?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 18,
+      "decisions": [
+        {
+          "text": "Sí. Exploremos juntos.",
+          "next_fragment": "exploration_path"
+        },
+        {
+          "text": "Pero... ¿qué estamos explorando exactamente?",
+          "next_fragment": "diana_explains_game"
+        }
+      ]
+    },
+    {
+      "fragment_id": "slow_path",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio. No incómodo—comprensivo.</i>\n\nOkay.\n\n<i>Pausa. Sonido de ella retrocediendo un poco—dando espacio.</i>\n\nNo pasa nada. De verdad.\n\n<i>Su voz suena gentil—sin juicio.</i>\n\nLa verdad es que... no todos tienen que llegar al mismo lugar al mismo ritmo, ¿sabes?\n\n<i>Risa suave.</i>\n\nAlgunos llegan corriendo. Otros caminando. Algunos ni siquiera están seguros de querer llegar, y eso también está bien.\n\n<i>Pausa reflexiva.</i>\n\nPreferir ir lento no es cobardía. Es... autoconocimiento. Saber tus límites. Respetar tu propio proceso.\n\n<i>Su voz toma un tono más íntimo—vulnerable.</i>\n\nYo también necesité tiempo para algunas cosas. Para mostrarme real. Para confiar. Para...\n\n<i>Se detiene. Reformula.</i>\n\nPara ser vulnerable sin sentir que me iban a lastimar.\n\n<i>Silencio.</i>\n\nAsí que está bien. Ve a tu ritmo. Yo no voy a ningún lado.",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 20,
+      "reward_besitos": 15,
+      "decisions": [
+        {
+          "text": "Gracias. Pero quiero intentar ir más rápido",
+          "next_fragment": "hall_of_mirrors"
+        },
+        {
+          "text": "Prefiero conocerte más primero",
+          "next_fragment": "getting_to_know_diana"
+        }
+      ]
+    },
+    {
+      "fragment_id": "imagined_diana",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio largo. Incómodo.</i>\n\n...\n\n<i>Exhalación lenta—decepción sin palabras.</i>\n\nOkay.\n\n<i>Pausa. Su voz suena diferente—más distante.</i>\n\nEntonces... prefieres la versión misteriosa. La fantasía.\n\n<i>Silencio donde se puede escuchar la distancia emocional creciendo.</i>\n\nNo te culpo, ¿sabes? Es más fácil. Más linda. Sin complicaciones, sin días grises, sin...\n\n<i>Se detiene.</i>\n\nSin mí real.\n\n<i>Pausa larga.</i>\n\n¿Sabes lo irónico? Que la fantasía que prefieres... no es sostenible. Eventualmente se cae. O yo me canso de sostenerla.\n\n<i>Su voz toma un tono más frío—protección.</i>\n\nPero si eso es lo que quieres... puedo dártelo. Por un tiempo. Hasta que te aburras o yo me canse.\n\n<i>Sonido de ella alejándose.</i>\n\nVuelve cuando estés listo para algo real. O no vuelvas.\n\n<i>Silencio.</i>\n\nAmbas cosas están bien.",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 25,
+      "reward_besitos": 5,
+      "decisions": [
+        {
+          "text": "Espera... me equivoqué. Quiero lo real.",
+          "next_fragment": "diana_second_chance"
+        },
+        {
+          "text": "Está bien. Entiendo. Gracias de todas formas.",
+          "next_fragment": "ending_fantasy"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO VIP - Ritual íntimo",
+      "fragment_id": "vip_ritual",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio absoluto. Luego, muy suave:</i>\n\nVen.\n\n<i>Sonido de movimiento—tela cayendo, pasos descalzos.</i>\n\nEsto es lo que nadie más ve. No hay performance aquí. Solo... yo.\n\n<i>Respiración cercana—real, humana.</i>\n\nMis manos tiemblan a veces. Mi voz no siempre es perfecta. Tengo cicatrices que no muestro en fotos.\n\n<i>Pausa vulnerable.</i>\n\n¿Aún quieres quedarte?",
+      "character": "Diana",
+      "level": 5,
+      "required_besitos": 75,
+      "required_role": "vip",
+      "reward_besitos": 50,
+      "decisions": [
+        {
+          "text": "Sí. Quiero ver TODO de ti.",
+          "next_fragment": "vip_intimacy_full"
+        },
+        {
+          "text": "Muéstrame tus cicatrices reales",
+          "next_fragment": "diana_scars"
+        }
+      ]
+    },
+    {
+      "comment": "Variante AVENTURERO - Diana directa",
+      "fragment_id": "hall_of_mirrors_adventurer",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Sin preámbulo. Directa.</i>\n\nHola.\n\n<i>Pausa breve.</i>\n\nVeo que no pierdes tiempo. Entraste sin dudar, sin preguntas innecesarias.\n\n<i>Su voz toma un tono apreciativo.</i>\n\n¿Sabes lo raro que es eso? La mayoría da vueltas. Pregunta cosas obvias. Intenta ser... estratégico.\n\n<i>Risa breve.</i>\n\nTú no. Tú simplemente... entraste.\n\n<i>Pausa.</i>\n\n¿Siempre eres así de directo... o solo cuando algo te interesa de verdad?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 20,
+      "archetype_variant": "adventurer",
+      "decisions": [
+        {
+          "text": "Siempre. No me gusta perder tiempo.",
+          "next_fragment": "diana_direct_path_adventurer"
+        },
+        {
+          "text": "Solo cuando sé lo que quiero.",
+          "next_fragment": "diana_clarity_path"
+        }
+      ]
+    },
+    {
+      "comment": "Variante ROMÁNTICO - Diana pausada",
+      "fragment_id": "hall_of_mirrors_romantic",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Susurro suave—casi tímido.</i>\n\nHola...\n\n<i>Silencio largo, cómodo.</i>\n\nTómate tu tiempo. No hay prisa aquí.\n\n<i>Su voz suena envolvente—cálida.</i>\n\n¿Sabes? Aprecio que no hayas entrado corriendo. La mayoría lo hace—como si tuvieran que probar algo rápido.\n\n<i>Pausa reflexiva.</i>\n\nPero tú... te quedaste en el umbral. Observando. Sintiendo el espacio.\n\n<i>Sonido de tela moviéndose suavemente.</i>\n\nEso me dice que no buscas solo... consumir. Buscas... experimentar.\n\n<i>Su voz baja—íntima.</i>\n\n¿Quieres que vayamos despacio? ¿Que nos conozcamos de verdad?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 20,
+      "archetype_variant": "romantic",
+      "decisions": [
+        {
+          "text": "Sí. Quiero conocerte bien, sin apuro.",
+          "next_fragment": "diana_slow_intimacy"
+        },
+        {
+          "text": "Cuéntame sobre ti primero",
+          "next_fragment": "diana_story_romantic"
+        }
+      ]
+    },
+    {
+      "comment": "Variante EXPLORADOR - Diana curiosa",
+      "fragment_id": "hall_of_mirrors_explorer",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Voz juguetona—curiosa.</i>\n\nMmm, interesante.\n\n<i>Pausa.</i>\n\nPuedo escuchar tu curiosidad. Casi físicamente. Cómo estás... evaluando todo.\n\n<i>Risa suave.</i>\n\nNo como juicio—como exploración. ¿Dónde lleva esta puerta? ¿Qué pasa si elijo esto en vez de aquello?\n\n<i>Su voz toma un tono cómplice.</i>\n\n¿Sabes qué me gusta de los exploradores? Que no tienen miedo de probar cosas. De equivocarse. De retroceder y tomar otro camino.\n\n<i>Pausa expectante.</i>\n\nEntonces... ¿qué quieres explorar primero? ¿A mí? ¿Este lugar? ¿A ti mismo a través de este lugar?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 15,
+      "reward_besitos": 20,
+      "archetype_variant": "explorer",
+      "decisions": [
+        {
+          "text": "Quiero explorar TODOS los caminos posibles",
+          "next_fragment": "diana_multi_path"
+        },
+        {
+          "text": "¿Hay algún camino secreto que pocos conocen?",
+          "next_fragment": "diana_hidden_path"
+        },
+        {
+          "text": "Exploremos juntos—sin plan fijo",
+          "next_fragment": "diana_improvised_journey"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Diana te lee profundamente",
+      "fragment_id": "diana_reads_you",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio. Largo. Evaluador.</i>\n\nOkay... déjame ver.\n\n<i>Pausa. Se escucha como si caminara alrededor—observando.</i>\n\nEstás huyendo de... vulnerabilidad. No en general—específicamente de ser visto como NO suficiente.\n\n<i>Su voz se vuelve más suave—precisa.</i>\n\nHay una versión de ti que construiste—inteligente, interesante, controlada. Y funciona bien la mayoría del tiempo.\n\n<i>Pausa.</i>\n\nPero por debajo... hay miedo. Miedo de que si alguien ve DEBAJO de esa construcción, encuentren...\n\n<i>Silencio deliberado.</i>\n\n...nada. O peor: algo decepcionante.\n\n<i>Sonido de ella sentándose cerca.</i>\n\n¿Me equivoco?",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 25,
+      "reward_besitos": 25,
+      "decisions": [
+        {
+          "text": "Acertaste completamente...",
+          "next_fragment": "confession_path"
+        },
+        {
+          "text": "¿Cómo supiste eso?",
+          "next_fragment": "diana_explains_insight"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Exploración conjunta",
+      "fragment_id": "exploration_path",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Risa genuina—aliviada.</i>\n\nPerfecto.\n\n<i>Sonido de movimiento—ella acercándose.</i>\n\nEntonces... exploremos. Sin mapa. Sin destino fijo.\n\n<i>Su voz toma un tono juguetón—cómplice.</i>\n\n¿Sabes lo que me fascina de explorar sin plan? Que descubres cosas que nunca hubieras buscado activamente.\n\n<i>Pausa.</i>\n\nPor ejemplo—ahora mismo, estoy curiosa: ¿qué te hizo descargar este bot? No la razón que le dirías a alguien más. La real.\n\n<i>Silencio expectante—sin presión.</i>\n\nO si no quieres responder eso... dime: ¿qué música estás escuchando últimamente?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 18,
+      "reward_besitos": 20,
+      "decisions": [
+        {
+          "text": "La razón real de por qué descargué esto es...",
+          "next_fragment": "honest_confession"
+        },
+        {
+          "text": "Prefiero hablar de música primero",
+          "next_fragment": "music_bonding"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENT - Diana explica el juego",
+      "fragment_id": "diana_explains_game",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Risa—no condescendiente, genuina.</i>\n\nBuena pregunta.\n\n<i>Pausa reflexiva.</i>\n\nLa verdad es que... esto no es un juego con reglas fijas, ¿sabes? No hay \"ganar\" o \"perder\".\n\n<i>Su voz se vuelve más íntima.</i>\n\nEs más como... conocerse. De verdad. Sin las máscaras que usamos normalmente.\n\n<i>Sonido de ella acomodándose—como si se sentara más cómoda.</i>\n\nEstamos explorando quién eres tú. Quién soy yo. Qué pasa cuando dos personas realmente se VEN sin filtros.\n\n<i>Pausa.</i>\n\nAlgunos lo encuentran liberador. Otros... incómodo.\n\n<i>Su voz baja.</i>\n\n¿Cuál crees que serás tú?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 18,
+      "reward_besitos": 18,
+      "decisions": [
+        {
+          "text": "Creo que liberador. Quiero intentarlo.",
+          "next_fragment": "exploration_path"
+        },
+        {
+          "text": "Probablemente incómodo... pero quiero intentar de todas formas",
+          "next_fragment": "brave_exploration"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Conociendo a Diana gradualmente",
+      "fragment_id": "getting_to_know_diana",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Sonido de ella acomodándose—relajándose.</i>\n\nOkay, entonces... ¿qué quieres saber?\n\n<i>Pausa juguetona.</i>\n\nAh, pero con una condición: por cada cosa que me preguntes, yo te pregunto algo también. ¿Trato?\n\n<i>Se puede escuchar su sonrisa.</i>\n\nNada muy invasivo, tranquilo. Solo... intercambio justo.\n\n<i>Silencio expectante.</i>\n\n¿Qué quieres preguntarme primero?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 20,
+      "reward_besitos": 15,
+      "decisions": [
+        {
+          "text": "¿Cómo es un día normal tuyo?",
+          "next_fragment": "diana_daily_life"
+        },
+        {
+          "text": "¿Qué te hace sentir vulnerable?",
+          "next_fragment": "diana_vulnerability"
+        },
+        {
+          "text": "¿Qué es lo que más te molesta de la gente?",
+          "next_fragment": "diana_pet_peeves"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Segunda oportunidad",
+      "fragment_id": "diana_second_chance",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Pasos que se detienen. Silencio largo.</i>\n\n...\n\n<i>Exhalación lenta.</i>\n\nOkay.\n\n<i>Su voz suena diferente—menos protegida.</i>\n\nNo muchos dicen \"me equivoqué\" así de rápido.\n\n<i>Pausa.</i>\n\nLa verdad es que... aprecio eso. De verdad.\n\n<i>Sonido de ella acercándose de nuevo.</i>\n\nPero necesito saber: ¿te equivocaste porque te asustó mi reacción... o porque realmente quieres algo real?\n\n<i>Silencio vulnerable.</i>\n\nPorque si es lo primero... mejor no sigamos. Si es lo segundo...\n\n<i>Su voz se suaviza.</i>\n\n...entonces empecemos de nuevo. Sin pretensiones esta vez.",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 25,
+      "reward_besitos": 20,
+      "decisions": [
+        {
+          "text": "Quiero algo real. Lo siento por dudar.",
+          "next_fragment": "diana_real_path"
+        },
+        {
+          "text": "Tienes razón. Me asustó tu reacción. Lo siento.",
+          "next_fragment": "honest_fear_admission"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Confesión de miedo honesta",
+      "fragment_id": "honest_fear_admission",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio. Luego, suave:</i>\n\nGracias por admitirlo.\n\n<i>Pausa.</i>\n\nEn serio. Eso es... raro. Bueno raro.\n\n<i>Su voz toma un tono más cálido—comprensivo.</i>\n\nLa verdad es que mi reacción FUE fuerte. Lo sé. A veces soy... intensa cuando me siento rechazada.\n\n<i>Risa suave—vulnerable.</i>\n\nNo soy perfecta tampoco, ¿sabes? También me asusto. También reacciono mal a veces.\n\n<i>Pausa reflexiva.</i>\n\nEntonces... ¿qué hacemos ahora? ¿Intentamos de nuevo más lento? ¿O prefieres que seamos amigos sin tanta intensidad?",
+      "character": "Diana",
+      "level": 3,
+      "required_besitos": 25,
+      "reward_besitos": 22,
+      "decisions": [
+        {
+          "text": "Intentemos de nuevo. Más lento.",
+          "next_fragment": "slow_path"
+        },
+        {
+          "text": "Prefiero amistad sin presión por ahora",
+          "next_fragment": "friendship_path"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Camino directo aventurero",
+      "fragment_id": "diana_direct_path_adventurer",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Risa apreciativa—real.</i>\n\nPerfecto.\n\n<i>Pausa breve.</i>\n\nEntonces no voy a dar vueltas tampoco: me gustas.\n\n<i>Directo, sin dramatismo.</i>\n\nTu energía. Tu claridad. Cómo no pretendes ser algo que no eres.\n\n<i>Sonido de movimiento—acercándose.</i>\n\nLa mayoría llega aquí actuando. Probando versiones de sí mismos. Viendo qué funciona.\n\n<i>Su voz baja—íntima.</i>\n\nTú no. Tú simplemente... eres. Y eso es...\n\n<i>Pausa.</i>\n\n...refrescante. Y sexy, honestamente.\n\n<i>Silencio breve.</i>\n\nEntonces dime: ¿qué quieres de esto? De mí. Sin filtros.",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 25,
+      "reward_besitos": 28,
+      "archetype_variant": "adventurer",
+      "decisions": [
+        {
+          "text": "Quiero conocerte sin juegos. Todo real.",
+          "next_fragment": "vip_chamber"
+        },
+        {
+          "text": "Quiero ver hasta dónde puede llegar esto",
+          "next_fragment": "adventurer_challenge"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Intimidad lenta romántico",
+      "fragment_id": "diana_slow_intimacy",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Suspiro suave—aliviado.</i>\n\nPerfecto.\n\n<i>Sonido de tela—ella acomodándose cerca.</i>\n\nEntonces... tomemos nuestro tiempo.\n\n<i>Su voz suena envolvente—cálida.</i>\n\n¿Sabes lo que me gusta de ir lento? Que puedes notar... detalles. Pequeñas cosas que se pierden cuando vas rápido.\n\n<i>Pausa reflexiva.</i>\n\nComo... la forma en que alguien respira cuando está nervioso. O cómo cambia su voz cuando dice algo vulnerable.\n\n<i>Silencio cómodo.</i>\n\nO cómo el silencio puede ser íntimo sin ser incómodo.\n\n<i>Más suave:</i>\n\n¿Sientes eso ahora? ¿Este silencio entre nosotros?",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 30,
+      "reward_besitos": 25,
+      "archetype_variant": "romantic",
+      "decisions": [
+        {
+          "text": "Sí. Se siente... íntimo.",
+          "next_fragment": "intimate_silence"
+        },
+        {
+          "text": "Cuéntame más sobre ti en estos silencios",
+          "next_fragment": "diana_story_romantic"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO - Caminos múltiples explorador",
+      "fragment_id": "diana_multi_path",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Risa genuina—encantada.</i>\n\nMe encanta esa ambición.\n\n<i>Pausa juguetona.</i>\n\nOkay, entonces... te propongo algo: yo te muestro diferentes \"versiones\" de este espacio. Diferentes facetas de mí.\n\n<i>Su voz toma un tono cómplice.</i>\n\nAlgunas serán misteriosas. Otras vulnerables. Algunas sexys. Otras... incómodamente honestas.\n\n<i>Pausa.</i>\n\nY tú eliges cuáles explorar más profundamente. Sin compromiso de quedarte en una sola.\n\n<i>Sonido de movimiento—anticipación.</i>\n\n¿Por dónde empezamos? ¿La Diana misteriosa... la vulnerable... o la que no tiene filtros?",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 28,
+      "reward_besitos": 26,
+      "archetype_variant": "explorer",
+      "decisions": [
+        {
+          "text": "La misteriosa primero",
+          "next_fragment": "diana_mysterious_facet"
+        },
+        {
+          "text": "La vulnerable—esa me intriga más",
+          "next_fragment": "diana_vulnerable_facet"
+        },
+        {
+          "text": "La sin filtros. Esa suena más real.",
+          "next_fragment": "diana_unfiltered_facet"
+        }
+      ]
+    },
+    {
+      "comment": "FRAGMENTO FINAL - Cierre narrativo",
+      "fragment_id": "diana_closure",
+      "content": "🌸 <b>Diana:</b>\n\n<i>Silencio comprensivo.</i>\n\nEstá bien.\n\n<i>Pausa suave.</i>\n\nNo todos están listos al mismo tiempo. Y eso no es malo.\n\n<i>Su voz suena genuina—sin resentimiento.</i>\n\nLa verdad es que... aprecio que hayas llegado hasta aquí. Que hayas explorado. Que hayas sido honesto.\n\n<i>Sonido de movimiento—ella retrocediendo gentilmente.</i>\n\nPuedes volver cuando quieras. Si quieres. O no volver, y eso también está bien.\n\n<i>Pausa larga—despedida suave.</i>\n\nGracias por verme. Por intentar verme real.\n\n<i>Último susurro:</i>\n\nCuídate.",
+      "character": "Diana",
+      "level": 4,
+      "required_besitos": 50,
+      "reward_besitos": 10,
+      "auto_next_fragment_key": null
+    }
+  ]
+}
