@@ -114,7 +114,7 @@
     },
     "display": {
       "fragment_progress": "📍 *Fragmento {visited}/{total}* • Nivel {level} • {progress_pct:.0f}%\n\n",
-      "character_line": "{emoji} *{name}:*\n\n*{text}*",
+      "character_line": "{emoji} *{name}:*\n\n{text}",
       "reward_line": "\n\n✨ *Has recibido {reward} besitos*"
     },
     "requirements": {

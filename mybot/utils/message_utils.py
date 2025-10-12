@@ -38,6 +38,49 @@ def escape_markdown(text: str) -> str:
     return text
 
 
+def escape_markdown_v2(text: str) -> str:
+    """
+    Escapa caracteres especiales para MarkdownV2 de Telegram.
+
+    Preserva el formato intencional (* para negrita, _ para cursiva)
+    pero escapa otros caracteres especiales.
+
+    Args:
+        text: Texto a escapar
+
+    Returns:
+        Texto con caracteres especiales escapados pero formato preservado
+    """
+    if not text:
+        return text
+
+    # Caracteres que SIEMPRE deben escaparse (excepto * y _ que son formato)
+    escape_chars = [
+        ('\\', '\\\\'),  # Backslash primero
+        ('[', '\\['),    # Enlace inicio
+        (']', '\\]'),    # Enlace fin
+        ('(', '\\('),    # Paréntesis
+        (')', '\\)'),    # Paréntesis
+        ('~', '\\~'),    # Tachado
+        ('`', '\\`'),    # Código
+        ('>', '\\>'),    # Quote
+        ('#', '\\#'),    # Heading
+        ('+', '\\+'),    # Plus
+        ('-', '\\-'),    # Guión/lista
+        ('=', '\\='),    # Igual
+        ('|', '\\|'),    # Pipe
+        ('{', '\\{'),    # Llave
+        ('}', '\\}'),    # Llave
+        ('.', '\\.'),    # Punto
+        ('!', '\\!'),    # Exclamación
+    ]
+
+    for char, escaped in escape_chars:
+        text = text.replace(char, escaped)
+
+    return text
+
+
 async def get_profile_message(
     user: User, active_missions: list[Mission], session: AsyncSession
 ) -> str:
