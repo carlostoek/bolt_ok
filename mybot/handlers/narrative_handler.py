@@ -603,12 +603,8 @@ async def _display_narrative_fragment(
     # Formatear el texto del fragmento
     character_emoji = "🎩" if fragment.character == "Lucien" else "🌸"
 
-    fragment_text = progress_info + get_text(
-        "narrative.display.character_line",
-        emoji=character_emoji,
-        name=fragment.character,
-        text=fragment.text
-    )
+    # HTML mode: No escaping needed, HTML tags are safe
+    fragment_text = f"{progress_info}{character_emoji} <b>{fragment.character}:</b>\n\n{fragment.text}"
 
     # Agregar información de recompensas si las hay
     if fragment.reward_besitos > 0:
@@ -636,7 +632,7 @@ async def _display_narrative_fragment(
                     photo=fragment.image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="MarkdownV2"
+                    parse_mode="HTML"
                 )
             else:
                 # En mensaje normal, enviar directamente
@@ -644,7 +640,7 @@ async def _display_narrative_fragment(
                     photo=fragment.image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="MarkdownV2"
+                    parse_mode="HTML"
                 )
         except Exception as e:
             logger.error(f"Error enviando fragmento con imagen: {e}")
@@ -656,19 +652,19 @@ async def _display_narrative_fragment(
                         await message.delete()
                     except Exception:
                         pass
-                    await message.answer(fragment_text, reply_markup=keyboard)
+                    await message.answer(fragment_text, reply_markup=keyboard, parse_mode="HTML")
                 else:
-                    await safe_edit(message, fragment_text, reply_markup=keyboard)
+                    await safe_edit(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
             else:
-                await safe_answer(message, fragment_text, reply_markup=keyboard)
+                await safe_answer(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
     else:
         # Sin imagen, enviar solo texto como antes
         if is_callback:
             # Si el mensaje anterior tenía foto, debemos eliminar y enviar nuevo
             # El patch en message_safety.py manejará esto automáticamente
-            await safe_edit(message, fragment_text, reply_markup=keyboard)
+            await safe_edit(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
         else:
-            await safe_answer(message, fragment_text, reply_markup=keyboard)
+            await safe_answer(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
 
 @router.callback_query(F.data == "start_narrative")
 async def start_narrative_callback(callback: CallbackQuery, session: AsyncSession):
@@ -782,12 +778,14 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
 
         # Formatear texto del fragmento
         character_emoji = "🌸" if character == "Diana" else "🎩"
-        fragment_text = f"{character_emoji} **{character}:**\n\n{content}"
+
+        # HTML mode: No escaping needed
+        fragment_text = f"{character_emoji} <b>{character}:</b>\n\n{content}"
 
         # Agregar información de recompensas si las hay
         reward_besitos = fragment_data.get('reward_besitos', 0)
         if reward_besitos > 0:
-            fragment_text += f"\n\n✨ *Has ganado {reward_besitos} besitos*"
+            fragment_text += f"\n\n✨ <i>Has ganado {reward_besitos} besitos</i>"
 
         # Crear teclado con opciones de enhanced L1F1
         keyboard = await _get_enhanced_l1f1_keyboard(choices)
@@ -799,7 +797,7 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
                     photo=image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="MarkdownV2"
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 logger.error(f"Error enviando enhanced L1F1 con imagen: {e}")
@@ -1126,12 +1124,14 @@ async def _display_enhanced_followup_fragment(
 
         # Formatear texto del fragmento
         character_emoji = "🌸" if character == "Diana" else "🎩"
-        fragment_text = f"{character_emoji} **{character}:**\n\n{content}"
+
+        # HTML mode: No escaping needed
+        fragment_text = f"{character_emoji} <b>{character}:</b>\n\n{content}"
 
         # Agregar recompensas si las hay
         reward_besitos = fragment_data.get('reward_besitos', 0)
         if reward_besitos > 0:
-            fragment_text += f"\n\n✨ *Has ganado {reward_besitos} besitos*"
+            fragment_text += f"\n\n✨ <i>Has ganado {reward_besitos} besitos</i>"
 
         # Crear teclado para el seguimiento
         keyboard = await _get_enhanced_followup_keyboard(choices)
@@ -1150,7 +1150,7 @@ async def _display_enhanced_followup_fragment(
                     photo=image_url,
                     caption=fragment_text,
                     reply_markup=keyboard,
-                    parse_mode="MarkdownV2"
+                    parse_mode="HTML"
                 )
             except Exception as e:
                 logger.error(f"Error enviando followup con imagen: {e}")
