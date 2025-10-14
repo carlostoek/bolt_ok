@@ -604,11 +604,16 @@ async def _display_narrative_fragment(
     character_emoji = "🎩" if fragment.character == "Lucien" else "🌸"
 
     # HTML mode: No escaping needed, HTML tags are safe
-    fragment_text = f"{progress_info}{character_emoji} <b>{fragment.character}:</b>\n\n{fragment.text}"
+    fragment_text = progress_info + get_text(
+        "narrative.display.character_line_html",
+        emoji=character_emoji,
+        name=fragment.character,
+        text=fragment.text
+    )
 
     # Agregar información de recompensas si las hay
     if fragment.reward_besitos > 0:
-        fragment_text += get_text("narrative.display.reward_line", reward=fragment.reward_besitos)
+        fragment_text += get_text("narrative.display.reward_line_html", reward=fragment.reward_besitos)
 
     # Crear teclado con opciones (pasando user_id para navegación)
     keyboard = await get_narrative_keyboard(fragment, session, user_id=user_id)
@@ -780,12 +785,17 @@ async def _display_enhanced_l1f1_fragment(message: Message, fragment_data: dict,
         character_emoji = "🌸" if character == "Diana" else "🎩"
 
         # HTML mode: No escaping needed
-        fragment_text = f"{character_emoji} <b>{character}:</b>\n\n{content}"
+        fragment_text = get_text(
+            "narrative.display.character_line_html",
+            emoji=character_emoji,
+            name=character,
+            text=content
+        )
 
         # Agregar información de recompensas si las hay
         reward_besitos = fragment_data.get('reward_besitos', 0)
         if reward_besitos > 0:
-            fragment_text += f"\n\n✨ <i>Has ganado {reward_besitos} besitos</i>"
+            fragment_text += get_text("narrative.display.reward_line_html", reward=reward_besitos)
 
         # Crear teclado con opciones de enhanced L1F1
         keyboard = await _get_enhanced_l1f1_keyboard(choices)
@@ -1126,12 +1136,17 @@ async def _display_enhanced_followup_fragment(
         character_emoji = "🌸" if character == "Diana" else "🎩"
 
         # HTML mode: No escaping needed
-        fragment_text = f"{character_emoji} <b>{character}:</b>\n\n{content}"
+        fragment_text = get_text(
+            "narrative.display.character_line_html",
+            emoji=character_emoji,
+            name=character,
+            text=content
+        )
 
         # Agregar recompensas si las hay
         reward_besitos = fragment_data.get('reward_besitos', 0)
         if reward_besitos > 0:
-            fragment_text += f"\n\n✨ <i>Has ganado {reward_besitos} besitos</i>"
+            fragment_text += get_text("narrative.display.reward_line_html", reward=reward_besitos)
 
         # Crear teclado para el seguimiento
         keyboard = await _get_enhanced_followup_keyboard(choices)
