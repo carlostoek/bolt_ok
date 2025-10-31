@@ -28,6 +28,9 @@ class StoryFragment(Base):
 
     # Variante por arquetipo (adventurer, romantic, explorer, balanced, null=genérico)
     archetype_variant = Column(String(20), nullable=True, index=True)
+    
+    # Referencia a experiencia unificada que creó este fragmento
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
 
     # Metadata for extended functionality (e.g., migrated lore pieces)
     fragment_metadata = Column(JSON, nullable=True)

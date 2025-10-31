@@ -34,6 +34,8 @@ from .game_admin import router as game_admin_router
 from .event_admin import router as event_admin_router
 from .admin_config import router as admin_config_router
 from .shop_admin import router as shop_admin_router
+from .experiences_admin import router as experiences_admin_router
+from .experience_wizard import router as experience_wizard_router
 
 router.include_router(vip_router)
 router.include_router(free_router)
@@ -44,6 +46,8 @@ router.include_router(game_admin_router)
 router.include_router(event_admin_router)
 router.include_router(admin_config_router)
 router.include_router(shop_admin_router)
+router.include_router(experiences_admin_router)
+router.include_router(experience_wizard_router)
 
 @router.message(Command("admin"))
 async def admin_start(message: Message, session: AsyncSession):

@@ -144,6 +144,9 @@ class Mission(Base):
         nullable=True,
         index=True
     )
+    
+    # Referencia a experiencia unificada que creó esta misión
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
 
     # Relación con LorePiece
     @declared_attr
@@ -579,6 +582,9 @@ class ShopItem(Base):
     unlock_requirements = Column(JSON, nullable=True)  # Compound conditions for unlock (NULL = no requirements)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+    
+    # Referencia a experiencia unificada que creó este item
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
 
     lore_piece = relationship("LorePiece")
     product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
