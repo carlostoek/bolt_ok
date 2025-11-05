@@ -6,6 +6,7 @@ import logging
 from aiogram import Router, F, Bot
 from aiogram.types import CallbackQuery, Message, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 
@@ -15,6 +16,7 @@ from utils.admin_state import AdminShopStates
 from keyboards.common import get_back_kb
 from database.models import ShopItem, LorePiece, UserPurchase
 from services.shop_service import ShopService
+from utils.constants import ConditionOperator, ConditionType, ComparisonOperator, LoreCategory
 
 logger = logging.getLogger(__name__)
 router = Router()
@@ -956,7 +958,7 @@ async def proceed_to_unlock_config(callback: CallbackQuery, state: FSMContext, s
 
 @router.callback_query(AdminShopStates.selecting_unlock, F.data == "shop_create_unlock_no")
 async def admin_shop_create_no_unlock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Create product without unlock."""
+    """Create product without unlock and proceed to file upload."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
@@ -977,26 +979,33 @@ async def admin_shop_create_no_unlock(callback: CallbackQuery, state: FSMContext
         unlocks_lore_piece_id=None
     )
     session.add(shop_item)
-    await session.commit()
+    await session.flush()  # Flush to get the ID but don't commit yet
+
+    # Store the shop item ID in state for file upload
+    await state.update_data(shop_item_id=shop_item.id)
 
     text = f"""✅ **Producto Creado**
 
 **{shop_item.name}** ha sido agregado a la tienda.
 
 • 💰 Precio: {shop_item.price} besitos
-• {'👑 Solo VIP' if shop_item.is_active else '🆓 Para Todos'}
+• {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
 • 📦 Sin desbloqueo de contenido
-• ✅ Activo"""
+• ✅ Activo
+
+📁 **Paso 10: Archivos del Producto** (Opcional)
+
+¿Deseas agregar archivos a este producto?
+Por ejemplo: sesiones fotográficas con múltiples imágenes."""
 
     from aiogram.utils.keyboard import InlineKeyboardBuilder
     builder = InlineKeyboardBuilder()
-    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
-    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
-    builder.button(text="🔙 Volver", callback_data="admin_shop")
+    builder.button(text="📁 Sí, agregar archivos", callback_data="shop_create_files_yes")
+    builder.button(text="⏭️ Omitir (sin archivos)", callback_data="shop_create_files_skip")
     builder.adjust(1)
 
     await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    await state.clear()
+    await state.set_state(AdminShopStates.uploading_files)
     await callback.answer()
 
 
@@ -1038,10 +1047,10 @@ Elige qué pieza narrativa se desbloqueará al comprar este producto:
 
     for lore in lore_pieces[:15]:  # Limit to 15 for keyboard size
         category_emoji = {
-            'fragmentos': '🗺️',
-            'memorias': '💭',
-            'secretos': '🔮',
-            'llaves': '🗝️'
+            "fragmentos": '🗺️',
+            "memorias": '💭',
+            "secretos": '🔮',
+            "llaves": '🗝️'
         }.get(lore.category, '📜')
 
         builder.button(
@@ -1060,7 +1069,7 @@ Elige qué pieza narrativa se desbloqueará al comprar este producto:
 
 @router.callback_query(AdminShopStates.confirming_creation, F.data.startswith("shop_select_lore:"))
 async def admin_shop_create_with_unlock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Create product with lore piece unlock."""
+    """Create product with lore piece unlock and proceed to file upload."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
@@ -1088,7 +1097,10 @@ async def admin_shop_create_with_unlock(callback: CallbackQuery, state: FSMConte
         unlocks_lore_piece_id=lore_piece_id
     )
     session.add(shop_item)
-    await session.commit()
+    await session.flush()  # Flush to get the ID but don't commit yet
+
+    # Store the shop item ID in state for file upload
+    await state.update_data(shop_item_id=shop_item.id)
 
     text = f"""✅ **Producto Creado con Éxito**
 
@@ -1104,228 +1116,40 @@ async def admin_shop_create_with_unlock(callback: CallbackQuery, state: FSMConte
 **{lore_piece.title}**
 `{lore_piece.code_name}`
 
-⚠️ **Importante:** Para que el desbloqueo funcione en decisiones narrativas, debes configurar el `decision_requirements` en el Coordinador Central.
-
-📖 Ver documentación en: `docs/guia-fragmentos-condicionados-items-2025-09-15.md`"""
-
-    from aiogram.utils.keyboard import InlineKeyboardBuilder
-    builder = InlineKeyboardBuilder()
-    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
-    builder.button(text="🔗 Config. Desbloqueos", callback_data="admin_shop_unlocks")
-    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
-    builder.button(text="🔙 Volver", callback_data="admin_shop")
-    builder.adjust(1)
-
-    await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    await state.clear()
-    logger.info(f"Admin {callback.from_user.id} created shop item: {shop_item.name}")
-    await callback.answer()
-
-
-# Add file management handlers after unlock selection
-@router.callback_query(AdminShopStates.selecting_unlock, F.data == "shop_create_unlock_no")
-async def admin_shop_create_no_unlock(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Create product without unlock - proceed to file upload."""
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
-
-    data = await state.get_data()
-    
-    text = f"""➕ **Crear Producto**
-
-✅ Nombre: **{data['name']}**
-✅ Precio: {data['price']} besitos
-✅ Acceso: {'👑 Solo VIP' if data['is_vip_only'] else '🆓 Para Todos'}
-✅ Sin desbloqueo narrativo
-
 📁 **Paso 10: Archivos del Producto** (Opcional)
 
-¿Este producto incluye archivos (fotos, videos, etc.)?
-
-💡 Ejemplo: Sesión de fotos con múltiples imágenes."""
+¿Deseas agregar archivos a este producto?
+Por ejemplo: sesiones fotográficas con múltiples imágenes."""
 
     from aiogram.utils.keyboard import InlineKeyboardBuilder
     builder = InlineKeyboardBuilder()
     builder.button(text="📁 Sí, agregar archivos", callback_data="shop_create_files_yes")
-    builder.button(text="⏭️ Sin archivos", callback_data="shop_create_files_no")
+    builder.button(text="⏭️ Omitir (sin archivos)", callback_data="shop_create_files_skip")
     builder.adjust(1)
 
     await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    await state.set_state(AdminShopStates.configuring_files)
-    await callback.answer()
-
-
-@router.callback_query(AdminShopStates.configuring_files, F.data == "shop_create_files_no")
-async def admin_shop_create_no_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Create product without files."""
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
-
-    data = await state.get_data()
-
-    # Create the shop item
-    shop_item = ShopItem(
-        name=data['name'],
-        description=data['description'],
-        price=data['price'],
-        is_vip_only=data['is_vip_only'],
-        image_file_id=data.get('image_file_id'),
-        stock_limit=data.get('stock_limit'),
-        max_purchases_per_user=data.get('max_purchases_per_user', 1),
-        available_from=data.get('available_from'),
-        available_until=data.get('available_until'),
-        is_active=True,
-        unlocks_lore_piece_id=None
-    )
-    session.add(shop_item)
-    await session.commit()
-
-    text = f"""✅ **Producto Creado**
-
-**{shop_item.name}** ha sido agregado a la tienda.
-
-• 💰 Precio: {shop_item.price} besitos
-• {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
-• 📦 Sin archivos adjuntos
-• ✅ Activo"""
-
-    from aiogram.utils.keyboard import InlineKeyboardBuilder
-    builder = InlineKeyboardBuilder()
-    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
-    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
-    builder.button(text="🔙 Volver", callback_data="admin_shop")
-    builder.adjust(1)
-
-    await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    await state.clear()
-    await callback.answer()
-
-
-@router.callback_query(AdminShopStates.configuring_files, F.data == "shop_create_files_yes")
-async def admin_shop_create_request_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Request file upload for product."""
-    if not await is_admin(callback.from_user.id, session):
-        return await callback.answer("Acceso denegado", show_alert=True)
-
-    text = """📁 **Agregar Archivos al Producto**
-
-Envía los archivos (fotos, videos, documentos) que incluye este producto.
-
-💡 Tips:
-• Puedes enviar múltiples archivos
-• Se enviarán en el orden que los recibas
-• Formatos soportados: fotos, videos, documentos
-
-⚠️ Envía cada archivo individualmente. Cuando termines, presiona "✅ Finalizar"."""
-
-    from aiogram.utils.keyboard import InlineKeyboardBuilder
-    builder = InlineKeyboardBuilder()
-    builder.button(text="✅ Finalizar", callback_data="shop_create_files_done")
-    builder.button(text="❌ Cancelar", callback_data="shop_create_files_no")
-    builder.adjust(1)
-
-    await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    await state.update_data(product_files=[])
     await state.set_state(AdminShopStates.uploading_files)
     await callback.answer()
 
 
-@router.message(AdminShopStates.uploading_files, F.photo)
-async def admin_shop_receive_photo_file(message: Message, state: FSMContext, session: AsyncSession):
-    """Receive a photo file for the product."""
-    if not await is_admin(message.from_user.id, session):
-        return
 
-    data = await state.get_data()
-    files = data.get('product_files', [])
-    
-    # Get the largest photo
-    photo = message.photo[-1]
-    files.append({
-        'file_id': photo.file_id,
-        'file_type': 'photo'
-    })
-    
-    await state.update_data(product_files=files)
-    await message.answer(f"✅ Foto agregada ({len(files)} archivos en total)")
-
-
-@router.message(AdminShopStates.uploading_files, F.video)
-async def admin_shop_receive_video_file(message: Message, state: FSMContext, session: AsyncSession):
-    """Receive a video file for the product."""
-    if not await is_admin(message.from_user.id, session):
-        return
-
-    data = await state.get_data()
-    files = data.get('product_files', [])
-    
-    files.append({
-        'file_id': message.video.file_id,
-        'file_type': 'video'
-    })
-    
-    await state.update_data(product_files=files)
-    await message.answer(f"✅ Video agregado ({len(files)} archivos en total)")
-
-
-@router.message(AdminShopStates.uploading_files, F.document)
-async def admin_shop_receive_document_file(message: Message, state: FSMContext, session: AsyncSession):
-    """Receive a document file for the product."""
-    if not await is_admin(message.from_user.id, session):
-        return
-
-    data = await state.get_data()
-    files = data.get('product_files', [])
-    
-    files.append({
-        'file_id': message.document.file_id,
-        'file_type': 'document'
-    })
-    
-    await state.update_data(product_files=files)
-    await message.answer(f"✅ Documento agregado ({len(files)} archivos en total)")
-
-
-@router.callback_query(AdminShopStates.uploading_files, F.data == "shop_create_files_done")
-async def admin_shop_create_with_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
-    """Create product with uploaded files."""
+# File upload handlers
+@router.callback_query(AdminShopStates.uploading_files, F.data == "shop_create_files_skip")
+async def admin_shop_skip_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Skip file upload and finalize product creation."""
     if not await is_admin(callback.from_user.id, session):
         return await callback.answer("Acceso denegado", show_alert=True)
 
     data = await state.get_data()
-    files = data.get('product_files', [])
-
-    # Create the shop item
-    shop_item = ShopItem(
-        name=data['name'],
-        description=data['description'],
-        price=data['price'],
-        is_vip_only=data['is_vip_only'],
-        image_file_id=data.get('image_file_id'),
-        stock_limit=data.get('stock_limit'),
-        max_purchases_per_user=data.get('max_purchases_per_user', 1),
-        available_from=data.get('available_from'),
-        available_until=data.get('available_until'),
-        is_active=True,
-        unlocks_lore_piece_id=None
-    )
-    session.add(shop_item)
-    await session.flush()  # Get the ID
+    shop_item_id = data.get('shop_item_id')
     
-    # Add product files
-    from database.models import ProductFile
-    for index, file_data in enumerate(files):
-        product_file = ProductFile(
-            shop_item_id=shop_item.id,
-            file_id=file_data['file_id'],
-            file_type=file_data['file_type'],
-            order_index=index
-        )
-        session.add(product_file)
-    
+    # Commit the transaction
     await session.commit()
-
-    text = f"""✅ **Producto Creado con Archivos**
+    
+    # Get the shop item for display
+    shop_item = await session.get(ShopItem, shop_item_id)
+    
+    text = f"""✅ **Producto Creado Completamente**
 
 **{shop_item.name}** ha sido agregado a la tienda.
 
@@ -1333,9 +1157,9 @@ async def admin_shop_create_with_files(callback: CallbackQuery, state: FSMContex
 • 💰 Precio: {shop_item.price} besitos
 • {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
 • ✅ Estado: Activo
-• 📁 Archivos: {len(files)} archivos adjuntos
+• 📁 Archivos: Sin archivos
 
-Los usuarios recibirán todos los archivos al comprar este producto."""
+El producto está listo para ser vendido."""
 
     from aiogram.utils.keyboard import InlineKeyboardBuilder
     builder = InlineKeyboardBuilder()
@@ -1346,8 +1170,187 @@ Los usuarios recibirán todos los archivos al comprar este producto."""
 
     await callback.message.edit_text(text, reply_markup=builder.as_markup())
     await state.clear()
-    logger.info(f"Admin {callback.from_user.id} created shop item with {len(files)} files: {shop_item.name}")
     await callback.answer()
+
+@router.callback_query(AdminShopStates.uploading_files, F.data == "shop_create_files_yes")
+async def admin_shop_start_file_upload(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Start the file upload process."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    data = await state.get_data()
+    shop_item_id = data.get('shop_item_id')
+    
+    text = """📁 **Agregar Archivos al Producto**
+
+Ahora puedes enviar los archivos que se entregarán al usuario al comprar este producto.
+
+**Tipos de archivos soportados:**
+• 📸 Fotos (como foto)
+• 🎥 Videos (como video)
+• 📄 Documentos (como documento)
+
+**Instrucciones:**
+1. Envía un archivo (foto, video o documento)
+2. Se te pedirá un orden (1, 2, 3...)
+3. Repite para cada archivo
+4. Cuando termines, presiona "✅ Finalizar"
+
+⚠️ **Importante:** Los archivos se enviarán en el orden que especifiques.
+
+Envía el primer archivo ahora:"""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="✅ Finalizar", callback_data="shop_files_finish")
+    builder.button(text="❌ Cancelar", callback_data="shop_create_files_skip")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.set_state(AdminShopStates.receiving_files)
+    await callback.answer()
+
+@router.callback_query(AdminShopStates.receiving_files, F.data == "shop_files_finish")
+async def admin_shop_finish_files(callback: CallbackQuery, state: FSMContext, session: AsyncSession):
+    """Finish file upload and finalize product creation."""
+    if not await is_admin(callback.from_user.id, session):
+        return await callback.answer("Acceso denegado", show_alert=True)
+
+    data = await state.get_data()
+    shop_item_id = data.get('shop_item_id')
+    
+    # Commit the transaction
+    await session.commit()
+    
+    # Get the shop item and count files
+    from database.models import ProductFile
+    files_stmt = select(ProductFile).where(ProductFile.shop_item_id == shop_item_id)
+    files_result = await session.execute(files_stmt)
+    files = files_result.scalars().all()
+    
+    shop_item = await session.get(ShopItem, shop_item_id)
+    
+    text = f"""✅ **Producto Creado Completamente**
+
+**{shop_item.name}** ha sido agregado a la tienda.
+
+**Configuración:**
+• 💰 Precio: {shop_item.price} besitos
+• {'👑 Solo VIP' if shop_item.is_vip_only else '🆓 Para Todos'}
+• ✅ Estado: Activo
+• 📁 Archivos: {len(files)} archivos
+
+El producto está listo para ser vendido. Al comprarlo, los usuarios recibirán los {len(files)} archivos automáticamente."""
+
+    from aiogram.utils.keyboard import InlineKeyboardBuilder
+    builder = InlineKeyboardBuilder()
+    builder.button(text="👁️ Ver Producto", callback_data=f"admin_shop_view:{shop_item.id}")
+    builder.button(text="➕ Crear Otro", callback_data="admin_shop_create")
+    builder.button(text="🔙 Volver", callback_data="admin_shop")
+    builder.adjust(1)
+
+    await callback.message.edit_text(text, reply_markup=builder.as_markup())
+    await state.clear()
+    await callback.answer()
+
+# Handle file uploads
+@router.message(AdminShopStates.receiving_files, F.photo | F.video | F.document)
+async def admin_shop_receive_file(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive and process uploaded files."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    data = await state.get_data()
+    shop_item_id = data.get('shop_item_id')
+    
+    if not shop_item_id:
+        await message.answer("❌ Error: sesión expirada")
+        await state.clear()
+        return
+
+    # Determine file type and get file_id
+    file_type = None
+    file_id = None
+    
+    if message.photo:
+        file_type = 'photo'
+        file_id = message.photo[-1].file_id
+    elif message.video:
+        file_type = 'video'
+        file_id = message.video.file_id
+    elif message.document:
+        file_type = 'document'
+        file_id = message.document.file_id
+    
+    if not file_id:
+        await message.answer("❌ Tipo de archivo no soportado")
+        return
+
+    # Ask for order index
+    await state.update_data(pending_file_type=file_type, pending_file_id=file_id)
+    
+    text = f"""📁 **Archivo Recibido**
+
+Tipo: {file_type}
+✅ Archivo guardado temporalmente.
+
+**Ahora ingresa el orden de este archivo:**
+(1 para el primero, 2 para el segundo, etc.)
+
+Los archivos se enviarán en este orden al usuario."""
+
+    await message.answer(text)
+    # Stay in receiving_files state to get the order
+
+@router.message(AdminShopStates.receiving_files)
+async def admin_shop_receive_file_order(message: Message, state: FSMContext, session: AsyncSession):
+    """Receive order index for the uploaded file."""
+    if not await is_admin(message.from_user.id, session):
+        return
+
+    try:
+        order_index = int(message.text.strip())
+        if order_index <= 0:
+            await message.answer("❌ El orden debe ser un número positivo. Intenta de nuevo:")
+            return
+    except ValueError:
+        await message.answer("❌ Por favor ingresa un número válido para el orden:")
+        return
+
+    data = await state.get_data()
+    shop_item_id = data.get('shop_item_id')
+    file_type = data.get('pending_file_type')
+    file_id = data.get('pending_file_id')
+    
+    if not all([shop_item_id, file_type, file_id]):
+        await message.answer("❌ Error: datos de archivo perdidos")
+        await state.clear()
+        return
+
+    # Create ProductFile record
+    from database.models import ProductFile
+    product_file = ProductFile(
+        shop_item_id=shop_item_id,
+        file_type=file_type,
+        file_id=file_id,
+        order_index=order_index
+    )
+    session.add(product_file)
+    await session.flush()
+
+    # Clear pending file data
+    await state.update_data(pending_file_type=None, pending_file_id=None)
+    
+    text = f"""✅ **Archivo Agregado**
+
+Tipo: {file_type}
+Orden: {order_index}
+
+Puedes:
+• Enviar otro archivo
+• Presionar "✅ Finalizar" en el mensaje anterior para terminar"""
+
+    await message.answer(text)
 
 # Import unlock configuration router
 from . import shop_unlock_config
@@ -2585,26 +2588,26 @@ async def admin_shop_apply_requirement_template(callback: CallbackQuery, session
         template_name = "Sin requisitos"
     elif template == "vip":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "vip_status", "value": True}
+                {"type": ConditionType.VIP_STATUS, "value": True}
             ]
         }
         template_name = "👑 Solo VIP"
     elif template == "level5":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "level", "value": 5, "comparison": ">="}
+                {"type": ConditionType.LEVEL, "value": 5, "comparison": ComparisonOperator.GREATER_EQUAL}
             ]
         }
         template_name = "⭐ Nivel 5+"
     elif template == "vip_level10":
         item.unlock_requirements = {
-            "operator": "AND",
+            "operator": ConditionOperator.AND,
             "conditions": [
-                {"type": "vip_status", "value": True},
-                {"type": "level", "value": 10, "comparison": ">="}
+                {"type": ConditionType.VIP_STATUS, "value": True},
+                {"type": ConditionType.LEVEL, "value": 10, "comparison": ComparisonOperator.GREATER_EQUAL}
             ]
         }
         template_name = "💎 VIP + Nivel 10"
@@ -2735,7 +2738,7 @@ async def admin_shop_receive_manual_requirements(message: Message, state: FSMCon
             await message.answer("❌ El JSON debe tener 'operator' y 'conditions'")
             return
 
-        if requirements["operator"] not in ["AND", "OR"]:
+        if requirements["operator"] not in [ConditionOperator.AND, ConditionOperator.OR]:
             await message.answer("❌ El operador debe ser 'AND' o 'OR'")
             return
 

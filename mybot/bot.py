@@ -97,8 +97,8 @@ async def global_error_handler(event: ErrorEvent) -> None:
     
     # Log del error
     logger.error(
-        f"Ups, Diana tropezó con un error en {event.update.update_id if event.update else 'desconocido'}: "
-        f"{type(event.exception).__name__} - {event.exception}. ¡Lo sentimos, estamos en ello!",
+        f"Error en {event.update.update_id if event.update else 'Unknown'}: "
+        f"{type(event.exception).__name__}: {event.exception}",
         exc_info=True
     )
     

@@ -144,6 +144,9 @@ class Mission(Base):
         nullable=True,
         index=True
     )
+    
+    # Referencia a experiencia unificada que creó esta misión
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
 
     # Relación con LorePiece
     @declared_attr
@@ -563,9 +566,6 @@ class LorePiece(Base):
 
 class ShopItem(Base):
     __tablename__ = "shop_items"
-    
-    # Add this relationship
-    product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
@@ -582,8 +582,12 @@ class ShopItem(Base):
     unlock_requirements = Column(JSON, nullable=True)  # Compound conditions for unlock (NULL = no requirements)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=func.now())
+    
+    # Referencia a experiencia unificada que creó este item
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
 
     lore_piece = relationship("LorePiece")
+    product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
 
 class UserPurchase(Base):
     __tablename__ = "user_purchases"
@@ -596,6 +600,22 @@ class UserPurchase(Base):
     
     user = relationship("User", back_populates="purchases")
     shop_item = relationship("ShopItem")
+
+class ProductFile(Base):
+    """Files associated with shop items (for multi-file products like photo sessions)."""
+    
+    __tablename__ = "product_files"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shop_item_id = Column(Integer, ForeignKey("shop_items.id"), nullable=False)
+    file_type = Column(String(20), nullable=False)  # 'photo', 'video', 'document'
+    file_id = Column(String(255), nullable=False)
+    order_index = Column(Integer, nullable=False, default=0)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationship
+    shop_item = relationship("ShopItem", back_populates="product_files")
+
 
 class UserLorePiece(Base):
     """Mapping of unlocked lore pieces per user."""

@@ -24,29 +24,6 @@ class PointService:
             await self.session.refresh(progress)
         return progress
 
-    async def award_message(self, user_id: int, bot: Bot) -> UserStats | None:
-        progress = await self._get_or_create_progress(user_id)
-        now = datetime.datetime.utcnow()
-        if progress.last_activity_at and (now - progress.last_activity_at).total_seconds() < 30:
-            return None
-        progress = await self.add_points(user_id, 1, bot=bot)
-        progress.messages_sent += 1
-        await self.session.commit()
-        ach_service = AchievementService(self.session)
-        await ach_service.check_message_achievements(user_id, progress.messages_sent, bot=bot)
-        new_badges = await ach_service.check_user_badges(user_id)
-        for badge in new_badges:
-            await ach_service.award_badge(user_id, badge.id)
-            if bot:
-                from services.notification_service import NotificationService
-                await NotificationService.send_achievement(
-                    bot=bot,
-                    user_id=user_id,
-                    achievement_name=badge.name,
-                    icon=badge.icon or "🏅",
-                    description=None
-                )
-        return progress
 
     async def award_reaction(
         self, user: User, message_id: int, bot: Bot, points: float = None

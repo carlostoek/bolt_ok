@@ -5,8 +5,8 @@
 BUTLER_MESSAGES = {
     "start_welcome_new_user": (
         "🌙 Bienvenid@ a *El Diván de Diana*…\n\n"
-        "Diana te saluda con una sonrisa y te invita a explorar un mundo lleno de sorpresas. Cada gesto y decisión cuenta en *El Juego del Diván*.\n\n"
-        "¿List@ para descubrir lo que le espera? Deja que te guíe por este fascinante viaje."
+        "Permítame presentarle las maravillas de este lugar. Cada gesto y decisión cuenta en *El Juego del Diván*.\n\n"
+        "¿List@ para descubrir lo que le espera? Elija por dónde comenzar y yo me encargaré de guiarle con la debida cortesía."
     ),
     "start_welcome_returning_user": (
         "✨ Me alegra tenerle de regreso.\n\n"

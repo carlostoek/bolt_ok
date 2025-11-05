@@ -1,8 +1,1 @@
-aiogram>=3.0.0
-SQLAlchemy
-aiosqlite
-APScheduler
-python-dotenv
-
-
-# Base require
+-r mybot/requirements.txt

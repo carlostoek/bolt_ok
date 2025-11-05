@@ -1,8 +1,9 @@
 import logging
+import time
 from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, case
 from aiogram import Bot
 from database.models import ShopItem, UserPurchase, User, UserLorePiece
 from services.point_service import PointService
@@ -20,7 +21,15 @@ class ShopService:
         self.subscription_service = SubscriptionService(session)
 
     async def get_available_items(self, user_id: int) -> List[ShopItem]:
-        """Get available shop items for the user, considering VIP status and stock"""
+        """
+        Get available shop items for the user, considering VIP status and stock.
+
+        OPTIMIZED: Uses a single aggregated query with LEFT JOIN to fetch all purchase
+        counts at once, eliminating N+1 query problem.
+        """
+        start_time = time.time()
+        query_count = 0  # Track number of queries for performance analysis
+
         try:
             # Ensure the "Diario de Diana" item exists
             await self._ensure_diario_diana_item_exists()
@@ -29,21 +38,50 @@ class ShopService:
 
             # Check if user is VIP using the proper service method
             is_vip = await self.subscription_service.is_subscription_active(user_id)
+            query_count += 1  # VIP check query (unavoidable)
 
-            stmt = select(ShopItem).where(ShopItem.is_active == True)
+            # OPTIMIZED QUERY: Fetch all items with aggregated purchase counts in a single query
+            # Using LEFT JOIN and conditional aggregation to get both total and user-specific counts
+            stmt = (
+                select(
+                    ShopItem,
+                    # Total purchases for stock checking
+                    func.coalesce(func.count(UserPurchase.id), 0).label('total_purchases'),
+                    # User-specific purchases for per-user limit checking
+                    func.coalesce(
+                        func.sum(
+                            case((UserPurchase.user_id == user_id, 1), else_=0)
+                        ),
+                        0
+                    ).label('user_purchases')
+                )
+                .outerjoin(UserPurchase, ShopItem.id == UserPurchase.shop_item_id)
+                .where(ShopItem.is_active == True)
+                .group_by(ShopItem.id)
+            )
+
             result = await self.session.execute(stmt)
-            all_items = result.scalars().all()
+            items_with_counts = result.all()
+            query_count += 1  # Single optimized query for all items + purchase counts
 
             # Log all found items for debugging
-            logger.info(f"Found {len(all_items)} active shop items")
-            for item in all_items:
-                logger.info(f"Shop item: {item.name} (VIP: {item.is_vip_only})")
+            logger.info(f"Found {len(items_with_counts)} active shop items")
+            for row in items_with_counts:
+                item = row.ShopItem
+                logger.info(
+                    f"Shop item: {item.name} (VIP: {item.is_vip_only}, "
+                    f"Total purchases: {row.total_purchases}, User purchases: {row.user_purchases})"
+                )
 
             # Filter items based on stock, VIP status, and availability dates
             available_items = []
             now = datetime.now()
 
-            for item in all_items:
+            for row in items_with_counts:
+                item = row.ShopItem
+                total_purchases = row.total_purchases
+                user_purchases = row.user_purchases
+
                 # Filter VIP-only items if user is not VIP
                 if item.is_vip_only and not is_vip:
                     continue
@@ -57,39 +95,30 @@ class ShopService:
                     logger.info(f"Item {item.name} no longer available (ended {item.available_until})")
                     continue
 
-                # Check stock availability
+                # Check stock availability using pre-fetched total_purchases
                 if item.stock_limit is not None:
-                    # Count total purchases
-                    purchases_stmt = select(func.count(UserPurchase.id)).where(
-                        UserPurchase.shop_item_id == item.id
-                    )
-                    purchases_result = await self.session.execute(purchases_stmt)
-                    total_purchases = purchases_result.scalar() or 0
-
                     # Skip if sold out
                     if total_purchases >= item.stock_limit:
                         logger.info(f"Item {item.name} is sold out ({total_purchases}/{item.stock_limit})")
                         continue
 
-                # Check if user has reached their purchase limit
+                # Check if user has reached their purchase limit using pre-fetched user_purchases
                 if item.max_purchases_per_user > 0:
-                    user_purchases_stmt = select(func.count(UserPurchase.id)).where(
-                        UserPurchase.user_id == user_id,
-                        UserPurchase.shop_item_id == item.id
-                    )
-                    user_purchases_result = await self.session.execute(user_purchases_stmt)
-                    user_purchases = user_purchases_result.scalar() or 0
-
                     # Skip if user has reached their limit
                     if user_purchases >= item.max_purchases_per_user:
-                        logger.info(f"User {user_id} has reached purchase limit for {item.name} ({user_purchases}/{item.max_purchases_per_user})")
+                        logger.info(
+                            f"User {user_id} has reached purchase limit for {item.name} "
+                            f"({user_purchases}/{item.max_purchases_per_user})"
+                        )
                         continue
 
                 # Check unlock requirements (compound conditions)
+                # NOTE: These queries are unavoidable as they involve complex condition checking
                 if item.unlock_requirements is not None:
                     from services.condition_checker import ConditionChecker
                     checker = ConditionChecker(self.session)
                     meets_requirements, _ = await checker.check_requirements(user_id, item.unlock_requirements)
+                    # ConditionChecker may execute multiple queries - counted separately
 
                     if not meets_requirements:
                         logger.info(f"User {user_id} does not meet requirements for {item.name}")
@@ -97,10 +126,26 @@ class ShopService:
 
                 available_items.append(item)
 
-            logger.info(f"Showing {len(available_items)} available items to user {user_id}")
+            elapsed_time = time.time() - start_time
+            logger.info(
+                f"[PERFORMANCE] get_available_items for user {user_id}: "
+                f"{elapsed_time:.3f}s | {query_count} queries | "
+                f"{len(items_with_counts)} total items | {len(available_items)} available"
+            )
+
+            # Alert if performance is degraded
+            if elapsed_time > 1.0:
+                logger.warning(
+                    f"[PERFORMANCE] SLOW shop load for user {user_id}: {elapsed_time:.3f}s "
+                    f"({query_count} queries) - Consider optimization"
+                )
+
             return available_items
         except Exception as e:
-            logger.error(f"Error getting available items for user {user_id}: {str(e)}")
+            elapsed_time = time.time() - start_time
+            logger.error(
+                f"Error getting available items for user {user_id} after {elapsed_time:.3f}s: {str(e)}"
+            )
             return []
 
     async def _ensure_diario_diana_item_exists(self):
@@ -201,21 +246,18 @@ class ShopService:
     async def purchase_item(self, user_id: int, item_id: int, bot: Optional[Bot] = None) -> Dict[str, Any]:
         """Purchase an item for the user directly"""
         try:
-            # Get the item with its files
+            logger.info(f"Starting purchase process for user {user_id}, item {item_id}, bot available: {bot is not None}")
+            
+            # Get the item
             stmt = select(ShopItem).where(ShopItem.id == item_id, ShopItem.is_active == True)
             result = await self.session.execute(stmt)
             item = result.scalar_one_or_none()
-            
-            # Also get the product files
-            from database.models import ProductFile
-            files_stmt = select(ProductFile).where(
-                ProductFile.shop_item_id == item_id
-            ).order_by(ProductFile.order_index)
-            files_result = await self.session.execute(files_stmt)
-            product_files = files_result.scalars().all()
 
             if not item:
+                logger.warning(f"Item {item_id} not found or not active")
                 return {"success": False, "message": "Item not found"}
+            
+            logger.info(f"Found item: {item.name} (ID: {item.id})")
 
             # Check if user is VIP for VIP-only items
             if item.is_vip_only:
@@ -326,15 +368,15 @@ class ShopService:
             logger.info(f"Purchase successful for user {user_id}. Pending decision will be processed on return to narrative.")
 
             await self.session.commit()
+            logger.info(f"Purchase committed successfully for user {user_id}, item {item.id}")
 
-            # Send product files if this is a multi-file product
-            if bot and product_files:
-                try:
-                    await self._send_product_files(bot, user_id, item, product_files)
-                    logger.info(f"Sent {len(product_files)} files to user {user_id} for product {item.name}")
-                except Exception as e:
-                    logger.error(f"Error sending product files to user {user_id}: {str(e)}")
-            
+            # Send product files if any - do this after commit to ensure purchase was successful
+            if bot:
+                logger.info(f"Bot available, attempting to send product files for item {item.id} to user {user_id}")
+                await self._send_product_files(bot, user_id, item)
+            else:
+                logger.warning(f"No bot available to send product files for item {item.id} to user {user_id}")
+
             # Try to send purchase gift if configured
             if bot:
                 try:
@@ -407,42 +449,6 @@ class ShopService:
             logger.error(f"Error adding item to backpack for user {user_id}: {str(e)}")
             return None
 
-    async def _send_product_files(self, bot: Bot, user_id: int, item: ShopItem, product_files: List[Any]):
-        """Send all files associated with a product to the user"""
-        try:
-            # Send a message first
-            await bot.send_message(
-                chat_id=user_id,
-                text=f"🎁 ¡Gracias por tu compra de **{item.name}**!\n\nAquí tienes tu contenido:"
-            )
-            
-            # Send each file
-            for product_file in product_files:
-                if product_file.file_type == 'photo':
-                    await bot.send_photo(
-                        chat_id=user_id,
-                        photo=product_file.file_id,
-                        caption=f"📸 {item.name}"
-                    )
-                elif product_file.file_type == 'video':
-                    await bot.send_video(
-                        chat_id=user_id,
-                        video=product_file.file_id,
-                        caption=f"🎥 {item.name}"
-                    )
-                elif product_file.file_type == 'document':
-                    await bot.send_document(
-                        chat_id=user_id,
-                        document=product_file.file_id,
-                        caption=f"📄 {item.name}"
-                    )
-                # Add a small delay to avoid rate limiting
-                import asyncio
-                await asyncio.sleep(0.5)
-        except Exception as e:
-            logger.error(f"Error sending product files: {str(e)}")
-            raise
-
     async def _unlock_narrative_fragment(self, user_id: int, fragment_key: str) -> Optional[str]:
         """Unlock a narrative fragment for the user by navigating to it"""
         try:
@@ -466,3 +472,58 @@ class ShopService:
         except Exception as e:
             logger.error(f"Error unlocking fragment {fragment_key} for user {user_id}: {str(e)}")
             return None
+
+    async def _send_product_files(self, bot: Bot, user_id: int, item: ShopItem):
+        """Send all files associated with a product to the user"""
+        try:
+            # Get product files
+            from database.models import ProductFile
+            from sqlalchemy import select
+            
+            files_stmt = select(ProductFile).where(
+                ProductFile.shop_item_id == item.id
+            ).order_by(ProductFile.order_index)
+            files_result = await self.session.execute(files_stmt)
+            product_files = files_result.scalars().all()
+            
+            logger.info(f"Found {len(product_files)} product files for item {item.id} ({item.name})")
+            
+            if not product_files:
+                logger.info(f"No product files found for item {item.id}")
+                return
+                
+            # Send a message first
+            await bot.send_message(
+                chat_id=user_id,
+                text=f"🎁 ¡Gracias por tu compra de **{item.name}**!\n\nAquí tienes tu contenido:"
+            )
+            
+            # Send each file
+            for idx, product_file in enumerate(product_files, 1):
+                logger.info(f"Sending file {idx}/{len(product_files)}: type={product_file.file_type}, id={product_file.file_id}")
+                if product_file.file_type == 'photo':
+                    await bot.send_photo(
+                        chat_id=user_id,
+                        photo=product_file.file_id,
+                        caption=f"📸 {item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'video':
+                    await bot.send_video(
+                        chat_id=user_id,
+                        video=product_file.file_id,
+                        caption=f"🎥 {item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'document':
+                    await bot.send_document(
+                        chat_id=user_id,
+                        document=product_file.file_id,
+                        caption=f"📄 {item.name} ({idx}/{len(product_files)})"
+                    )
+                # Add a small delay to avoid rate limiting
+                import asyncio
+                await asyncio.sleep(0.5)
+                
+            logger.info(f"Successfully sent {len(product_files)} files to user {user_id}")
+        except Exception as e:
+            logger.error(f"Error sending product files: {str(e)}", exc_info=True)
+            # Don't raise the error - we don't want to fail the purchase if file sending fails

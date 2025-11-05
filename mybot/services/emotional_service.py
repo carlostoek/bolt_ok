@@ -91,7 +91,7 @@ class EmotionalService:
                 profile.last_updated_at = datetime.datetime.utcnow()
                 
                 await self.session.commit()
-                logger.info(f"✨ Diana ha ajustado su percepción de ti: {old_archetype} cambió a {new_archetype} (confianza: {confidence})")
+                logger.info(f"Updated user {user_id} archetype: {old_archetype} -> {new_archetype} (confidence: {confidence})")
                 return True
                 
             return False

@@ -70,15 +70,35 @@ async def _mostrar_mochila_con_session(message: Message, session, user_id: int =
         await message.answer("❌ Error: No se pudo identificar al usuario")
         return
 
-    # Obtener todas las pistas del usuario
-    result = await session.execute(
-        select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-        .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-        .where(UserLorePiece.user_id == user_id)
-        .order_by(UserLorePiece.unlocked_at.desc())
-    )
-
-    pistas_data = result.all()
+    # Obtener todas las pistas del usuario usando NarrativeService
+    from services.narrative_service import NarrativeService
+    narrative_service = NarrativeService(session)
+    lore_pieces = await narrative_service.get_unlocked_lore_pieces(user_id)
+        
+    # Convert to similar format for compatibility
+    pistas_data = []
+    for piece in lore_pieces:
+        # Extract lore piece info from metadata
+        metadata = piece.metadata or {}
+        # Create a mock object with the expected attributes
+        class MockLorePiece:
+            def __init__(self, fragment, metadata):
+                self.id = fragment.id
+                self.code_name = fragment.key.replace("lore_", "")
+                self.title = metadata.get('lore_title', 'Untitled')
+                self.description = metadata.get('lore_description')
+                self.content_type = metadata.get('original_content_type', 'text')
+                self.content = fragment.text
+                self.category = metadata.get('original_category')
+                self.is_main_story = False
+                self.is_active = True
+            
+        mock_piece = MockLorePiece(piece, metadata)
+        pistas_data.append((
+            mock_piece,
+            None,   # unlocked_at - not available in new system
+            {}      # context - not available in new system
+        ))
 
     # Obtener items comprados (independiente del rol actual - si compró como VIP, debe verlos)
     purchases_result = await session.execute(
@@ -120,22 +140,23 @@ async def _mostrar_mochila_con_session(message: Message, session, user_id: int =
         for shop_item, purchased_at in purchased_items:
             categorized_hints['tesoros'].append(('item', shop_item, purchased_at, None))
 
+    # Crear mensaje principal
     lucien_message = random.choice(LUCIEN_BACKPACK_MESSAGES)
     total_hints = len(pistas_data)
     total_items = len(purchased_items)
-    texto = (
-        "============================\n"
-        "🎩 *Mensaje de Lucien:*\n"
-        f"{lucien_message}\n"
-        "============================\n\n"
-        "📊 **Resumen de tu Colección**\n"
-        f"- Pistas descubiertas: {total_hints}\n"
-    )
+
+    texto = f"🎩 **Lucien:**\n*{lucien_message}*\n\n"
+    texto += f"📊 **Tu Colección:** {total_hints} pistas descubiertas"
+
     if total_items > 0:
-        texto += f"- Tesoros adquiridos: {total_items}\n"
+        texto += f" | 💎 {total_items} tesoros adquiridos"
+
+    texto += "\n"
+
     if recent_hints:
-        texto += f"- Pistas nuevas: {len(recent_hints)}\n"
-    texto += "\n🎒 **Selecciona una categoría para explorar:**"
+        texto += f"✨ **Nuevas:** {len(recent_hints)} pistas recientes\n"
+
+    texto += "\n🎒 **Explora tu mochila:**"
     
     # Crear botones por categoría
     keyboard = []
@@ -185,19 +206,20 @@ async def mostrar_mochila_narrativa(message: Message):
 
 async def mostrar_mochila_vacia(message: Message):
     """Mensaje especial para mochila vacía con contexto narrativo"""
-    texto = """============================
-🎩 **Bienvenido a tu Mochila**
-============================
+    texto = """🎩 **Lucien:**
+*Una mochila vacía... pero no por mucho tiempo.*
 
-Tu mochila está actualmente vacía.
+🌸 **Diana:**
+*Todo viajero comienza con las manos vacías. Lo que importa no es lo que llevas, sino lo que estás dispuesto a descubrir.*
 
-🔹 **Próximos Pasos:**
-- Reacciona a los mensajes en el canal.
-- Realiza las misiones disponibles.
-- Observa las señales que te ofrecemos.
+*Cada interacción, cada momento de atención genuina, cada reacción que me das... todo suma hacia algo más grande.*
 
-¡Tu primera pista te espera a la vuelta de la esquina!
-"""
+**🎯 Primeros pasos:**
+• Reacciona a mensajes en el canal
+• Completa misiones disponibles  
+• Mantente atento a las señales que te envío
+
+*Tu primera pista te está esperando...*"""
     
     keyboard = [
         [InlineKeyboardButton(text="🎯 Ver Misiones", callback_data="menu:missions")],
@@ -239,20 +261,35 @@ async def mostrar_categoria(callback: CallbackQuery):
                 ])
 
         else:
-            # Para otras categorías, mostrar lore pieces
-            result = await session.execute(
-                select(LorePiece, UserLorePiece.unlocked_at, UserLorePiece.context)
-                .join(UserLorePiece, LorePiece.id == UserLorePiece.lore_piece_id)
-                .where(
-                    and_(
-                        UserLorePiece.user_id == user_id,
-                        LorePiece.category == category
-                    )
-                )
-                .order_by(UserLorePiece.unlocked_at.desc())
-            )
-
-            pistas_data = result.all()
+            # Para otras categorías, mostrar lore pieces usando NarrativeService
+            from services.narrative_service import NarrativeService
+            narrative_service = NarrativeService(session)
+            lore_pieces = await narrative_service.get_unlocked_lore_pieces(user_id)
+        
+            # Filter by category using metadata
+            pistas_data = []
+            for piece in lore_pieces:
+                metadata = piece.metadata or {}
+                if metadata.get('original_category') == category:
+                    # Create a mock object with the expected attributes
+                    class MockLorePiece:
+                        def __init__(self, fragment, metadata):
+                            self.id = fragment.id
+                            self.code_name = fragment.key.replace("lore_", "")
+                            self.title = metadata.get('lore_title', 'Untitled')
+                            self.description = metadata.get('lore_description')
+                            self.content_type = metadata.get('original_content_type', 'text')
+                            self.content = fragment.text
+                            self.category = metadata.get('original_category')
+                            self.is_main_story = False
+                            self.is_active = True
+                
+                    mock_piece = MockLorePiece(piece, metadata)
+                    pistas_data.append((
+                        mock_piece,
+                        None,   # unlocked_at
+                        {}      # context
+                    ))
 
             for pista, unlocked_at, context in pistas_data:
                 # Agregar indicadores especiales
@@ -401,6 +438,14 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
 
         shop_item, purchased_at, price_paid = tesoro_data
 
+        # Contar archivos del producto
+        from database.models import ProductFile
+        files_stmt = select(func.count(ProductFile.id)).where(
+            ProductFile.shop_item_id == shop_item.id
+        )
+        files_result = await session.execute(files_stmt)
+        files_count = files_result.scalar() or 0
+
         # Crear mensaje detallado
         texto = f"💎 **{shop_item.name}**\n\n"
 
@@ -415,6 +460,7 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
             texto += f"⏰ Adquirido hace {dias_desde} días\n"
 
         texto += f"💰 Precio pagado: {price_paid} besitos\n"
+        texto += f"📁 Archivos: {files_count} archivo{'s' if files_count != 1 else ''}\n"
 
         # Si desbloquea algo especial
         if shop_item.unlocks_lore_piece_id:
@@ -425,9 +471,17 @@ async def ver_tesoro_detallado(callback: CallbackQuery):
         texto += "\n🌸 **Diana:**\n"
         texto += "*Cada objeto que eliges me dice algo sobre ti... Me gusta.*"
 
-        keyboard = [
-            [InlineKeyboardButton(text="⬅️ Volver", callback_data="mochila_cat:tesoros")]
-        ]
+        keyboard = []
+        
+        # Agregar botón para ver archivos si hay archivos
+        if files_count > 0:
+            keyboard.append([
+                InlineKeyboardButton(text="📁 Ver archivos", callback_data=f"ver_tesoro_archivos:{shop_item.id}")
+            ])
+        
+        keyboard.append([
+            InlineKeyboardButton(text="⬅️ Volver", callback_data="mochila_cat:tesoros")
+        ])
 
         await callback.message.edit_text(texto, reply_markup=InlineKeyboardMarkup(inline_keyboard=keyboard), parse_mode="Markdown")
 
@@ -658,48 +712,100 @@ async def verificar_combinaciones_disponibles(session, user_id, hint_code):
 
 async def desbloquear_pista_narrativa(bot, user_id, pista_code, context=None):
     """Desbloquea una pista con contexto narrativo completo"""
+    from services.lore_piece_service import LorePieceService
+    from database.setup import get_session_factory
+    
     session_factory = get_session_factory()
     async with session_factory() as session:
-        # Buscar la pista por código
-        result = await session.execute(
-            select(LorePiece).where(LorePiece.code_name == pista_code)
+        service = LorePieceService(session)
+        success = await service.unlock_lore_piece_for_user(
+            user_id=user_id,
+            lore_piece_code=pista_code,
+            context=context,
+            bot=bot
         )
-        pista = result.scalar_one_or_none()
         
-        if not pista:
-            return False
+        # Send additional narrative notification if successful
+        if success:
+            await send_narrative_notification(bot, user_id, "new_hint", {
+                'hint_title': pista_code,  # We'd need to get the actual title, but this is fine
+                'hint_code': pista_code,
+                'source': context.get('source', 'unknown') if context else 'unknown'
+            })
         
-        # Verificar si ya la tiene
-        existing = await session.execute(
-            select(UserLorePiece).where(
+        return success
+
+@router.callback_query(F.data.startswith("ver_tesoro_archivos:"))
+async def ver_tesoro_archivos(callback: CallbackQuery):
+    """Envía los archivos del producto al usuario cuando solicita verlos"""
+    item_id = int(callback.data.split(":")[1])
+    session_factory = get_session_factory()
+
+    async with session_factory() as session:
+        user_id = callback.from_user.id
+
+        # Verificar que el usuario compró este item
+        purchase_result = await session.execute(
+            select(UserPurchase)
+            .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+            .where(
                 and_(
-                    UserLorePiece.user_id == user_id,
-                    UserLorePiece.lore_piece_id == pista.id
+                    UserPurchase.user_id == user_id,
+                    ShopItem.id == item_id
                 )
             )
         )
         
-        if existing.scalar_one_or_none():
-            return False  # Ya la tiene
-        
-        # Crear registro
-        user_lore_piece = UserLorePiece(
-            user_id=user_id,
-            lore_piece_id=pista.id,
-            context=context or {}
+        purchase = purchase_result.scalar_one_or_none()
+        if not purchase:
+            await callback.answer("❌ No tienes acceso a este producto")
+            return
+
+        # Obtener el item y los archivos
+        shop_item = await session.get(ShopItem, item_id)
+        from database.models import ProductFile
+        files_stmt = select(ProductFile).where(
+            ProductFile.shop_item_id == item_id
+        ).order_by(ProductFile.order_index)
+        files_result = await session.execute(files_stmt)
+        product_files = files_result.scalars().all()
+
+        if not product_files:
+            await callback.answer("❌ No hay archivos para este producto")
+            return
+
+        # Enviar mensaje de inicio
+        await callback.message.answer(
+            f"🎁 **{shop_item.name}**\n\nAquí tienes tus archivos:"
         )
-        
-        session.add(user_lore_piece)
-        await session.commit()
-        
-        # Enviar notificación narrativa
-        await send_narrative_notification(bot, user_id, "new_hint", {
-            'hint_title': pista.title,
-            'hint_code': pista.code_name,
-            'source': context.get('source', 'unknown') if context else 'unknown'
-        })
-        
-        return True
+
+        # Enviar cada archivo
+        for idx, product_file in enumerate(product_files, 1):
+            try:
+                if product_file.file_type == 'photo':
+                    await callback.message.answer_photo(
+                        photo=product_file.file_id,
+                        caption=f"📸 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'video':
+                    await callback.message.answer_video(
+                        video=product_file.file_id,
+                        caption=f"🎥 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                elif product_file.file_type == 'document':
+                    await callback.message.answer_document(
+                        document=product_file.file_id,
+                        caption=f"📄 {shop_item.name} ({idx}/{len(product_files)})"
+                    )
+                # Pequeña pausa para evitar límites de rate
+                import asyncio
+                await asyncio.sleep(0.5)
+            except Exception as e:
+                logger.error(f"Error enviando archivo {idx} del producto {item_id}: {str(e)}")
+                continue
+
+        await callback.answer("✅ Archivos enviados")
+
 
 @router.callback_query(F.data == "volver_mochila")
 async def volver_mochila(callback: CallbackQuery):
@@ -713,185 +819,25 @@ async def volver_mochila(callback: CallbackQuery):
 @router.callback_query(F.data == "open_backpack")
 async def open_backpack_callback(callback: CallbackQuery):
     """Handler para abrir la mochila desde el menú principal (callback)"""
+    # El handler de callbacks necesita pasar el user_id explícitamente
     session_factory = get_session_factory()
-    
+
+    # Crear un wrapper del mensaje para que tenga edit_text
+    class MessageWrapper:
+        def __init__(self, original_message):
+            self._message = original_message
+            self.from_user = original_message.chat
+
+        async def edit_text(self, *args, **kwargs):
+            return await self._message.edit_text(*args, **kwargs)
+
+        async def answer(self, *args, **kwargs):
+            return await self._message.answer(*args, **kwargs)
+
+    wrapped_message = MessageWrapper(callback.message)
+
     async with session_factory() as session:
-        # Get user's purchased items
-        from database.models import UserPurchase, ShopItem, ProductFile
-        from sqlalchemy import select
-        
-        user_id = callback.from_user.id
-        
-        # Get user's purchased items
-        stmt = select(UserPurchase, ShopItem).join(
-            ShopItem, UserPurchase.shop_item_id == ShopItem.id
-        ).where(UserPurchase.user_id == user_id)
-        
-        result = await session.execute(stmt)
-        purchases = result.all()
-        
-        if not purchases:
-            await mostrar_mochila_vacia(callback.message)
-            return
-        
-        # Build backpack content
-        text = "🎒 **Tu Mochila**\n\n"
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
-        builder = InlineKeyboardBuilder()
-        
-        for purchase, item in purchases:
-            # Check if it's a multi-file product
-            files_stmt = select(ProductFile).where(ProductFile.shop_item_id == item.id)
-            files_result = await session.execute(files_stmt)
-            files = files_result.scalars().all()
-            
-            if files:
-                # It's a multi-file product
-                builder.button(
-                    text=f"📁 {item.name}",
-                    callback_data=f"backpack_view_files:{item.id}"
-                )
-            else:
-                # Regular item
-                builder.button(
-                    text=f"📦 {item.name}",
-                    callback_data=f"backpack_view_item:{item.id}"
-                )
-        
-        builder.button(text="🔙 Volver", callback_data="menu_principal")
-        builder.adjust(1)
-        
-        await callback.message.edit_text(
-            text="🎒 **Tu Mochila**\n\nSelecciona un item para verlo:",
-            reply_markup=builder.as_markup()
-        )
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("backpack_view_files:"))
-async def backpack_view_files(callback: CallbackQuery):
-    """View files of a purchased multi-file product"""
-    item_id = int(callback.data.split(":")[1])
-    
-    session_factory = get_session_factory()
-    
-    async with session_factory() as session:
-        user_id = callback.from_user.id
-        
-        # Verify ownership
-        from database.models import UserPurchase, ProductFile, ShopItem
-        from sqlalchemy import select
-        
-        purchase_stmt = select(UserPurchase).where(
-            UserPurchase.user_id == user_id,
-            UserPurchase.shop_item_id == item_id
-        )
-        purchase_result = await session.execute(purchase_stmt)
-        purchase = purchase_result.scalar_one_or_none()
-        
-        if not purchase:
-            await callback.answer("❌ No tienes este producto", show_alert=True)
-            return
-        
-        # Get product files
-        files_stmt = select(ProductFile).where(
-            ProductFile.shop_item_id == item_id
-        ).order_by(ProductFile.order_index)
-        files_result = await session.execute(files_stmt)
-        files = files_result.scalars().all()
-        
-        if not files:
-            await callback.answer("❌ Este producto no tiene archivos", show_alert=True)
-            return
-        
-        # Send files to user
-        bot = callback.bot
-        item = await session.get(ShopItem, item_id)
-        
-        await callback.message.answer(f"📁 **{item.name}**\n\nEnviando tus archivos...")
-        
-        # Send each file
-        for product_file in files:
-            if product_file.file_type == 'photo':
-                await bot.send_photo(
-                    chat_id=user_id,
-                    photo=product_file.file_id,
-                    caption=f"📸 {item.name}"
-                )
-            elif product_file.file_type == 'video':
-                await bot.send_video(
-                    chat_id=user_id,
-                    video=product_file.file_id,
-                    caption=f"🎥 {item.name}"
-                )
-            elif product_file.file_type == 'document':
-                await bot.send_document(
-                    chat_id=user_id,
-                    document=product_file.file_id,
-                    caption=f"📄 {item.name}"
-                )
-            # Add a small delay
-            import asyncio
-            await asyncio.sleep(0.5)
-        
-        # Add a back button
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
-        builder = InlineKeyboardBuilder()
-        builder.button(text="🔙 Volver a Mochila", callback_data="open_backpack")
-        await callback.message.answer("¿Quieres ver otro item?", reply_markup=builder.as_markup())
-    
-    await callback.answer()
-
-
-@router.callback_query(F.data.startswith("backpack_view_item:"))
-async def backpack_view_item(callback: CallbackQuery):
-    """View regular purchased item"""
-    item_id = int(callback.data.split(":")[1])
-    
-    session_factory = get_session_factory()
-    
-    async with session_factory() as session:
-        user_id = callback.from_user.id
-        
-        # Verify ownership and get item
-        from database.models import UserPurchase, ShopItem
-        from sqlalchemy import select
-        
-        stmt = select(UserPurchase, ShopItem).join(
-            ShopItem, UserPurchase.shop_item_id == ShopItem.id
-        ).where(
-            UserPurchase.user_id == user_id,
-            ShopItem.id == item_id
-        )
-        result = await session.execute(stmt)
-        purchase_data = result.first()
-        
-        if not purchase_data:
-            await callback.answer("❌ No tienes este producto", show_alert=True)
-            return
-        
-        purchase, item = purchase_data
-        
-        # Show item details
-        text = f"📦 **{item.name}**\n\n"
-        if item.description:
-            text += f"{item.description}\n\n"
-        text += f"💰 Precio pagado: {purchase.price_paid} besitos\n"
-        text += f"📅 Fecha de compra: {purchase.purchased_at.strftime('%d/%m/%Y')}\n\n"
-        
-        if item.unlocks_lore_piece_id:
-            from database.models import LorePiece
-            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
-            if lore_piece:
-                text += f"🔓 Desbloquea: {lore_piece.title}\n"
-        
-        # Add back button
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
-        builder = InlineKeyboardBuilder()
-        builder.button(text="🔙 Volver a Mochila", callback_data="open_backpack")
-        
-        await callback.message.edit_text(text, reply_markup=builder.as_markup())
-    
+        await _mostrar_mochila_con_session(wrapped_message, session, user_id=callback.from_user.id)
     await callback.answer()
 
 

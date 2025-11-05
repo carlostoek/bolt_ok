@@ -34,6 +34,8 @@ from .game_admin import router as game_admin_router
 from .event_admin import router as event_admin_router
 from .admin_config import router as admin_config_router
 from .shop_admin import router as shop_admin_router
+from .experiences_admin import router as experiences_admin_router
+from .experience_wizard import router as experience_wizard_router
 
 router.include_router(vip_router)
 router.include_router(free_router)
@@ -44,6 +46,8 @@ router.include_router(game_admin_router)
 router.include_router(event_admin_router)
 router.include_router(admin_config_router)
 router.include_router(shop_admin_router)
+router.include_router(experiences_admin_router)
+router.include_router(experience_wizard_router)
 
 @router.message(Command("admin"))
 async def admin_start(message: Message, session: AsyncSession):
@@ -51,9 +55,11 @@ async def admin_start(message: Message, session: AsyncSession):
     if not await is_admin(message.from_user.id, session):
         return await message.answer("Acceso denegado")
     
+    # Use the admin main keyboard instead of undefined get_admin_kb
+    from keyboards.admin_main_kb import get_admin_main_kb
     await message.answer(
         "Panel de Administración",
-        reply_markup=get_admin_kb()
+        reply_markup=get_admin_main_kb()
     )
 
 @router.message(Command("admin_menu"))
@@ -360,7 +366,7 @@ async def admin_free_channel_redirect(callback: CallbackQuery, session: AsyncSes
 
 
 @router.message(F.text.startswith("/give_hint "))
-async def cmd_give_hint(message: Message):
+async def cmd_give_hint(message: Message, session: AsyncSession):
     """Comando de admin para dar una pista a un usuario."""
     if not await is_admin(message.from_user.id, session):
         await message.answer(
@@ -375,11 +381,11 @@ async def cmd_give_hint(message: Message):
             target_user_id = int(parts[1])
             hint_code_to_give = parts[2]
 
-            success = await desbloquear_pista_narrativa(
-                message.bot,
-                target_user_id,
-                hint_code_to_give,
-                {"source": "admin_command", "admin_id": message.from_user.id},
+            from services.narrative_service import NarrativeService
+            service = NarrativeService(session)
+            success = await service.unlock_lore_piece(
+                user_id=target_user_id,
+                lore_piece_code=hint_code_to_give
             )
 
             if success:

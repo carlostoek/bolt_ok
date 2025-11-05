@@ -39,7 +39,7 @@ class PointsMiddleware(BaseMiddleware):
                     if event.text and event.text.startswith("/"):
                         return await handler(event, data)
 
-                    await service.award_message(event.from_user.id, bot)
+
                     await mission_service.update_progress(event.from_user.id, "messages", bot=bot)
                     completed = await mission_service.increment_challenge_progress(
                         event.from_user.id,

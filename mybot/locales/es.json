@@ -114,8 +114,10 @@
     },
     "display": {
       "fragment_progress": "📍 *Fragmento {visited}/{total}* • Nivel {level} • {progress_pct:.0f}%\n\n",
-      "character_line": "{emoji} *{name}:*\n\n*{text}*",
-      "reward_line": "\n\n✨ *Has recibido {reward} besitos*"
+      "character_line": "{emoji} *{name}:*\n\n{text}",
+      "character_line_html": "{emoji} <b>{name}:</b>\n\n{text}",
+      "reward_line": "\n\n✨ *Has recibido {reward} besitos*",
+      "reward_line_html": "\n\n✨ <i>Has ganado {reward} besitos</i>"
     },
     "requirements": {
       "blocked_title": "🚫 *Camino Bloqueado*\n\n",

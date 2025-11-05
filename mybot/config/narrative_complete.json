@@ -1,0 +1,199 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "last_updated": "2025-10-09T12:00:00Z",
+    "updated_by": "admin",
+    "description": "Narrativa completa del bot - Sistema Los Kinkys + El Diván"
+  },
+
+  "fragments": [
+    {
+      "key": "start",
+      "text": "🎩 **Lucien:** Bienvenido a Los Kinkys. Has cruzado una frontera que no existe en mapas.\n\nAquí, cada curiosidad es un espejo. Cada gesto tuyo, una pincelada de quién soy.\n\n¿Estás listo para comenzar este viaje?",
+      "character": "Lucien",
+      "level": 1,
+      "min_besitos": 0,
+      "reward_besitos": 5,
+      "required_role": null,
+      "image_url": null,
+      "unlocks_achievement_id": null,
+      "auto_next_fragment_key": null,
+      "archetype_variant": null,
+      "choices": [
+        {
+          "text": "🚪 Estoy listo para comenzar",
+          "destination_fragment_key": "intro_1",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "🤔 Necesito saber más primero",
+          "destination_fragment_key": "info_1",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": {
+        "x": 250,
+        "y": 0
+      }
+    },
+    {
+      "key": "intro_1",
+      "text": "🎩 **Lucien:** Excelente decisión. La primera regla de Los Kinkys es simple:\n\nNo busques lo obvio. Busca lo que te hace sentir vivo.\n\nDiana te observa desde las sombras...",
+      "character": "Lucien",
+      "level": 1,
+      "min_besitos": 0,
+      "reward_besitos": 10,
+      "required_role": null,
+      "image_url": null,
+      "unlocks_achievement_id": "first_step",
+      "auto_next_fragment_key": "diana_appears",
+      "archetype_variant": null,
+      "choices": [],
+      "visual_position": {
+        "x": 250,
+        "y": 200
+      }
+    },
+    {
+      "key": "diana_appears",
+      "text": "🌸 **Diana:** Así que decidiste entrar... Interesante.\n\nPuedo sentir tu energía desde aquí. Hay algo en ti que me intriga.\n\n¿Qué buscas realmente en este lugar?",
+      "character": "Diana",
+      "level": 1,
+      "min_besitos": 0,
+      "reward_besitos": 0,
+      "required_role": null,
+      "image_url": null,
+      "unlocks_achievement_id": null,
+      "auto_next_fragment_key": null,
+      "archetype_variant": null,
+      "choices": [
+        {
+          "text": "💭 Comprensión profunda",
+          "destination_fragment_key": "path_filosofa",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "❤️ Conexión emocional",
+          "destination_fragment_key": "path_corazon",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "✨ Experiencias únicas",
+          "destination_fragment_key": "path_aventurera",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": {
+        "x": 250,
+        "y": 400
+      }
+    },
+    {
+      "key": "diana_diary",
+      "text": "🌸 **Diana:** Así que compraste mi diario íntimo...\n\nEsto es lo que nunca le he mostrado a nadie:\n\n*[Contenido exclusivo del diario]*\n\nAhora que conoces mis secretos más profundos, ¿qué harás con ellos?",
+      "character": "Diana",
+      "level": 2,
+      "min_besitos": 30,
+      "reward_besitos": 50,
+      "required_role": null,
+      "image_url": null,
+      "unlocks_achievement_id": "intimate_secrets",
+      "auto_next_fragment_key": null,
+      "archetype_variant": null,
+      "choices": [
+        {
+          "text": "🔒 Guardarlos con respeto",
+          "destination_fragment_key": "diana_trust_path",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": {
+        "x": 600,
+        "y": 200
+      }
+    }
+  ],
+
+  "shop_items": [
+    {
+      "name": "📓 Diario Íntimo de Diana",
+      "description": "Accede a los pensamientos más profundos y secretos de Diana que nunca ha compartido con nadie.",
+      "price": 30,
+      "is_vip_only": false,
+      "unlocks_fragment_key": "diana_diary",
+      "unlocks_lore_piece_code": null,
+      "image_file_id": null,
+      "stock_limit": null,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    },
+    {
+      "name": "🗝️ Llave del Jardín Secreto",
+      "description": "Una llave antigua que desbloquea los secretos del jardín de Diana.",
+      "price": 50,
+      "is_vip_only": false,
+      "unlocks_fragment_key": null,
+      "unlocks_lore_piece_code": "pista_jardin_1",
+      "image_file_id": null,
+      "stock_limit": 100,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    },
+    {
+      "name": "💎 Acceso VIP al Diván",
+      "description": "Acceso exclusivo a contenido íntimo y personalizado de Diana.",
+      "price": 100,
+      "is_vip_only": false,
+      "unlocks_fragment_key": "divan_entrance",
+      "unlocks_lore_piece_code": null,
+      "image_file_id": null,
+      "stock_limit": null,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    }
+  ],
+
+  "lore_pieces": [
+    {
+      "code_name": "pista_jardin_1",
+      "title": "El Secreto del Jardín - Parte 1",
+      "description": "La primera pista sobre el jardín secreto de Diana",
+      "content": "En el jardín donde las rosas negras florecen, hay una estatua con una inscripción: 'Solo quien conoce mi sombra puede ver mi luz'",
+      "content_type": "text",
+      "category": "jardin_secreto",
+      "is_main_story": true
+    },
+    {
+      "code_name": "pista_jardin_2",
+      "title": "El Secreto del Jardín - Parte 2",
+      "description": "La segunda pista del jardín",
+      "content": "Bajo la estatua, enterrado hace años, descansa un medallón con las iniciales 'D.M.' - Diana Mysterious",
+      "content_type": "text",
+      "category": "jardin_secreto",
+      "is_main_story": true
+    },
+    {
+      "code_name": "jardin_revelacion",
+      "title": "La Revelación del Jardín",
+      "description": "El secreto completo del jardín de Diana",
+      "content": "🌹 **El Jardín Secreto Revelado**\n\nDiana creó este jardín como refugio de su pasado. Cada rosa negra representa una herida transformada en belleza. El medallón perteneció a su abuela, quien le enseñó que la oscuridad y la luz coexisten en armonía.\n\nAhora que conoces esto, Diana confía en ti completamente.",
+      "content_type": "text",
+      "category": "jardin_secreto",
+      "is_main_story": true
+    }
+  ],
+
+  "hint_combinations": [
+    {
+      "combination_code": "jardin_completo",
+      "required_hints": ["pista_jardin_1", "pista_jardin_2"],
+      "reward_code": "jardin_revelacion"
+    }
+  ]
+}

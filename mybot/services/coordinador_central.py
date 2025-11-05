@@ -7,12 +7,15 @@ import json
 from pathlib import Path
 from typing import Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
+from config.decision_constants import DecisionID, get_decision_name
 
 try:
     from .integration.channel_engagement_service import ChannelEngagementService
     from .integration.narrative_point_service import NarrativePointService
     from .integration.narrative_access_service import NarrativeAccessService
     from .narrative_service import NarrativeService
+    from .narrative_state_machine import NarrativeStateMachine
+    from .decision_processor import DecisionProcessor
     from .point_service import PointService
     from .emotional_analysis_service import EmotionalAnalysisService
     from .character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
@@ -23,6 +26,8 @@ except ImportError:
     from services.integration.narrative_point_service import NarrativePointService
     from services.integration.narrative_access_service import NarrativeAccessService
     from services.narrative_service import NarrativeService
+    from services.narrative_state_machine import NarrativeStateMachine
+    from services.decision_processor import DecisionProcessor
     from services.point_service import PointService
     from services.emotional_analysis_service import EmotionalAnalysisService
     from services.character_voice_service import CharacterVoiceService, CharacterType, EmotionalContext
@@ -30,44 +35,12 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
-# Path to decision requirements configuration
-_DECISION_REQUIREMENTS_PATH = Path(__file__).parent.parent / "config" / "decision_requirements.json"
-
-
-def _load_decision_requirements() -> Dict[int, str]:
-    """
-    Load decision requirements from JSON configuration file.
-    Returns a dictionary mapping decision_id (int) to item_name (str).
-    Falls back to hardcoded defaults if file doesn't exist.
-    """
-    if not _DECISION_REQUIREMENTS_PATH.exists():
-        logger.warning(f"Decision requirements file not found at {_DECISION_REQUIREMENTS_PATH}, using defaults")
-        # Return hardcoded defaults
-        return {
-            1: "📖 Diario Secreto",
-            15: "📓 Diario Íntimo",
-        }
-
-    try:
-        with open(_DECISION_REQUIREMENTS_PATH, "r", encoding="utf-8") as f:
-            config = json.load(f)
-            # Convert string keys to integers
-            return {int(k): v for k, v in config.items()}
-    except Exception as e:
-        logger.error(f"Error loading decision requirements from {_DECISION_REQUIREMENTS_PATH}: {e}")
-        # Return hardcoded defaults on error
-        return {
-            1: "📖 Diario Secreto",
-            15: "📓 Diario Íntimo",
-        }
-
 
 class AccionUsuario(enum.Enum):
     """Enumeración de acciones de usuario que pueden desencadenar flujos integrados."""
     REACCIONAR_PUBLICACION = "reaccionar_publicacion"
     ACCEDER_NARRATIVA_VIP = "acceder_narrativa_vip"
     TOMAR_DECISION = "tomar_decision"
-    PARTICIPAR_CANAL = "participar_canal"
     VERIFICAR_ENGAGEMENT = "verificar_engagement"
     TEST_EVALUACION_EMOCIONAL = "test_evaluacion_emocional"
     ACCEDER_TIENDA = "acceder_tienda"
@@ -97,6 +70,8 @@ class CoordinadorCentral:
         self.narrative_access = NarrativeAccessService(session)
         # Servicios base
         self.narrative_service = NarrativeService(session)
+        self.narrative_state_machine = NarrativeStateMachine(session)
+        self.decision_processor = DecisionProcessor(session)
         self.point_service = PointService(session)
         # Servicio de análisis emocional (con graceful degradation)
         try:
@@ -135,8 +110,7 @@ class CoordinadorCentral:
                 return await self._flujo_acceso_narrativa_vip(user_id, **kwargs)
             elif accion == AccionUsuario.TOMAR_DECISION:
                 return await self._flujo_tomar_decision(user_id, **kwargs)
-            elif accion == AccionUsuario.PARTICIPAR_CANAL:
-                return await self._flujo_participacion_canal(user_id, **kwargs)
+
             elif accion == AccionUsuario.VERIFICAR_ENGAGEMENT:
                 return await self._flujo_verificar_engagement(user_id, **kwargs)
             elif accion == AccionUsuario.TEST_EVALUACION_EMOCIONAL:
@@ -286,8 +260,7 @@ class CoordinadorCentral:
                 # Generar mejoras contextuales (solo sugerencias, no modifican respuesta)
                 base_response = {
                     "message": mensaje,
-                    "type": "reaction_success",
-                    "points": 10
+                    "type": "reaction_success"
                 }
                 response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
                     user_id, base_response, emotional_context
@@ -299,7 +272,6 @@ class CoordinadorCentral:
         return {
             "success": True,
             "message": mensaje,
-            "points_awarded": 10,
             "total_points": puntos_actuales,
             "hint_unlocked": pista_desbloqueada,
             "action": "reaction_success",
@@ -367,77 +339,64 @@ class CoordinadorCentral:
         Returns:
             Dict con resultados y mensajes
         """
-        # Load decision requirements from JSON configuration
-        # This is now managed through the admin panel (Admin → Tienda → Gestionar Desbloqueos)
-        decision_requirements = _load_decision_requirements()
+        # Check item requirements using DecisionProcessor
+        has_item, required_item, teaser_fragment_key = await self.decision_processor.check_item_requirement(
+            user_id, decision_id
+        )
 
-        logger.debug(f"Loaded decision requirements: {decision_requirements}")
+        if required_item and not has_item:
+            # Store the pending decision in user state to process after purchase
+            user_state = await self.narrative_service._get_or_create_user_state(user_id)
 
-        # Check if this decision requires an item
-        required_item = decision_requirements.get(decision_id)
-        if required_item:
-            from services.shop_service import ShopService
-            shop_service = ShopService(self.session)
-            has_item = await shop_service.has_item_in_inventory(user_id, required_item)
-            
-            if not has_item:
-                # Store the pending decision in user state to process after purchase
-                user_state = await self.narrative_service._get_or_create_user_state(user_id)
+            logger.info(f"[DECISION_BLOCK_DEBUG] User {user_id} missing item {required_item} for decision {get_decision_name(decision_id)}")
 
-                logger.info(f"[DECISION_BLOCK_DEBUG] User {user_id} attempting decision {decision_id} without item {required_item}")
-                logger.info(f"[DECISION_BLOCK_DEBUG] Current state: current_fragment={user_state.current_fragment_key}, shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}")
+            # Use State Machine for atomic shop transition
+            transition_success = await self.narrative_state_machine.transition_to_shop(
+                user_id=user_id,
+                current_fragment_key=user_state.current_fragment_key,
+                pending_decision_id=decision_id
+            )
 
-                # Only set shop_redirect_fragment_key if not already set
-                if not user_state.shop_redirect_fragment_key:
-                    user_state.shop_redirect_fragment_key = user_state.current_fragment_key
-                    logger.info(f"[DECISION_BLOCK_DEBUG] Set shop_redirect_fragment_key to {user_state.current_fragment_key}")
-                else:
-                    logger.info(f"[DECISION_BLOCK_DEBUG] Preserving existing shop_redirect_fragment_key: {user_state.shop_redirect_fragment_key}")
-
-                # Store the decision_id to process later
-                user_state.pending_decision_id = decision_id
-                logger.info(f"[DECISION_BLOCK_DEBUG] Set pending_decision_id to {decision_id}")
-
-                await self.session.commit()
-                logger.info(f"[DECISION_BLOCK_DEBUG] Committed state for user {user_id}")
-
-                # For diary intimate decision, redirect to teaser fragment instead of blocking
-                if decision_id == 15:  # Diary intimate decision
-                    # Process decision to teaser fragment instead
-                    teaser_fragment = await self.narrative_service._get_fragment_by_key("diana_diary_tease")
-                    if teaser_fragment:
-                        logger.info(f"[DECISION_BLOCK_DEBUG] Redirecting to teaser fragment: {teaser_fragment.key}")
-                        # Update user state to teaser fragment
-                        user_state.current_fragment_key = teaser_fragment.key
-                        user_state.fragments_visited = (user_state.fragments_visited or 0) + 1
-                        await self.narrative_service._process_fragment_rewards(user_id, teaser_fragment)
-                        await self.session.commit()
-
-                        logger.info(f"[DECISION_BLOCK_DEBUG] After teaser redirect - current_fragment={user_state.current_fragment_key}, shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}")
-
-                        return {
-                            "success": True,
-                            "fragment": teaser_fragment,
-                            "action": "decision_success"
-                        }
-
-                # For other items, show restriction message
-                try:
-                    restriction_message = self.character_voice.get_character_response(
-                        CharacterType.DIANA,
-                        EmotionalContext.VULNERABILIDAD_BAJA,
-                        "item_required"
-                    )
-                except:
-                    restriction_message = "💋 Diana susurra: 'Este camino requiere algo más íntimo...'"
-
+            if not transition_success:
+                logger.error(f"[DECISION_BLOCK_DEBUG] Failed to transition user {user_id} to shop state")
                 return {
                     "success": False,
-                    "message": f"{restriction_message}\n\n🔒 **Acceso Restringido**\n\nNecesitas el {required_item} para tomar esta decisión.\n\nVisita la tienda para adquirirlo.",
-                    "action": "item_required",
-                    "decision_id": decision_id,
-                    "required_item": required_item
+                    "message": "No se pudo procesar la transición a la tienda. Intenta nuevamente.",
+                    "action": "state_transition_failed"
                 }
+
+            logger.info(f"[DECISION_BLOCK_DEBUG] Successfully transitioned user {user_id} to SHOPPING state")
+
+            # Use DecisionProcessor to handle special decisions
+            special_fragment = await self.decision_processor.process_special_decision(
+                user_id=user_id,
+                decision_id=decision_id,
+                has_required_item=has_item,
+                teaser_fragment_key=teaser_fragment_key
+            )
+
+            if special_fragment:
+                # Special decision processed (e.g., teaser redirect)
+                return {
+                    "success": True,
+                    "fragment": special_fragment,
+                    "action": "decision_success"
+                }
+
+            # For other items, show restriction message
+            restriction_message = await self.decision_processor.get_required_item_message(
+                decision_id=decision_id,
+                required_item_name=required_item,
+                character_voice_service=self.character_voice
+            )
+
+            return {
+                "success": False,
+                "message": restriction_message,
+                "action": "item_required",
+                "decision_id": decision_id,
+                "required_item": required_item
+            }
         
         # 1. Análisis emocional previo a la decisión (no bloquea funcionalidad)
         emotional_context = None
@@ -519,7 +478,7 @@ class CoordinadorCentral:
         # 5. Decisión exitosa
         # Para decisiones especiales (como las de items), no agregar mensaje extra
         # ya que el flujo narrativo debe ser limpio
-        special_decision_ids = {15}  # Diary intimate decision
+        special_decision_ids = {DecisionID.DIARY_INTIMATE}
 
         if decision_id in special_decision_ids:
             # Para decisiones especiales, retornar solo el fragmento
@@ -563,109 +522,7 @@ class CoordinadorCentral:
                 "emotional_evolution": emotional_evolution
             }
     
-    async def _flujo_participacion_canal(self, user_id: int, channel_id: int, action_type: str, bot=None) -> Dict[str, Any]:
-        """
-        Flujo para manejar participación en canales (mensajes, comentarios, etc).
-        
-        Args:
-            user_id: ID del usuario
-            channel_id: ID del canal
-            action_type: Tipo de acción (post, comment, etc)
-            bot: Instancia del bot para enviar mensajes
-            
-        Returns:
-            Dict con resultados y mensajes
-        """
-        # 1. Análisis emocional de participación en canal (no bloquea funcionalidad)
-        emotional_context = None
-        if self.emotional_analysis:
-            try:
-                import datetime
-                # Analizar timing y patrones de participación
-                emotional_context = await self.emotional_analysis.analyze_response_timing(
-                    user_id, datetime.datetime.utcnow(), f"channel_participation_{action_type}"
-                )
-            except Exception as e:
-                logger.debug(f"Análisis emocional de participación falló para usuario {user_id}: {str(e)}")
-                # Graceful degradation
-        
-        # 2. Otorgar puntos por participación
-        participacion_exitosa = await self.channel_engagement.award_channel_participation(
-            user_id, channel_id, action_type, bot
-        )
-        
-        if not participacion_exitosa:
-            # Lucien maneja fallos de participación como custodio
-            participation_fail_message = self.character_voice.get_character_response(
-                CharacterType.LUCIEN,
-                EmotionalContext.PAUSA_REFLEXIVA,
-                "participation_failed",
-                emotional_context
-            )
-            
-            return {
-                "success": False,
-                "message": participation_fail_message,
-                "action": "participation_failed",
-                "emotional_context": emotional_context
-            }
-        
-        # 3. Determinar puntos otorgados según el tipo de acción
-        puntos = 5 if action_type == "post" else 2 if action_type == "comment" else 1
-        
-        # 4. Generar mensaje con voz auténtica según tipo de acción
-        user_points = await self.point_service.get_user_points(user_id)
-        user_history = {"total_interactions": user_points // 5}  # Aproximación
-        
-        emotional_context_enum = self.character_voice.map_emotional_analysis_to_context(
-            emotional_context, emotional_context, None, user_history
-        )
-        
-        # Diana responde a participación social (conexión)
-        base_message = self.character_voice.get_character_response(
-            CharacterType.DIANA,
-            emotional_context_enum,
-            f"participation_{action_type}",
-            emotional_context,
-            user_history
-        )
-        
-        # Agregar puntos según acción
-        points_text = f"\n\n*+{puntos} besito{'s' if puntos > 1 else ''}* 💋 por tu {action_type}."
-        mensaje = f"{base_message}{points_text}"
-        
-        # 5. Análisis emocional post-participación y mejoras contextuales
-        behavioral_patterns = None
-        response_enhancements = None
-        if self.emotional_analysis:
-            try:
-                import datetime
-                # Detectar patrones de participación social
-                recent_actions = [{"timestamp": datetime.datetime.utcnow(), "type": "channel_participation", "action_type": action_type, "channel_id": channel_id}]
-                behavioral_patterns = await self.emotional_analysis.detect_behavioral_patterns(
-                    user_id, recent_actions
-                )
-                
-                # Generar mejoras contextuales
-                base_response = {"message": mensaje, "type": "participation_success", "points": puntos}
-                response_enhancements = await self.emotional_analysis.generate_contextual_response_enhancement(
-                    user_id, base_response, emotional_context
-                )
-            except Exception as e:
-                logger.debug(f"Análisis post-participación falló para usuario {user_id}: {str(e)}")
-                # Graceful degradation
-        
-        return {
-            "success": True,
-            "message": mensaje,
-            "points_awarded": puntos,
-            "action": "participation_success",
-            "action_type": action_type,
-            # Información adicional de análisis emocional
-            "emotional_context": emotional_context,
-            "behavioral_patterns": behavioral_patterns,
-            "response_enhancements": response_enhancements
-        }
+
     
     async def _flujo_verificar_engagement(self, user_id: int, bot=None) -> Dict[str, Any]:
         """
@@ -703,29 +560,26 @@ class CoordinadorCentral:
         user_history = {"streak": streak, "total_interactions": streak * 2}  # Aproximación
         
         if streak % 7 == 0:  # Racha semanal - alta dedicación
-            weekly_message = self.character_voice.get_character_response(
+            mensaje = self.character_voice.get_character_response(
                 CharacterType.DIANA,
                 EmotionalContext.ENGAGEMENT_ALTO,
                 "weekly_streak",
                 None,
                 user_history
             )
-            mensaje = f"{weekly_message}\n\n*+25 besitos* 💋 por tu constancia semanal."
         else:
-            daily_message = self.character_voice.get_character_response(
+            mensaje = self.character_voice.get_character_response(
                 CharacterType.DIANA,
                 EmotionalContext.USUARIO_AVANZADO if streak > 7 else EmotionalContext.NUEVO_USUARIO,
                 "daily_check",
                 None,
                 user_history
             )
-            mensaje = f"{daily_message}\n\n*+10 besitos* 💋 por tu visita diaria."
         
         return {
             "success": True,
             "message": mensaje,
             "streak": streak,
-            "points_awarded": 25 if streak % 7 == 0 else 10,
             "action": "daily_check_success"
         }
     

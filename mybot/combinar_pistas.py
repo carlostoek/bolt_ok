@@ -8,7 +8,6 @@ from sqlalchemy.future import select
 from database.setup import get_session
 from database.models import UserLorePiece, LorePiece
 from database.hint_combination import HintCombination
-from narrativa import desbloquear_pista
 
 router = Router()
 
@@ -34,7 +33,12 @@ async def procesar_combinacion(message: Message, state: FSMContext):
         for combinacion in combinaciones:
             pistas_requeridas = sorted(combinacion.required_hints.split(","))
             if user_hints == pistas_requeridas:
-                await desbloquear_pista(bot=message.bot, user_id=user_id, pista_code=combinacion.reward_code)
+                from services.narrative_service import NarrativeService
+                service = NarrativeService(session)
+                await service.unlock_lore_piece(
+                    user_id=user_id,
+                    lore_piece_code=combinacion.reward_code
+                )
                 await safe_answer(message, "\u00a1Combinaci\u00f3n correcta! Has desbloqueado una nueva pista.")
                 await state.clear()
                 return

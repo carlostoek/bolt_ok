@@ -163,8 +163,7 @@ class GiftService:
 
         try:
             message = template["message"].format(**format_data)
-            # Agrega un toque especial a la entrega del regalo
-            return message + "\n\n🌟 ¡Disfruta tu regalo, es un detalle especial de Diana!"
+            return message
         except KeyError as e:
             logger.warning(f"Falta clave en context_data para {event_type}: {e}")
             # Fallback a mensaje de sorpresa

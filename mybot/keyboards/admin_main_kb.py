@@ -17,14 +17,17 @@ def get_admin_main_kb():
     builder.button(text="📖 Narrativa", callback_data="admin_narrative_panel")
     builder.button(text="💎 Mi Diván", callback_data="admin:midivan")
 
-    # Fila 4: Estadísticas y configuración
+    # Fila 4: Experiencias unificadas
+    builder.button(text="🎭 Experiencias", callback_data="admin_experiences")
     builder.button(text="📊 Estadísticas", callback_data="admin_stats")
+
+    # Fila 5: Configuración
     builder.button(text="⚙️ Configuración", callback_data="admin_config")
 
-    # Fila 5: Navegación
+    # Fila 6: Navegación
     builder.button(text="🔄 Actualizar", callback_data="admin_main_menu")
     builder.button(text="↩️ Volver", callback_data="admin_back")
 
-    # Distribución: 2x2x2x2x2 (añadido Mi Diván en fila 3)
-    builder.adjust(2, 2, 2, 2, 2)
+    # Distribución: 2x2x2x2x1x2
+    builder.adjust(2, 2, 2, 2, 1, 2)
     return builder.as_markup()

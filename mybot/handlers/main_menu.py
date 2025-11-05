@@ -26,12 +26,13 @@ async def handle_home_button(message: Message, session: AsyncSession):
         text, keyboard = await menu_factory.create_menu("main", user_id, session, message.bot)
 
         # Enviar el menú inline
-        await menu_manager.send_menu(
+        await menu_manager.show_menu(
             message,
             text,
             keyboard,
             session,
-            "main"
+            "main",
+            force_new_message=True
         )
     except Exception as e:
         logger.error(f"Error showing main menu for user {user_id}: {e}", exc_info=True)
@@ -81,37 +82,46 @@ async def handle_narrative_button(message: Message, session: AsyncSession):
     user_id = message.from_user.id
 
     try:
+        from services.narrative_state_machine import NarrativeStateMachine
         service = NarrativeService(session, message.bot)
+        state_machine = NarrativeStateMachine(session)
 
-        # Check if user has a shop redirect fragment to return to
-        user_state = await service._get_or_create_user_state(user_id)
-        logger.info(f"[HISTORIA_BUTTON_DEBUG] User {user_id} state: shop_redirect={user_state.shop_redirect_fragment_key}, pending_decision={user_state.pending_decision_id}, current_fragment={user_state.current_fragment_key}")
+        # Check if user is in shop flow
+        is_in_shop_flow = await state_machine.is_in_shop_flow(user_id)
+        logger.info(f"[HISTORIA_BUTTON_DEBUG] User {user_id} is_in_shop_flow: {is_in_shop_flow}")
 
         # First, check if there's a pending decision to process (e.g., after shop purchase)
-        if user_state.shop_redirect_fragment_key and user_state.pending_decision_id:
-            logger.info(f"[HISTORIA_BUTTON_DEBUG] Processing pending decision {user_state.pending_decision_id}")
-            coordinador = CoordinadorCentral(session)
+        if is_in_shop_flow:
+            return_result = await state_machine.return_from_shop(user_id)
+            if return_result["success"] and return_result.get("pending_decision_id"):
+                pending_decision_id = return_result["pending_decision_id"]
+                logger.info(f"[HISTORIA_BUTTON_DEBUG] Processing pending decision {pending_decision_id}")
+                coordinador = CoordinadorCentral(session)
 
-            result = await coordinador.ejecutar_flujo(
-                user_id,
-                AccionUsuario.TOMAR_DECISION,
-                decision_id=user_state.pending_decision_id
-            )
+                result = await coordinador.ejecutar_flujo(
+                    user_id,
+                    AccionUsuario.TOMAR_DECISION,
+                    decision_id=pending_decision_id
+                )
 
-            if result["success"] and result.get("fragment"):
-                # Clear flags and show the unlocked fragment
-                user_state.shop_redirect_fragment_key = None
-                user_state.pending_decision_id = None
-                await session.commit()
-                logger.info(f"[HISTORIA_BUTTON_DEBUG] Showing unlocked fragment: {result['fragment'].key}")
-                await _display_narrative_fragment(message, result["fragment"], session)
-                return
+                if result["success"] and result.get("fragment"):
+                    # CRITICAL FIX: Clear shop context ONLY after successful decision processing
+                    logger.info(f"[HISTORIA_BUTTON_DEBUG] Decision processed successfully, clearing shop context")
+                    await state_machine.clear_shop_context(user_id)
+
+                    logger.info(f"[HISTORIA_BUTTON_DEBUG] Showing unlocked fragment: {result['fragment'].key}")
+                    await _display_narrative_fragment(message, result["fragment"], session)
+                    return
+                else:
+                    # Decision failed - context preserved for retry
+                    logger.warning(f"[HISTORIA_BUTTON_DEBUG] Decision processing failed - preserving shop context")
 
         # Try to get current fragment (where user left off)
         current_fragment = await service.get_user_current_fragment(user_id)
 
         # Check if user can go back (has history)
         can_go_back = await service.can_go_back(user_id)
+        user_state = await service._get_or_create_user_state(user_id)
         logger.info(f"[HISTORIA_BUTTON_DEBUG] User {user_id} can_go_back: {can_go_back}, choices_made: {len(user_state.choices_made or [])}")
 
         if current_fragment:
@@ -164,7 +174,17 @@ async def handle_diario_intimo_button(message: Message, session: AsyncSession):
         reason = result.get('message', get_text("main_menu_handler.default_access_denied"))
         await message.answer(get_text("main_menu_handler.access_restricted", reason=reason))
 
-@router.callback_query(F.data == "narrative_main_menu")
+from keyboards.minigames_kb import get_minigames_keyboard
+
+@router.callback_query(F.data == "menu:minigames")
+async def show_minigames_menu(callback: CallbackQuery, session: AsyncSession):
+    """Shows the minigames menu."""
+    text = "Selecciona un minijuego:"
+    keyboard = get_minigames_keyboard()
+    await callback.message.edit_text(text, reply_markup=keyboard)
+    await callback.answer()
+
+@router.callback_query(F.data.in_({"narrative_main_menu", "menu:main"}))
 async def return_to_main_menu(callback: CallbackQuery, session: AsyncSession):
     """Regresa al menú principal desde la narrativa o tienda, según el rol del usuario"""
     user_id = callback.from_user.id

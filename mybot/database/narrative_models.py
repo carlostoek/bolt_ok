@@ -28,6 +28,12 @@ class StoryFragment(Base):
 
     # Variante por arquetipo (adventurer, romantic, explorer, balanced, null=genérico)
     archetype_variant = Column(String(20), nullable=True, index=True)
+    
+    # Referencia a experiencia unificada que creó este fragmento
+    experience_id = Column(String(50), ForeignKey("unified_experiences.id", ondelete="SET NULL"), nullable=True, index=True)
+
+    # Metadata for extended functionality (e.g., migrated lore pieces)
+    fragment_metadata = Column(JSON, nullable=True)
 
     # Timestamps
     created_at = Column(DateTime, default=func.now())
@@ -87,6 +93,9 @@ class UserNarrativeState(Base):
     # Para redirección desde la tienda
     shop_redirect_fragment_key = Column(String(50), nullable=True)
     pending_decision_id = Column(Integer, nullable=True)  # Store decision to process after purchase
+    
+    # Track unlocked lore pieces as fragment keys
+    unlocked_fragments = Column(JSON, default=list)
 
     user = relationship(
         "User", 

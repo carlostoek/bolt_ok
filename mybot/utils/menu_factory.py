@@ -11,6 +11,13 @@ from keyboards.vip_main_kb import get_vip_main_kb
 from keyboards.subscription_kb import get_free_main_menu_kb
 from keyboards.admin_vip_channel_kb import get_admin_vip_channel_kb
 from keyboards.free_channel_admin_kb import get_free_channel_admin_kb
+from keyboards.admin_experiences_kb import (
+    get_admin_experiences_main_kb,
+    get_admin_experiences_list_kb,
+    get_admin_experience_view_kb,
+    get_admin_experience_elements_kb,
+    get_admin_experience_back_kb
+)
 from services import ConfigService
 from keyboards.setup_kb import (
     get_setup_main_kb, 
@@ -272,6 +279,8 @@ class MenuFactory:
             text, keyboard = self._create_admin_vip_menu()
         elif menu_state == "admin_free":
             text, keyboard = await self._create_admin_free_menu(session)
+        elif menu_state.startswith("admin_experiences"):
+            text, keyboard = await self._create_experiences_menu(menu_state, user_id, session)
         else:
             logger.warning(f"Unknown specific menu state: {menu_state}. Falling back to main menu for role: {role}")
             text, keyboard = self._create_main_menu(role)
@@ -309,6 +318,95 @@ class MenuFactory:
         keyboard = get_narrative_stats_keyboard()
         # Los keyboards ya tienen el botón de menú principal
         # No agregar botón duplicado
+        return text, keyboard
+
+    async def _create_experiences_menu(
+        self, 
+        menu_state: str, 
+        user_id: int, 
+        session: AsyncSession
+    ) -> Tuple[str, InlineKeyboardMarkup]:
+        """Create experiences-related menus."""
+        from services.experience_service import ExperienceService
+        
+        experience_service = ExperienceService(session)
+        
+        if menu_state == "admin_experiences_main":
+            # Main experiences panel
+            total_experiences = await experience_service.get_total_count()
+            active_experiences = await experience_service.get_active_count()
+            
+            text = (
+                "🎭 **Panel de Experiencias Unificadas**\n\n"
+                "Desde aquí puedes gestionar experiencias que unifican narrativa, tienda y misiones.\n\n"
+                f"📊 **Estadísticas:**\n"
+                f"• Total de experiencias: {total_experiences}\n"
+                f"• Experiencias activas: {active_experiences}\n\n"
+                "**Funcionalidades:**\n"
+                "• 📋 Ver lista de experiencias\n"
+                "• ✨ Crear nueva experiencia\n"
+                "• 🔍 Ver elementos propagados\n"
+                "• ⚙️ Configurar experiencias\n"
+            )
+            keyboard = get_admin_experiences_main_kb()
+            
+        elif menu_state == "admin_experiences_list":
+            # Experiences list
+            experiences = await experience_service.get_all_experiences()
+            
+            if not experiences:
+                text = (
+                    "📋 **Lista de Experiencias**\n\n"
+                    "No hay experiencias creadas aún.\n\n"
+                    "💡 **Sugerencia:** Crea tu primera experiencia para unificar narrativa, tienda y misiones."
+                )
+                keyboard = get_admin_experience_back_kb()
+            else:
+                text = (
+                    "📋 **Lista de Experiencias**\n\n"
+                    f"Se encontraron {len(experiences)} experiencia(s):\n\n"
+                    "💡 **Leyenda:** ✅ Activa | ❌ Inactiva\n"
+                )
+                keyboard = get_admin_experiences_list_kb(experiences)
+                
+        elif menu_state == "admin_experience_elements":
+            # All propagated elements
+            total_fragments = await experience_service.get_total_fragment_count()
+            total_items = await experience_service.get_total_item_count()
+            total_missions = await experience_service.get_total_mission_count()
+            
+            text = (
+                "🔍 **Elementos Propagados**\n\n"
+                "Vista general de todos los elementos creados por experiencias unificadas:\n\n"
+                f"📖 **Fragmentos Narrativos:** {total_fragments}\n"
+                f"🛒 **Items de Tienda:** {total_items}\n"
+                f"🎯 **Misiones:** {total_missions}\n\n"
+                "💡 **Nota:** Estos elementos fueron creados automáticamente por el sistema de experiencias unificadas."
+            )
+            keyboard = get_admin_experience_elements_kb()
+            
+        elif menu_state == "admin_experience_config":
+            # Configuration panel
+            text = (
+                "⚙️ **Configuración de Experiencias**\n\n"
+                "Opciones de configuración del sistema de experiencias unificadas:\n\n"
+                "🔧 **Funcionalidades disponibles:**\n"
+                "• Propagación automática de elementos\n"
+                "• Validación de requisitos compuestos\n"
+                "• Gestión de dependencias entre experiencias\n"
+                "• Recompensas automáticas\n\n"
+                "💡 **Próximamente:**\n"
+                "• Asistente visual para creación\n"
+                "• Plantillas predefinidas\n"
+                "• Análisis de rendimiento\n"
+            )
+            keyboard = get_admin_experience_back_kb()
+            
+        else:
+            # Fallback for unknown experience states
+            text = "⚠️ **Estado de Experiencia Desconocido**\n\nNo se pudo cargar el menú solicitado."
+            keyboard = get_admin_experience_back_kb()
+            
         return text, keyboard
 
     def _create_admin_vip_menu(self) -> Tuple[str, InlineKeyboardMarkup]:
