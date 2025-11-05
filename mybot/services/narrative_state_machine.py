@@ -391,10 +391,7 @@ class NarrativeStateMachine:
             user_state = await self._get_or_create_user_state(user_id)
 
             # Clear to default reading state
-            user_state.shop_context = {
-                'state': NarrativeFlowState.READING_FRAGMENT.value,
-                'cleared_timestamp': datetime.utcnow().isoformat(),
-            }
+            user_state.shop_context = {}
 
             await self.session.commit()
 
