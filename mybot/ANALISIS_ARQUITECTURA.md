@@ -5,285 +5,242 @@ Este documento detalla la arquitectura, módulos y flujos de datos del bot de Te
 ## 1. Arquitectura General
 
 ### Stack Tecnológico
-- **Lenguaje:** Python
-- **Framework del Bot:** [Aiogram](https://aiogram.dev/), un framework asíncrono moderno para la API de Telegram.
-- **Base de Datos:** [SQLAlchemy](https://www.sqlalchemy.org/) (con su extensión `asyncio`) como ORM. Esto permite que el bot sea agnóstico a la base de datos subyacente, aunque la documentación y configuración sugieren compatibilidad con **PostgreSQL** y **SQLite**.
-- **Migraciones de BD:** [Alembic](https://alembic.sqlalchemy.org/en/latest/), integrado con SQLAlchemy para gestionar la evolución del esquema de la base de datos.
+- **Lenguaje:** Python 3
+- **Framework de Bot:** `aiogram` para la interacción asíncrona con la API de Telegram.
+- **Base de Datos:** SQLite, gestionada a través del ORM `SQLAlchemy`. Se evidencia en `database/setup.py`.
+- **Manejo de Migraciones:** `alembic` está configurado (`alembic.ini`), lo que indica un manejo estructurado de los cambios en el schema de la base de datos.
 
 ### Estructura de Directorios y Organización del Código
-El proyecto sigue una estructura organizada y modular:
-- `handlers/`: Contiene la lógica para responder a los comandos del bot, callbacks de botones y otros eventos de Telegram. Se subdivide por funcionalidad (admin, user, narrative, shop, etc.).
-- `database/`: Define los modelos de datos con SQLAlchemy (`models.py`, `narrative_models.py`), la configuración de la conexión (`setup.py`) y las migraciones de Alembic.
-- `services/`: Encapsula la lógica de negocio principal (ej: `narrative_service.py`, `shop_service.py`). Los handlers delegan en estos servicios para realizar las operaciones complejas.
-- `core/`: Define las interfaces y componentes fundamentales, como los repositorios base.
-- `config/`: Almacena archivos de configuración estáticos, como los schemas JSON para la narrativa (`narrative_schema.json`).
-- `keyboards/`: Lógica para crear los teclados interactivos (botones inline y de respuesta) que se muestran a los usuarios.
-- `docs/`: Documentación extensa sobre la arquitectura, flujos y decisiones de diseño.
-- `tests/`: Pruebas automatizadas para garantizar la calidad del código.
+El proyecto sigue una estructura modular y limpia, separando responsabilidades:
+- `handlers/`: Contiene la lógica de presentación, manejando los comandos y callbacks de Telegram. Es el punto de entrada para las interacciones del usuario.
+- `services/`: Contiene la lógica de negocio. Los servicios orquestan las operaciones, interactuando con la base de datos y otros servicios.
+- `database/`: Define los modelos de datos (`models.py`, `narrative_models.py`, etc.) con SQLAlchemy, y la configuración de la conexión.
+- `keyboards/`: Define los teclados interactivos que se muestran al usuario.
+- `config/`: Almacena archivos de configuración estáticos, como schemas JSON.
+- `bot.py`: Punto de entrada de la aplicación que inicializa el bot, el dispatcher y registra los routers de los diferentes módulos.
 
 ### Dependencias Principales
-Aunque `requirements.txt` está malformado, el análisis del código revela las siguientes dependencias clave:
+El archivo `requirements.txt` revela las siguientes dependencias clave:
 - `aiogram`: Framework principal del bot.
-- `sqlalchemy`: ORM para toda la interacción con la base de datos.
-- `alembic`: Herramienta para migraciones de base de datos.
+- `sqlalchemy`: ORM para la interacción con la base de datos.
+- `alembic`: Para migraciones de la base de datos.
+- `asyncpg` (potencialmente): Aunque se usa SQLite, la presencia de este driver sugiere que podría estar preparado para PostgreSQL.
 
 ## 2. Módulo de Narrativa
 
-El módulo de narrativa es el corazón de la experiencia y está diseñado de forma flexible usando un sistema de grafos.
-
 ### Modelo de Datos de Fragmentos
-El modelo principal es `StoryFragment`, que representa un nodo en la historia.
+La narrativa se estructura principalmente en el archivo `database/narrative_models.py`.
 
+- **`StoryFragment`**: Representa un nodo en la historia.
+  - `key`: Un identificador **único de tipo string** (ej: `diana_intro_1`) que es la clave principal para la navegación.
+  - `text`: El contenido del fragmento.
+  - `character`: Personaje que habla (Lucien o Diana).
+  - `auto_next_fragment_key`: Si no es nulo, la historia avanza automáticamente a este fragmento sin mostrar decisiones.
 ```python
-# database/narrative_models.py
-
+# extraído de database/narrative_models.py
 class StoryFragment(Base):
     __tablename__ = 'story_fragments'
 
     id = Column(Integer, primary_key=True)
-    key = Column(String(50), unique=True, nullable=False) # Identificador de negocio
+    key = Column(String(50), unique=True, nullable=False)
     text = Column(Text, nullable=False)
-    image_url = Column(String(500), nullable=True)
-    
-    # Requisitos para acceder
-    min_besitos = Column(Integer, default=0)
-    required_role = Column(String, nullable=True, index=True)
-    
-    # Recompensa por llegar
-    reward_besitos = Column(Integer, default=0)
-    
-    # Siguiente fragmento (si no hay decisión)
+    # ... otros campos ...
     auto_next_fragment_key = Column(String(50), nullable=True)
-
-    # Relación con las decisiones que parten de este fragmento
-    choices = relationship(
-        "NarrativeChoice", 
-        back_populates="source_fragment", 
-        foreign_keys="NarrativeChoice.source_fragment_id",
-        cascade="all, delete-orphan"
-    )
+    # ...
 ```
 
-### Cómo se Almacenan las Decisiones y sus Consecuencias
-Las decisiones son arcos que conectan los nodos (`StoryFragment`). Se modelan con `NarrativeChoice`.
+### Almacenamiento de Decisiones y Consecuencias
+- **`NarrativeChoice`**: Representa una opción que el usuario puede tomar. Crucialmente, vincula un fragmento de origen con uno de destino a través de claves de string.
+  - `source_fragment_id`: El ID del fragmento donde se muestra esta opción.
+  - `destination_fragment_key`: La **clave string** del fragmento al que se navegará si se elige esta opción.
+- **`UserNarrativeState`**: Almacena el progreso del usuario.
+  - `current_fragment_key`: La clave del fragmento actual del usuario.
+  - `choices_made`: Un campo JSON que almacena un historial de las decisiones tomadas.
 
 ```python
-# database/narrative_models.py
-
+# extraído de database/narrative_models.py
 class NarrativeChoice(Base):
     __tablename__ = 'narrative_choices'
 
     id = Column(Integer, primary_key=True)
     source_fragment_id = Column(Integer, ForeignKey('story_fragments.id'), nullable=False)
-    destination_fragment_key = Column(String(50), nullable=False) # A dónde lleva la decisión
-    text = Column(String, nullable=False) # Texto del botón
-    
-    # Requisitos para que la opción sea visible/usable
-    required_besitos = Column(Integer, default=0)
-    required_role = Column(String, nullable=True)
+    destination_fragment_key = Column(String(50), nullable=False)
+    text = Column(String, nullable=False)
+    # ...
 ```
-
-El progreso del usuario se guarda en `UserNarrativeState`, que registra el fragmento actual y las decisiones tomadas.
-
-```python
-# database/narrative_models.py
-
-class UserNarrativeState(Base):
-    __tablename__ = 'user_narrative_states'
-
-    user_id = Column(BigInteger, ForeignKey('users.id'), primary_key=True)
-    current_fragment_key = Column(String(50), nullable=True)
-    choices_made = Column(JSON, default=list) # Historial de decisiones
-    unlocked_fragments = Column(JSON, default=list) # Fragmentos desbloqueados (ej. por compra)
-```
-
 ### Sistema de Bloqueo/Desbloqueo de Contenido
-El acceso a fragmentos y decisiones se puede restringir mediante:
-1.  **Puntos:** `StoryFragment.min_besitos` y `NarrativeChoice.required_besitos`.
-2.  **Roles:** `StoryFragment.required_role` y `NarrativeChoice.required_role` (ej: "vip").
-3.  **Desbloqueo explícito:** La lista `UserNarrativeState.unlocked_fragments` permite dar acceso a fragmentos específicos, por ejemplo, tras una compra en la tienda.
+El acceso a fragmentos y decisiones está controlado por requisitos directamente en los modelos.
+- `StoryFragment.min_besitos`: Requiere una cantidad mínima de puntos ("besitos") para acceder al fragmento.
+- `StoryFragment.required_role`: Requiere un rol de usuario específico (ej: `vip`).
+- `NarrativeChoice.required_besitos` y `NarrativeChoice.required_role`: Lo mismo, pero aplicado a una decisión específica.
+
+El `NarrativeService` es responsable de validar estos requisitos antes de mostrar el contenido.
 
 ### Relaciones entre Fragmentos (Árbol de Decisiones)
-El árbol se construye mediante la relación entre `StoryFragment` y `NarrativeChoice`. Cada `NarrativeChoice` actúa como un arco dirigido que conecta un `source_fragment_id` con un `destination_fragment_key`. Esto permite crear narrativas ramificadas complejas. Los fragmentos lineales usan `auto_next_fragment_key` para avanzar automáticamente.
+La estructura es un grafo dirigido. Cada `StoryFragment` es un nodo. Las aristas son las `NarrativeChoice` que conectan un `source_fragment_id` con un `destination_fragment_key`. La navegación se basa en las claves de string, lo que permite flexibilidad para definir y modificar la narrativa sin romper referencias de IDs numéricos.
 
-### Identificadores Únicos Usados
-- **`StoryFragment.key`**: Es el identificador de negocio principal. Es una cadena de texto legible (ej: `CAP1_ESCENA_01`) que desacopla la lógica del `id` numérico autoincremental. Esto facilita la creación y migración de contenido narrativo desde archivos JSON.
-- **`NarrativeChoice.id`**: Clave primaria para las decisiones.
-- **`User.id`**: ID de usuario de Telegram, que vincula al jugador con su estado narrativo.
+### Identificadores Únicos
+- **Fragmentos:** `key` (String, ej: `lucien_despertar_3`). Este es el identificador de negocio.
+- **Decisiones:** `id` (Integer, autoincremental).
+- **Otros Modelos (Misiones, Pistas):** `code_name` (String) o `id` (String).
 
 ## 3. Módulo de Gamificación
 
-El bot incluye un sistema de gamificación robusto para incentivar la participación.
-
 ### Sistema de Puntos
-- Los puntos (llamados "besitos" o `points`) se almacenan en el modelo `User`: `points = Column(Float, default=0)`.
-- **Cómo se otorgan:**
-    - Al llegar a un `StoryFragment` (`reward_besitos`).
-    - Al completar una `Mission` (`reward_points`).
-    - Al reaccionar a publicaciones en canales (`Channel.reaction_points`).
-    - Al completar un `Trivia` (`reward_points`).
-- **Cómo se consumen:**
-    - Al elegir una `NarrativeChoice` con coste (`required_besitos`).
-    - Al comprar un `ShopItem` (`price`).
-    - Al jugar un minijuego (`MiniGamePlay.cost_points`).
+- Los puntos se denominan "besitos" dentro del sistema.
+- Se almacenan en el modelo `User`, en la columna `points`.
+- **Otorgamiento:** Los puntos se conceden principalmente a través de:
+  - `StoryFragment.reward_besitos`: Al completar un fragmento narrativo.
+  - `Mission.reward_points`: Al completar una misión.
+  - Reacciones a publicaciones en canales (configurado en `Channel.reaction_points`).
 
 ### Estructura de Recompensas y Misiones
-- **Misiones (`Mission`):** Tareas que los usuarios pueden completar para ganar puntos. Tienen un tipo (`one_time`, `daily`), un objetivo (`target_value`) y una recompensa. El progreso se guarda en `UserMissionEntry`. Las misiones pueden estar encadenadas.
-- **Recompensas (`Reward`):** Premios que se desbloquean al alcanzar un umbral de puntos (`required_points`).
-- **Logros y Medallas (`Achievement`, `Badge`):** Reconocimientos adicionales por cumplir ciertas condiciones.
+El archivo `database/models.py` define un sistema de gamificación robusto:
+- **`Mission`**: Define una tarea a realizar (ej: "reacciona 5 veces"). Tiene un `type` (`one_time`, `daily`), `reward_points`, y puede desbloquear una pista (`unlocks_lore_piece_code`).
+- **`UserMissionEntry`**: Tabla pivot que registra el progreso de un usuario en una misión.
+- **`Achievement`**: Logros que se desbloquean bajo ciertas condiciones.
+- **`Reward`**: Recompensas por alcanzar hitos de puntos.
+- **`LorePiece`**: Pistas o piezas de historia coleccionables que se pueden desbloquear.
 
 ### Sistema de Widgets
-El término "widget" no se usa explícitamente, pero se refiere a los módulos interactivos de gamificación:
-- **Sorteos (`Raffle`):** Sistema para crear sorteos en los que los usuarios pueden participar.
-- **Subastas (`Auction`):** Un sistema de pujas en tiempo real donde los usuarios usan sus puntos.
-- **Trivias (`Trivia`):** Cuestionarios con preguntas y respuestas que otorgan puntos.
-- **Desafíos (`Challenge`):** Competiciones de tiempo limitado (diarias, semanales) basadas en acciones específicas.
+El término "widget" no se usa explícitamente. Sin embargo, la interfaz de gamificación se construye a través de teclados interactivos (`InlineKeyboard`) definidos en `keyboards/` que se presentan en los `handlers/`. Por ejemplo, `handlers/missions_handler.py` muestra la lista de misiones con botones para interactuar.
 
 ### Integración con Narrativa
-La gamificación y la narrativa están profundamente entrelazadas:
-- Completar una `Mission` puede desbloquear una `LorePiece` (pieza de historia).
-- Comprar un `ShopItem` puede desbloquear un `StoryFragment` (`unlocks_fragment_key`) o una `LorePiece`.
-- Alcanzar un `StoryFragment` puede desbloquear un `Achievement`.
+La gamificación y la narrativa están estrechamente ligadas:
+- **Misiones que Desbloquean Pistas:** `Mission.unlocks_lore_piece_code` crea una relación directa donde completar una misión otorga una `LorePiece`.
+- **Narrativa que Desbloquea Logros:** `StoryFragment.unlocks_achievement_id` permite que avanzar en la historia otorgue `Achievement`.
+- **Niveles que Desbloquean Pistas:** El modelo `Level` tiene un campo `unlocks_lore_piece_code`.
 
 ## 4. Módulo de Administración de Canales
 
 ### Estados de Usuario
-El modelo `User` gestiona los diferentes estados y roles:
-- `role = Column(String, default="free")`: El rol principal del usuario (ej: "free", "vip").
-- `vip_expires_at = Column(DateTime, nullable=True)`: Controla la membresía VIP temporal.
-- `is_admin = Column(Boolean, default=False)`: Define a los administradores del bot.
+- **`User.role`**: Columna clave que define el estado del usuario. Los valores observados son `free` y `vip`.
+- **`User.vip_expires_at`**: Fecha de expiración para el estado VIP.
+- **`VipSubscription`** y **`VipGrant`**: Modelos dedicados para gestionar las suscripciones VIP y los accesos gratuitos otorgados, lo que permite una auditoría completa.
 
 ### Sistema de Reacciones y Eventos
-- **Reacciones Nativas:** El modelo `Channel` permite configurar qué emojis de reacción están permitidos y cuántos puntos otorgan (`reaction_points`).
-- **Reacciones por Botones:** El modelo `ButtonReaction` registra clics en teclados personalizados adjuntos a mensajes de un canal.
-- **Eventos Especiales:** El modelo `Event` permite crear eventos de tiempo limitado, como multiplicadores de puntos (ej: "Doble de puntos este fin de semana").
+- **`Channel.reactions`**: Un campo JSON que lista los emojis permitidos para reaccionar en un canal.
+- **`Channel.reaction_points`**: Un JSON que mapea cada emoji a una cantidad de puntos a otorgar.
+- **`Event`**: Un modelo para definir eventos especiales (ej: "doble de puntos por reacciones") con un multiplicador y fechas de inicio/fin.
 
 ### Permisos y Roles
-El acceso a contenido y funcionalidades se controla principalmente a través del `User.role`:
-- **Narrativa:** `StoryFragment.required_role` y `NarrativeChoice.required_role`.
-- **Tienda:** `ShopItem.is_vip_only`.
-- **Comandos de Admin:** La lógica en los `handlers/admin/` comprueba el flag `User.is_admin`.
+- **Admin:** El campo booleano `User.is_admin` otorga acceso a paneles de administración. El handler `handlers/start.py` diferencia entre usuarios normales y administradores para mostrar menús distintos.
+- **Roles (VIP/Free):** Múltiples servicios y handlers verifican el `user.role` para restringir el acceso a contenido, como se ve en los campos `required_role` de los modelos de narrativa y tienda.
 
 ## 5. Tienda
 
 ### Modelo de Productos
-El producto está modelado por `ShopItem`, que contiene su nombre, descripción, precio, imagen y reglas de negocio. Un `ShopItem` puede estar asociado a múltiples archivos (`ProductFile`), útil para vender sets de fotos o contenido multimedia.
+- **`ShopItem`**: El modelo central de la tienda, definido en `database/models.py`. Contiene toda la información de un producto.
+  - `price`: Costo en "besitos".
+  - `is_vip_only`: Booleano para restringir la compra a usuarios VIP.
+  - `stock_limit`: Para productos con existencias limitadas.
+  - `max_purchases_per_user`: Límite de compras por usuario.
+  - `unlock_requirements`: Un campo JSON para definir condiciones complejas de desbloqueo.
 
 ```python
-# database/models.py
-
+# extraído de database/models.py
 class ShopItem(Base):
     __tablename__ = "shop_items"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(255), nullable=False)
-    description = Column(Text)
-    price = Column(Integer, nullable=False) # Precio en puntos
+    price = Column(Integer, nullable=False)  # Price in besitos
     is_vip_only = Column(Boolean, default=False)
-    
-    # ¿Qué desbloquea este item?
     unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
-    unlocks_fragment_key = Column(String(50), nullable=True)
-    
-    # Reglas de disponibilidad y stock
+    unlocks_fragment_key = Column(String(50), nullable=True)  # Key of StoryFragment
     stock_limit = Column(Integer, nullable=True)
-    max_purchases_per_user = Column(Integer, default=1)
-    available_from = Column(DateTime, nullable=True)
-    available_until = Column(DateTime, nullable=True)
-    
-    # Requisitos de compra complejos
-    unlock_requirements = Column(JSON, nullable=True)
+    # ...
 ```
 
 ### Tipos de Productos
-El tipo de producto se define por lo que desbloquea:
-- **Desbloqueo de Narrativa:** Items que rellenan `unlocks_fragment_key`.
-- **Desbloqueo de Lore:** Items que rellenan `unlocks_lore_piece_id`.
-- **Acceso VIP:** No hay un campo directo, pero la lógica de compra puede otorgar un `VipGrant` o un `Reward` que a su vez da días de VIP.
-- **Contenido Multimedia:** Items que entregan `ProductFile`.
+Los productos son agnósticos y su función se define por lo que desbloquean:
+- **Desbloqueo de Fragmentos:** `ShopItem.unlocks_fragment_key` vincula un producto a un fragmento narrativo, permitiendo comprar acceso a ramas de la historia.
+- **Desbloqueo de Pistas:** `ShopItem.unlocks_lore_piece_id` vincula un producto a una `LorePiece`.
+- **Desbloqueo de Estado VIP:** No se observa un campo directo, pero podría manejarse a través de un producto que otorga una recompensa de tipo `vip_access`.
 
 ### Sistema de Compra y Validación
-El proceso, gestionado en `handlers/shop_handlers.py`, implica:
-1.  Verificar que el usuario tiene puntos suficientes.
-2.  Comprobar el stock (`stock_limit`) y el límite de compra por usuario (`max_purchases_per_user`).
-3.  Validar la disponibilidad por fecha y rol (`available_from`, `is_vip_only`).
-4.  Si todo es correcto, se restan los puntos al usuario, se crea un registro en `UserPurchase` y se entrega el producto (desbloqueando el contenido o enviando los archivos).
+El flujo se maneja en `handlers/shop_handlers.py` y `services/shop_service.py`:
+1. El usuario selecciona un producto.
+2. El sistema verifica si el usuario cumple los requisitos (puntos, rol, stock, etc.).
+3. Si la validación es exitosa, se crea un registro en la tabla `UserPurchase`.
+4. Se descuentan los puntos del `User.points`.
+5. Se otorga el contenido desbloqueado (se crea un `UserLorePiece` o se actualiza el `UserNarrativeState`).
+El `narrative_handler.py` contiene lógica de "retorno de la tienda" (`return_from_shop`) para manejar decisiones narrativas que requerían una compra, demostrando una integración profunda.
 
 ### Referencias Cruzadas
-- `ShopItem.unlocks_fragment_key` -> `StoryFragment.key`
-- `ShopItem.unlocks_lore_piece_id` -> `LorePiece.id`
-- `UserPurchase` -> `User.id` y `ShopItem.id`
+- **`ShopItem.unlocks_fragment_key`**: Referencia de **String** a `StoryFragment.key`.
+- **`ShopItem.unlocks_lore_piece_id`**: Referencia de **Integer** (clave foránea) a `LorePiece.id`.
 
 ## 6. Configuración Actual
 
-### Archivos de Configuración Existentes
-- `alembic.ini`: Configuración para las migraciones de base de datos.
-- `config/narrative_schema.json`: Define la estructura esperada para los archivos JSON de narrativa.
-- `config/decision_requirements.json`: Parece ser un archivo de configuración para la lógica de decisiones.
-- `data/*.json`: Contienen datos iniciales para trivias, quizzes, etc.
+### Archivos de Configuración
+- `config/narrative_schema.json`: Un schema JSON que valida la estructura de los archivos de configuración de narrativa. Esto es una excelente práctica para mantener la consistencia.
+- `config/decision_requirements.json`: Un archivo JSON simple que parece mapear IDs de decisión a nombres de items requeridos (ej: "Diario Secreto").
+- La base de datos misma actúa como una fuente de configuración para misiones, productos de la tienda, etc., que se gestionan probablemente a través de un panel de admin.
 
 ### Formato de Datos
-- **Base de Datos:** La fuente principal de verdad para todos los datos dinámicos (usuarios, progreso, etc.).
-- **JSON:** Utilizado para la carga inicial de contenido estático como la narrativa y las trivias. Esto permite a los diseñadores narrativos trabajar en archivos de texto sencillos que luego se cargan en la base de datos.
+- **JSON:** Es el formato principal para la configuración estática y para campos flexibles en la base de datos.
+- **Base de Datos:** La mayoría de las entidades (misiones, productos) se definen como registros en la base de datos, lo que permite una gestión dinámica.
 
-### Proceso Actual de Creación/Vinculación de Elementos
-1.  **Narrativa:** Se crea un archivo JSON siguiendo el schema. Un script (`populate_narrative.py` o similar) lee este JSON y lo inserta en las tablas `story_fragments` y `narrative_choices`, resolviendo las referencias por `key`.
-2.  **Tienda, Misiones, etc.:** Se crean a través de paneles de administración dentro del propio bot (gestionados en `handlers/admin/`). Estos paneles interactúan directamente con la base de datos a través de los servicios.
+### Proceso de Creación/Vinculación de Elementos
+El flujo de trabajo parece ser una combinación de:
+1. **Configuración estática:** Definir la estructura base y ciertos elementos en archivos JSON.
+2. **Gestión dinámica:** Utilizar paneles de administración (inferido por la existencia de `handlers/admin/`) para crear y modificar misiones, productos y fragmentos narrativos directamente en la base de datos.
+La vinculación se realiza consistentemente a través de identificadores de string (`key`, `code_name`) o IDs numéricos.
 
-### Pain Points Identificados en el Flujo de Configuración
-- **Dependencia de JSONs:** Mantener la consistencia entre múltiples archivos JSON de narrativa puede ser complejo. Un error de sintaxis o una `key` mal escrita puede romper el flujo.
-- **Vinculación Manual:** La vinculación entre módulos (ej: un `ShopItem` que desbloquea un `StoryFragment`) depende de que el administrador introduzca la `key` correcta manualmente en el panel de admin. Esto es propenso a errores.
-- **Falta de un CMS Unificado:** La configuración está dividida entre archivos JSON y paneles de admin dentro del bot. Un CMS web externo podría centralizar y simplificar la gestión de todo el contenido (narrativa, tienda, misiones) con validación y selectores visuales para evitar errores de tipeo.
+### Pain Points Identificados
+- **Configuración descentralizada:** La configuración reside en múltiples lugares: archivos JSON, la base de datos y valores hardcodeados en el código (ej: en teclados). Esto puede dificultar la gestión y el seguimiento de todos los parámetros del sistema.
+- **Confianza en IDs numéricos:** Aunque se usan claves de string en la narrativa, otros módulos todavía dependen de IDs numéricos autoincrementales como claves foráneas, lo que puede ser más frágil al migrar datos entre entornos.
 
 ## 7. APIs y Endpoints
 
 ### Comandos del Bot Expuestos
-Los handlers en `handlers/` definen los comandos. Los principales son:
-- `/start`: Inicia la interacción con el bot.
-- `/menu`: Muestra el menú principal.
-- Comandos de admin (ej: `/admin`, `/shop_admin`): Acceden a los paneles de gestión.
-- El bot responde a callbacks de botones en lugar de a muchos comandos de texto.
+Basado en los `handlers`, se identifican los siguientes comandos para el usuario:
+- `/start`: Inicia la interacción y muestra el menú principal. (en `handlers/start.py`)
+- `/historia`: Inicia o continúa la narrativa. (en `handlers/narrative_handler.py`)
+- `/mi_historia`: Muestra estadísticas del progreso narrativo. (en `handlers/narrative_handler.py`)
+Además de estos, el bot funciona principalmente a través de callbacks de botones (`CallbackQuery`).
 
-### APIs Externas
-No se evidencia una API REST/GraphQL pública expuesta por el bot. La comunicación es interna o a través de la API de Telegram.
+### API REST/GraphQL
+No se ha encontrado evidencia de una API REST o GraphQL expuesta. La comunicación es interna entre los módulos de Python o directa con la API de Telegram.
 
 ### Webhooks de Telegram
-El bot funciona en modo webhook (preferido para producción). El punto de entrada principal (`bot.py` o similar) configura el dispatcher de Aiogram para recibir las actualizaciones de Telegram.
+El framework `aiogram` puede operar tanto en modo `polling` como `webhook`. El archivo `bot.py` es donde se realizaría esta configuración. Aunque no se especifica el modo, una aplicación en producción típicamente usaría webhooks para mayor eficiencia.
 
 ## 8. Interconexiones Críticas
 
-### Mapa de Dependencias entre Módulos
-- **Usuario (`User`)** es el modelo central. Todo se vincula a él.
-- **Narrativa (`StoryFragment`)** se conecta con **Gamificación** (`Achievement`, `Mission`) y **Tienda** (`ShopItem`).
-- **Tienda (`ShopItem`)** es un nexo clave, pudiendo desbloquear contenido en casi todos los demás módulos (Narrativa, Lore, VIP).
-- **Gamificación (`Mission`, `Level`)** desbloquea `LorePiece`, que es una forma de narrativa ligera.
+### Mapa de Dependencias
+- **Orquestador Principal:** El `CoordinadorCentral` (mencionado en el análisis del código) actúa como una fachada que orquesta flujos complejos entre módulos, desacoplando los servicios entre sí.
+- **Flujo:** `Handlers` reciben input -> llaman a `Services` -> `Services` ejecutan la lógica de negocio, usando los `Models` de la base de datos para persistir los cambios.
 
-### Flujos de Datos
+### Flujos de Datos Clave
 - **Usuario completa un fragmento narrativo:**
-    1.  El `narrative_handler` recibe el callback de la decisión del usuario.
-    2.  Llama al `narrative_service` para validar la elección.
-    3.  El servicio actualiza el `UserNarrativeState` (cambia `current_fragment_key`, añade la decisión a `choices_made`).
-    4.  Otorga puntos (`User.points += reward_besitos`).
-    5.  Comprueba si se desbloquea un `Achievement`.
-    6.  Envía el nuevo `StoryFragment` al usuario.
+  1. `narrative_handler` recibe el callback de la decisión.
+  2. Llama a `NarrativeService` para procesar la decisión.
+  3. `NarrativeService` valida requisitos, actualiza `UserNarrativeState.current_fragment_key`.
+  4. Otorga `reward_besitos` actualizando `User.points`.
+  5. Desbloquea un `Achievement` si `unlocks_achievement_id` está presente.
+  6. Devuelve el siguiente `StoryFragment` al handler para ser mostrado.
 
 - **Usuario reacciona a una publicación:**
-    1.  El `reaction_handler` recibe el evento `MessageReactionUpdated`.
-    2.  Busca en el modelo `Channel` los puntos asociados a esa reacción.
-    3.  Llama al `point_service` para añadir los puntos al `User`.
-    4.  El `point_service` puede a su vez llamar al `level_service` o `achievement_service` para ver si la ganancia de puntos desbloquea algo.
+  1. Un `reaction_handler` (no mostrado, pero inferido) captura el evento.
+  2. Obtiene los puntos para esa reacción de `Channel.reaction_points`.
+  3. Actualiza `User.points`.
+  4. Actualiza el progreso de cualquier misión de tipo "reacción" en `UserMissionEntry`.
 
 - **Usuario compra un producto:**
-    1.  El `shop_handler` recibe el callback de compra.
-    2.  Llama al `shop_service` para validar la compra (puntos, stock, etc.).
-    3.  Si es válida, el servicio resta los puntos al `User` y crea un `UserPurchase`.
-    4.  El servicio determina qué desbloquea el item (`unlocks_fragment_key`, `unlocks_lore_piece_id`, etc.).
-    5.  Llama al servicio correspondiente (ej: `narrative_service`) para otorgar el acceso.
-    6.  Notifica al usuario de la compra exitosa.
+  1. `shop_handlers` recibe el callback de compra.
+  2. Llama a `ShopService` para ejecutar la compra.
+  3. `ShopService` verifica los puntos del usuario y otros requisitos.
+  4. Crea un registro en `UserPurchase`.
+  5. Deduce los puntos de `User.points`.
+  6. Si `unlocks_lore_piece_id` está presente, crea un registro en `UserLorePiece`.
+  7. Si `unlocks_fragment_key` está presente, actualiza el `UserNarrativeState` o un campo similar para dar acceso.
+  8. El `narrative_handler` tiene lógica para re-evaluar una decisión pendiente después de que el usuario regresa de la tienda.
 
 - **Usuario completa una misión:**
-    1.  Un `middleware` o un `handler` específico detecta la acción que cumple la misión (ej: enviar X mensajes).
-    2.  Actualiza el `UserMissionEntry` marcando la misión como completada.
-    3.  Llama al `point_service` para otorgar los `reward_points`.
-    4.  Comprueba si la misión desbloquea una `LorePiece` o una misión subsecuente.
-    5.  Notifica al usuario a través de un `notifier_service`.
+  1. Un evento (ej: enviar un mensaje, reaccionar) dispara una verificación en `MissionService`.
+  2. `MissionService` actualiza el `progress_value` en `UserMissionEntry`.
+  3. Si el progreso alcanza `Mission.target_value`, marca la misión como completada.
+  4. Otorga los `reward_points` a `User.points`.
+  5. Si `unlocks_lore_piece_code` está presente, crea un registro en `UserLorePiece`.
