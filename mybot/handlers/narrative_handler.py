@@ -10,6 +10,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from services.narrative_service import NarrativeService, RequirementsInfo
 from services.narrative_loader import NarrativeLoader
+from services.coordinador_central import CoordinadorCentral, AccionUsuario
+from services.narrative_state_machine import NarrativeStateMachine
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
 from utils.user_roles import get_user_role
@@ -664,9 +666,29 @@ async def _display_narrative_fragment(
 
 @router.callback_query(F.data == "start_narrative")
 async def start_narrative_callback(callback: CallbackQuery, session: AsyncSession):
-    """Handles the 'start_narrative' button click by calling the command handler."""
-    await callback.answer(get_text("narrative.handler.starting_story"))
-    await start_narrative_command(callback.message, session)
+    """Continúa la narrativa desde donde se quedó el usuario o inicia si es nuevo."""
+    user_id = callback.from_user.id
+
+    try:
+        await callback.answer(get_text("narrative.handler.starting_story"))
+        
+        service = NarrativeService(session, callback.bot)
+
+        # Try to get current fragment (where user left off)
+        current_fragment = await service.get_user_current_fragment(user_id)
+
+        if current_fragment:
+            logger.info(f"[HISTORIA_CALLBACK_DEBUG] Continuing from fragment: {current_fragment.key}")
+            await _display_narrative_fragment(callback.message, current_fragment, session)
+        else:
+            # New user - start narrative from beginning
+            logger.info(f"[HISTORIA_CALLBACK_DEBUG] Starting new narrative for user {user_id}")
+            await start_narrative_command(callback.message, session)
+
+    except Exception as e:
+        logger.error(f"Error in historia callback for user {user_id}: {e}", exc_info=True)
+        await callback.answer("❌ Error al cargar tu historia", show_alert=True)
+        await callback.answer("❌ Error al cargar tu historia", show_alert=True)
 
 # Enhanced L1F1 Helper Functions
 
