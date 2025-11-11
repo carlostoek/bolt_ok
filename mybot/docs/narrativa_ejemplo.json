@@ -1,0 +1,259 @@
+{
+  "version": "1.0",
+  "metadata": {
+    "last_updated": "2025-11-11T10:30:00Z",
+    "updated_by": "admin",
+    "description": "Ejemplo completo de configuración de narrativa para el editor visual, incluyendo fragmentos, decisiones, tienda, lore y combinaciones de pistas."
+  },
+  "fragments": [
+    {
+      "key": "start_adventure",
+      "text": "🎩 **Lucien:** Bienvenido, viajero. El camino que tienes delante está lleno de misterios y decisiones. ¿Estás listo para forjar tu propio destino?",
+      "character": "Lucien",
+      "level": 1,
+      "reward_besitos": 10,
+      "choices": [
+        {
+          "text": "Estoy listo para cualquier desafío.",
+          "destination_fragment_key": "forest_entrance",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "Necesito prepararme un poco más.",
+          "destination_fragment_key": "prepare_yourself",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 200, "y": 0 }
+    },
+    {
+      "key": "prepare_yourself",
+      "text": "🌸 **Diana:** La preparación es clave, pero la aventura no espera. Puedes visitar la tienda para equiparte o volver al inicio cuando te sientas listo.",
+      "character": "Diana",
+      "level": 1,
+      "auto_next_fragment_key": null,
+      "choices": [
+        {
+          "text": "Ir a la tienda",
+          "destination_fragment_key": "shop_menu",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "Volver al inicio",
+          "destination_fragment_key": "start_adventure",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 50, "y": 200 }
+    },
+    {
+      "key": "forest_entrance",
+      "text": "🌳 **Narrador:** Te encuentras en la entrada de un bosque denso. Un sendero se adentra en la oscuridad, mientras que otro bordea un río cristalino.",
+      "character": "Lucien",
+      "level": 2,
+      "min_besitos": 5,
+      "choices": [
+        {
+          "text": "Adentrarte en el sendero oscuro.",
+          "destination_fragment_key": "dark_path",
+          "required_besitos": 10,
+          "required_role": null
+        },
+        {
+          "text": "Seguir el río.",
+          "destination_fragment_key": "river_path",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 400, "y": 200 }
+    },
+    {
+      "key": "dark_path",
+      "text": "🌑 **Narrador:** La oscuridad te envuelve. Sientes una presencia extraña. De repente, una voz susurra: 'Solo los VIP pueden pasar por aquí'.",
+      "character": "Diana",
+      "level": 3,
+      "required_role": "vip",
+      "choices": [
+        {
+          "text": "Mostrar tu membresía VIP.",
+          "destination_fragment_key": "secret_glade",
+          "required_besitos": 0,
+          "required_role": "vip"
+        },
+        {
+          "text": "Buscar otro camino.",
+          "destination_fragment_key": "forest_entrance",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 600, "y": 400 }
+    },
+    {
+      "key": "river_path",
+      "text": "💧 **Narrador:** El río te guía a un claro soleado. Ves una flor brillante en la orilla.",
+      "character": "Lucien",
+      "level": 2,
+      "reward_besitos": 15,
+      "choices": [
+        {
+          "text": "Recoger la flor.",
+          "destination_fragment_key": "flower_collected",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "Ignorar la flor y continuar.",
+          "destination_fragment_key": "crossroads",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 200, "y": 400 }
+    },
+    {
+      "key": "flower_collected",
+      "text": "🌸 **Diana:** ¡Qué hermosa flor! Parece tener propiedades mágicas. La guardas en tu mochila.",
+      "character": "Diana",
+      "level": 2,
+      "unlocks_achievement_id": "first_flower",
+      "auto_next_fragment_key": "crossroads",
+      "visual_position": { "x": 50, "y": 600 }
+    },
+    {
+      "key": "secret_glade",
+      "text": "✨ **Narrador:** Has llegado a un claro secreto, lleno de luz y magia. Aquí, Diana te espera con una revelación.",
+      "character": "Diana",
+      "level": 4,
+      "reward_besitos": 50,
+      "image_url": "https://example.com/secret_glade.jpg",
+      "archetype_variant": "romantic",
+      "choices": [
+        {
+          "text": "Escuchar la revelación de Diana.",
+          "destination_fragment_key": "diana_revelation",
+          "required_besitos": 0,
+          "required_role": null
+        }
+      ],
+      "visual_position": { "x": 600, "y": 600 }
+    },
+    {
+      "key": "diana_revelation",
+      "text": "🌸 **Diana:** La verdad es que... siempre te he estado observando. Cada decisión tuya ha tejido este camino.",
+      "character": "Diana",
+      "level": 5,
+      "auto_next_fragment_key": null,
+      "visual_position": { "x": 800, "y": 800 }
+    },
+    {
+      "key": "crossroads",
+      "text": "🗺️ **Narrador:** El camino se divide en tres: una cueva oscura, un pueblo bullicioso y un antiguo templo.",
+      "character": "Lucien",
+      "level": 3,
+      "choices": [
+        {
+          "text": "Explorar la cueva.",
+          "destination_fragment_key": "dark_cave",
+          "required_besitos": 20,
+          "required_role": null
+        },
+        {
+          "text": "Visitar el pueblo.",
+          "destination_fragment_key": "bustling_village",
+          "required_besitos": 0,
+          "required_role": null
+        },
+        {
+          "text": "Investigar el templo.",
+          "destination_fragment_key": "ancient_temple",
+          "required_besitos": 0,
+          "required_role": "vip"
+        }
+      ],
+      "visual_position": { "x": 200, "y": 800 }
+    }
+  ],
+  "shop_items": [
+    {
+      "name": "Linterna Mágica",
+      "description": "Ilumina los caminos más oscuros y revela secretos ocultos.",
+      "price": 30,
+      "is_vip_only": false,
+      "unlocks_fragment_key": "dark_cave",
+      "image_file_id": "telegram_file_id_lantern",
+      "stock_limit": 50,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    },
+    {
+      "name": "Amuleto de Protección VIP",
+      "description": "Te otorga acceso temporal a zonas exclusivas.",
+      "price": 100,
+      "is_vip_only": false,
+      "unlocks_lore_piece_code": "vip_pass_lore",
+      "image_file_id": "telegram_file_id_amulet",
+      "stock_limit": 10,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    },
+    {
+      "name": "Mapa del Tesoro",
+      "description": "Un mapa antiguo que indica la ubicación de un tesoro legendario.",
+      "price": 50,
+      "is_vip_only": true,
+      "unlocks_fragment_key": "treasure_location",
+      "image_file_id": "telegram_file_id_map",
+      "stock_limit": null,
+      "max_purchases_per_user": 1,
+      "is_active": true
+    }
+  ],
+  "lore_pieces": [
+    {
+      "code_name": "ancient_forest_legend",
+      "title": "La Leyenda del Bosque Susurrante",
+      "description": "Un antiguo relato sobre los espíritus que habitan el bosque.",
+      "content": "Se dice que en lo profundo del bosque, los árboles susurran secretos a quienes saben escuchar...",
+      "content_type": "text",
+      "category": "Leyendas",
+      "is_main_story": false
+    },
+    {
+      "code_name": "vip_pass_lore",
+      "title": "Pase VIP Temporal",
+      "description": "Información sobre cómo usar tu pase VIP temporal.",
+      "content": "Con este amuleto, puedes acceder a la zona VIP del bosque por 24 horas. ¡Úsalo sabiamente!",
+      "content_type": "text",
+      "category": "Pases",
+      "is_main_story": false
+    },
+    {
+      "code_name": "temple_runes",
+      "title": "Runas del Templo Antiguo",
+      "description": "Un conjunto de runas grabadas en las paredes del templo.",
+      "content": "Las runas hablan de un poder ancestral que duerme bajo la tierra...",
+      "content_type": "image",
+      "image_url": "https://example.com/temple_runas.png",
+      "category": "Secretos",
+      "is_main_story": true
+    }
+  ],
+  "hint_combinations": [
+    {
+      "combination_code": "forest_treasure_map",
+      "required_hints": ["ancient_forest_legend", "temple_runes"],
+      "reward_code": "treasure_location"
+    },
+    {
+      "combination_code": "vip_access_combo",
+      "required_hints": ["vip_pass_lore", "secret_glade_map_fragment"],
+      "reward_code": "secret_glade_access"
+    }
+  ]
+}
