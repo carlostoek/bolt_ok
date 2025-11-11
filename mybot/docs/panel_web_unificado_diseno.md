@@ -4,10 +4,11 @@
 
 **Objetivo:** Crear un panel web unificado que elimine los pasos manuales actuales y automatice la configuración del ecosistema completo, integrando narrativa, tienda, lore y gamificación en una interfaz cohesiva.
 
-**Problema Actual:** Configurar un fragmento narrativo bloqueado requiere:
-1. Ir a la sección de lores y configurar un lore
-2. Ir a la sección de tienda para crear un producto que desbloquee el fragmento  
-3. Ir a crear el fragmento y colocar manualmente el ID del producto
+**Problema Actual:** Para configurar un fragmento narrativo que se desbloquea con un producto, el proceso manual es propenso a errores y requiere:
+1. Ir a la sección de tienda para crear un producto
+2. Copiar el ID del nuevo producto
+3. Ir a la sección de narrativa para crear o editar el fragmento
+4. Pegar manualmente el ID del producto en la configuración del fragmento
 
 **Solución:** Un panel web donde todo el flujo esté conectado con disposición automática.
 
@@ -101,13 +102,20 @@ NarrativeChoice (decisiones)
 ### **Nuevos Modelos Propuestos**
 
 ```python
+import enum
+
+class ContentTypeEnum(enum.Enum):
+    FRAGMENT = "fragment"
+    SHOP_ITEM = "shop_item"
+    LORE_PIECE = "lore_piece"
+
 class UnifiedContentConfig(Base):
     """Configuración unificada para contenido interconectado"""
     __tablename__ = "unified_content_configs"
     
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)  # Nombre descriptivo
-    content_type = Column(String, nullable=False)  # "fragment", "shop_item", "lore_piece"
+    content_type = Column(Enum(ContentTypeEnum), nullable=False)
     
     # Referencias a entidades existentes
     fragment_key = Column(String, ForeignKey("story_fragments.key"), nullable=True)
@@ -351,9 +359,9 @@ GET /api/content-graph
   "lore_piece": {
     "auto_create": false
   },
-  "unlock_conditions": {
-    "type": "shop_purchase",
-    "requirements": []
+  "fragment_unlock_conditions": {
+    "type": "level",
+    "min_level": 3
   }
 }
 ```
