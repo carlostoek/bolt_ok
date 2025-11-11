@@ -884,12 +884,57 @@ async def continue_narrative_after_purchase(callback: CallbackQuery, session: As
     try:
         await callback.answer("📖 Regresando a la historia...")
 
-        # Redirigir al handler de narrativa
-        # Este handler ya existe y maneja el shop_redirect_fragment_key
-        from handlers.narrative_handler import start_narrative_command
+        # Usar la misma lógica que el botón del keyboard para continuar desde donde se quedó
+        from services.narrative_service import NarrativeService
+        from services.coordinador_central import CoordinadorCentral, AccionUsuario
+        from services.narrative_state_machine import NarrativeStateMachine
+        from handlers.narrative_handler import _display_narrative_fragment
 
-        # Simular mensaje para el handler
-        await start_narrative_command(callback.message, session)
+        user_id = callback.from_user.id
+        service = NarrativeService(session, callback.bot)
+        state_machine = NarrativeStateMachine(session)
+
+        # Check if user is in shop flow
+        is_in_shop_flow = await state_machine.is_in_shop_flow(user_id)
+        logger.info(f"[SHOP_RETURN_DEBUG] User {user_id} is_in_shop_flow: {is_in_shop_flow}")
+
+        # First, check if there's a pending decision to process (e.g., after shop purchase)
+        if is_in_shop_flow:
+            return_result = await state_machine.return_from_shop(user_id)
+            if return_result["success"] and return_result.get("pending_decision_id"):
+                pending_decision_id = return_result["pending_decision_id"]
+                logger.info(f"[SHOP_RETURN_DEBUG] Processing pending decision {pending_decision_id}")
+                coordinador = CoordinadorCentral(session)
+
+                result = await coordinador.ejecutar_flujo(
+                    user_id,
+                    AccionUsuario.TOMAR_DECISION,
+                    decision_id=pending_decision_id
+                )
+
+                if result["success"] and result.get("fragment"):
+                    # CRITICAL FIX: Clear shop context ONLY after successful decision processing
+                    logger.info(f"[SHOP_RETURN_DEBUG] Decision processed successfully, clearing shop context")
+                    await state_machine.clear_shop_context(user_id)
+
+                    logger.info(f"[SHOP_RETURN_DEBUG] Showing unlocked fragment: {result['fragment'].key}")
+                    await _display_narrative_fragment(callback.message, result["fragment"], session)
+                    return
+                else:
+                    # Decision failed - context preserved for retry
+                    logger.warning(f"[SHOP_RETURN_DEBUG] Decision processing failed - preserving shop context")
+
+        # Try to get current fragment (where user left off)
+        current_fragment = await service.get_user_current_fragment(user_id)
+
+        if current_fragment:
+            logger.info(f"[SHOP_RETURN_DEBUG] Continuing from fragment: {current_fragment.key}")
+            await _display_narrative_fragment(callback.message, current_fragment, session)
+        else:
+            # New user - start narrative from beginning
+            logger.info(f"[SHOP_RETURN_DEBUG] Starting new narrative for user {user_id}")
+            from handlers.narrative_handler import start_narrative_command
+            await start_narrative_command(callback.message, session)
 
     except Exception as e:
         logger.error(f"Error continuing narrative after purchase: {e}", exc_info=True)
