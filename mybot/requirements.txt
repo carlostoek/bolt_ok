@@ -1,1 +1,7 @@
--r mybot/requirements.txt
+aiogram
+sqlalchemy[asyncio]
+asyncpg
+alembic
+python-dotenv
+cryptography
+pytest

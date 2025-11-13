@@ -2,14 +2,18 @@ import os
 from typing import List
 
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "YOUR_BOT_TOKEN")
-if BOT_TOKEN == "YOUR_BOT_TOKEN" or not BOT_TOKEN:
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "7570619877:AAHJMc_PNgZT9rpjUzpp19FMo7WlmHfA5Ms")
+if (not BOT_TOKEN or 
+    len(BOT_TOKEN) < 10 or 
+    ':' not in BOT_TOKEN or
+    BOT_TOKEN == "YOUR_BOT_TOKEN" or
+    BOT_TOKEN == "your_bot_token_here"):
     raise ValueError(
         "BOT_TOKEN environment variable is not set or contains the default placeholder."
     )
 
 ADMIN_IDS: List[int] = [
-    int(uid) for uid in os.environ.get("ADMIN_IDS", "").split(";") if uid.strip()
+    int(uid) for uid in os.environ.get("ADMIN_IDS", "").replace(",", ";").split(";") if uid.strip()
 ]
 
 VIP_CHANNEL_ID = int(os.environ.get("VIP_CHANNEL_ID", "0"))
@@ -26,6 +30,12 @@ class Config:
     
     # SQLite configuration
     DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///bot.db")
+    # Ensure SQLite URLs use the async format
+    if DATABASE_URL.startswith("sqlite:///"):
+        DATABASE_URL = DATABASE_URL.replace("sqlite:///", "sqlite+aiosqlite:///", 1)
+    elif DATABASE_URL.startswith("sqlite:"):
+        DATABASE_URL = DATABASE_URL.replace("sqlite:", "sqlite+aiosqlite:", 1)
+        
     DB_POOL_SIZE = int(os.environ.get("DB_POOL_SIZE", "10"))
     DB_MAX_OVERFLOW = int(os.environ.get("DB_MAX_OVERFLOW", "5"))
     
