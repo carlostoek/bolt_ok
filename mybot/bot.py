@@ -8,7 +8,6 @@ load_dotenv()
 
 from aiogram import Bot, Dispatcher, BaseMiddleware
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.client.bot import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import ErrorEvent
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
@@ -166,7 +165,7 @@ async def main() -> None:
         # Configuración del bot
         bot = Bot(
             BOT_TOKEN, 
-            default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+            parse_mode=ParseMode.HTML
         )
         dp = Dispatcher(storage=MemoryStorage(), session_factory=session_factory)
 
