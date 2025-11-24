@@ -152,7 +152,7 @@ async def create_trigger_with_actions(
         logger.error(f"❌ Error inesperado: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error interno del servidor: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -244,7 +244,7 @@ async def test_event_execution(
         logger.error(f"❌ Error inesperado en simulación: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error interno del servidor: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -290,10 +290,10 @@ async def get_trigger(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al obtener trigger: {str(e)}")
+        logger.error(f"❌ Error al obtener trigger: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener trigger: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -331,10 +331,10 @@ async def list_triggers(
         return triggers
 
     except Exception as e:
-        logger.error(f"❌ Error al listar triggers: {str(e)}")
+        logger.error(f"❌ Error al listar triggers: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al listar triggers: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -382,10 +382,10 @@ async def update_trigger(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al actualizar trigger: {str(e)}")
+        logger.error(f"❌ Error al actualizar trigger: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al actualizar trigger: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -431,8 +431,8 @@ async def delete_trigger(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al eliminar trigger: {str(e)}")
+        logger.error(f"❌ Error al eliminar trigger: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al eliminar trigger: {str(e)}"
+            detail="Error interno del servidor."
         )

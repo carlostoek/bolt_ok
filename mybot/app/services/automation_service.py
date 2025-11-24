@@ -360,12 +360,10 @@ class AutomationService:
             return True  # Sin condiciones = siempre se ejecuta
 
         for key, expected_value in conditions.items():
-            actual_value = context.get(key)
-            
-            # Comparación simple (igualdad)
-            if actual_value != expected_value:
+            if key not in context or context.get(key) != expected_value:
                 logger.debug(
-                    f"      Condición falló: {key} = {actual_value} (esperado: {expected_value})"
+                    f"      Condición falló: la clave '{key}' no está en el contexto o el valor no coincide. "
+                    f"Contexto: {context.get(key)}, Esperado: {expected_value}"
                 )
                 return False
 

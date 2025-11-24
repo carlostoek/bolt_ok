@@ -142,7 +142,7 @@ async def create_product_with_nested(
         logger.error(f"❌ Error inesperado: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error interno del servidor: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -188,10 +188,10 @@ async def get_product(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al obtener producto: {str(e)}")
+        logger.error(f"❌ Error al obtener producto: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener producto: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -229,10 +229,10 @@ async def list_products(
         return products
 
     except Exception as e:
-        logger.error(f"❌ Error al listar productos: {str(e)}")
+        logger.error(f"❌ Error al listar productos: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al listar productos: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -280,10 +280,10 @@ async def update_product(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al actualizar producto: {str(e)}")
+        logger.error(f"❌ Error al actualizar producto: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al actualizar producto: {str(e)}"
+            detail="Error interno del servidor."
         )
 
 
@@ -329,8 +329,8 @@ async def delete_product(
         )
 
     except Exception as e:
-        logger.error(f"❌ Error al eliminar producto: {str(e)}")
+        logger.error(f"❌ Error al eliminar producto: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al eliminar producto: {str(e)}"
+            detail="Error interno del servidor."
         )

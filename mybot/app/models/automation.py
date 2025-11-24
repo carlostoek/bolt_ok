@@ -123,7 +123,7 @@ class AutomationLog(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
 
     # Información del evento
-    trigger_id = Column(Integer, ForeignKey('automation_triggers.id'), nullable=False)
+    trigger_id = Column(Integer, ForeignKey('automation_triggers.id', ondelete='SET NULL'), nullable=True)
     event_type = Column(String(50), nullable=False)
     user_id = Column(Integer, nullable=False)
     

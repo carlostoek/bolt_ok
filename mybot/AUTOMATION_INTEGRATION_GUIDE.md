@@ -198,6 +198,8 @@ EXECUTE_WEBHOOK = "execute_webhook"
 
 ```python
 # En handlers/fragment_handlers.py
+from datetime import datetime
+
 async def handle_fragment_view(user_id: int, fragment_key: str):
     # Lógica existente...
     
@@ -216,7 +218,7 @@ async def handle_fragment_view(user_id: int, fragment_key: str):
 
 ```python
 # En handlers/shop_handlers.py  
-async def handle_purchase(user_id: int, product_id: int):
+async def handle_purchase(user_id: int, product_id: int, product_price: float):
     # Lógica de compra existente...
     
     # Ejecutar automatizaciones
@@ -235,6 +237,8 @@ async def handle_purchase(user_id: int, product_id: int):
 
 ```python
 # En handlers/user_handlers.py
+from datetime import datetime
+
 async def handle_user_registration(user_id: int, source: str):
     # Lógica de registro existente...
     
