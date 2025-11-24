@@ -1,0 +1,1892 @@
+
+ ▐▛███▜▌   Claude Code v2.0.50
+▝▜█████▛▘  Sonnet 4.5 · API Usage Billing
+  ▘▘ ▝▝    ~/repos/bolt_ok/mybot
+
+> Actúa como un Arquitecto de Software Senior y Desarrollador Full Stack 
+especializado en paneles administrativos complejos. Vamos a construir un 
+dashboard web para administrar este bot
+
+**Contexto del Problema:**
+Actualmente, la administración es manual y fragmentada. Para crear una 
+historia bloqueada, el admin debe:
+1. Ir a Tienda -> Crear Producto -> Copiar ID.
+2. Ir a Narrativa -> Crear Fragmento -> Pegar ID del producto para 
+bloquearlo.
+3. Ir a Configuración -> Crear Trigger de recompensa -> Pegar IDs de nuevo.
+
+**Objetivo:**
+Crear un "Sistema de Administración Unificado" donde las dependencias se 
+gestionen automáticamente. Si creo un fragmento bloqueado, debo poder crear 
+el producto que lo bloquea *en la misma pantalla* y el sistema debe 
+encargarse de crear el producto, obtener su ID y vincularlo al fragmento 
+automáticamente.
+
+**Archivos de Referencia:**
+@docs/arquitectura_actual.md
+
+Aquí se detalla toda la estructura, arquitectura y conexiones que hay en el 
+sistema
+
+**Stack Tecnológico Sugerido:**
+- Backend: Python (FastAPI o Flask) para integrarse con los modelos ORM 
+existentes del bot (SQLAlchemy).
+- Frontend: React (o Next.js) con componentes modernos (ShadcnUI o Material 
+UI).
+- Base de Datos: PostgreSQL (la misma que usa el bot).
+
+**Tu primera tarea:**
+Analiza el documento y genera un esquema de los endpoints de la API 
+necesarios para soportar una creación "anidada" (Nested Creation). Por 
+ejemplo, un endpoint `POST /narrative/create` que acepte en su body 
+opcionalmente un objeto `new_product_lock` para crearlo al vuelo. 
+  ⎿  Read docs/arquitectura_actual.md (534 lines)
+
+● Perfecto, voy a analizar la arquitectura actual y diseñar un sistema de
+  API robusto que soporte creación anidada y automatización de dependencias.
+   Déjame estructurar el trabajo:
+
+● 📋 Esquema de API para Panel de Administración Unificado
+
+  Análisis de Arquitectura Completado
+
+  He analizado el documento y identificado las relaciones críticas que
+  necesitan automatización. A continuación presento un diseño de API RESTful
+   completo con soporte para Nested Creation y gestión automática de 
+  dependencias.
+
+  ---
+  🏗️ Principios de Diseño
+
+  1. Nested Creation Pattern
+
+  Los endpoints soportan creación de entidades relacionadas en una sola
+  transacción atómica.
+
+  2. Referencia Inteligente
+
+  Permite referenciar entidades existentes (por ID) o crear nuevas inline
+  (objeto completo).
+
+  3. Validación en Cascada
+
+  El backend valida automáticamente integridad referencial antes de commit.
+
+  4. Idempotencia
+
+  Los endpoints usan IDs de negocio (keys) para evitar duplicados.
+
+  ---
+  📚 Módulos de la API
+
+  /api/v1/
+  ├── /narrative/          # Gestión de narrativa
+  ├── /shop/              # Gestión de tienda
+  ├── /gamification/      # Misiones, recompensas, logros
+  ├── /automation/        # Triggers, rewards, journeys
+  ├── /users/             # Gestión de usuarios
+  ├── /lore/              # Gestión de lore
+  └── /dashboard/         # Analytics y estadísticas
+
+  ---
+  🎯 1. MÓDULO DE NARRATIVA
+
+  POST /api/v1/narrative/fragments
+
+  Crea un fragmento con soporte para nested creation de productos y 
+  decisiones.
+
+  Request Body (Nested Creation):
+
+  {
+    "key": "CAP10_INTRO",
+    "text": "Entraste a la habitación oscura...",
+    "image_url": "https://...",
+    "min_besitos": 0,
+    "required_role": null,
+    "reward_besitos": 10,
+
+    // OPCIÓN 1: Referencia a producto existente
+    "unlock_product_id": 42,
+
+    // OPCIÓN 2: Crear producto al vuelo (NESTED)
+    "unlock_product": {
+      "name": "Acceso Capítulo 10",
+      "description": "Desbloquea el capítulo completo",
+      "price": 50,
+      "is_vip_only": false,
+      "stock_limit": null
+    },
+
+    // OPCIÓN 3: Crear múltiples decisiones inline
+    "choices": [
+      {
+        "text": "Entrar sigilosamente",
+        "destination_fragment_key": "CAP10_SIGILO",
+        "required_besitos": 0
+      },
+      {
+        "text": "Entrar con confianza",
+        "destination_fragment_key": "CAP10_CONFIANZA",
+        "required_besitos": 20,
+        // También puede crear el destino al vuelo
+        "destination_fragment": {
+          "key": "CAP10_CONFIANZA",
+          "text": "Entraste con paso firme..."
+        }
+      }
+    ],
+
+    // Auto-avance si no hay decisiones
+    "auto_next_fragment_key": null
+  }
+
+  Response:
+
+  {
+    "success": true,
+    "data": {
+      "fragment": {
+        "id": 156,
+        "key": "CAP10_INTRO",
+        "text": "Entraste a la habitación oscura...",
+        "unlock_product_id": 87  // ID auto-generado
+      },
+      "created_product": {
+        "id": 87,
+        "name": "Acceso Capítulo 10"
+      },
+      "created_choices": [
+        {"id": 201, "text": "Entrar sigilosamente"},
+        {"id": 202, "text": "Entrar con confianza"}
+      ]
+    },
+    "message": "Fragmento creado con 1 producto y 2 decisiones"
+  }
+
+  ---
+  GET /api/v1/narrative/fragments
+
+  Lista fragmentos con filtros avanzados.
+
+  Query Parameters:
+
+  ?is_locked=true
+  &required_role=vip
+  &search=capitulo
+  &page=1
+  &per_page=20
+  &include=choices,unlock_product  // Eager loading
+
+  Response:
+
+  {
+    "data": [
+      {
+        "id": 156,
+        "key": "CAP10_INTRO",
+        "text": "Entraste a la habitación oscura...",
+        "is_locked": true,
+        "unlock_product": {
+          "id": 87,
+          "name": "Acceso Capítulo 10",
+          "price": 50
+        },
+        "choices": [
+          {
+            "id": 201,
+            "text": "Entrar sigilosamente",
+            "destination_fragment_key": "CAP10_SIGILO"
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "total": 45,
+      "page": 1,
+      "per_page": 20
+    }
+  }
+
+  ---
+  GET /api/v1/narrative/fragments/{key}
+
+  Obtiene un fragmento por su key de negocio (no ID numérico).
+
+  {
+    "id": 156,
+    "key": "CAP10_INTRO",
+    "text": "Entraste a la habitación oscura...",
+    "unlock_product": {...},
+    "choices": [...],
+    "statistics": {
+      "views": 342,
+      "completion_rate": 0.87,
+      "avg_choice_distribution": [0.6, 0.4]
+    }
+  }
+
+  ---
+  PUT /api/v1/narrative/fragments/{key}
+
+  Actualiza un fragmento (soporta actualización parcial).
+
+  {
+    "text": "NUEVO TEXTO DEL FRAGMENTO",
+    "reward_besitos": 15,
+    // Cambiar producto de desbloqueo
+    "unlock_product_id": 99
+  }
+
+  ---
+  POST /api/v1/narrative/fragments/batch
+
+  Creación masiva de fragmentos (útil para importar desde JSON).
+
+  {
+    "fragments": [
+      {"key": "CAP10_INTRO", "text": "..."},
+      {"key": "CAP10_SIGILO", "text": "..."}
+    ],
+    "auto_link": true  // Vincula automáticamente auto_next
+  }
+
+  ---
+  GET /api/v1/narrative/tree
+
+  Obtiene el árbol completo de decisiones (para visualización).
+
+  Response:
+
+  {
+    "nodes": [
+      {
+        "id": "CAP10_INTRO",
+        "label": "Capítulo 10: Inicio",
+        "is_locked": true,
+        "type": "fragment"
+      }
+    ],
+    "edges": [
+      {
+        "from": "CAP10_INTRO",
+        "to": "CAP10_SIGILO",
+        "label": "Entrar sigilosamente",
+        "type": "choice"
+      }
+    ]
+  }
+
+  ---
+  🛒 2. MÓDULO DE TIENDA
+
+  POST /api/v1/shop/items
+
+  Crea producto con vinculación automática a narrativa/lore.
+
+  Request Body (Nested):
+
+  {
+    "name": "Pack Capítulo 10 + Bonus",
+    "description": "Acceso completo + lore exclusivo",
+    "price": 100,
+    "is_vip_only": false,
+
+    // OPCIÓN 1: Referencia a fragmento existente
+    "unlocks_fragment_key": "CAP10_INTRO",
+
+    // OPCIÓN 2: Crear fragmento al vuelo
+    "unlocks_fragment": {
+      "key": "CAP10_BONUS",
+      "text": "Contenido exclusivo...",
+      "image_url": "https://..."
+    },
+
+    // OPCIÓN 3: Crear lore al vuelo
+    "unlocks_lore": {
+      "lore_id": "HISTORIA_VILLANO",
+      "title": "El Origen del Villano",
+      "content": "Hace mucho tiempo..."
+    },
+
+    // Archivos multimedia asociados
+    "product_files": [
+      {
+        "file_type": "photo",
+        "telegram_file_id": "AgACAgIAAxkBAAI...",
+        "caption": "Foto exclusiva 1"
+      }
+    ],
+
+    // Reglas de disponibilidad
+    "stock_limit": 50,
+    "max_purchases_per_user": 1,
+    "available_from": "2025-11-30T00:00:00Z",
+    "available_until": "2025-12-31T23:59:59Z"
+  }
+
+  Response:
+
+  {
+    "success": true,
+    "data": {
+      "product": {
+        "id": 87,
+        "name": "Pack Capítulo 10 + Bonus"
+      },
+      "created_fragment": {
+        "id": 157,
+        "key": "CAP10_BONUS"
+      },
+      "created_lore": {
+        "id": 23,
+        "lore_id": "HISTORIA_VILLANO"
+      }
+    }
+  }
+
+  ---
+  GET /api/v1/shop/items
+
+  Lista productos con filtros.
+
+  ?is_vip_only=false
+  &available_now=true
+  &in_stock=true
+  &search=capitulo
+  &include=unlocked_content  // Include fragment/lore details
+
+  ---
+  GET /api/v1/shop/items/{id}/analytics
+
+  Estadísticas de ventas de un producto.
+
+  {
+    "product_id": 87,
+    "total_purchases": 342,
+    "revenue": 17100,  // En besitos
+    "unique_buyers": 342,
+    "avg_purchase_time_hours": 48.5,
+    "stock_remaining": 8,
+    "purchase_trend": [
+      {"date": "2025-11-20", "purchases": 45},
+      {"date": "2025-11-21", "purchases": 67}
+    ]
+  }
+
+  ---
+  🎮 3. MÓDULO DE GAMIFICACIÓN
+
+  POST /api/v1/gamification/missions
+
+  Crea misión con recompensas anidadas.
+
+  Request Body:
+
+  {
+    "title": "Explora 5 capítulos",
+    "description": "Lee 5 fragmentos diferentes",
+    "mission_type": "one_time",  // o "daily"
+    "target_value": 5,
+
+    // NESTED: Define la recompensa inline
+    "reward": {
+      "reward_type": "besitos",
+      "amount": 50
+    },
+
+    // O recompensa compleja
+    "rewards": [
+      {
+        "reward_type": "product",
+        "product_id": 42
+      },
+      {
+        "reward_type": "lore",
+        "lore_id": 10
+      },
+      {
+        "reward_type": "vip_days",
+        "duration_days": 7
+      }
+    ],
+
+    // Misión encadenada
+    "next_mission_id": null,
+
+    // Desbloqueo condicional
+    "unlock_requirements": {
+      "min_level": 5,
+      "required_role": "free"
+    }
+  }
+
+  ---
+  POST /api/v1/gamification/achievements
+
+  Crea logro con trigger automático.
+
+  {
+    "name": "Completaste el Capítulo 10",
+    "description": "Llegaste al final del capítulo más épico",
+    "icon_url": "https://...",
+
+    // NESTED: Define el trigger inline
+    "trigger": {
+      "trigger_type": "VISIT_FRAGMENT",
+      "fragment_key": "CAP10_FINAL"
+    },
+
+    "reward": {
+      "reward_type": "badge",
+      "badge_id": 5
+    }
+  }
+
+  ---
+  🤖 4. MÓDULO DE AUTOMATIZACIÓN (CRÍTICO)
+
+  Este módulo saca la lógica hardcodeada y la hace configurable.
+
+  POST /api/v1/automation/triggers
+
+  Crea trigger configurable sin código.
+
+  Request Body:
+
+  {
+    "name": "Regalo al completar misión de bienvenida",
+    "enabled": true,
+
+    // Condición del trigger
+    "trigger_event": {
+      "event_type": "MISSION_COMPLETED",
+      "mission_id": 1
+    },
+
+    // O trigger por fragmento
+    "trigger_event": {
+      "event_type": "FRAGMENT_VIEWED",
+      "fragment_key": "CAP10_FINAL"
+    },
+
+    // O trigger por compra
+    "trigger_event": {
+      "event_type": "PRODUCT_PURCHASED",
+      "product_id": 87
+    },
+
+    // Condiciones adicionales (opcionales)
+    "conditions": {
+      "user_role": "free",  // Solo para usuarios free
+      "first_time_only": true,
+      "max_activations": 1
+    },
+
+    // NESTED: Acciones a ejecutar
+    "actions": [
+      {
+        "action_type": "GIVE_PRODUCT",
+        "product_id": 42
+      },
+      {
+        "action_type": "GRANT_VIP",
+        "duration_days": 3
+      },
+      {
+        "action_type": "UNLOCK_FRAGMENT",
+        "fragment_key": "BONUS_SECRET"
+      },
+      {
+        "action_type": "ADD_POINTS",
+        "amount": 100
+      },
+      {
+        "action_type": "SEND_MESSAGE",
+        "message_template": "¡Felicidades {user_name}! Has desbloqueado 
+  contenido secreto."
+      }
+    ]
+  }
+
+  Response:
+
+  {
+    "success": true,
+    "trigger_id": 42,
+    "message": "Trigger creado. Se ejecutará automáticamente cuando un 
+  usuario complete la misión 1."
+  }
+
+  ---
+  GET /api/v1/automation/triggers
+
+  Lista todos los triggers configurados.
+
+  {
+    "data": [
+      {
+        "id": 42,
+        "name": "Regalo al completar misión de bienvenida",
+        "enabled": true,
+        "trigger_event": {
+          "event_type": "MISSION_COMPLETED",
+          "mission_id": 1
+        },
+        "actions_count": 4,
+        "total_activations": 1523,
+        "last_activated": "2025-11-24T10:30:00Z"
+      }
+    ]
+  }
+
+  ---
+  POST /api/v1/automation/journeys
+
+  Crea automated journey (secuencia programada).
+
+  {
+    "name": "Onboarding de 7 días",
+    "trigger_event": {
+      "event_type": "USER_CREATED"
+    },
+
+    // Secuencia de pasos
+    "steps": [
+      {
+        "day": 1,
+        "time": "09:00",
+        "action": {
+          "action_type": "SEND_MESSAGE",
+          "message": "¡Bienvenido! Empieza tu aventura."
+        }
+      },
+      {
+        "day": 3,
+        "time": "09:00",
+        "action": {
+          "action_type": "GIVE_PRODUCT",
+          "product_id": 10,
+          "message": "Regalo del día 3"
+        }
+      },
+      {
+        "day": 7,
+        "time": "09:00",
+        "action": {
+          "action_type": "UNLOCK_FRAGMENT",
+          "fragment_key": "CAPITULO_BONUS_SEMANA1"
+        }
+      }
+    ]
+  }
+
+  ---
+  👥 5. MÓDULO DE USUARIOS
+
+  GET /api/v1/users
+
+  Lista usuarios con filtros.
+
+  ?role=vip
+  &is_banned=false
+  &registered_after=2025-11-01
+  &min_points=100
+  &search=username
+
+  ---
+  GET /api/v1/users/{telegram_id}/profile
+
+  Perfil completo del usuario.
+
+  {
+    "id": 123456789,
+    "username": "@usuario",
+    "role": "vip",
+    "vip_expires_at": "2025-12-31T23:59:59Z",
+    "points": 1250,
+    "level": 8,
+
+    "narrative_progress": {
+      "current_fragment_key": "CAP10_INTRO",
+      "fragments_viewed": 45,
+      "choices_made": 38,
+      "completion_percentage": 0.73
+    },
+
+    "inventory": [
+      {
+        "product_id": 42,
+        "product_name": "Acceso Capítulo 5",
+        "acquired_at": "2025-11-20T14:30:00Z"
+      }
+    ],
+
+    "missions_completed": 12,
+    "achievements_unlocked": 8
+  }
+
+  ---
+  POST /api/v1/users/{telegram_id}/actions
+
+  Ejecuta acciones manuales sobre un usuario (para admin).
+
+  {
+    "action": "GRANT_VIP",
+    "duration_days": 30,
+    "reason": "Premio por participación"
+  }
+
+  // O
+  {
+    "action": "ADD_TO_INVENTORY",
+    "product_id": 42
+  }
+
+  // O
+  {
+    "action": "SET_FRAGMENT",
+    "fragment_key": "CAP5_INICIO"
+  }
+
+  ---
+  📊 6. MÓDULO DE DASHBOARD
+
+  GET /api/v1/dashboard/overview
+
+  Resumen general del bot.
+
+  {
+    "users": {
+      "total": 5423,
+      "active_today": 342,
+      "vip": 456,
+      "new_this_week": 89
+    },
+    "narrative": {
+      "total_fragments": 156,
+      "avg_completion_rate": 0.68,
+      "most_popular_fragment": "CAP3_BATALLA"
+    },
+    "shop": {
+      "total_products": 34,
+      "total_revenue": 125300,  // besitos
+      "best_seller": {
+        "id": 87,
+        "name": "Acceso Capítulo 10",
+        "sales": 342
+      }
+    },
+    "engagement": {
+      "daily_active_users": [
+        {"date": "2025-11-20", "users": 412},
+        {"date": "2025-11-21", "users": 389}
+      ]
+    }
+  }
+
+  ---
+  GET /api/v1/dashboard/narrative-flow
+
+  Análisis del flujo narrativo (funnel analysis).
+
+  {
+    "fragments": [
+      {
+        "key": "CAP1_INTRO",
+        "views": 5423,
+        "completions": 4891,
+        "drop_rate": 0.098
+      },
+      {
+        "key": "CAP2_INTRO",
+        "views": 4891,
+        "completions": 4234,
+        "drop_rate": 0.134
+      }
+    ],
+    "bottlenecks": [
+      {
+        "fragment_key": "CAP5_PAYWALL",
+        "drop_rate": 0.42,
+        "reason": "High price barrier"
+      }
+    ]
+  }
+
+  ---
+  🔧 7. ENDPOINTS DE UTILIDAD
+
+  POST /api/v1/validation/fragment-key
+
+  Valida que una key no exista (para formularios en tiempo real).
+
+  {
+    "key": "CAP10_INTRO"
+  }
+
+  // Response
+  {
+    "available": false,
+    "suggestion": "CAP10_INTRO_V2"
+  }
+
+  ---
+  GET /api/v1/references
+
+  Obtiene listas para dropdowns (productos, fragmentos, lore, etc.).
+
+  /api/v1/references/products
+  /api/v1/references/fragments
+  /api/v1/references/lore-pieces
+  /api/v1/references/missions
+
+  // Response
+  [
+    {"id": 42, "name": "Acceso Capítulo 5", "key": "CAP5_ACCESS"},
+    {"id": 43, "name": "Pack VIP Mensual", "key": "VIP_PACK"}
+  ]
+
+  ---
+  🚀 Ejemplos de Flujos Unificados
+
+  Escenario 1: Lanzar Capítulo de Pago
+
+  Flujo Actual (Manual):
+  1. Crear producto → Copiar ID
+  2. Crear fragmento → Pegar ID
+  3. Editar código → Hardcodear trigger
+
+  Flujo con API Unificada (1 Request):
+
+  POST /api/v1/narrative/fragments
+
+  {
+    "key": "CAP10_INTRO",
+    "text": "El capítulo más esperado...",
+
+    // Crea el producto automáticamente
+    "unlock_product": {
+      "name": "Acceso Capítulo 10",
+      "price": 50
+    },
+
+    // Crea el trigger automáticamente
+    "auto_create_trigger": {
+      "on_complete": {
+        "give_achievement": "COMPLETASTE_CAP10"
+      }
+    }
+  }
+
+  Resultado: Fragmento + Producto + Trigger creados en una transacción
+  atómica.
+
+  ---
+  Escenario 2: Misión con Regalo
+
+  POST /api/v1/automation/triggers
+
+  {
+    "name": "Regalo por completar tutorial",
+    "trigger_event": {
+      "event_type": "FRAGMENT_VIEWED",
+      "fragment_key": "TUTORIAL_FINAL"
+    },
+    "conditions": {
+      "first_time_only": true
+    },
+    "actions": [
+      {
+        "action_type": "GIVE_PRODUCT",
+        // Crea el producto inline si no existe
+        "product": {
+          "name": "Kit de Bienvenida",
+          "price": 0,
+          "auto_deliver": true
+        }
+      }
+    ]
+  }
+
+  ---
+  🔐 Autenticación y Permisos
+
+  Todos los endpoints requieren:
+
+  Authorization: Bearer <JWT_TOKEN>
+  X-Admin-Role: super_admin | content_admin | analyst
+
+  Niveles de permiso:
+  - super_admin: Acceso completo
+  - content_admin: CRUD de narrativa/shop (no puede modificar usuarios)
+  - analyst: Solo lectura (dashboard/analytics)
+
+  ---
+
+● 📦 DTOs y Modelos (FastAPI/Pydantic)
+
+  Modelos Base para Nested Creation
+
+  # models/nested.py
+
+  from pydantic import BaseModel, Field
+  from typing import Optional, Union, List
+  from datetime import datetime
+  from enum import Enum
+
+  # ==================== ENUMS ====================
+
+  class RewardType(str, Enum):
+      BESITOS = "besitos"
+      PRODUCT = "product"
+      LORE = "lore"
+      VIP_DAYS = "vip_days"
+      FRAGMENT_UNLOCK = "fragment_unlock"
+
+  class TriggerEventType(str, Enum):
+      FRAGMENT_VIEWED = "FRAGMENT_VIEWED"
+      PRODUCT_PURCHASED = "PRODUCT_PURCHASED"
+      MISSION_COMPLETED = "MISSION_COMPLETED"
+      USER_CREATED = "USER_CREATED"
+      POINTS_THRESHOLD = "POINTS_THRESHOLD"
+
+  class ActionType(str, Enum):
+      GIVE_PRODUCT = "GIVE_PRODUCT"
+      GRANT_VIP = "GRANT_VIP"
+      UNLOCK_FRAGMENT = "UNLOCK_FRAGMENT"
+      ADD_POINTS = "ADD_POINTS"
+      SEND_MESSAGE = "SEND_MESSAGE"
+      UNLOCK_LORE = "UNLOCK_LORE"
+
+  # ==================== NESTED MODELS ====================
+
+  class ProductCreateNested(BaseModel):
+      """Modelo para crear producto inline (nested)"""
+      name: str = Field(..., min_length=1, max_length=255)
+      description: Optional[str] = None
+      price: int = Field(..., ge=0)
+      is_vip_only: bool = False
+      stock_limit: Optional[int] = Field(None, ge=1)
+      max_purchases_per_user: int = Field(1, ge=1)
+      available_from: Optional[datetime] = None
+      available_until: Optional[datetime] = None
+
+      class Config:
+          json_schema_extra = {
+              "example": {
+                  "name": "Acceso Capítulo 10",
+                  "description": "Desbloquea el capítulo completo",
+                  "price": 50,
+                  "is_vip_only": False
+              }
+          }
+
+  class FragmentCreateNested(BaseModel):
+      """Modelo para crear fragmento inline"""
+      key: str = Field(..., min_length=1, max_length=50)
+      text: str = Field(..., min_length=1)
+      image_url: Optional[str] = None
+      min_besitos: int = Field(0, ge=0)
+      required_role: Optional[str] = None
+      reward_besitos: int = Field(0, ge=0)
+
+  class LoreCreateNested(BaseModel):
+      """Modelo para crear lore inline"""
+      lore_id: str = Field(..., max_length=50)
+      title: str = Field(..., max_length=255)
+      content: str
+      is_unlocked_by_default: bool = False
+
+  class NarrativeChoiceNested(BaseModel):
+      """Decisión narrativa (puede crear destino inline)"""
+      text: str = Field(..., max_length=255)
+      destination_fragment_key: Optional[str] = None
+      destination_fragment: Optional[FragmentCreateNested] = None
+      required_besitos: int = Field(0, ge=0)
+      required_role: Optional[str] = None
+
+      def validate_destination(self):
+          """Valida que tenga key O fragmento nested"""
+          if not self.destination_fragment_key and not
+  self.destination_fragment:
+              raise ValueError("Must provide destination_fragment_key or 
+  destination_fragment")
+
+  # ==================== REQUEST MODELS ====================
+
+  class FragmentCreateRequest(BaseModel):
+      """Request completo para crear fragmento con nested creation"""
+      key: str = Field(..., min_length=1, max_length=50)
+      text: str = Field(..., min_length=1)
+      image_url: Optional[str] = None
+      min_besitos: int = Field(0, ge=0)
+      required_role: Optional[str] = None
+      reward_besitos: int = Field(0, ge=0)
+
+      # Producto de desbloqueo: referencia O creación nested
+      unlock_product_id: Optional[int] = None
+      unlock_product: Optional[ProductCreateNested] = None
+
+      # Decisiones: inline creation
+      choices: Optional[List[NarrativeChoiceNested]] = None
+
+      # Auto-avance
+      auto_next_fragment_key: Optional[str] = None
+
+      class Config:
+          json_schema_extra = {
+              "example": {
+                  "key": "CAP10_INTRO",
+                  "text": "Entraste a la habitación oscura...",
+                  "unlock_product": {
+                      "name": "Acceso Capítulo 10",
+                      "price": 50
+                  },
+                  "choices": [
+                      {
+                          "text": "Entrar sigilosamente",
+                          "destination_fragment_key": "CAP10_SIGILO"
+                      }
+                  ]
+              }
+          }
+
+  class ProductCreateRequest(BaseModel):
+      """Request para crear producto con nested unlocks"""
+      name: str = Field(..., min_length=1, max_length=255)
+      description: Optional[str] = None
+      price: int = Field(..., ge=0)
+      is_vip_only: bool = False
+
+      # Referencias a contenido existente
+      unlocks_fragment_key: Optional[str] = None
+      unlocks_lore_piece_id: Optional[int] = None
+
+      # O creación nested
+      unlocks_fragment: Optional[FragmentCreateNested] = None
+      unlocks_lore: Optional[LoreCreateNested] = None
+
+      # Reglas
+      stock_limit: Optional[int] = None
+      max_purchases_per_user: int = 1
+      available_from: Optional[datetime] = None
+      available_until: Optional[datetime] = None
+
+  class RewardDefinition(BaseModel):
+      """Definición de recompensa reutilizable"""
+      reward_type: RewardType
+      amount: Optional[int] = None  # Para besitos o vip_days
+      product_id: Optional[int] = None
+      lore_id: Optional[int] = None
+      fragment_key: Optional[str] = None
+
+  class TriggerConditions(BaseModel):
+      """Condiciones adicionales para un trigger"""
+      user_role: Optional[str] = None
+      min_points: Optional[int] = None
+      first_time_only: bool = False
+      max_activations: Optional[int] = None
+
+  class TriggerAction(BaseModel):
+      """Acción a ejecutar por un trigger"""
+      action_type: ActionType
+      product_id: Optional[int] = None
+      fragment_key: Optional[str] = None
+      amount: Optional[int] = None  # Para ADD_POINTS o GRANT_VIP
+      message_template: Optional[str] = None
+
+  class TriggerCreateRequest(BaseModel):
+      """Request para crear trigger configurable"""
+      name: str = Field(..., max_length=255)
+      enabled: bool = True
+
+      # Evento que dispara
+      trigger_event_type: TriggerEventType
+      fragment_key: Optional[str] = None
+      mission_id: Optional[int] = None
+      product_id: Optional[int] = None
+      points_threshold: Optional[int] = None
+
+      # Condiciones
+      conditions: Optional[TriggerConditions] = None
+
+      # Acciones (nested)
+      actions: List[TriggerAction] = Field(..., min_items=1)
+
+      class Config:
+          json_schema_extra = {
+              "example": {
+                  "name": "Regalo al completar tutorial",
+                  "trigger_event_type": "FRAGMENT_VIEWED",
+                  "fragment_key": "TUTORIAL_FINAL",
+                  "conditions": {
+                      "first_time_only": True
+                  },
+                  "actions": [
+                      {
+                          "action_type": "GIVE_PRODUCT",
+                          "product_id": 42
+                      },
+                      {
+                          "action_type": "ADD_POINTS",
+                          "amount": 50
+                      }
+                  ]
+              }
+          }
+
+  # ==================== RESPONSE MODELS ====================
+
+  class ProductResponse(BaseModel):
+      """Response model para producto"""
+      id: int
+      name: str
+      description: Optional[str]
+      price: int
+      is_vip_only: bool
+      unlocks_fragment_key: Optional[str]
+      unlocks_lore_piece_id: Optional[int]
+
+      class Config:
+          from_attributes = True
+
+  class FragmentResponse(BaseModel):
+      """Response model para fragmento"""
+      id: int
+      key: str
+      text: str
+      image_url: Optional[str]
+      is_locked: bool
+      unlock_product_id: Optional[int]
+      unlock_product: Optional[ProductResponse] = None
+
+      class Config:
+          from_attributes = True
+
+  class FragmentCreateResponse(BaseModel):
+      """Response completa al crear fragmento con nested"""
+      success: bool
+      data: dict
+      message: str
+
+      class Config:
+          json_schema_extra = {
+              "example": {
+                  "success": True,
+                  "data": {
+                      "fragment": {
+                          "id": 156,
+                          "key": "CAP10_INTRO"
+                      },
+                      "created_product": {
+                          "id": 87,
+                          "name": "Acceso Capítulo 10"
+                      },
+                      "created_choices": [
+                          {"id": 201, "text": "Entrar sigilosamente"}
+                      ]
+                  },
+                  "message": "Fragmento creado con 1 producto y 2 
+  decisiones"
+              }
+          }
+
+  class PaginatedResponse(BaseModel):
+      """Response paginada genérica"""
+      data: List[dict]
+      pagination: dict
+
+      class Config:
+          json_schema_extra = {
+              "example": {
+                  "data": [],
+                  "pagination": {
+                      "total": 45,
+                      "page": 1,
+                      "per_page": 20,
+                      "total_pages": 3
+                  }
+              }
+          }
+
+  class ApiError(BaseModel):
+      """Error response estándar"""
+      success: bool = False
+      error: str
+      details: Optional[dict] = None
+
+  ---
+
+● 💻 Implementación de Endpoints Clave (FastAPI)
+
+  Ejemplo 1: Endpoint con Nested Creation de Fragmento
+
+  # api/routes/narrative.py
+
+  from fastapi import APIRouter, HTTPException, Depends
+  from sqlalchemy.ext.asyncio import AsyncSession
+  from sqlalchemy import select
+  from typing import Optional
+
+  from database.setup import get_db
+  from database.models import StoryFragment, ShopItem, NarrativeChoice
+  from models.nested import FragmentCreateRequest, FragmentCreateResponse
+
+  router = APIRouter(prefix="/api/v1/narrative", tags=["Narrative"])
+
+  @router.post("/fragments", response_model=FragmentCreateResponse)
+  async def create_fragment_with_nested(
+      request: FragmentCreateRequest,
+      db: AsyncSession = Depends(get_db)
+  ):
+      """
+      Crea un fragmento con soporte para nested creation de productos y 
+  decisiones.
+      
+      Casos soportados:
+      1. Fragmento simple (sin bloqueo)
+      2. Fragmento + referencia a producto existente
+      3. Fragmento + creación de producto inline (NESTED)
+      4. Fragmento + múltiples decisiones inline
+      """
+
+      try:
+          # ===== VALIDACIÓN =====
+
+          # Verificar que el key no exista
+          existing = await db.execute(
+              select(StoryFragment).where(StoryFragment.key == request.key)
+          )
+          if existing.scalar_one_or_none():
+              raise HTTPException(
+                  status_code=400,
+                  detail=f"Fragment with key '{request.key}' already exists"
+              )
+
+          # ===== NESTED CREATION: PRODUCTO =====
+
+          created_product = None
+          unlock_product_id = request.unlock_product_id
+
+          # Si se proporciona un producto nested, crearlo primero
+          if request.unlock_product:
+              product_data = request.unlock_product.dict()
+              new_product = ShopItem(**product_data)
+              db.add(new_product)
+              await db.flush()  # Genera el ID sin hacer commit
+
+              unlock_product_id = new_product.id
+              created_product = {
+                  "id": new_product.id,
+                  "name": new_product.name,
+                  "price": new_product.price
+              }
+
+          # ===== CREACIÓN DEL FRAGMENTO =====
+
+          fragment = StoryFragment(
+              key=request.key,
+              text=request.text,
+              image_url=request.image_url,
+              min_besitos=request.min_besitos,
+              required_role=request.required_role,
+              reward_besitos=request.reward_besitos,
+              auto_next_fragment_key=request.auto_next_fragment_key
+          )
+
+          # Vincular producto de desbloqueo si existe
+          if unlock_product_id:
+              # Validar que el producto exista (si es referencia)
+              if not request.unlock_product:
+                  product = await db.get(ShopItem, unlock_product_id)
+                  if not product:
+                      raise HTTPException(
+                          status_code=404,
+                          detail=f"Product {unlock_product_id} not found"
+                      )
+
+              # Actualizar el producto para que desbloquee este fragmento
+              if created_product:
+                  await db.execute(
+                      update(ShopItem)
+                      .where(ShopItem.id == unlock_product_id)
+                      .values(unlocks_fragment_key=request.key)
+                  )
+
+          db.add(fragment)
+          await db.flush()
+
+          # ===== NESTED CREATION: DECISIONES =====
+
+          created_choices = []
+          if request.choices:
+              for choice_data in request.choices:
+                  # Validar que tenga destino
+                  if not choice_data.destination_fragment_key and not
+  choice_data.destination_fragment:
+                      raise HTTPException(
+                          status_code=400,
+                          detail="Each choice must have 
+  destination_fragment_key or destination_fragment"
+                      )
+
+                  # Si hay fragmento nested, crearlo primero
+                  destination_key = choice_data.destination_fragment_key
+                  if choice_data.destination_fragment:
+                      dest_fragment = StoryFragment(
+                          **choice_data.destination_fragment.dict()
+                      )
+                      db.add(dest_fragment)
+                      await db.flush()
+                      destination_key = dest_fragment.key
+
+                  # Crear la decisión
+                  choice = NarrativeChoice(
+                      source_fragment_id=fragment.id,
+                      destination_fragment_key=destination_key,
+                      text=choice_data.text,
+                      required_besitos=choice_data.required_besitos,
+                      required_role=choice_data.required_role
+                  )
+                  db.add(choice)
+                  await db.flush()
+
+                  created_choices.append({
+                      "id": choice.id,
+                      "text": choice.text,
+                      "destination": destination_key
+                  })
+
+          # ===== COMMIT ATÓMICO =====
+          await db.commit()
+
+          # Construir respuesta
+          message_parts = ["Fragmento creado"]
+          if created_product:
+              message_parts.append(f"con 1 producto")
+          if created_choices:
+              message_parts.append(f"y {len(created_choices)} decisiones")
+
+          return FragmentCreateResponse(
+              success=True,
+              data={
+                  "fragment": {
+                      "id": fragment.id,
+                      "key": fragment.key,
+                      "text": fragment.text[:50] + "...",
+                      "unlock_product_id": unlock_product_id
+                  },
+                  "created_product": created_product,
+                  "created_choices": created_choices
+              },
+              message=" ".join(message_parts)
+          )
+
+      except HTTPException:
+          await db.rollback()
+          raise
+      except Exception as e:
+          await db.rollback()
+          raise HTTPException(status_code=500, detail=f"Error creating 
+  fragment: {str(e)}")
+
+  ---
+  Ejemplo 2: Endpoint de Triggers Configurables
+
+  # api/routes/automation.py
+
+  from fastapi import APIRouter, HTTPException, Depends
+  from sqlalchemy.ext.asyncio import AsyncSession
+  from typing import List
+
+  from database.setup import get_db
+  from database.models import AutomationTrigger, TriggerAction
+  from models.nested import TriggerCreateRequest
+
+  router = APIRouter(prefix="/api/v1/automation", tags=["Automation"])
+
+  @router.post("/triggers")
+  async def create_trigger(
+      request: TriggerCreateRequest,
+      db: AsyncSession = Depends(get_db)
+  ):
+      """
+      Crea un trigger configurable que se ejecuta automáticamente.
+      
+      Este endpoint reemplaza la necesidad de hardcodear lógica en el 
+  código.
+      """
+
+      try:
+          # Validar que las entidades referenciadas existan
+          if request.fragment_key:
+              fragment = await db.execute(
+                  select(StoryFragment).where(StoryFragment.key ==
+  request.fragment_key)
+              )
+              if not fragment.scalar_one_or_none():
+                  raise HTTPException(404, f"Fragment 
+  '{request.fragment_key}' not found")
+
+          # Crear el trigger
+          trigger = AutomationTrigger(
+              name=request.name,
+              enabled=request.enabled,
+              trigger_event_type=request.trigger_event_type.value,
+              fragment_key=request.fragment_key,
+              mission_id=request.mission_id,
+              product_id=request.product_id,
+              points_threshold=request.points_threshold,
+              conditions=request.conditions.dict() if request.conditions
+  else None
+          )
+          db.add(trigger)
+          await db.flush()
+
+          # Crear las acciones asociadas
+          for action_data in request.actions:
+              action = TriggerAction(
+                  trigger_id=trigger.id,
+                  action_type=action_data.action_type.value,
+                  product_id=action_data.product_id,
+                  fragment_key=action_data.fragment_key,
+                  amount=action_data.amount,
+                  message_template=action_data.message_template
+              )
+              db.add(action)
+
+          await db.commit()
+
+          return {
+              "success": True,
+              "trigger_id": trigger.id,
+              "message": f"Trigger '{request.name}' creado con 
+  {len(request.actions)} acciones"
+          }
+
+      except HTTPException:
+          await db.rollback()
+          raise
+      except Exception as e:
+          await db.rollback()
+          raise HTTPException(500, f"Error creating trigger: {str(e)}")
+
+
+  @router.get("/triggers")
+  async def list_triggers(
+      enabled: Optional[bool] = None,
+      event_type: Optional[str] = None,
+      db: AsyncSession = Depends(get_db)
+  ):
+      """Lista todos los triggers configurados"""
+
+      query = select(AutomationTrigger)
+
+      if enabled is not None:
+          query = query.where(AutomationTrigger.enabled == enabled)
+      if event_type:
+          query = query.where(AutomationTrigger.trigger_event_type ==
+  event_type)
+
+      result = await db.execute(query)
+      triggers = result.scalars().all()
+
+      return {
+          "data": [
+              {
+                  "id": t.id,
+                  "name": t.name,
+                  "enabled": t.enabled,
+                  "event_type": t.trigger_event_type,
+                  "actions_count": len(t.actions),
+                  "total_activations": t.total_activations
+              }
+              for t in triggers
+          ]
+      }
+
+  ---
+  Ejemplo 3: Servicio de Ejecución de Triggers
+
+  # services/automation_service.py
+
+  from sqlalchemy.ext.asyncio import AsyncSession
+  from sqlalchemy import select
+  from typing import Optional
+
+  from database.models import AutomationTrigger, TriggerAction, User,
+  ShopItem, InventoryItem
+  from models.nested import TriggerEventType, ActionType
+
+  class AutomationService:
+      """Servicio que ejecuta triggers automáticamente"""
+
+      def __init__(self, db: AsyncSession):
+          self.db = db
+
+      async def execute_triggers_for_event(
+          self,
+          event_type: TriggerEventType,
+          user_id: int,
+          context: dict
+      ):
+          """
+          Ejecuta todos los triggers activos para un evento específico.
+          
+          Args:
+              event_type: Tipo de evento (FRAGMENT_VIEWED, etc.)
+              user_id: ID del usuario que disparó el evento
+              context: Datos adicionales (fragment_key, product_id, etc.)
+          """
+
+          # Buscar triggers habilitados para este evento
+          query = select(AutomationTrigger).where(
+              AutomationTrigger.enabled == True,
+              AutomationTrigger.trigger_event_type == event_type.value
+          )
+
+          # Filtrar por contexto específico
+          if event_type == TriggerEventType.FRAGMENT_VIEWED:
+              query = query.where(
+                  AutomationTrigger.fragment_key ==
+  context.get("fragment_key")
+              )
+          elif event_type == TriggerEventType.MISSION_COMPLETED:
+              query = query.where(
+                  AutomationTrigger.mission_id == context.get("mission_id")
+              )
+
+          result = await self.db.execute(query)
+          triggers = result.scalars().all()
+
+          # Ejecutar cada trigger
+          for trigger in triggers:
+              # Verificar condiciones
+              if not await self._check_conditions(trigger, user_id):
+                  continue
+
+              # Ejecutar acciones
+              await self._execute_actions(trigger, user_id)
+
+              # Incrementar contador
+              trigger.total_activations += 1
+              await self.db.commit()
+
+      async def _check_conditions(self, trigger: AutomationTrigger, user_id:
+   int) -> bool:
+          """Verifica si el usuario cumple las condiciones del trigger"""
+
+          if not trigger.conditions:
+              return True
+
+          user = await self.db.get(User, user_id)
+          conditions = trigger.conditions
+
+          # Verificar rol
+          if conditions.get("user_role") and user.role !=
+  conditions["user_role"]:
+              return False
+
+          # Verificar puntos mínimos
+          if conditions.get("min_points") and user.points <
+  conditions["min_points"]:
+              return False
+
+          # Verificar first_time_only
+          if conditions.get("first_time_only"):
+              # Comprobar si ya se ejecutó para este usuario
+              # (necesitarías una tabla de logs)
+              pass
+
+          return True
+
+      async def _execute_actions(self, trigger: AutomationTrigger, user_id: 
+  int):
+          """Ejecuta todas las acciones del trigger"""
+
+          user = await self.db.get(User, user_id)
+
+          for action in trigger.actions:
+              if action.action_type == ActionType.GIVE_PRODUCT.value:
+                  await self._give_product(user_id, action.product_id)
+
+              elif action.action_type == ActionType.ADD_POINTS.value:
+                  user.points += action.amount
+
+              elif action.action_type == ActionType.GRANT_VIP.value:
+                  user.vip_expires_at = datetime.now() +
+  timedelta(days=action.amount)
+                  user.role = "vip"
+
+              elif action.action_type == ActionType.UNLOCK_FRAGMENT.value:
+                  # Añadir a unlocked_fragments del UserNarrativeState
+                  state = await self._get_or_create_narrative_state(user_id)
+                  if action.fragment_key not in state.unlocked_fragments:
+                      state.unlocked_fragments.append(action.fragment_key)
+
+              elif action.action_type == ActionType.SEND_MESSAGE.value:
+                  # Encolar mensaje para envío (integración con el bot)
+                  await self._send_telegram_message(
+                      user_id,
+
+  action.message_template.format(user_name=user.first_name)
+                  )
+
+          await self.db.commit()
+
+      async def _give_product(self, user_id: int, product_id: int):
+          """Añade un producto al inventario del usuario"""
+
+          # Verificar si ya lo tiene
+          existing = await self.db.execute(
+              select(InventoryItem).where(
+                  InventoryItem.user_id == user_id,
+                  InventoryItem.product_id == product_id
+              )
+          )
+
+          if not existing.scalar_one_or_none():
+              inventory_item = InventoryItem(
+                  user_id=user_id,
+                  product_id=product_id,
+                  quantity=1
+              )
+              self.db.add(inventory_item)
+
+  ---
+  Integración con el Bot (Handlers)
+
+  # handlers/narrative_handlers.py
+
+  from aiogram import Router, F
+  from aiogram.types import CallbackQuery
+  from sqlalchemy.ext.asyncio import AsyncSession
+
+  from services.automation_service import AutomationService
+  from models.nested import TriggerEventType
+
+  router = Router()
+
+  @router.callback_query(F.data.startswith("view_fragment:"))
+  async def handle_fragment_view(callback: CallbackQuery, db: AsyncSession):
+      """Handler que se ejecuta cuando un usuario ve un fragmento"""
+
+      fragment_key = callback.data.split(":")[1]
+      user_id = callback.from_user.id
+
+      # Lógica normal del bot (mostrar fragmento, etc.)
+      # ...
+
+      # ===== EJECUTAR TRIGGERS AUTOMÁTICAMENTE =====
+      automation_service = AutomationService(db)
+      await automation_service.execute_triggers_for_event(
+          event_type=TriggerEventType.FRAGMENT_VIEWED,
+          user_id=user_id,
+          context={"fragment_key": fragment_key}
+      )
+
+      await callback.answer()
+
+  ---
+
+● 📊 Resumen y Arquitectura Recomendada
+
+  Ventajas del Sistema Propuesto
+
+  1. Eliminación de Trabajo Manual
+
+  - ❌ Antes: Crear producto → Copiar ID → Crear fragmento → Pegar ID
+  - ✅ Ahora: Un solo request crea ambos en transacción atómica
+
+  2. Lógica de Negocio Configurable
+
+  - ❌ Antes: Triggers hardcodeados en handlers (requiere developer +
+  deploy)
+  - ✅ Ahora: Admin crea triggers desde el panel sin tocar código
+
+  3. Validación Automática
+
+  - ✅ El backend valida integridad referencial antes del commit
+  - ✅ Dropdowns con entidades existentes (no más copy-paste de IDs)
+  - ✅ Transacciones atómicas (todo se crea o nada)
+
+  4. Escalabilidad
+
+  - ✅ Añadir nuevas misiones, recompensas o journeys sin modificar código
+  - ✅ Sistema de triggers genérico extensible a nuevos eventos
+
+  ---
+  🗂️ Estructura de Base de Datos Adicional
+
+  Tablas nuevas necesarias para soportar el sistema:
+
+  -- Tabla para triggers configurables
+  CREATE TABLE automation_triggers (
+      id SERIAL PRIMARY KEY,
+      name VARCHAR(255) NOT NULL,
+      enabled BOOLEAN DEFAULT TRUE,
+      trigger_event_type VARCHAR(50) NOT NULL,  -- FRAGMENT_VIEWED, etc.
+
+      -- Referencias opcionales según el tipo de evento
+      fragment_key VARCHAR(50),
+      mission_id INTEGER,
+      product_id INTEGER,
+      points_threshold INTEGER,
+
+      -- Condiciones (JSON)
+      conditions JSONB,
+
+      -- Estadísticas
+      total_activations INTEGER DEFAULT 0,
+      last_activated_at TIMESTAMP,
+
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+  );
+
+  -- Tabla para acciones de los triggers
+  CREATE TABLE trigger_actions (
+      id SERIAL PRIMARY KEY,
+      trigger_id INTEGER REFERENCES automation_triggers(id) ON DELETE
+  CASCADE,
+      action_type VARCHAR(50) NOT NULL,  -- GIVE_PRODUCT, GRANT_VIP, etc.
+
+      -- Parámetros según el tipo de acción
+      product_id INTEGER,
+      fragment_key VARCHAR(50),
+      amount INTEGER,
+      message_template TEXT,
+
+      execution_order INTEGER DEFAULT 0,  -- Orden de ejecución
+
+      created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  -- Índices para optimizar búsquedas
+  CREATE INDEX idx_triggers_event_type ON
+  automation_triggers(trigger_event_type);
+  CREATE INDEX idx_triggers_fragment_key ON
+  automation_triggers(fragment_key);
+  CREATE INDEX idx_triggers_enabled ON automation_triggers(enabled);
+
+  -- Tabla de logs de ejecución (para auditoría)
+  CREATE TABLE trigger_execution_logs (
+      id SERIAL PRIMARY KEY,
+      trigger_id INTEGER REFERENCES automation_triggers(id),
+      user_id BIGINT REFERENCES users(id),
+      executed_at TIMESTAMP DEFAULT NOW(),
+      actions_executed INTEGER,
+      success BOOLEAN,
+      error_message TEXT
+  );
+
+  ---
+  🎨 Stack Completo Recomendado
+
+  Backend
+
+  # Stack tecnológico
+  - Framework: FastAPI 0.109+
+  - ORM: SQLAlchemy 2.0+ (async)
+  - Validación: Pydantic 2.0+
+  - Migraciones: Alembic
+  - Auth: JWT (python-jose)
+  - CORS: FastAPI CORS middleware
+
+  Frontend
+
+  // Stack tecnológico
+  - Framework: Next.js 14+ (App Router)
+  - UI Components: shadcn/ui (Radix UI + Tailwind)
+  - State Management: Zustand o TanStack Query
+  - Forms: React Hook Form + Zod
+  - Data Fetching: TanStack Query (React Query)
+  - Visualización: Recharts o D3.js (para el árbol narrativo)
+
+  Infraestructura
+
+  # Docker Compose para desarrollo
+  services:
+    api:
+      build: ./backend
+      ports: ["8000:8000"]
+      depends_on: [db, redis]
+
+    frontend:
+      build: ./frontend
+      ports: ["3000:3000"]
+
+    db:
+      image: postgres:16
+      volumes: ["pgdata:/var/lib/postgresql/data"]
+
+    redis:
+      image: redis:7-alpine  # Para caching y job queues
+
+  ---
+  🚀 Plan de Implementación (Fases)
+
+  Fase 1: API Core (2-3 semanas)
+
+  - Setup FastAPI + SQLAlchemy async
+  - Implementar modelos Pydantic con nested creation
+  - Endpoints CRUD básicos (narrativa, shop, users)
+  - Sistema de autenticación JWT
+  - Endpoints de nested creation (fragmentos + productos)
+
+  Fase 2: Automatización (2 semanas)
+
+  - Tabla automation_triggers y trigger_actions
+  - Endpoints de triggers configurables
+  - Servicio AutomationService para ejecución
+  - Integración con handlers del bot
+
+  Fase 3: Frontend Dashboard (3-4 semanas)
+
+  - Setup Next.js + shadcn/ui
+  - Páginas de CRUD básicas (listados, formularios)
+  - Formularios con nested creation (seleccionar o crear inline)
+  - Visualización del árbol narrativo (react-flow o D3)
+  - Panel de triggers con constructor visual
+
+  Fase 4: Analytics & Optimización (2 semanas)
+
+  - Endpoints de dashboard/estadísticas
+  - Gráficos de engagement y conversión
+  - Funnel analysis del flujo narrativo
+  - Sistema de logs y auditoría
+
+  ---
+  🔍 Ejemplo de UI (Nested Creation Form)
+
+  Formulario de Creación de Fragmento Bloqueado
+
+  // Pseudocódigo del formulario
+  function CreateFragmentForm() {
+    const [unlockMode, setUnlockMode] = useState('existing'); // 'existing' 
+  | 'create_new'
+
+    return (
+      <Form>
+        <TextField name="key" label="Fragment Key" />
+        <TextArea name="text" label="Contenido" />
+
+        {/* NESTED CREATION: Selector inteligente */}
+        <FormSection title="Producto de Desbloqueo">
+          <RadioGroup value={unlockMode} onChange={setUnlockMode}>
+            <Radio value="none">Sin bloqueo (gratis)</Radio>
+            <Radio value="existing">Producto existente</Radio>
+            <Radio value="create_new">Crear nuevo producto</Radio>
+          </RadioGroup>
+
+          {unlockMode === 'existing' && (
+            <Select name="unlock_product_id" label="Seleccionar producto">
+              <Option value={42}>Acceso Capítulo 5 (50 besitos)</Option>
+              <Option value={43}>Pack VIP (100 besitos)</Option>
+            </Select>
+          )}
+
+          {unlockMode === 'create_new' && (
+            <Card variant="nested">
+              <CardHeader>Nuevo Producto</CardHeader>
+              <TextField name="unlock_product.name" placeholder="Ej: Acceso 
+  Capítulo 10" />
+              <NumberField name="unlock_product.price" placeholder="Precio 
+  en besitos" />
+              <Checkbox name="unlock_product.is_vip_only">Solo
+  VIP</Checkbox>
+            </Card>
+          )}
+        </FormSection>
+
+        <FormSection title="Decisiones">
+          <ChoicesEditor name="choices" />
+        </FormSection>
+
+        <Button type="submit">Crear Fragmento</Button>
+      </Form>
+    );
+  }
+
+  ---
+  ⚠️ Consideraciones de Seguridad
+
+  1. Autenticación del Panel
+
+  # Middleware de autenticación
+  @app.middleware("http")
+  async def verify_admin_token(request: Request, call_next):
+      if request.url.path.startswith("/api/v1/"):
+          token = request.headers.get("Authorization")
+          if not token or not verify_jwt(token):
+              return JSONResponse({"error": "Unauthorized"},
+  status_code=401)
+      return await call_next(request)
+
+  2. Validación de Permisos
+
+  # Decorador para verificar roles
+  def require_role(min_role: str):
+      def decorator(func):
+          async def wrapper(*args, **kwargs):
+              user = get_current_user()
+              if not has_permission(user.role, min_role):
+                  raise HTTPException(403, "Insufficient permissions")
+              return await func(*args, **kwargs)
+          return wrapper
+      return decorator
+
+  @router.delete("/fragments/{key}")
+  @require_role("super_admin")
+  async def delete_fragment(key: str):
+      # Solo super_admin puede eliminar
+      pass
+
+  3. Rate Limiting
+
+  from slowapi import Limiter
+
+  limiter = Limiter(key_func=get_remote_address)
+
+  @router.post("/fragments")
+  @limiter.limit("20/minute")
+  async def create_fragment():
+      # Máximo 20 fragmentos por minuto
+      pass
+
+  ---
+  📈 Métricas de Éxito
+
+  KPIs a trackear:
+
+  1. Tiempo de configuración: Reducir de 15 min → 2 min para crear contenido
+   bloqueado
+  2. Errores de vinculación: De ~30% → 0% (eliminando copy-paste)
+  3. Deployments por semana: De 5-10 → 1-2 (menos cambios en código)
+  4. Time-to-market: Lanzar nuevo capítulo en minutos vs horas
+
+  ---
+  🎯 Conclusión
+
+  El sistema propuesto resuelve los 3 pain points críticos identificados en
+  tu arquitectura:
+
+  1. ✅ Complejidad innecesaria: Nested creation elimina flujos fragmentados
+  2. ✅ Lógica aislada: Triggers configurables sacan la lógica del código
+  3. ✅ Cuellos de botella: Admins pueden crear contenido sin developers
+
+  Próximo paso recomendado: Implementar Fase 1 (API Core) con un endpoint de
+   prueba de nested creation para validar el diseño antes de escalar.
+
+  ¿Quieres que profundice en algún aspecto específico (implementación de
+  triggers, diseño del frontend, integración con el bot existente)?
+
+> Genera un documento llamado esquema_api.md en @docs con toda esta 
+información e incluye un roadmap de implementación especificando  
+componentes/archivos, etc 
+  ⎿  Listed directory docs/
+  ⎿  Interrupted · What should Claude do instead?
+
+
+
