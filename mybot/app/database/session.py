@@ -20,14 +20,21 @@ class Base(DeclarativeBase):
 
 
 # Crear engine asíncrono
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.ECHO_SQL,
-    pool_size=settings.POOL_SIZE,
-    max_overflow=settings.MAX_OVERFLOW,
-    pool_pre_ping=settings.POOL_PRE_PING,
-    future=True
-)
+# SQLite no soporta pool_size/max_overflow, así que usamos kwargs condicionales
+engine_kwargs = {
+    "echo": settings.ECHO_SQL,
+    "future": True
+}
+
+# Solo agregar opciones de pool si NO es SQLite
+if "sqlite" not in settings.DATABASE_URL.lower():
+    engine_kwargs.update({
+        "pool_size": settings.POOL_SIZE,
+        "max_overflow": settings.MAX_OVERFLOW,
+        "pool_pre_ping": settings.POOL_PRE_PING
+    })
+
+engine = create_async_engine(settings.DATABASE_URL, **engine_kwargs)
 
 # Crear session factory
 AsyncSessionLocal = async_sessionmaker(

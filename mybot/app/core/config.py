@@ -38,7 +38,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
-        case_sensitive=True
+        case_sensitive=True,
+        extra="ignore"  # Ignorar variables de entorno no definidas (para coexistir con el bot)
     )
 
 

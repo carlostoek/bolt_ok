@@ -1,6 +1,5 @@
 """Servicios de lógica de negocio."""
 
-# Los servicios se importarán aquí cuando se implementen
-# Por ahora, dejamos el módulo preparado
+from app.services.narrative_service import NarrativeService
 
-__all__ = []
+__all__ = ["NarrativeService"]

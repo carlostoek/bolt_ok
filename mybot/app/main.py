@@ -3,12 +3,21 @@ FastAPI Application - Bot Admin Panel
 
 Punto de entrada principal de la aplicación.
 """
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.database import init_db, close_db
+from app.api.v1.endpoints import narrative
+
+# Configurar logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -21,16 +30,18 @@ async def lifespan(app: FastAPI):
     - Shutdown: Cierra conexiones de BD
     """
     # Startup
-    print("🚀 Iniciando aplicación...")
+    logger.info("🚀 Iniciando aplicación Bot Admin Panel...")
+    logger.info(f"Versión: {settings.VERSION}")
+    logger.info(f"Modo Debug: {settings.DEBUG}")
     await init_db()
-    print("✅ Base de datos inicializada")
+    logger.info("✅ Base de datos inicializada")
 
     yield
 
     # Shutdown
-    print("🛑 Cerrando aplicación...")
+    logger.info("🛑 Cerrando aplicación...")
     await close_db()
-    print("✅ Conexiones cerradas")
+    logger.info("✅ Conexiones cerradas")
 
 
 # Crear aplicación FastAPI
@@ -38,7 +49,23 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     debug=settings.DEBUG,
-    lifespan=lifespan
+    lifespan=lifespan,
+    description="""
+    Panel de Administración para Bot de Telegram.
+
+    ## Características
+
+    - ✅ Atomic Nested Creation - Crea múltiples entidades relacionadas en una sola petición
+    - ✅ Gestión de fragmentos narrativos con decisiones
+    - ✅ Sistema de tienda con productos que desbloquean contenido
+    - ✅ Transacciones atómicas - Todo se crea o nada
+    - ✅ Sin necesidad de copy-paste de IDs entre entidades
+
+    ## Documentación Técnica
+
+    - [OpenAPI Docs](/docs)
+    - [ReDoc](/redoc)
+    """
 )
 
 # Configurar CORS
@@ -64,14 +91,38 @@ async def root():
 @app.get("/health")
 async def health_check():
     """Endpoint de health check."""
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "service": "Bot Admin Panel",
+        "version": settings.VERSION
+    }
 
 
-# Los routers se agregarán aquí cuando se implementen los endpoints
-# Ejemplo:
-# from app.api.v1.endpoints import narrative, shop
-# app.include_router(narrative.router, prefix=settings.API_V1_PREFIX, tags=["narrative"])
-# app.include_router(shop.router, prefix=settings.API_V1_PREFIX, tags=["shop"])
+# ============================================================================
+# INCLUIR ROUTERS DE ENDPOINTS
+# ============================================================================
+
+# Router de Narrativa - Sistema de fragmentos y decisiones
+app.include_router(
+    narrative.router,
+    prefix=f"{settings.API_V1_PREFIX}/narrative",
+    tags=["Narrative"],
+    responses={
+        404: {"description": "Fragmento no encontrado"},
+        409: {"description": "Key duplicada"},
+        500: {"description": "Error interno del servidor"}
+    }
+)
+
+logger.info("✅ Router de Narrativa registrado en /api/v1/narrative")
+
+# Router de Tienda (pendiente de implementar)
+# from app.api.v1.endpoints import shop
+# app.include_router(
+#     shop.router,
+#     prefix=f"{settings.API_V1_PREFIX}/shop",
+#     tags=["Shop"]
+# )
 
 
 if __name__ == "__main__":

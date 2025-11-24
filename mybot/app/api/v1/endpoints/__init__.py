@@ -1,5 +1,5 @@
 """Endpoints de la API v1."""
 
-# Los endpoints se importarán aquí cuando se implementen
+from app.api.v1.endpoints import narrative
 
-__all__ = []
+__all__ = ["narrative"]

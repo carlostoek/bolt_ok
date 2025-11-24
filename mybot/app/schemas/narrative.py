@@ -3,7 +3,7 @@ Esquemas Pydantic V2 para el sistema narrativo.
 Incluye soporte completo para Atomic Nested Creation.
 """
 from typing import Optional, List, ForwardRef
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from app.schemas.shop import ProductCreateNested
 
 
@@ -78,29 +78,29 @@ class ChoiceCreateNested(BaseModel):
     required_role: Optional[str] = Field(None, max_length=50)
     is_hidden: bool = False
 
-    @field_validator('destination_fragment_key')
-    @classmethod
-    def validate_destination(cls, v, info):
+    @model_validator(mode='after')
+    def validate_destination(self):
         """
         Valida que se proporcione EXACTAMENTE uno de:
         - destination_fragment_key
         - destination_fragment
         """
-        destination_fragment = info.data.get('destination_fragment')
+        has_key = self.destination_fragment_key is not None
+        has_fragment = self.destination_fragment is not None
 
-        if v and destination_fragment:
+        if has_key and has_fragment:
             raise ValueError(
                 "No se puede proporcionar tanto 'destination_fragment_key' "
                 "como 'destination_fragment'. Elige uno."
             )
 
-        if not v and not destination_fragment:
+        if not has_key and not has_fragment:
             raise ValueError(
                 "Se debe proporcionar 'destination_fragment_key' "
                 "o 'destination_fragment'"
             )
 
-        return v
+        return self
 
     model_config = ConfigDict(from_attributes=True)
 
