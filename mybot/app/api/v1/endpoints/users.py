@@ -328,55 +328,72 @@ async def execute_user_action(
         user = None
         message = ""
 
-        # Ejecutar acción según tipo
-        if action_data.action == "GRANT_VIP":
-            if not action_data.duration_days:
-                raise ValidationException("Se requiere duration_days para GRANT_VIP")
-            user = await service.grant_vip(user_id, action_data.duration_days)
-            message = f"VIP concedido por {action_data.duration_days} días"
+        # Mapeo de acciones a funciones del servicio
+        action_handlers = {
+            "GRANT_VIP": {
+                "handler": lambda: service.grant_vip(user_id, action_data.duration_days),
+                "required_fields": ["duration_days"],
+                "message": f"VIP concedido por {action_data.duration_days} días"
+            },
+            "ADD_POINTS": {
+                "handler": lambda: service.add_points(user_id, action_data.amount),
+                "required_fields": ["amount"],
+                "message": f"{action_data.amount} puntos añadidos"
+            },
+            "REMOVE_POINTS": {
+                "handler": lambda: service.remove_points(user_id, action_data.amount),
+                "required_fields": ["amount"],
+                "message": f"{action_data.amount} puntos removidos"
+            },
+            "BAN_USER": {
+                "handler": lambda: service.ban_user(user_id),
+                "required_fields": [],
+                "message": "Usuario baneado"
+            },
+            "UNBAN_USER": {
+                "handler": lambda: service.unban_user(user_id),
+                "required_fields": [],
+                "message": "Usuario desbaneado"
+            },
+            "SET_ROLE": {
+                "handler": lambda: service.set_user_role(user_id, action_data.role),
+                "required_fields": ["role"],
+                "message": f"Rol cambiado a {action_data.role}"
+            },
+            "ADD_TO_INVENTORY": {
+                "handler": lambda: service.add_to_inventory(user_id, action_data.product_id),
+                "required_fields": ["product_id"],
+                "message": f"Producto {action_data.product_id} añadido al inventario",
+                "needs_user_refresh": True
+            },
+            "SET_FRAGMENT": {
+                "handler": lambda: service.set_current_fragment(user_id, action_data.fragment_key),
+                "required_fields": ["fragment_key"],
+                "message": f"Fragmento actual cambiado a {action_data.fragment_key}",
+                "needs_user_refresh": True
+            }
+        }
 
-        elif action_data.action == "ADD_POINTS":
-            if not action_data.amount:
-                raise ValidationException("Se requiere amount para ADD_POINTS")
-            user = await service.add_points(user_id, action_data.amount)
-            message = f"{action_data.amount} puntos añadidos"
+        # Obtener handler para la acción
+        handler_config = action_handlers.get(action_data.action)
+        if not handler_config:
+            raise ValidationException(f"Acción '{action_data.action}' no implementada")
 
-        elif action_data.action == "REMOVE_POINTS":
-            if not action_data.amount:
-                raise ValidationException("Se requiere amount para REMOVE_POINTS")
-            user = await service.remove_points(user_id, action_data.amount)
-            message = f"{action_data.amount} puntos removidos"
+        # Validar campos requeridos
+        for field in handler_config["required_fields"]:
+            if not getattr(action_data, field, None):
+                raise ValidationException(f"Se requiere {field} para {action_data.action}")
 
-        elif action_data.action == "BAN_USER":
-            user = await service.ban_user(user_id)
-            message = "Usuario baneado"
-
-        elif action_data.action == "UNBAN_USER":
-            user = await service.unban_user(user_id)
-            message = "Usuario desbaneado"
-
-        elif action_data.action == "SET_ROLE":
-            if not action_data.role:
-                raise ValidationException("Se requiere role para SET_ROLE")
-            user = await service.set_user_role(user_id, action_data.role)
-            message = f"Rol cambiado a {action_data.role}"
-
-        elif action_data.action == "ADD_TO_INVENTORY":
-            if not action_data.product_id:
-                raise ValidationException("Se requiere product_id para ADD_TO_INVENTORY")
-            await service.add_to_inventory(user_id, action_data.product_id)
+        # Ejecutar handler
+        result = await handler_config["handler"]()
+        
+        # Si la acción requiere refrescar el usuario, obtenerlo nuevamente
+        if handler_config.get("needs_user_refresh"):
             user = await service.get_user(user_id)
-            message = f"Producto {action_data.product_id} añadido al inventario"
-
-        elif action_data.action == "SET_FRAGMENT":
-            if not action_data.fragment_key:
-                raise ValidationException("Se requiere fragment_key para SET_FRAGMENT")
-            await service.set_current_fragment(user_id, action_data.fragment_key)
-            user = await service.get_user(user_id)
-            message = f"Fragmento actual cambiado a {action_data.fragment_key}"
-
-        if not user:
-            raise ValidationException("Acción no implementada o usuario no encontrado")
+        else:
+            user = result
+            
+        message = handler_config["message"]
 
         logger.info(f"✅ Acción '{action_data.action}' ejecutada exitosamente para usuario {user_id}")
 

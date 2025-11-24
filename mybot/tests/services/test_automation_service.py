@@ -336,25 +336,6 @@ class TestAutomationServiceEdgeCases:
                 }
             },
             is_enabled=True,
-            priority=1
-        )
-        
-        trigger_data = TriggerCreate(
-            name="large_params_trigger",
-            description="Test trigger with large parameters",
-            event_type="custom_event",
-            conditions={
-                "complex_condition": {
-                    "nested": {
-                        "deep": {
-                            "very_deep": {
-                                "array": ["item1", "item2", "item3"] * 10
-                            }
-                        }
-                    }
-                }
-            },
-            is_enabled=True,
             priority=1,
             actions=[
                 ActionCreateNested(

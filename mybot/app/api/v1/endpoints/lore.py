@@ -28,7 +28,7 @@ router = APIRouter()
 
 
 @router.post(
-    "/lore",
+    "",
     response_model=LoreResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Crear pieza de lore",
@@ -72,12 +72,12 @@ async def create_lore_piece(
         logger.error(f"❌ Error al crear pieza de lore: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error interno del servidor: {str(e)}"
+            detail="Error interno del servidor"
         )
 
 
 @router.get(
-    "/lore/{lore_id}",
+    "/{lore_id}",
     response_model=LoreResponse,
     summary="Obtener pieza de lore por ID",
     description="Obtiene una pieza de lore específica por su lore_id."
@@ -121,12 +121,12 @@ async def get_lore_piece(
         logger.error(f"❌ Error al obtener pieza de lore: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener pieza de lore: {str(e)}"
+            detail="Error al obtener pieza de lore"
         )
 
 
 @router.get(
-    "/lore",
+    "",
     response_model=LoreListResponse,
     summary="Listar piezas de lore",
     description="Obtiene todas las piezas de lore con filtros y paginación."
@@ -175,12 +175,12 @@ async def list_lore_pieces(
         logger.error(f"❌ Error al listar piezas de lore: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al listar piezas de lore: {str(e)}"
+            detail="Error al listar piezas de lore"
         )
 
 
 @router.put(
-    "/lore/{lore_id}",
+    "/{lore_id}",
     response_model=LoreResponse,
     summary="Actualizar pieza de lore",
     description="Actualiza una pieza de lore existente. Solo actualiza los campos proporcionados."
@@ -223,12 +223,12 @@ async def update_lore_piece(
         logger.error(f"❌ Error al actualizar pieza de lore: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al actualizar pieza de lore: {str(e)}"
+            detail="Error al actualizar pieza de lore"
         )
 
 
 @router.delete(
-    "/lore/{lore_id}",
+    "/{lore_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Eliminar pieza de lore",
     description="Elimina una pieza de lore por su lore_id."
@@ -269,12 +269,12 @@ async def delete_lore_piece(
         logger.error(f"❌ Error al eliminar pieza de lore: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al eliminar pieza de lore: {str(e)}"
+            detail="Error al eliminar pieza de lore"
         )
 
 
 @router.get(
-    "/lore/search",
+    "/search",
     response_model=List[LoreResponse],
     summary="Buscar piezas de lore",
     description="Busca piezas de lore por texto en lore_id, título o contenido."
@@ -307,12 +307,12 @@ async def search_lore_pieces(
         logger.error(f"❌ Error al buscar piezas de lore: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al buscar piezas de lore: {str(e)}"
+            detail="Error al buscar piezas de lore"
         )
 
 
 @router.get(
-    "/lore/statistics",
+    "/statistics",
     summary="Estadísticas del sistema de lore",
     description="Obtiene estadísticas sobre las piezas de lore en el sistema."
 )
@@ -340,5 +340,5 @@ async def get_lore_statistics(
         logger.error(f"❌ Error al obtener estadísticas: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al obtener estadísticas: {str(e)}"
+            detail="Error al obtener estadísticas"
         )

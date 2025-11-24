@@ -157,7 +157,7 @@ class UserService:
         for field, value in update_data.items():
             setattr(user, field, value)
 
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
         await self.db.commit()
         await self.db.refresh(user)
         return user
@@ -172,8 +172,8 @@ class UserService:
         expires_at = datetime.now() + timedelta(days=days)
         
         user.is_vip = True
-        user.vip_expires_at = expires_at
-        user.updated_at = datetime.now()
+        user.vip_expires_at = datetime.utcnow() + timedelta(days=days)
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -186,7 +186,7 @@ class UserService:
             raise NotFoundException(f"Usuario con ID {user_id} no encontrado")
 
         user.points += amount
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -202,7 +202,7 @@ class UserService:
             raise ValidationException("El usuario no tiene suficientes puntos")
 
         user.points -= amount
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -215,7 +215,7 @@ class UserService:
             raise NotFoundException(f"Usuario con ID {user_id} no encontrado")
 
         user.is_banned = True
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -228,7 +228,7 @@ class UserService:
             raise NotFoundException(f"Usuario con ID {user_id} no encontrado")
 
         user.is_banned = False
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -241,7 +241,7 @@ class UserService:
             raise NotFoundException(f"Usuario con ID {user_id} no encontrado")
 
         user.role = role
-        user.updated_at = datetime.now()
+        user.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(user)
@@ -308,7 +308,7 @@ class UserService:
             self.db.add(narrative_state)
 
         narrative_state.current_fragment_key = fragment_key
-        narrative_state.updated_at = datetime.now()
+        narrative_state.updated_at = datetime.utcnow()
 
         await self.db.commit()
         await self.db.refresh(narrative_state)

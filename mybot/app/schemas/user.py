@@ -5,14 +5,8 @@ Incluye modelos de request/response para la API.
 from pydantic import BaseModel, Field, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
-from enum import Enum
 
-
-class UserRole(str, Enum):
-    """Roles de usuario disponibles."""
-    USER = "user"
-    ADMIN = "admin"
-    SUPER_ADMIN = "super_admin"
+from app.models.user import UserRole
 
 
 class UserBase(BaseModel):

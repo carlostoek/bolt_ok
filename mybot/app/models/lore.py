@@ -40,8 +40,7 @@ class LorePiece(Base):
     unlocking_products = relationship(
         "ShopItem",
         back_populates="unlocks_lore",
-        foreign_keys="ShopItem.unlocks_lore_piece_id",
-        primaryjoin="LorePiece.id == foreign(ShopItem.unlocks_lore_piece_id)"
+        foreign_keys="ShopItem.unlocks_lore_piece_id"
     )
 
     def __repr__(self):

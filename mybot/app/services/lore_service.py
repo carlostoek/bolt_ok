@@ -91,7 +91,7 @@ class LoreService:
             raise ValidationException(f"La pieza de lore con ID '{lore_data.lore_id}' ya existe")
 
         # Crear pieza de lore
-        lore_piece = LorePiece(**lore_data.dict())
+        lore_piece = LorePiece(**lore_data.model_dump())
         self.db.add(lore_piece)
 
         await self.db.commit()
@@ -105,7 +105,7 @@ class LoreService:
             raise NotFoundException(f"Pieza de lore con ID '{lore_id}' no encontrada")
 
         # Actualizar campos
-        update_data = lore_data.dict(exclude_unset=True)
+        update_data = lore_data.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(lore_piece, field, value)
 
@@ -133,7 +133,7 @@ class LoreService:
             if existing_lore:
                 raise ValidationException(f"La pieza de lore con ID '{lore_data.lore_id}' ya existe")
 
-            lore_piece = LorePiece(**lore_data.dict())
+            lore_piece = LorePiece(**lore_data.model_dump())
             self.db.add(lore_piece)
             created_pieces.append(lore_piece)
 
