@@ -116,13 +116,21 @@ app.include_router(
 
 logger.info("✅ Router de Narrativa registrado en /api/v1/narrative")
 
-# Router de Tienda (pendiente de implementar)
-# from app.api.v1.endpoints import shop
-# app.include_router(
-#     shop.router,
-#     prefix=f"{settings.API_V1_PREFIX}/shop",
-#     tags=["Shop"]
-# )
+# Router de Tienda
+from app.api.v1.endpoints import shop
+app.include_router(
+    shop.router,
+    prefix=f"{settings.API_V1_PREFIX}/shop",
+    tags=["Shop"]
+)
+
+# Router de Automatización
+from app.api.v1.endpoints import automation
+app.include_router(
+    automation.router,
+    prefix=f"{settings.API_V1_PREFIX}/automation",
+    tags=["Automation"]
+)
 
 
 if __name__ == "__main__":

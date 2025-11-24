@@ -59,4 +59,6 @@ echo "   Health: http://localhost:8000/health"
 echo ""
 
 # Iniciar con uvicorn
-python main.py
+# Nos movemos al directorio padre para que los imports de 'app' funcionen
+cd ..
+python -m app.main

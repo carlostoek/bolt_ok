@@ -1,6 +1,7 @@
 """
 Excepciones personalizadas para el panel de administración.
 """
+from typing import Optional
 
 
 class AppException(Exception):
@@ -49,9 +50,29 @@ class ValidationException(AppException):
 class NestedCreationException(AppException):
     """Excepción específica para errores en creación anidada."""
 
-    def __init__(self, message: str, nested_entity: str = None):
+    def __init__(self, message: str, nested_entity: Optional[str] = None):
         full_message = f"Error en creación anidada"
         if nested_entity:
             full_message += f" de {nested_entity}"
         full_message += f": {message}"
         super().__init__(full_message, status_code=500)
+
+
+class ProductNotFoundException(AppException):
+    """Excepción cuando no se encuentra un producto."""
+
+    def __init__(self, product_id: int):
+        super().__init__(
+            f"No se encontró el producto con ID '{product_id}'",
+            status_code=404
+        )
+
+
+class TriggerNotFoundException(AppException):
+    """Excepción cuando no se encuentra un trigger."""
+
+    def __init__(self, trigger_id: int):
+        super().__init__(
+            f"No se encontró el trigger con ID '{trigger_id}'",
+            status_code=404
+        )

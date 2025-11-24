@@ -7,6 +7,8 @@ from typing import Optional, List, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload
 
 from app.models.narrative import StoryFragment, NarrativeChoice
 from app.models.shop import ShopItem
@@ -293,7 +295,11 @@ class NarrativeService:
         Raises:
             FragmentNotFoundException: Si no existe el fragmento
         """
-        stmt = select(StoryFragment).where(StoryFragment.key == key)
+        stmt = (
+            select(StoryFragment)
+            .where(StoryFragment.key == key)
+            .options(selectinload(StoryFragment.choices))
+        )
         result = await self.db.execute(stmt)
         fragment = result.scalar_one_or_none()
 
@@ -319,12 +325,13 @@ class NarrativeService:
         """
         stmt = (
             select(StoryFragment)
+            .options(selectinload(StoryFragment.choices))
             .offset(skip)
             .limit(limit)
             .order_by(StoryFragment.id)
         )
         result = await self.db.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     async def update_fragment(
         self,
