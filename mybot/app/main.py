@@ -132,6 +132,22 @@ app.include_router(
     tags=["Automation"]
 )
 
+# Router de Usuarios
+from app.api.v1.endpoints import users
+app.include_router(
+    users.router,
+    prefix=f"{settings.API_V1_PREFIX}/users",
+    tags=["Users"]
+)
+
+# Router de Lore
+from app.api.v1.endpoints import lore
+app.include_router(
+    lore.router,
+    prefix=f"{settings.API_V1_PREFIX}/lore",
+    tags=["Lore"]
+)
+
 
 if __name__ == "__main__":
     import uvicorn

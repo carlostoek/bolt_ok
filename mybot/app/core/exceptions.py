@@ -76,3 +76,10 @@ class TriggerNotFoundException(AppException):
             f"No se encontró el trigger con ID '{trigger_id}'",
             status_code=404
         )
+
+
+class NotFoundException(AppException):
+    """Excepción genérica cuando no se encuentra un recurso."""
+
+    def __init__(self, message: str):
+        super().__init__(message, status_code=404)

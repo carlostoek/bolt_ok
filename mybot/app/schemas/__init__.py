@@ -15,6 +15,24 @@ from app.schemas.shop import (
     ProductResponse,
     ProductCreateNested
 )
+from app.schemas.user import (
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+    UserProfileResponse,
+    UserListResponse,
+    UserActionRequest,
+    UserActionResponse,
+    UserFilterParams,
+    UserRole
+)
+from app.schemas.lore import (
+    LoreCreate,
+    LoreUpdate,
+    LoreResponse,
+    LoreListResponse,
+    LoreFilterParams
+)
 
 __all__ = [
     # Narrative
@@ -29,5 +47,21 @@ __all__ = [
     "ProductCreate",
     "ProductUpdate",
     "ProductResponse",
-    "ProductCreateNested"
+    "ProductCreateNested",
+    # Users
+    "UserCreate",
+    "UserUpdate",
+    "UserResponse",
+    "UserProfileResponse",
+    "UserListResponse",
+    "UserActionRequest",
+    "UserActionResponse",
+    "UserFilterParams",
+    "UserRole",
+    # Lore
+    "LoreCreate",
+    "LoreUpdate",
+    "LoreResponse",
+    "LoreListResponse",
+    "LoreFilterParams"
 ]
