@@ -58,11 +58,7 @@ Diana ha desbloqueado un fragmento especial solo para ti.
                     except KeyError:
                         pass  # Si falta algún dato, usar mensaje sin formatear
 
-                    success_text += f"""
-
-─────────────
-
-{upsell_message}"""
+                    success_text += f"\n\n─────────────\n\n{upsell_message}"
 
             # Build keyboard según tipo de upsell
             keyboard = get_upsell_keyboard(
