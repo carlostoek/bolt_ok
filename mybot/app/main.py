@@ -148,6 +148,14 @@ app.include_router(
     tags=["Lore"]
 )
 
+# Router de Autenticación
+from app.api.v1.endpoints import login
+app.include_router(
+    login.router,
+    prefix=f"{settings.API_V1_PREFIX}/auth",
+    tags=["Authentication"]
+)
+
 
 if __name__ == "__main__":
     import uvicorn

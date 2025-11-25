@@ -2,7 +2,7 @@
 Modelos ORM para el sistema de tienda del bot.
 Incluye productos y sus relaciones con la narrativa.
 """
-from sqlalchemy import Column, Integer, String, Text, Boolean
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
 from app.database.session import Base
 
@@ -28,10 +28,25 @@ class ShopItem(Base):
 
     # Relación con narrativa
     unlocks_fragment_key = Column(String(50), nullable=True, index=True)
+    unlocks_lore_piece_id = Column(Integer, ForeignKey("lore_pieces.id"), nullable=True)
+
+    # Imagen del producto
+    image_file_id = Column(String(255), nullable=True)
 
     # Control de stock
     stock_limit = Column(Integer, nullable=True)  # NULL = ilimitado
     max_purchases_per_user = Column(Integer, nullable=False, default=1)
+
+    # Disponibilidad temporal
+    available_from = Column(DateTime, nullable=True)
+    available_until = Column(DateTime, nullable=True)
+
+    # Requisitos de desbloqueo
+    unlock_requirements = Column(JSON, nullable=True)
+
+    # Estado
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, nullable=False, server_default="CURRENT_TIMESTAMP")
 
     # Relaciones
     unlocks_fragment = relationship(
@@ -40,6 +55,12 @@ class ShopItem(Base):
         foreign_keys=[unlocks_fragment_key],
         primaryjoin="foreign(ShopItem.unlocks_fragment_key) == StoryFragment.key",
         uselist=False
+    )
+    
+    unlocks_lore = relationship(
+        "LorePiece",
+        back_populates="unlocking_products",
+        foreign_keys=[unlocks_lore_piece_id]
     )
 
     def __repr__(self):
