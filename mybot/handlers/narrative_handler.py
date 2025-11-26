@@ -8,10 +8,10 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.narrative_service import NarrativeService, RequirementsInfo
-from services.narrative_loader import NarrativeLoader
-from services.coordinador_central import CoordinadorCentral, AccionUsuario
-from services.narrative_state_machine import NarrativeStateMachine
+# Imports refactorizados
+from app.services.narrative_service import NarrativeService
+from app.services.automation_service import AutomationService
+
 from keyboards.narrative_kb import get_narrative_keyboard, get_narrative_stats_keyboard
 from utils.message_safety import safe_answer, safe_edit
 from utils.user_roles import get_user_role
@@ -23,12 +23,12 @@ logger = logging.getLogger(__name__)
 router = Router(name="narrative_handler")
 
 @router.message(Command("historia"))
-async def start_narrative_command(message: Message, session: AsyncSession):
+async def start_narrative_command(message: Message, db: AsyncSession):
     """Continúa la narrativa desde el último punto guardado del usuario."""
     user_id = message.from_user.id
 
     try:
-        service = NarrativeService(session, message.bot)
+        service = NarrativeService(db)
 
         # Obtener fragmento actual del usuario (esto debería recordar el progreso)
         current_fragment = await service.get_user_current_fragment(user_id)
@@ -36,14 +36,14 @@ async def start_narrative_command(message: Message, session: AsyncSession):
         if current_fragment:
             # El usuario ya tiene progreso - continuar desde ahí
             logger.info(f"Usuario {user_id} continúa narrativa desde fragmento: {current_fragment.key}")
-            await _display_narrative_fragment(message, current_fragment, session)
+            await _display_narrative_fragment(message, current_fragment, db)
         else:
             # Usuario nuevo - iniciar narrativa desde el principio
             logger.info(f"Usuario {user_id} inicia narrativa por primera vez")
             current_fragment = await service.start_narrative(user_id)
             
             if current_fragment:
-                await _display_narrative_fragment(message, current_fragment, session)
+                await _display_narrative_fragment(message, current_fragment, db)
             else:
                 await safe_answer(
                     message,
@@ -58,153 +58,35 @@ async def start_narrative_command(message: Message, session: AsyncSession):
         )
 
 @router.callback_query(F.data.startswith("narrative_choice:"))
-async def handle_narrative_choice(callback: CallbackQuery, session: AsyncSession):
+async def handle_narrative_choice(callback: CallbackQuery, db: AsyncSession):
     """Maneja las decisiones narrativas del usuario."""
     user_id = callback.from_user.id
 
     try:
-        # Immediate feedback to user with emotional response (UX improvement)
         await callback.answer("🌸 Diana siente tu elección...")
         
-        # Show visual processing feedback with Diana's voice
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
-        processing_builder = InlineKeyboardBuilder()
-        processing_builder.button(text="⏳ Pensando en tu decisión...", callback_data="noop")
-        
-        # Get current fragment to show character context
-        service = NarrativeService(session, callback.bot)
-        current_fragment = await service.get_user_current_fragment(user_id)
-        
-        character_emoji = "🎩" if current_fragment and current_fragment.character == "Lucien" else "🌸"
-        processing_text = f"{character_emoji} *{current_fragment.character if current_fragment else 'Diana'}*:\n\n"
-        processing_text += "Siento tu elección... déjame ver qué nos depara el destino..."
-        
-        # Update message with processing feedback
-        try:
-            await callback.message.edit_text(
-                processing_text,
-                reply_markup=processing_builder.as_markup(),
-                parse_mode="MarkdownV2"
-            )
-        except Exception:
-            # If message edit fails, continue with the flow
-            pass
-
-        # Extraer índice de la decisión
         choice_data = callback.data.split(":")
         if len(choice_data) < 2:
             await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
             return
 
-        choice_index = int(choice_data[1])
+        choice_id = int(choice_data[1])
 
-        # Get current fragment and choices to check for special decisions
-        if current_fragment:
-            choices = await service._get_fragment_choices(current_fragment.id)
-            if 0 <= choice_index < len(choices):
-                selected_choice = choices[choice_index]
-
-                # Check if this is the "Go to shop" special action from teaser
-                if "🛒" in selected_choice.text and ("tienda" in selected_choice.text.lower() or "shop" in selected_choice.text.lower()):
-                    logger.info(f"User {user_id} selecting 'Go to Shop' from narrative teaser")
-                    # Use State Machine for atomic shop transition
-                    from services.narrative_state_machine import NarrativeStateMachine
-                    state_machine = NarrativeStateMachine(session)
-                    success = await state_machine.transition_to_shop(
-                        user_id=user_id,
-                        current_fragment_key=current_fragment.key
-                    )
-                    if success:
-                        logger.info(f"[STATE_MACHINE] User {user_id} transitioned to SHOPPING from {current_fragment.key}")
-                    else:
-                        logger.warning(f"[STATE_MACHINE] Failed to transition user {user_id} to shop")
-                    
-                    # Show shop directly instead of going to next fragment
-                    from handlers.shop_handlers import show_shop
-
-                    # Create a mock callback for shop handler
-                    class MockCallback:
-                        def __init__(self, original_callback):
-                            self.from_user = original_callback.from_user
-                            self.message = original_callback.message
-                            self.bot = original_callback.bot
-                            self._callback = original_callback
-
-                        async def answer(self, *args, **kwargs):
-                            await self._callback.answer(*args, **kwargs)
-
-                    mock_callback = MockCallback(callback)
-                    await show_shop(mock_callback, session)
-                    return
-
-                # Check if this is a special decision that requires item verification
-                if "diario íntimo" in selected_choice.text.lower():
-                    # Use CoordinadorCentral for special item verification
-                    from services.coordinador_central import CoordinadorCentral, AccionUsuario
-                    coordinador = CoordinadorCentral(session)
-
-                    # Log for debugging
-                    logger.info(f"[DECISION_DEBUG] Processing diary decision for user {user_id}, choice ID: {selected_choice.id}, current_fragment: {current_fragment.key}")
-
-                    result = await coordinador.ejecutar_flujo(
-                        user_id,
-                        AccionUsuario.TOMAR_DECISION,
-                        decision_id=selected_choice.id
-                    )
-
-                    logger.info(f"[DECISION_DEBUG] Coordinator result: success={result['success']}, has_fragment={result.get('fragment') is not None}")
-                    if result.get("fragment"):
-                        logger.info(f"[DECISION_DEBUG] Fragment returned: key={result['fragment'].key}")
-
-                    if result["success"]:
-                        next_fragment = result.get("fragment")
-                    else:
-                        logger.warning(f"[DECISION_DEBUG] Decision failed: {result.get('message')}")
-                        await callback.answer(result.get("message", get_text("narrative.handler.cannot_make_decision")), show_alert=True)
-                        return
-                else:
-                    # Process normal decision using the actual decision ID, not the choice index
-                    logger.info(f"[DECISION_DEBUG] Processing normal decision for user {user_id}, choice ID: {selected_choice.id}")
-                    next_fragment = await service.process_user_decision_by_id(user_id, selected_choice.id)
-                    if next_fragment:
-                        logger.info(f"[DECISION_DEBUG] Normal decision returned fragment: {next_fragment.key}")
-                    else:
-                        logger.warning(f"[DECISION_DEBUG] Normal decision returned None")
-            else:
-                next_fragment = None
-        else:
-            next_fragment = None
+        narrative_service = NarrativeService(db)
+        
+        next_fragment = await narrative_service.process_user_decision(user_id, choice_id)
 
         if not next_fragment:
-            # Get detailed requirements info
-            # We need to get selected_choice again for requirements check
-            if current_fragment and 0 <= choice_index < len(choices):
-                selected_choice = choices[choice_index]
-                can_proceed, requirements_info = await service.check_decision_requirements_info(user_id, selected_choice.id)
-                
-                # Build detailed message with requirements
-                await _show_requirements_message(callback, requirements_info, session)
+            can_proceed, requirements_info = await narrative_service.check_decision_requirements(user_id, choice_id)
+            await _show_requirements_message(callback, requirements_info, db)
             return
 
-        # Mostrar siguiente fragmento con feedback emocional
         await callback.answer("✨ Tu decisión ha sido escuchada...")
-        await _display_narrative_fragment(callback.message, next_fragment, session, is_callback=True)
+        await _display_narrative_fragment(callback.message, next_fragment, db, is_callback=True)
 
-        # ========================================
-        # MEJORA #3: TRIGGER DE SESIÓN INDIVIDUAL
-        # ========================================
-        # Evaluar si es momento de ofrecer sesión individual después de fragmento emocional
-        try:
-            from services.session_trigger_service import SessionTriggerService
-            trigger_service = SessionTriggerService(session)
-            await trigger_service.trigger_on_narrative_completion(
-                user_id=user_id,
-                fragment_key=next_fragment.key,
-                bot=callback.bot
-            )
-        except Exception as trigger_error:
-            # No bloquear flujo principal si falla el trigger
-            logger.error(f"Error in session trigger: {trigger_error}")
+        # Ejecutar triggers de automatización
+        automation_service = AutomationService(db)
+        await automation_service.execute_triggers(user_id, "narrative_choice", {"fragment_key": next_fragment.key})
 
     except ValueError:
         await callback.answer(get_text("narrative.handler.invalid_decision"), show_alert=True)
@@ -576,35 +458,11 @@ async def _display_narrative_fragment(
     is_callback: bool = False
 ):
     """Muestra un fragmento narrativo con sus opciones."""
-    # Obtener user_id
-    user_id = message.from_user.id if hasattr(message, 'from_user') else (message.chat.id if hasattr(message, 'chat') else None)
-
-    # Obtener estadísticas de progreso
-    progress_info = ""
-    if user_id:
-        try:
-            service = NarrativeService(session)
-            stats = await service.get_user_narrative_stats(user_id)
-            fragments_visited = stats.get('fragments_visited', 0)
-            total_accessible = stats.get('total_accessible', 0)
-            progress_pct = stats.get('progress_percentage', 0)
-
-            # Crear indicador visual de progreso
-            progress_info = get_text(
-                "narrative.display.fragment_progress",
-                visited=fragments_visited,
-                total=total_accessible,
-                level=fragment.level,
-                progress_pct=progress_pct
-            )
-        except Exception as e:
-            logger.warning(f"No se pudo obtener progreso para usuario {user_id}: {e}")
-
     # Formatear el texto del fragmento
     character_emoji = "🎩" if fragment.character == "Lucien" else "🌸"
 
     # HTML mode: No escaping needed, HTML tags are safe
-    fragment_text = progress_info + get_text(
+    fragment_text = get_text(
         "narrative.display.character_line_html",
         emoji=character_emoji,
         name=fragment.character,
@@ -616,6 +474,7 @@ async def _display_narrative_fragment(
         fragment_text += get_text("narrative.display.reward_line_html", reward=fragment.reward_besitos)
 
     # Crear teclado con opciones (pasando user_id para navegación)
+    user_id = message.from_user.id if hasattr(message, 'from_user') else (message.chat.id if hasattr(message, 'chat') else None)
     keyboard = await get_narrative_keyboard(fragment, session, user_id=user_id)
 
     # Verificar si el fragmento tiene imagen
@@ -623,14 +482,11 @@ async def _display_narrative_fragment(
 
     # Mostrar el fragmento
     if has_image:
-        # Si tiene imagen, enviar como foto con caption
         try:
             if is_callback:
-                # En callback, eliminar mensaje anterior y enviar nuevo con imagen
                 try:
                     await message.delete()
                 except Exception:
-                    # El mensaje puede ya no existir, continuar de todos modos
                     pass
                 await message.bot.send_photo(
                     chat_id=message.chat.id,
@@ -640,7 +496,6 @@ async def _display_narrative_fragment(
                     parse_mode="HTML"
                 )
             else:
-                # En mensaje normal, enviar directamente
                 await message.answer_photo(
                     photo=fragment.image_url,
                     caption=fragment_text,
@@ -649,9 +504,7 @@ async def _display_narrative_fragment(
                 )
         except Exception as e:
             logger.error(f"Error enviando fragmento con imagen: {e}")
-            # Fallback a texto sin imagen
             if is_callback:
-                # Si el mensaje anterior tenía foto, eliminar y enviar nuevo
                 if message.photo:
                     try:
                         await message.delete()
@@ -663,10 +516,7 @@ async def _display_narrative_fragment(
             else:
                 await safe_answer(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
     else:
-        # Sin imagen, enviar solo texto como antes
         if is_callback:
-            # Si el mensaje anterior tenía foto, debemos eliminar y enviar nuevo
-            # El patch en message_safety.py manejará esto automáticamente
             await safe_edit(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
         else:
             await safe_answer(message, fragment_text, reply_markup=keyboard, parse_mode="HTML")
@@ -1231,7 +1081,7 @@ async def _fallback_to_standard_narrative(callback: CallbackQuery, session: Asyn
         await callback.answer(get_text("narrative.handler.continue_error"), show_alert=True)
 
 
-async def _show_requirements_message(callback: CallbackQuery, requirements_info: RequirementsInfo, session: AsyncSession):
+async def _show_requirements_message(callback: CallbackQuery, requirements_info, session: AsyncSession):
     """
     Muestra un mensaje detallado de requisitos no cumplidos con opciones de conversión.
 

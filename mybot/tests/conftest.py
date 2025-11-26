@@ -1,290 +1,112 @@
-"""
-Testing configuration for automation system with atomic nested creation.
-Fixtures and utilities for testing the event-driven automation engine.
-"""
-import pytest
+# tests/conftest.py
 import asyncio
-from typing import Dict, Any
-from unittest.mock import AsyncMock, MagicMock, patch
-from datetime import datetime, timedelta, timezone
+import pytest
+import pytest_asyncio
+from unittest.mock import AsyncMock, MagicMock
+from aiogram import Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 
-from app.models.automation import AutomationTrigger, TriggerAction, AutomationLog
-from app.schemas.automation import TriggerCreate, ActionCreateNested
-from app.services.automation_service import AutomationService
+# Assuming the Base is defined in a way that all models are registered.
+# If not, we might need to import all model files here.
+from database.base import Base 
+from middlewares.db_middleware import DbSessionMiddleware
 
+# Use an in-memory SQLite database for testing
+DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 @pytest.fixture(scope="session")
 def event_loop():
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+    """Create an instance of the default event loop for each test session."""
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
+@pytest_asyncio.fixture(scope="session")
+async def test_db_engine():
+    """Fixture for creating an in-memory SQLite database engine."""
+    engine = create_async_engine(DATABASE_URL, echo=False)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield engine
+    await engine.dispose()
 
-@pytest.fixture
-def mock_session():
-    """Mock database session for testing."""
-    session = AsyncMock()
-    
-    # Mock common database operations
-    session.execute = AsyncMock()
-    session.commit = AsyncMock()
-    session.rollback = AsyncMock()
-    session.refresh = AsyncMock()
-    session.get = AsyncMock()
-    session.add = AsyncMock()
-    session.flush = AsyncMock()
-    
-    # Mock flush to set IDs on objects
-    async def mock_flush():
-        # Set IDs on any added objects
-        if hasattr(session, '_added_objects'):
-            for i, obj in enumerate(session._added_objects, start=1):
-                if hasattr(obj, 'id') and obj.id is None:
-                    obj.id = i
-    
-    session.flush = mock_flush
-    
-    # Track added objects
-    session._added_objects = []
-    
-    def mock_add(obj):
-        session._added_objects.append(obj)
-    
-    session.add = mock_add
-    
-    return session
+@pytest_asyncio.fixture
+async def db_session(test_db_engine):
+    """
+    Fixture that provides a clean, isolated database session for each test function.
+    Creates all tables before the test and drops them afterwards.
+    """
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-
-@pytest.fixture
-def automation_service(mock_session):
-    """Fixture providing the automation service."""
-    return AutomationService(mock_session)
-
-
-@pytest.fixture
-def sample_trigger_data() -> Dict[str, Any]:
-    """Sample data for creating automation triggers."""
-    return {
-        "name": "test_trigger",
-        "description": "Test automation trigger",
-        "event_type": "fragment_viewed",
-        "conditions": {
-            "fragment_key": "welcome",
-            "user_level": 1
-        },
-        "is_enabled": True,
-        "priority": 1
-    }
-
-
-@pytest.fixture
-def sample_action_data() -> Dict[str, Any]:
-    """Sample data for creating trigger actions."""
-    return {
-        "action_type": "give_product",
-        "parameters": {
-            "product_id": 1,
-            "quantity": 1
-        },
-        "execution_order": 1,
-        "is_enabled": True
-    }
-
-
-@pytest.fixture
-def sample_nested_creation_data() -> Dict[str, Any]:
-    """Sample data for testing atomic nested creation."""
-    return {
-        "name": "atomic_nested_trigger",
-        "description": "Test atomic nested creation",
-        "event_type": "purchase_completed",
-        "conditions": {
-            "product_type": "premium"
-        },
-        "is_enabled": True,
-        "priority": 1,
-        "actions": [
-            {
-                "action_type": "give_product",
-                "parameters": {
-                    "product_id": 2,
-                    "quantity": 1
-                },
-                "execution_order": 1,
-                "is_enabled": True
-            },
-            {
-                "action_type": "add_points",
-                "parameters": {
-                    "points": 100
-                },
-                "execution_order": 2,
-                "is_enabled": True
-            }
-        ]
-    }
-
-
-@pytest.fixture
-def automation_test_scenarios():
-    """Predefined test scenarios for automation system."""
-    return {
-        "atomic_nested_creation": {
-            "description": "Create trigger with multiple actions atomically",
-            "trigger_data": {
-                "name": "multi_action_trigger",
-                "event_type": "user_registered",
-                "conditions": {},
-                "is_enabled": True
-            },
-            "actions_data": [
-                {
-                    "action_type": "grant_vip",
-                    "parameters": {"duration_days": 7},
-                    "execution_order": 1
-                },
-                {
-                    "action_type": "send_message",
-                    "parameters": {"message": "Welcome to our platform!"},
-                    "execution_order": 2
-                }
-            ],
-            "expected_actions_count": 2
-        },
-        "rollback_scenario": {
-            "description": "Test rollback when action creation fails",
-            "trigger_data": {
-                "name": "rollback_test",
-                "event_type": "fragment_viewed",
-                "conditions": {"fragment_key": "test_fragment"},
-                "is_enabled": True
-            },
-            "actions_data": [
-                {
-                    "action_type": "give_product",
-                    "parameters": {"product_id": 1},
-                    "execution_order": 1
-                },
-                {
-                    "action_type": "invalid_action",  # This should cause rollback
-                    "parameters": {},
-                    "execution_order": 2
-                }
-            ],
-            "should_fail": True
-        },
-        "condition_evaluation": {
-            "description": "Test complex condition evaluation",
-            "trigger_data": {
-                "name": "complex_conditions",
-                "event_type": "fragment_viewed",
-                "conditions": {
-                    "fragment_key": "advanced_level",
-                    "user_level": {"gte": 5},
-                    "vip_status": True
-                },
-                "is_enabled": True
-            },
-            "actions_data": [
-                {
-                    "action_type": "unlock_fragment",
-                    "parameters": {"fragment_key": "secret_content"},
-                    "execution_order": 1
-                }
-            ]
-        }
-    }
-
-
-@pytest.fixture
-def mock_event_context():
-    """Mock event context for testing trigger evaluation."""
-    return {
-        "user_id": 12345,
-        "fragment_key": "welcome",
-        "user_level": 1,
-        "vip_status": False,
-        "timestamp": datetime.now(timezone.utc).isoformat()
-    }
-
-
-class AutomationTestHelper:
-    """Helper class for automation system testing."""
-    
-    @staticmethod
-    async def create_test_trigger_with_actions(
-        session: AsyncMock,
-        trigger_data: Dict[str, Any],
-        actions_data: list[Dict[str, Any]]
-    ) -> AutomationTrigger:
-        """Helper to create a trigger with actions for testing."""
-        # Create trigger
-        trigger = AutomationTrigger(**trigger_data)
-        
-        # Create actions
-        trigger.actions = []
-        for i, action_data in enumerate(actions_data):
-            action = TriggerAction(
-                trigger_id=1,  # Mock trigger ID
-                **action_data
-            )
-            trigger.actions.append(action)
-        
-        return trigger
-    
-    @staticmethod
-    async def verify_atomic_creation(
-        session: AsyncMock,
-        trigger_name: str,
-        expected_actions_count: int
-    ) -> bool:
-        """Verify that trigger and actions were created atomically."""
-        # In mock tests, we'll simulate the verification
-        return True
-    
-    @staticmethod
-    async def verify_rollback(
-        session: AsyncMock,
-        trigger_name: str
-    ) -> bool:
-        """Verify that rollback occurred (trigger should not exist)."""
-        # In mock tests, we'll simulate the verification
-        return True
-
-
-@pytest.fixture
-def automation_test_helper():
-    """Fixture providing the automation test helper."""
-    return AutomationTestHelper()
-
-
-# Integration test helpers
-async def setup_test_automation_state(session: AsyncMock, user_id: int):
-    """Helper to setup automation state for testing."""
-    # Create test triggers and actions
-    trigger_data = {
-        "name": f"test_trigger_{user_id}",
-        "event_type": "fragment_viewed",
-        "conditions": {"fragment_key": "test_fragment"},
-        "is_enabled": True
-    }
-    
-    actions_data = [
-        {
-            "action_type": "send_message",
-            "parameters": {"message": "Test message"},
-            "execution_order": 1
-        }
-    ]
-    
-    helper = AutomationTestHelper()
-    return await helper.create_test_trigger_with_actions(
-        session, trigger_data, actions_data
+    TestSessionLocal = async_sessionmaker(
+        bind=test_db_engine,
+        class_=AsyncSession,
+        expire_on_commit=False,
     )
+    async with TestSessionLocal() as session:
+        yield session
 
+    async with test_db_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
 
-async def cleanup_test_automation_data(session: AsyncMock):
-    """Helper to cleanup test automation data after tests."""
-    # Reset mock calls
-    session.reset_mock()
+@pytest.fixture
+def mock_bot():
+    """Fixture to create a mocked Bot instance."""
+    bot = MagicMock()
+    bot.send_photo = AsyncMock()
+    return bot
+
+@pytest_asyncio.fixture
+async def dispatcher(db_session):
+    """Fixture to create and configure the Dispatcher."""
+    from handlers import narrative_handler, shop_handlers # Import routers here
+    
+    storage = MemoryStorage()
+    dp = Dispatcher(storage=storage)
+
+    # We use the session from the db_session fixture for the middleware
+    dp.update.outer_middleware(DbSessionMiddleware(session_pool=db_session.get_bind().engine.pool))
+
+    # Include routers
+    dp.include_router(narrative_handler.router)
+    dp.include_router(shop_handlers.router)
+
+    yield dp
+
+@pytest.fixture
+def mock_user():
+    """Fixture to create a mock user."""
+    user = MagicMock()
+    user.id = 12345
+    user.username = "testuser"
+    user.first_name = "Test"
+    return user
+
+@pytest.fixture
+def mock_message(mock_user, mock_bot):
+    """Fixture to create a mock message."""
+    message = MagicMock()
+    message.from_user = mock_user
+    message.answer = AsyncMock()
+    message.answer_photo = AsyncMock()
+    message.edit_text = AsyncMock()
+    message.bot = mock_bot
+    return message
+
+@pytest.fixture
+def mock_callback_query(mock_user, mock_bot):
+    """Fixture to create a mock callback query."""
+    callback = MagicMock()
+    callback.from_user = mock_user
+    message = MagicMock()
+    message.answer = AsyncMock()
+    message.edit_text = AsyncMock()
+    message.delete = AsyncMock()
+    message.chat.id = 12345
+    callback.message = message
+    callback.answer = AsyncMock()
+    callback.bot = mock_bot
+    return callback

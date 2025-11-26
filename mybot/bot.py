@@ -31,22 +31,12 @@ def setup_logging():
 
 
 
-# --- MIDDLEWARE DE SESIÓN ---
-class DBSessionMiddleware(BaseMiddleware):
-    """Middleware para inyectar la sesión de base de datos en los handlers"""
-    def __init__(self, session_pool: async_sessionmaker[AsyncSession]):
-        self.session_pool = session_pool
 
-    async def __call__(self, handler, event, data):
-        async with self.session_pool() as session:
-            data["session"] = session
-            try:
-                return await handler(event, data)
-            finally:
-                await session.close()
 
 # Imports
-from database.setup import init_db, get_session_factory
+from app.database.session import AsyncSessionLocal
+from middlewares.db_middleware import DbSessionMiddleware
+from database.setup import init_db
 from utils.message_safety import patch_message_methods
 from utils.config import BOT_TOKEN, VIP_CHANNEL_ID
 
@@ -158,7 +148,7 @@ async def main() -> None:
         logger.info("Aplicando parches de seguridad...")
         patch_message_methods()
         
-        session_factory = get_session_factory()
+        session_factory = AsyncSessionLocal
         
         logger.info(f"VIP channel ID: {VIP_CHANNEL_ID}")
         logger.info("Configurando bot...")
@@ -168,14 +158,13 @@ async def main() -> None:
             BOT_TOKEN, 
             default=DefaultBotProperties(parse_mode=ParseMode.HTML)
         )
-        dp = Dispatcher(storage=MemoryStorage(), session_factory=session_factory)
+        dp = Dispatcher(storage=MemoryStorage())
 
         # Registrar manejo de errores PRIMERO
         dp.error.register(global_error_handler)
 
         # --- MIDDLEWARE DE SESIÓN ---
-        session_middleware = DBSessionMiddleware(session_factory)
-        dp.update.outer_middleware(session_middleware)  # Registrar PRIMERO
+        dp.update.outer_middleware(DbSessionMiddleware(session_pool=session_factory))
 
         # Configurar middlewares en orden correcto
         user_reg_middleware = UserRegistrationMiddleware()

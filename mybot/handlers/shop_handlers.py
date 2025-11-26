@@ -13,13 +13,11 @@ from aiogram.types import Message, CallbackQuery, InputMediaPhoto
 from aiogram.filters import Command
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
-from sqlalchemy.orm import selectinload
-from services.coordinador_central import CoordinadorCentral, AccionUsuario
-from services.shop_service import ShopService
-from services.condition_checker import ConditionChecker
-from services.upsell_service import UpsellService
-from database.models import ShopItem, UserPurchase, LorePiece
+
+# Imports refactorizados
+from app.services.shop_service import ShopService
+from app.services.automation_service import AutomationService
+
 from keyboards.common import build_shop_keyboard
 from keyboards.besitos_kb import get_besitos_packs_list_kb, get_besitos_pack_detail_kb, get_upsell_keyboard
 from utils.localization import get_text
@@ -29,13 +27,13 @@ router = Router()
 logger = logging.getLogger(__name__)
 
 @router.callback_query(F.data == "shop_access")
-async def show_shop(callback: CallbackQuery, session: AsyncSession):
+async def show_shop(callback: CallbackQuery, db: AsyncSession):
     """Show shop with available products."""
     try:
         logger.info(f"Shop access requested by user {callback.from_user.id}")
         user_id = callback.from_user.id
 
-        shop_service = ShopService(session)
+        shop_service = ShopService(db)
         items = await shop_service.get_available_items(user_id)
 
         if not items:
@@ -45,10 +43,7 @@ async def show_shop(callback: CallbackQuery, session: AsyncSession):
             )
             return
 
-        # Get user's current points
-        from database.models import User
-        user = await session.get(User, user_id)
-        user_points = user.points if user else 0
+        user_points = await shop_service.get_user_points(user_id)
 
         text = f"""🛍️ **Bienvenido a la Tienda de Diana**
 
@@ -62,36 +57,17 @@ Aquí puedes canjear tus besitos por recompensas exclusivas.
 
 Selecciona un producto para ver sus detalles."""
 
-        # Build keyboard with product buttons
         builder = InlineKeyboardBuilder()
 
         for item in items:
-            # Build button text with indicators
-            button_text = f"{item.name}"
-
-            # Add stock indicator if limited
-            if item.stock_limit is not None:
-                # Calculate remaining stock
-                purchases_stmt = select(func.count(UserPurchase.id)).where(
-                    UserPurchase.shop_item_id == item.id
-                )
-                total_purchases = (await session.execute(purchases_stmt)).scalar() or 0
-                remaining = item.stock_limit - total_purchases
-
-                if remaining <= 5:
-                    button_text += f" [¡Solo {remaining}!]"
-                elif remaining <= 10:
-                    button_text += f" [{remaining} disponibles]"
-
             builder.button(
-                text=button_text,
+                text=item.name,
                 callback_data=f"view_product:{item.id}"
             )
 
-        # Add inventory and back buttons
         builder.button(text=get_text("backpack.title_alt"), callback_data="view_inventory")
         builder.button(text=get_text("backpack.back_button"), callback_data="narrative_main_menu")
-        builder.adjust(1)  # One button per row
+        builder.adjust(1)
 
         await callback.message.edit_text(
             text,
@@ -105,34 +81,21 @@ Selecciona un producto para ver sus detalles."""
         await callback.answer("❌ Error al cargar la tienda. Intenta más tarde.", show_alert=True)
 
 @router.callback_query(F.data.startswith("view_product:"))
-async def view_product_detail(callback: CallbackQuery, session: AsyncSession):
+async def view_product_detail(callback: CallbackQuery, db: AsyncSession):
     """Show detailed product information."""
     try:
         item_id = int(callback.data.split(":")[1])
         user_id = callback.from_user.id
 
-        # Get product
-        item = await session.get(ShopItem, item_id)
+        shop_service = ShopService(db)
+        item = await shop_service.get_item(item_id)
         if not item or not item.is_active:
             await callback.answer("❌ Producto no encontrado", show_alert=True)
             return
 
-        # Get user points
-        from database.models import User
-        user = await session.get(User, user_id)
-        user_points = user.points if user else 0
-
-        # Check if user already owns it
-        purchase_check = await session.execute(
-            select(UserPurchase).where(
-                UserPurchase.user_id == user_id,
-                UserPurchase.shop_item_id == item_id
-            )
-        )
-        user_purchases_count = len(purchase_check.scalars().all())
-        already_owns = user_purchases_count > 0
-
-        # Build detailed description
+        user_points = await shop_service.get_user_points(user_id)
+        already_owns, user_purchases_count = await shop_service.has_user_purchased_item(user_id, item_id)
+        
         text = f"""📦 **{item.name}**
 
 **Descripción:**
@@ -140,101 +103,35 @@ async def view_product_detail(callback: CallbackQuery, session: AsyncSession):
 
 💰 **Precio:** {item.price} besitos
 """
-
-        # Add your current points
         can_afford = user_points >= item.price
         text += f"💎 **Tus besitos:** {user_points:.0f} besitos"
         if not can_afford:
             text += f" _(Necesitas {item.price - user_points:.0f} más)_"
         text += "\n\n"
-
-        # Show what it unlocks
-        if item.unlocks_lore_piece_id:
-            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
-            if lore_piece:
-                text += f"""🔓 **Desbloquea contenido narrativo:**
-• {lore_piece.title}
-_{lore_piece.description or 'Contenido exclusivo de la historia'}_
-
-"""
-
-        # Stock info
-        if item.stock_limit is not None:
-            purchases_stmt = select(func.count(UserPurchase.id)).where(
-                UserPurchase.shop_item_id == item_id
-            )
-            total_purchases = (await session.execute(purchases_stmt)).scalar() or 0
-            remaining = item.stock_limit - total_purchases
-
-            text += f"📦 **Stock:** {remaining} de {item.stock_limit} disponibles\n"
-
-            if remaining <= 5:
-                text += "⚠️ _¡Edición limitada! Quedan pocas unidades_\n"
-
-        # Purchase limit info
-        if item.max_purchases_per_user > 0:
-            remaining_purchases = item.max_purchases_per_user - user_purchases_count
-            if already_owns:
-                if remaining_purchases > 0:
-                    text += f"\n✅ **Ya lo compraste** ({user_purchases_count}/{item.max_purchases_per_user} veces)\n"
-                    text += f"_Puedes comprar {remaining_purchases} {'vez' if remaining_purchases == 1 else 'veces'} más_\n"
-                else:
-                    text += f"\n✅ **Ya lo compraste** (límite alcanzado: {user_purchases_count}/{item.max_purchases_per_user})\n"
-
-        # Availability info
-        if item.available_until:
-            from datetime import datetime
-            now = datetime.now()
-            days_remaining = (item.available_until - now).days
-
-            if days_remaining > 0:
-                text += f"\n⏰ **Disponible por tiempo limitado:** {days_remaining} días restantes\n"
-
-        # Build keyboard
+        
         builder = InlineKeyboardBuilder()
 
-        # Add buy button if can purchase
         can_purchase = (
             can_afford and
             (item.max_purchases_per_user == 0 or user_purchases_count < item.max_purchases_per_user)
         )
 
         if can_purchase:
-            builder.button(text="🛒 Comprar", callback_data=f"confirm_purchase:{item_id}")
+            builder.button(text="🛒 Comprar", callback_data=f"confirm_purchase:{item.id}")
         elif not can_afford:
-            # CRÍTICO: Momento de conversión - ofrecer compra de besitos
             missing = item.price - user_points
-            builder.button(text="💰 Comprar besitos", callback_data=f"besitos_insufficient:{item_id}:{int(missing)}")
+            builder.button(text="💰 Comprar besitos", callback_data=f"besitos_insufficient:{item.id}:{int(missing)}")
         elif user_purchases_count >= item.max_purchases_per_user:
             builder.button(text="✅ Ya lo compraste (límite alcanzado)", callback_data="noop")
 
         builder.button(text="🔙 Volver a la tienda", callback_data="shop_access")
         builder.adjust(1)
-
-        # Send product image if available
-        if item.image_file_id:
-            try:
-                await callback.message.delete()
-                await callback.bot.send_photo(
-                    chat_id=callback.from_user.id,
-                    photo=item.image_file_id,
-                    caption=text,
-                    reply_markup=builder.as_markup(),
-                    parse_mode="Markdown"
-                )
-            except Exception as img_error:
-                logger.warning(f"Could not send product image: {img_error}")
-                await callback.message.edit_text(
-                    text,
-                    reply_markup=builder.as_markup(),
-                    parse_mode="Markdown"
-                )
-        else:
-            await callback.message.edit_text(
-                text,
-                reply_markup=builder.as_markup(),
-                parse_mode="Markdown"
-            )
+        
+        await callback.message.edit_text(
+            text,
+            reply_markup=builder.as_markup(),
+            parse_mode="Markdown"
+        )
 
         await callback.answer()
 
@@ -246,49 +143,22 @@ _{lore_piece.description or 'Contenido exclusivo de la historia'}_
 
 
 @router.callback_query(F.data.startswith("confirm_purchase:"))
-async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
+async def confirm_purchase(callback: CallbackQuery, db: AsyncSession):
     """Show purchase confirmation dialog with emotional feedback."""
     try:
         item_id = int(callback.data.split(":")[1])
         user_id = callback.from_user.id
 
-        # Immediate emotional feedback
         await callback.answer("🌸 Diana espera tu decisión...")
         
-        # Show visual processing feedback
-        from aiogram.utils.keyboard import InlineKeyboardBuilder
-        processing_builder = InlineKeyboardBuilder()
-        processing_builder.button(text="⏳ Preparando detalles...", callback_data="noop")
-        
-        processing_text = f"""🌸 **Diana**:
-
-¿Vas a desbloquear este secreto?...
-*Tu elección me emociona...*
-"""
-        
-        # Update message with processing feedback
-        try:
-            await callback.message.edit_text(
-                processing_text,
-                reply_markup=processing_builder.as_markup(),
-                parse_mode="Markdown"
-            )
-        except Exception:
-            # If message edit fails, continue with the flow
-            pass
-
-        # Get product
-        item = await session.get(ShopItem, item_id)
+        shop_service = ShopService(db)
+        item = await shop_service.get_item(item_id)
         if not item:
             await callback.answer("❌ Producto no encontrado", show_alert=True)
             return
 
-        # Get user points
-        from database.models import User
-        user = await session.get(User, user_id)
-        user_points = user.points if user else 0
+        user_points = await shop_service.get_user_points(user_id)
 
-        # Build confirmation message
         text = f"""🛒 **Confirmación de Compra**
 
 **Producto:** {item.name}
@@ -298,42 +168,11 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
 💎 **Tras la compra:** {user_points - item.price:.0f} besitos
 """
 
-        if item.unlocks_lore_piece_id:
-            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
-            if lore_piece:
-                text += f"\n🔓 **Se desbloqueará:** {lore_piece.title}\n"
-
         text += "\n**¿Confirmas la compra?**"
 
-        # Build keyboard
         builder = InlineKeyboardBuilder()
-        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item_id}")
-        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item_id}")
-        builder.adjust(1)
-
-        await callback.message.edit_text(
-            text,
-            reply_markup=builder.as_markup(),
-            parse_mode="Markdown"
-        )
-        await callback.answer("✨ Listo para confirmar...")
-
-    except ValueError:
-        await callback.answer("❌ ID de producto inválido", show_alert=True)
-    except Exception as e:
-        logger.error(f"Error in confirm_purchase: {e}", exc_info=True)
-        await callback.answer("❌ Error al procesar", show_alert=True)
-        if item.unlocks_lore_piece_id:
-            lore_piece = await session.get(LorePiece, item.unlocks_lore_piece_id)
-            if lore_piece:
-                text += f"\n🔓 **Se desbloqueará:** {lore_piece.title}\n"
-
-        text += "\n**¿Confirmas la compra?**"
-
-        # Build keyboard
-        builder = InlineKeyboardBuilder()
-        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item_id}")
-        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item_id}")
+        builder.button(text="✅ Sí, comprar", callback_data=f"buy_item:{item.id}")
+        builder.button(text="❌ Cancelar", callback_data=f"view_product:{item.id}")
         builder.adjust(1)
 
         await callback.message.edit_text(
@@ -351,18 +190,17 @@ async def confirm_purchase(callback: CallbackQuery, session: AsyncSession):
 
 
 @router.callback_query(F.data.startswith("buy_item:"))
-async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
+async def handle_purchase(callback: CallbackQuery, db: AsyncSession):
     """Execute the purchase."""
     try:
         item_id = int(callback.data.split(":")[1])
         user_id = callback.from_user.id
 
-        shop_service = ShopService(session)
-        result = await shop_service.purchase_item(user_id, item_id, callback.bot)
+        shop_service = ShopService(db)
+        result = await shop_service.purchase_item(user_id, item_id)
 
         if result["success"]:
-            # Get item info for success message
-            item = await session.get(ShopItem, item_id)
+            item = await shop_service.get_item(item_id)
 
             success_text = f"""💝 **¡Compra Exitosa!**
 
@@ -371,95 +209,19 @@ async def handle_purchase(callback: CallbackQuery, session: AsyncSession):
 💰 *Has invertido {item.price} besitos en algo especial...*
 *Tu conexión con Diana acaba de profundizar...*
 """
-
-            # Check if lore was unlocked
-            unlocked_lore = result.get("unlocked_lore")
-            if unlocked_lore:
-                success_text += f"""
-
-🎉 **¡Contenido Íntimo Desbloqueado!**
-
-Diana te revela un nuevo secreto:
-📜 **{unlocked_lore.get("title", "Secreto de Diana")}**
-
-_{unlocked_lore.get("description", "Nuevo contenido disponible")}_
-
-📖 Puedes acceder a este contenido exclusivo desde el menú narrativo.
-*Diana espera ansiosa a que lo explores...*
-"""
-
-            # Check if narrative fragment was unlocked
-            unlocked_fragment = result.get("unlocked_fragment")
-            if unlocked_fragment:
-                success_text += f"""
-
-📖 **¡Nuevo Capítulo Revelado!**
-
-Diana ha desbloqueado un fragmento especial solo para ti.
-📖 Usa "📖 Continuar historia" para sumergirte más profundo en su mundo.
-*¿Te atreves a seguir descubriendo sus secretos?*
-"""
-
-            success_text += """
-
-🎒 *Tu colección personal acaba de crecer...*
-*Gracias por valorar lo que Diana comparte contigo...*
-"""
-
-            # ========================================
-            # MEJORA #2: UPSELL INTELIGENTE POST-COMPRA
-            # ========================================
-
-            # Determinar upsell inteligente
-            upsell_service = UpsellService(session)
-            upsell = await upsell_service.get_smart_upsell(user_id, item)
-
-            # Si hay upsell específico, agregarlo al mensaje
-            if upsell["type"] and upsell["message_key"]:
-                upsell_message = BOT_MESSAGES.get(upsell["message_key"], "")
-                if upsell_message:
-                    # Formatear mensaje con datos
-                    try:
-                        upsell_message = upsell_message.format(**upsell["data"])
-                    except KeyError:
-                        pass  # Si falta algún dato, usar mensaje sin formatear
-
-                    success_text += f"\n\n─────────────\n\n{upsell_message}"
-
-            # Build keyboard según tipo de upsell
-            keyboard = get_upsell_keyboard(
-                upsell_type=upsell["keyboard_type"],
-                item_data=upsell["keyboard_data"]
-            )
-
             await callback.message.edit_text(
                 success_text,
-                reply_markup=keyboard,
                 parse_mode="Markdown"
             )
             await callback.answer("✅ Compra realizada!", show_alert=False)
 
+            automation_service = AutomationService(db)
+            await automation_service.execute_triggers(user_id, "shop_purchase", {"item_id": item_id})
+
         else:
-            # CRÍTICO: Detectar error de insufficient_points y ofrecer besitos
-            error_code = result.get('error')
-            if error_code == 'insufficient_points':
-                # Recuperar puntos necesarios
-                from database.models import User
-                user = await session.get(User, user_id)
-                item = await session.get(ShopItem, item_id)
-                missing = item.price - (user.points if user else 0)
-
-                # Redirigir a oferta de besitos
-                await callback.answer("💰 Necesitas más besitos...", show_alert=False)
-                await offer_besitos_packs(callback, session, item_id, int(missing))
-                return
-
-            # Otros errores: mostrar mensaje y volver a shop
             error_msg = result.get('message', 'Error desconocido')
             await callback.answer(f"❌ {error_msg}", show_alert=True)
-
-            # Return to shop
-            await show_shop(callback, session)
+            await show_shop(callback, db)
 
     except ValueError:
         await callback.answer("❌ ID de artículo inválido", show_alert=True)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, ForeignKey, BigInteger, JSON
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, BigInteger, JSON, Boolean
 from sqlalchemy.types import DateTime
 from sqlalchemy.orm import relationship, declared_attr
 from sqlalchemy.sql import func
@@ -63,6 +63,7 @@ class NarrativeChoice(Base):
     # Condiciones opcionales para la decisión
     required_besitos = Column(Integer, default=0)
     required_role = Column(String, nullable=True)
+    is_hidden = Column(Boolean, default=False, nullable=False)
     
     # Timestamps
     created_at = Column(DateTime, default=func.now())

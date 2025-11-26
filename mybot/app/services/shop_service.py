@@ -6,7 +6,7 @@ import logging
 from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import select
+from sqlalchemy import select, func
 
 from app.models.shop import ShopItem
 from app.models.narrative import StoryFragment
@@ -307,3 +307,57 @@ class ShopService:
             await self.db.rollback()
             logger.error(f"Error eliminando producto {product_id}: {str(e)}")
             raise DatabaseException(f"Error eliminando producto: {str(e)}")
+
+    async def get_user_points(self, user_id: int) -> int:
+        from database.models import User
+        user = await self.db.get(User, user_id)
+        return user.points if user else 0
+
+    async def get_available_items(self, user_id: int) -> list[ShopItem]:
+        from database.models import User
+        user = await self.db.get(User, user_id)
+        # This is a simplified version. A real implementation would check roles, etc.
+        stmt = select(ShopItem).where(ShopItem.is_active == True)
+        if not user or not user.is_vip:
+            stmt = stmt.where(ShopItem.is_vip_only == False)
+        
+        result = await self.db.execute(stmt)
+        return result.scalars().all()
+
+    async def get_item(self, item_id: int) -> Optional[ShopItem]:
+        return await self.db.get(ShopItem, item_id)
+
+    async def has_user_purchased_item(self, user_id: int, item_id: int) -> tuple[bool, int]:
+        from database.models import UserPurchase
+        stmt = select(func.count(UserPurchase.id)).where(
+            UserPurchase.user_id == user_id,
+            UserPurchase.shop_item_id == item_id
+        )
+        result = await self.db.execute(stmt)
+        count = result.scalar() or 0
+        return count > 0, count
+
+    async def purchase_item(self, user_id: int, item_id: int) -> Dict[str, Any]:
+        from database.models import User
+        from database.models import UserPurchase
+
+        user = await self.db.get(User, user_id)
+        item = await self.db.get(ShopItem, item_id)
+
+        if not user or not item:
+            return {"success": False, "message": "Usuario o item no encontrado."}
+
+        if user.points < item.price:
+            return {"success": False, "message": "No tienes suficientes besitos."}
+
+        user.points -= item.price
+        purchase = UserPurchase(user_id=user_id, shop_item_id=item_id, price_paid=item.price)
+        self.db.add(purchase)
+        
+        try:
+            await self.db.commit()
+            return {"success": True}
+        except Exception as e:
+            await self.db.rollback()
+            logger.error(f"Error en la compra: {e}")
+            return {"success": False, "message": "Error al procesar la compra."}

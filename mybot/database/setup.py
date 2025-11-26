@@ -1,14 +1,10 @@
 # database/setup.py
 import logging
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.pool import NullPool
-from .base import Base
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database.session import AsyncSessionLocal, engine as app_engine, Base
 from utils.config import Config
 
 logger = logging.getLogger(__name__)
-
-_engine = None
-_sessionmaker = None
 
 TABLES_ORDER = [
     'users',
@@ -57,59 +53,30 @@ TABLES_ORDER = [
 ]
 
 async def init_db():
-    global _engine
     try:
-        logger.info("Inicializando motor de base de datos SQLite...")
+        logger.info("Inicializando motor de base de datos desde database/setup.py...")
 
-        db_url = Config.DATABASE_URL.strip()
-
-        if not db_url.startswith("sqlite+aiosqlite://"):
-            raise ValueError("DATABASE_URL debe comenzar con 'sqlite+aiosqlite://' para usar SQLite async.")
-
-        if _engine is None:
-            _engine = create_async_engine(
-                db_url,
-                echo=False,
-                poolclass=NullPool
-            )
-
-        async with _engine.begin() as conn:
-            logger.info("Creando tablas en orden definido...")
-            tables = [Base.metadata.tables[name] for name in TABLES_ORDER if name in Base.metadata.tables]
-            await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=tables))
+        async with app_engine.begin() as conn:
+            # This is now handled by the app's init_db, but we keep it for legacy scripts
+            # that might call this function directly.
+            logger.info("Verificando/creando tablas desde legacy init_db...")
+            await conn.run_sync(Base.metadata.create_all)
             
-            # Create any remaining tables that might not be in TABLES_ORDER
-            logger.info("Creando tablas restantes...")
-            remaining_tables = [table for name, table in Base.metadata.tables.items() if name not in TABLES_ORDER]
-            if remaining_tables:
-                await conn.run_sync(lambda sync_conn: Base.metadata.create_all(sync_conn, tables=remaining_tables))
-            
-            logger.info("Todas las tablas creadas exitosamente.")
+            logger.info("Tablas verificadas/creadas exitosamente desde legacy init_db.")
         
-        # Populate initial shop items if the shop is empty
         await populate_initial_shop_items()
         
-        return _engine
+        return app_engine
 
     except Exception as e:
         logger.critical(f"Error crítico al inicializar la base de datos: {e}")
         raise
 
 def get_session_factory():
-    global _sessionmaker
-    if _engine is None:
-        raise RuntimeError("Database engine not initialized. Call init_db first.")
-    if _sessionmaker is None:
-        _sessionmaker = async_sessionmaker(
-            bind=_engine,
-            expire_on_commit=False,
-            class_=AsyncSession
-        )
-    return _sessionmaker
+    return AsyncSessionLocal
 
 async def get_session() -> AsyncSession:
-    session_factory = get_session_factory()
-    return session_factory()
+    return AsyncSessionLocal()
 
 async def populate_initial_shop_items():
     """Add some initial items to the shop if it's empty"""
