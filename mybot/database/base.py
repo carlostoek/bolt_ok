@@ -1,5 +1,4 @@
-# database/base.py
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import declarative_base
 
-Base = declarative_base(cls=AsyncAttrs)
+# Centralized Base for all models
+Base = declarative_base()
