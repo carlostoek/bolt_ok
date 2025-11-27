@@ -23,7 +23,7 @@ class ProductFile(Base, TimestampMixin):
     __tablename__ = 'product_files'
     
     id = Column(Integer, primary_key=True, index=True)
-    shop_item_id = Column(Integer, ForeignKey('shop_items.id'))
+    shop_item_id = Column(Integer, ForeignKey('shop_items.id'), nullable=False)
     file_name = Column(String(255), nullable=False)
     file_path = Column(String(500), nullable=False)
     file_size = Column(Integer)  # in bytes
