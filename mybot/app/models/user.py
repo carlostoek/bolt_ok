@@ -52,5 +52,5 @@ class UserFragmentView(Base, TimestampMixin):
     last_viewed_at = Column(DateTime)
     
     # Relationships
-    user = relationship("User")
+    user = relationship("User", back_populates="fragment_views")
     fragment = relationship("StoryFragment", back_populates="user_views")
