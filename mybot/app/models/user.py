@@ -46,8 +46,8 @@ class UserFragmentView(Base, TimestampMixin):
     __tablename__ = 'user_fragment_views'
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    fragment_id = Column(Integer, ForeignKey('story_fragments.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    fragment_id = Column(Integer, ForeignKey('story_fragments.id'), nullable=False)
     view_count = Column(Integer, default=1)
     last_viewed_at = Column(DateTime)
     
