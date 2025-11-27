@@ -1,9 +1,18 @@
+import asyncio
+import os
+import sys
 from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from pathlib import Path
 
 from alembic import context
+from sqlalchemy import engine_from_config, pool
+from sqlalchemy.ext.asyncio import AsyncEngine
+
+# Add the project root to sys.path to import app modules
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
+from app.core.database import Base, configure_engine, engine
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -14,19 +23,21 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+# Set the target metadata for autogenerate support
+target_metadata = Base.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Detect database URL from environment
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./db.sqlite3")
 
 
-def run_migrations_offline() -> None:
+def get_database_url():
+    """
+    Obtiene la URL de la base de datos desde las variables de entorno.
+    """
+    return os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./db.sqlite3")
+
+
+def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
     This configures the context with just a URL
@@ -38,41 +49,104 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = get_database_url()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        # Include custom names for constraint naming
+        include_object=include_object,
     )
 
     with context.begin_transaction():
         context.run_migrations()
 
 
-def run_migrations_online() -> None:
-    """Run migrations in 'online' mode.
-
-    In this scenario we need to create an Engine
-    and associate a connection with the context.
-
+def include_object(object, name, type_, reflected, compare_to):
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
+    Custom function to include objects in autogenerate.
+    This helps filter out unwanted objects or include special ones.
+    """
+    # Exclude tables that are not part of our application
+    if type_ == "table":
+        # Add custom logic here if needed
+        pass
+    return True
+
+
+def do_run_migrations(connection):
+    """
+    Execute migrations with a database connection.
+    """
+    context.configure(
+        connection=connection,
+        target_metadata=target_metadata,
+        include_object=include_object,
+        # Add custom naming conventions
+        render_as_batch=True,  # Enable batch mode for SQLite compatibility
     )
 
-    with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
-
-        with context.begin_transaction():
-            context.run_migrations()
+    with context.begin_transaction():
+        context.run_migrations()
 
 
+async def run_migrations_online():
+    """
+    Run migrations in 'online' mode.
+
+    In this scenario we need to create an
+    Engine and associate a connection with the context.
+    """
+    database_url = get_database_url()
+    
+    # Configure engine if not already done
+    if engine is None:
+        configure_engine(database_url)
+    
+    async with engine.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+
+
+def run_migrations():
+    """
+    Main function to run migrations, detects if online or offline mode is needed.
+    """
+    if context.is_offline_mode():
+        run_migrations_offline()
+    else:
+        asyncio.run(run_migrations_online())
+
+
+# Import all models here so that they are registered with the metadata
+def import_models():
+    """
+    Import all application models to ensure they are registered with SQLAlchemy metadata.
+    This is essential for Alembic to detect and include all tables in migrations.
+    """
+    try:
+        # Import narrative models
+        from app.models.narrative import StoryFragment, NarrativeChoice, UserNarrativeState  # type: ignore
+        # Import shop models
+        from app.models.shop import ShopItem, ProductFile, InventoryItem, UserPurchase  # type: ignore
+        # Import gamification models
+        from app.models.gamification import Mission, Reward, Achievement, Badge  # type: ignore
+        # Import automation models
+        from app.models.automation import AutomationTrigger, TriggerAction, TriggerExecutionLog  # type: ignore
+        # Import user models
+        from app.models.user import User, UserMissionEntry, UserFragmentView  # type: ignore
+        # Import lore models
+        from app.models.lore import LorePiece, UserLorePiece  # type: ignore
+    except ImportError:
+        # Models may not exist yet, that's ok for initial setup
+        pass
+
+
+# Import all models before running migrations
+import_models()
+
+# Run the migrations
 if context.is_offline_mode():
     run_migrations_offline()
 else:
-    run_migrations_online()
+    asyncio.run(run_migrations_online())
