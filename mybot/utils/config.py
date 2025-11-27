@@ -9,7 +9,7 @@ if BOT_TOKEN == "YOUR_BOT_TOKEN" or not BOT_TOKEN:
     )
 
 ADMIN_IDS: List[int] = [
-    int(uid) for uid in os.environ.get("ADMIN_IDS", "").split(";") if uid.strip()
+    int(uid) for uid in os.environ.get("ADMIN_IDS", "").split(",") if uid.strip()
 ]
 
 VIP_CHANNEL_ID = int(os.environ.get("VIP_CHANNEL_ID", "0"))

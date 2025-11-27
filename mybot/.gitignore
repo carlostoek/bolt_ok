@@ -1,28 +1,8 @@
-# Aider-managed files
-.aider*
-
-# DBs and logs
-*.db
-*.log
-bot.db
-bot.log
-mybot/bot.db
-mybot/bot.log
-
-# Environments
-venv/
-.venv/
-mybot/.venvs/
-.python-version
-.pylintrc
-
-# Python cache files
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -36,57 +16,40 @@ parts/
 sdist/
 var/
 wheels/
-pip-wheel-metadata/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
-# PyInstaller
-*.manifest
-*.spec
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-
-# Environments
-.env
-.venv
+# Virtual Environment
+venv/
 env/
 ENV/
-env.bak/
-venv.bak/
 
 # IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*~
 
-# OS generated files
+# Logs
+logs/
+*.log
+
+# Environment
+.env
+.env.local
+.env.production
+.env.development
+
+# Database
+*.db
+*.db-journal
+
+# OS
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
-# Temporary files
-*.tmp
-*.temp
-
-# Docs
-mybot/docs/guia-fragmentos-condicionados-items-2025-09-15.md
+# Streamlit
+.streamlit/

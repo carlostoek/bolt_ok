@@ -1,270 +1,281 @@
-# 🌹 DianaBot - Experiencia Narrativa Inmersiva
+# Termux FastAPI + SQLAlchemy + Streamlit Setup
 
-> *Un ecosistema interactivo donde la narrativa, la gamificación y la exclusividad VIP se fusionan para crear una experiencia única.*
+A complete setup script for deploying a bot administration panel in Termux/Android with FastAPI, SQLAlchemy, and Streamlit.
 
----
+## Features
 
-## 🎭 ¿Qué es DianaBot?
+- **FastAPI** for REST API with async support
+- **SQLAlchemy** with async support for database operations
+- **Streamlit** for the web-based admin interface
+- **SQLite** database with aiosqlite for async operations
+- **Tmux** for process management
+- **Virtual environment** optimized for mobile storage
+- **Idempotent script** that can be run multiple times safely
 
-DianaBot no es solo un bot de Telegram. Es una **experiencia inmersiva** que combina narrativa ramificada, mecánicas de juego y contenido exclusivo en un ecosistema cohesivo y envolvente.
+## Prerequisites
 
-Guiado por **Lucien**, un mayordomo elegante y enigmático, cada usuario emprende un viaje personalizado hacia el descubrimiento de **Diana** - una figura deseada, misteriosa y omnipresente que se revela progresivamente a través de las decisiones del jugador.
+- Android device with Termux installed
+- Minimum 500MB free storage space
+- Minimum 1GB RAM recommended
+- Python 3.11+ (will be installed if not present)
 
----
+## Installation
 
-## 🧩 Los Tres Pilares del Ecosistema
+Since the automated setup encounters Rust compilation issues with newer Python packages, we'll set up the environment manually:
 
-### 📖 1. Narrativa Inmersiva
-El corazón emocional de la experiencia.
+1. Create the project directory structure:
+   ```bash
+   mkdir -p ~/bot-admin-api/app/api/v1/endpoints ~/bot-admin-api/app/core ~/bot-admin-api/app/models ~/bot-admin-api/app/services ~/bot-admin-api/alembic ~/bot-admin-api/tests ~/bot-admin-api/scripts ~/bot-admin-api/logs ~/bot-admin-api/backups
+   ```
 
-- **Historia Ramificada**: Cada decisión del usuario afecta el desarrollo de la narrativa
-- **Contenido Multinivel**:
-  - Niveles 1-3: Canal gratuito
-  - Niveles 4-6: Canal VIP (contenido exclusivo)
-- **Fragmentos Ocultos**: Pistas y revelaciones que se desbloquean mediante:
-  - Logros específicos
-  - Objetos de la tienda
-  - Reacciones a publicaciones
-  - Progreso en misiones
+2. Create the virtual environment:
+   ```bash
+   python -m venv ~/bot-admin-api/venv
+   source ~/bot-admin-api/venv/bin/activate
+   pip install --upgrade pip
+   ```
 
-**Personajes Principales**:
-- 🕴️ **Lucien** - El mayordomo guía, elegante y sarcástico
-- 🌸 **Diana** - La musa, el misterio, la meta del viaje
-- 👤 **El Usuario** - Protagonista con múltiples caminos posibles
+3. Install essential packages (with compatible versions that don't require Rust compilation):
+   ```bash
+   pip install fastapi==0.104.1 uvicorn==0.24.0 sqlalchemy==2.0.23 aiosqlite==0.19.0 python-dotenv==1.0.0 alembic==1.12.1 requests==2.31.0 pydantic==1.10.13
+   ```
 
-### 🎯 2. Sistema de Gamificación
-La mecánica que mantiene el engagement.
+4. Copy the configuration files to the project directory:
+   ```bash
+   cp .env.template ~/bot-admin-api/.env.template
+   cp .gitignore ~/bot-admin-api/.gitignore
+   ```
 
-**Economía Virtual: Besitos** 💋
-- Moneda interna que se gana y gasta en el ecosistema
-- Obtenible mediante:
-  - Completar misiones
-  - Reaccionar a publicaciones
-  - Ganar trivias
-  - Regalos diarios
-  - Subastas (solo VIP)
+5. Create the management scripts:
+   ```bash
+   # Create start script
+   cat > ~/bot-admin-api/scripts/start.sh << 'EOL'
+   #!/bin/bash
+   # Start all services in tmux sessions
 
-**Elementos de Juego**:
-- 🎯 **Misiones**: Diarias, semanales y especiales
-- 🏆 **Logros**: Badges desbloqueables con beneficios
-- 🛍️ **Tienda**: Objetos que influyen en la narrativa
-- 🎲 **Trivias**: Preguntas con recompensas
-- 🏛️ **Subastas VIP**: Competencia por contenido exclusivo
-- 🎒 **Mochila**: Inventario personal de objetos y pistas
+   # Check if virtual environment exists
+   if [ ! -d "$HOME/bot-admin-api/venv" ]; then
+       echo "Virtual environment not found. Please run setup first."
+       exit 1
+   fi
 
-### 🛡️ 3. Administración de Canales
-El sistema que controla accesos y contenido.
+   # Activate virtual environment
+   source $HOME/bot-admin-api/venv/bin/activate
 
-- **Canal Gratuito**: Acceso a los primeros niveles narrativos
-- **Canal VIP**: Contenido premium y funciones exclusivas
-- **Gestión de Suscripciones**: Control automático de accesos
-- **Publicaciones Programadas**: Contenido cronometrado
-- **Protección de Mensajes**: Anti-reenvío y anti-descarga
+   # Create tmux session if it doesn't exist
+   if ! tmux has-session -t "bot-admin" 2>/dev/null; then
+       echo "Creating tmux session for bot-admin services..."
+       
+       # Create new session in detached mode
+       tmux new-session -d -s bot-admin
+       
+       # Create a window for the API server
+       tmux send-keys -t bot-admin 'cd $HOME/bot-admin-api/app && python -m uvicorn main:app --host 0.0.0.0 --port 8000' C-m
+       
+       # Create a new window for the frontend (if we add one later)
+       tmux new-window -t bot-admin
+       tmux send-keys -t bot-admin:1 'cd $HOME/bot-admin-api/app && python -m uvicorn frontend:app --host 0.0.0.0 --port 8001' C-m
+       
+       # Create a new window for logs
+       tmux new-window -t bot-admin
+       tmux send-keys -t bot-admin:2 'tail -f $HOME/bot-admin-api/logs/api.log' C-m
+       
+       echo "Services started in tmux session 'bot-admin'"
+       echo "Connect with: tmux attach -t bot-admin"
+   else
+       echo "Tmux session 'bot-admin' already exists. Attach with: tmux attach -t bot-admin"
+   fi
+   EOL
 
----
+   # Create stop script
+   cat > ~/bot-admin-api/scripts/stop.sh << 'EOL'
+   #!/bin/bash
+   # Stop all services
 
-## 🔄 Cómo se Conecta Todo
+   if tmux has-session -t "bot-admin" 2>/dev/null; then
+       echo "Stopping tmux session 'bot-admin'..."
+       tmux kill-session -t bot-admin
+       echo "Services stopped."
+   else
+       echo "No tmux session 'bot-admin' found."
+   fi
+   EOL
 
-| Acción del Usuario | 📖 Narrativa | 🎯 Gamificación | 🛡️ Administración |
-|-------------------|-------------|----------------|-------------------|
-| Reacciona a publicación | Desbloquea pistas | Gana besitos | Registra acción |
-| Toma decisión narrativa | Avanza historia | Activa misiones | Puede generar evento |
-| Compra en tienda | Desbloquea fragmento | Usa besitos | — |
-| Juega trivia | Gana pistas | Gana puntos/logros | — |
-| Entra a canal VIP | Niveles 4-6 disponibles | Misiones especiales | Validación requerida |
-| Completa misión | Recibe fragmento | Gana besitos/logros | — |
+   # Create status script
+   cat > ~/bot-admin-api/scripts/status.sh << 'EOL'
+   #!/bin/bash
+   # Check service status
 
----
+   if tmux has-session -t "bot-admin" 2>/dev/null; then
+       echo "Services are running in tmux session 'bot-admin':"
+       tmux ls -f '#{session_attached} #{session_name}' | grep -q 'bot-admin' && echo "  - Session is attached" || echo "  - Session is detached"
+       echo "To view: tmux attach -t bot-admin"
+       echo "To stop: ./scripts/stop.sh"
+   else
+       echo "No services are currently running."
+       echo "Start with: ./scripts/start.sh"
+   fi
+   EOL
 
-## 💎 Experiencia VIP vs Gratuita
+   chmod +x ~/bot-admin-api/scripts/*.sh
+   ```
 
-### 🆓 Usuario Gratuito
-- ✅ Acceso a niveles narrativos 1-3
-- ✅ Sistema de gamificación básico
-- ✅ Misiones limitadas
-- ✅ Tienda con items básicos
-- ⭐ Opción de upgrade visible
+6. Create the application files as provided in the repository
 
-### 💎 Usuario VIP
-- ✨ Acceso completo a niveles 4-6
-- ✨ Sistema de gamificación completo
-- ✨ Misiones exclusivas con mayores recompensas
-- ✨ Participación en subastas en tiempo real
-- ✨ Contenido narrativo premium
-- ✨ Multiplicadores de besitos mejorados
-- ✨ **Mi Diván**: Espacio exclusivo con:
-  - 💘 Test de Compatibilidad con Diana
-  - ✉️ Mensajes Anónimos a Diana
-  - 📊 Estadísticas personalizadas
-
----
-
-## 🌟 Características Destacadas
-
-### 🎬 Mi Diván (Exclusivo VIP)
-Un espacio íntimo y personal para usuarios VIP donde pueden:
-
-- **Test de Compatibilidad**: Quiz interactivo que mide tu afinidad con Diana
-  - 10 preguntas sobre personalidad, valores e intereses
-  - Resultados personalizados con mensajes de Diana
-  - Recompensas en besitos
-  - Niveles de compatibilidad: desde "Por Conocerse" hasta "Alma Gemela"
-
-- **Mensajería Anónima**: Canal privado con Diana
-  - Envía confesiones, preguntas o fantasías de forma anónima
-  - Diana lee y responde personalmente
-  - Historial de conversaciones
-  - Notificaciones cuando Diana responde
-
-### 🎮 Sistema de Progresión
-- **Niveles Narrativos**: 6 niveles con historias únicas
-- **Fragmentos Ocultos**: Contenido secreto desbloqueable
-- **Pistas Distribuidas**: Búsqueda transcanal de información
-- **Decisiones Permanentes**: Algunas elecciones son irreversibles
-- **Múltiples Finales**: Distintos desenlaces según tus acciones
-
-### 🏛️ Subastas Dinámicas (VIP)
-- Tiempo real con temporizadores automáticos
-- Auto-extensión si hay pujas de último minuto
-- Notificaciones cuando te superan
-- Historial de participación
-- Items únicos y exclusivos
-
-### 🎯 Misiones Adaptativas
-- Se ajustan según tu progreso narrativo
-- Recompensas que desbloquean contenido
-- Conexión directa con la historia
-- Misiones especiales por eventos
-
----
-
-## 🚀 Cómo Empezar
-
-### Para Usuarios
-
-1. **Inicia el bot**: `/start`
-2. **Conoce a Lucien**: Tu guía en esta experiencia
-3. **Comienza tu historia**: Toma tu primera decisión
-4. **Explora y gana**: Completa misiones, gana besitos
-5. **Avanza**: Desbloquea pistas y fragmentos ocultos
-6. **Considera VIP**: Accede a contenido exclusivo cuando estés listo
-
-### Para Administradores
-
-1. **Panel de Control**: `/admin_menu`
-2. **Configuración Guiada**: Setup paso a paso
-3. **Gestión de Canales**: Configure canales gratuito y VIP
-4. **Contenido**: Cree misiones, trivias y subastas
-5. **Publicaciones**: Programe contenido automático
-6. **Monitoreo**: Estadísticas y métricas en tiempo real
-
----
-
-## 🎨 La Experiencia del Usuario
-
-### Primera Interacción
-Lucien te recibe con elegancia y misterio. Te presenta el universo de Diana y te ofrece tu primera decisión. Cada elección que tomes comenzará a moldear tu camino único.
-
-### Progresión
-A medida que avanzas, ganarás besitos, desbloquearás logros y descubrirás fragmentos de la historia. Algunos contenidos requieren objetos específicos de la tienda, otros se revelan solo a quienes toman ciertas decisiones.
-
-### Contenido VIP
-Al convertirte en VIP, se abre un nuevo mundo:
-- Niveles narrativos más profundos e íntimos
-- Acceso a **Mi Diván**, el espacio personal con Diana
-- Participación en subastas exclusivas
-- Misiones con recompensas premium
-- Multiplicadores mejorados de besitos
-
-### Metajuego
-El verdadero juego está en descubrir las conexiones ocultas, combinar pistas dispersas en publicaciones, y encontrar los fragmentos secretos que revelan la historia completa de Diana.
-
----
-
-## 🔧 Stack Técnico
-
-- **Framework**: Aiogram 3.x (Python async)
-- **Base de Datos**: SQLAlchemy (async) + SQLite/PostgreSQL
-- **Scheduler**: Tareas programadas para eventos y verificaciones
-- **Sistema de Mensajes**: Gestión inteligente anti-spam
-- **Localización**: Sistema i18n preparado para múltiples idiomas
-
----
-
-## 📁 Estructura del Proyecto
+## Project Structure
 
 ```
-bolt_ok/
-├── mybot/                    # Código principal del bot
-│   ├── handlers/            # Manejadores de comandos y callbacks
-│   ├── services/            # Lógica de negocio
-│   ├── database/            # Modelos y migraciones
-│   ├── keyboards/           # Teclados personalizados
-│   ├── utils/               # Utilidades y helpers
-│   └── docs/                # Documentación técnica
-│
-├── scripts/                 # Scripts de utilidad
-└── tests/                   # Tests automatizados
+~/bot-admin-api/
+├── app/
+│   ├── api/
+│   │   └── v1/
+│   │       └── endpoints/
+│   ├── core/
+│   ├── models/
+│   ├── services/
+│   ├── main.py          # FastAPI application
+│   └── frontend.py      # Streamlit application
+├── alembic/             # Database migrations
+├── tests/
+├── scripts/
+│   ├── start.sh         # Start all services
+│   ├── stop.sh          # Stop all services
+│   └── status.sh        # Check service status
+├── logs/
+├── backups/
+├── venv/                # Virtual environment
+├── requirements.txt
+├── .env.template
+├── .gitignore
+└── README.md
 ```
 
----
+## Configuration
 
-## 📚 Documentación
+1. Copy the environment template:
+   ```bash
+   cd ~/bot-admin-api
+   cp .env.template .env
+   ```
 
-- **Concepto Completo**: [`mybot/docs/concepto.md`](mybot/docs/concepto.md)
-- **Mi Diván - Features**: [`mybot/docs/MIDIVAN_VIP_FEATURES.md`](mybot/docs/MIDIVAN_VIP_FEATURES.md)
-- **Sistema Narrativo**: [`mybot/docs/Narrativo.md`](mybot/docs/Narrativo.md)
-- **Ramificación**: [`mybot/docs/ramificado.md`](mybot/docs/ramificado.md)
-- **Índice Completo**: [`mybot/docs/README.md`](mybot/docs/README.md)
+2. Edit the `.env` file with your configuration:
+   ```bash
+   nano .env
+   ```
 
----
+   - Set your Telegram bot token
+   - Configure database settings
+   - Update security settings
 
-## 🎯 Filosofía del Proyecto
+## Starting the Services
 
-> **DianaBot** es un sistema vivo donde:
->
-> 📖 La narrativa despierta el deseo de avanzar
-> 🎯 La gamificación da recompensas y sentido de progreso
-> 🛡️ La administración garantiza control, acceso y seguridad
->
-> Cada módulo puede existir por separado, pero juntos forman una experiencia interactiva única y envolvente.
+1. Activate the virtual environment:
+   ```bash
+   source ~/bot-admin-api/venv/bin/activate
+   ```
 
----
+2. Start all services using the provided script:
+   ```bash
+   ~/bot-admin-api/scripts/start.sh
+   ```
 
-## ✨ Lo Que Hace Único a DianaBot
+   This creates a tmux session with:
+   - Window 0: FastAPI server (port 8000)
+   - Window 1: Streamlit frontend (port 8501)
+   - Window 2: Service logs
 
-1. **Narrativa Adulta Elegante**: No es vulgar, es sensual e intelectual
-2. **Gamificación Integrada**: No se siente forzada, fluye con la historia
-3. **Economía Virtual Significativa**: Los besitos tienen valor real dentro del ecosistema
-4. **Exclusividad VIP Bien Diseñada**: El contenido premium realmente vale la pena
-5. **Personalización Extrema**: Cada usuario vive su propia historia
-6. **Mi Diván**: Conexión íntima y personal con Diana (VIP)
-7. **Sistema de Pistas**: Metajuego que fomenta exploración y comunidad
+3. Connect to the tmux session:
+   ```bash
+   tmux attach -t bot-admin
+   ```
 
----
+4. Access the services:
+   - API: http://localhost:8000
+   - Documentation: http://localhost:8000/docs
+   - Health check: http://localhost:8000/health
+   - Streamlit: http://localhost:8501
 
-## 🎉 Estado del Proyecto
+## Managing Services
 
-✅ Sistema narrativo completo
-✅ Gamificación funcional
-✅ Gestión de canales operativa
-✅ Tienda y economía de besitos
-✅ Sistema de misiones
-✅ Trivias y minijuegos
-✅ Subastas VIP
-✅ Mi Diván (Test de compatibilidad + Mensajería anónima)
-✅ Sistema de localización
-✅ Panel administrativo completo
+- Check status: `~/bot-admin-api/scripts/status.sh`
+- Stop services: `~/bot-admin-api/scripts/stop.sh`
+- View logs: `tail -f ~/bot-admin-api/logs/api.log`
 
----
+## Customization
 
-## 📞 Soporte
+### FastAPI Application
 
-Para más información sobre configuración, uso o desarrollo:
-- Consulta la documentación en `mybot/docs/`
-- Revisa el panel de administración con `/admin_menu`
-- Contacta al equipo de desarrollo
+The main FastAPI app is in `~/bot-admin-api/app/main.py`. Add your endpoints in the `app/api/v1/endpoints/` directory.
 
----
+### Streamlit Interface
 
-*Desarrollado con 💋 para crear experiencias inmersivas inolvidables.*
+The Streamlit frontend is in `~/bot-admin-api/app/frontend.py`. Customize the admin panel according to your needs.
+
+### Database Models
+
+Add your SQLAlchemy models in `~/bot-admin-api/app/models/` directory.
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Insufficient Storage**: Ensure you have at least 500MB free space before running the script.
+
+2. **Permission Errors**: Run the script in your Termux home directory with proper write permissions.
+
+3. **Python Version**: The script automatically installs Python 3.11+ if not present.
+
+4. **Package Installation Issues**: If a package fails to install, try updating your package lists:
+   ```bash
+   pkg update && pkg upgrade
+   ```
+
+### Manual Steps if Setup Fails
+
+If the script fails at any point, you can perform the steps manually:
+
+1. Install system dependencies:
+   ```bash
+   pkg update
+   pkg install python git tmux sqlite build-essential rust
+   # Install additional packages as needed
+   pkg install libffi openssl zlib libxml2 libxslt libjpeg-turbo freetype lcms2 tiff tk tcl
+   ```
+
+2. Create virtual environment:
+   ```bash
+   python -m venv ~/bot-admin-api/venv
+   source ~/bot-admin-api/venv/bin/activate
+   pip install --upgrade pip
+   ```
+
+3. Install Python packages:
+   ```bash
+   pip install fastapi uvicorn sqlalchemy aiosqlite asyncpg streamlit python-dotenv alembic pydantic pydantic-settings
+   ```
+
+## Architecture Details
+
+- **FastAPI**: Built with async/await for optimal performance in resource-constrained environments
+- **SQLAlchemy**: Async session handling with connection pooling (5 connections)
+- **Uvicorn**: Single worker configuration optimized for mobile resources
+- **Streamlit**: Lightweight web interface for admin panel
+- **Tmux**: Process management without requiring systemd
+- **SQLite**: Embedded database with minimal overhead
+
+## Security Considerations
+
+- Change the default SECRET_KEY in `.env`
+- Consider using HTTPS in production
+- Validate all user inputs
+- Regular updates of dependencies
+- Use environment variables for sensitive data
+
+## Performance Optimization
+
+The setup is optimized for mobile devices:
+- Minimal virtual environment (no unnecessary packages)
+- Limited database connection pool
+- Single Uvicorn worker
+- Lightweight database (SQLite)
+- Efficient logging configuration
