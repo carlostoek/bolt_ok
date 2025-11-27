@@ -23,7 +23,7 @@ class TriggerAction(Base, TimestampMixin):
     __tablename__ = 'trigger_actions'
     
     id = Column(Integer, primary_key=True, index=True)
-    trigger_id = Column(Integer, ForeignKey('automation_triggers.id'))
+    trigger_id = Column(Integer, ForeignKey('automation_triggers.id'), nullable=False)
     action_type = Column(String(100), nullable=False)  # send_message, update_status, etc.
     action_params = Column(JSON)  # Parameters for the action
     execution_order = Column(Integer, default=0)  # Order to execute actions
