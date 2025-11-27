@@ -30,8 +30,8 @@ class UserMissionEntry(Base, TimestampMixin):
     __tablename__ = 'user_mission_entries'
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    mission_id = Column(Integer, ForeignKey('missions.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    mission_id = Column(Integer, ForeignKey('missions.id'), nullable=False)
     started_at = Column(DateTime)
     completed_at = Column(DateTime)
     is_completed = Column(Boolean, default=False)
