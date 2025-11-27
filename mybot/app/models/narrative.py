@@ -38,8 +38,8 @@ class UserNarrativeState(Base, TimestampMixin):
     __tablename__ = 'user_narrative_states'
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey('users.id'))
-    current_fragment_id = Column(Integer, ForeignKey('story_fragments.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    current_fragment_id = Column(Integer, ForeignKey('story_fragments.id'), nullable=False)
     progress_percentage = Column(Integer, default=0)
     is_completed = Column(Boolean, default=False)
     
