@@ -51,6 +51,13 @@ class StoryFragment(Base):
         lazy="joined"
     )
 
+    unlock_product = relationship(
+        "ShopItem",
+        primaryjoin="foreign(ShopItem.unlocks_fragment_key) == StoryFragment.key",
+        uselist=False,
+        back_populates="unlocked_fragment"
+    )
+
 
 class NarrativeChoice(Base):
     __tablename__ = 'narrative_choices'
