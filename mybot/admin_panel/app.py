@@ -20,6 +20,7 @@ from admin_panel.config import config
 from admin_panel.api.narrative import narrative_bp
 from admin_panel.api.shop import shop_bp
 from admin_panel.api.automation import automation_bp
+from admin_panel.api.references import references_bp
 
 # Configurar logging
 logging.basicConfig(
@@ -70,6 +71,7 @@ def create_app(config_name='default'):
     app.register_blueprint(narrative_bp)
     app.register_blueprint(shop_bp)
     app.register_blueprint(automation_bp)
+    app.register_blueprint(references_bp)
     logger.info("✓ Blueprints de API registrados")
     
     # Registrar rutas de vistas (templates)

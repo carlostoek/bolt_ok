@@ -1,19 +1,184 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full bg-gray-50">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <title>{% block title %}Panel de Administración{% endblock %} | Bot Admin</title>
+
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+    <!-- Tailwind Config (opcional para customización) -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            200: '#bfdbfe',
+                            300: '#93c5fd',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-gray-100">
-    <nav class="bg-blue-600 text-white p-4">
-        <h1 class="text-xl font-bold">Panel de Administración</h1>
-    </nav>
-    
-    <main class="container mx-auto p-6">
-        {% block content %}{% endblock %}
-    </main>
+<body class="h-full" x-data="{ sidebarOpen: false }">
+    <div class="min-h-full">
+
+        <!-- Sidebar móvil (overlay) -->
+        <div x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-300"
+             x-transition:leave-start="opacity-0"
+             x-transition:leave-end="opacity-0"
+             class="fixed inset-0 z-40 flex lg:hidden"
+             @click="sidebarOpen = false"
+             style="display: none;">
+
+            <!-- Overlay -->
+            <div class="fixed inset-0 bg-gray-600 bg-opacity-75"></div>
+
+            <!-- Sidebar móvil -->
+            <div class="relative flex w-full max-w-xs flex-1 flex-col bg-white"
+                 @click.stop>
+                <div class="absolute top-0 right-0 -mr-12 pt-2">
+                    <button type="button"
+                            class="ml-1 flex h-10 w-10 items-center justify-center rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                            @click="sidebarOpen = false">
+                        <span class="sr-only">Cerrar sidebar</span>
+                        <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Contenido del sidebar móvil -->
+                {% include 'partials/_sidebar_content.html' %}
+            </div>
+
+            <div class="w-14 flex-shrink-0"></div>
+        </div>
+
+        <!-- Sidebar desktop -->
+        <div class="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+            <div class="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5">
+                {% include 'partials/_sidebar_content.html' %}
+            </div>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="lg:pl-64 flex flex-col flex-1">
+
+            <!-- Header -->
+            <div class="sticky top-0 z-10 flex h-16 flex-shrink-0 border-b border-gray-200 bg-white shadow-sm">
+                <button type="button"
+                        class="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary-500 lg:hidden"
+                        @click="sidebarOpen = true">
+                    <span class="sr-only">Abrir sidebar</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+
+                <div class="flex flex-1 justify-between px-4 sm:px-6 lg:px-8">
+                    <div class="flex flex-1 items-center">
+                        <h1 class="text-xl font-semibold text-gray-900">
+                            {% block page_title %}Panel de Administración{% endblock %}
+                        </h1>
+                    </div>
+
+                    <div class="ml-4 flex items-center gap-x-4">
+                        <!-- Indicador de estado -->
+                        <div class="flex items-center gap-x-2">
+                            <span class="relative flex h-3 w-3">
+                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                            </span>
+                            <span class="text-sm text-gray-600">API Activa</span>
+                        </div>
+
+                        <!-- Botón de ayuda -->
+                        <button type="button"
+                                class="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                            <span class="sr-only">Ver ayuda</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenido de la página -->
+            <main class="flex-1">
+                <div class="py-6">
+                    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+
+                        <!-- Flash messages (si existen) -->
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                <div class="mb-6 space-y-3">
+                                    {% for category, message in messages %}
+                                        <div class="rounded-md p-4 {% if category == 'error' %}bg-red-50{% elif category == 'success' %}bg-green-50{% else %}bg-blue-50{% endif %}">
+                                            <div class="flex">
+                                                <div class="flex-shrink-0">
+                                                    {% if category == 'error' %}
+                                                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 001.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    {% elif category == 'success' %}
+                                                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    {% else %}
+                                                        <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
+                                                        </svg>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="ml-3">
+                                                    <p class="text-sm font-medium {% if category == 'error' %}text-red-800{% elif category == 'success' %}text-green-800{% else %}text-blue-800{% endif %}">
+                                                        {{ message }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% endwith %}
+
+                        <!-- Contenido específico de cada página -->
+                        {% block content %}{% endblock %}
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- JavaScript Global -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

@@ -1,0 +1,87 @@
+<!-- Logo y título -->
+<div class="flex flex-shrink-0 items-center px-4">
+    <div class="flex items-center gap-x-3">
+        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600">
+            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        </div>
+        <div>
+            <h2 class="text-lg font-semibold text-gray-900">Bot Admin</h2>
+            <p class="text-xs text-gray-500">Panel de Control</p>
+        </div>
+    </div>
+</div>
+
+<!-- Navegación -->
+<nav class="mt-5 flex-1 space-y-1 px-2">
+    
+    <!-- Dashboard -->
+    <a href="{{ url_for('index') }}" 
+       class="{% if request.endpoint == 'index' %}bg-primary-50 text-primary-600{% else %}text-gray-700 hover:bg-gray-50{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+        <svg class="{% if request.endpoint == 'index' %}text-primary-600{% else %}text-gray-400 group-hover:text-gray-500{% endif %} mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+        Dashboard
+    </a>
+    
+    <!-- Sección: Narrativa -->
+    <div class="pt-4">
+        <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Narrativa
+        </h3>
+    </div>
+    
+    <a href="{{ url_for('fragments_list') }}" 
+       class="{% if request.endpoint == 'fragments_list' or request.endpoint == 'fragments_new' %}bg-primary-50 text-primary-600{% else %}text-gray-700 hover:bg-gray-50{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+        <svg class="{% if request.endpoint == 'fragments_list' or request.endpoint == 'fragments_new' %}text-primary-600{% else %}text-gray-400 group-hover:text-gray-500{% endif %} mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+        </svg>
+        Fragmentos
+    </a>
+    
+    <!-- Sección: Tienda -->
+    <div class="pt-4">
+        <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Tienda
+        </h3>
+    </div>
+    
+    <a href="{{ url_for('shop_list') }}" 
+       class="{% if request.endpoint == 'shop_list' or request.endpoint == 'shop_new' %}bg-primary-50 text-primary-600{% else %}text-gray-700 hover:bg-gray-50{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+        <svg class="{% if request.endpoint == 'shop_list' or request.endpoint == 'shop_new' %}text-primary-600{% else %}text-gray-400 group-hover:text-gray-500{% endif %} mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+        Productos
+    </a>
+    
+    <!-- Sección: Automatización -->
+    <div class="pt-4">
+        <h3 class="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+            Automatización
+        </h3>
+    </div>
+    
+    <a href="{{ url_for('triggers_list') }}" 
+       class="{% if request.endpoint == 'triggers_list' or request.endpoint == 'triggers_new' %}bg-primary-50 text-primary-600{% else %}text-gray-700 hover:bg-gray-50{% endif %} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+        <svg class="{% if request.endpoint == 'triggers_list' or request.endpoint == 'triggers_new' %}text-primary-600{% else %}text-gray-400 group-hover:text-gray-500{% endif %} mr-3 h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+        Triggers
+    </a>
+</nav>
+
+<!-- Footer del sidebar -->
+<div class="flex flex-shrink-0 border-t border-gray-200 p-4">
+    <div class="flex items-center">
+        <div>
+            <div class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gray-500">
+                <span class="text-sm font-medium leading-none text-white">AD</span>
+            </div>
+        </div>
+        <div class="ml-3">
+            <p class="text-sm font-medium text-gray-700">Admin</p>
+            <p class="text-xs font-medium text-gray-500">Ver perfil</p>
+        </div>
+    </div>
+</div>
