@@ -9,8 +9,9 @@ import multiprocessing
 import time
 
 def run_app():
-    # Set the DATABASE_URL environment variable for the subprocess explicitly
-    os.environ['DATABASE_URL'] = 'sqlite:///bot.db'
+    # Use test-specific database URL to avoid conflicts with main application
+    # This ensures tests don't interfere with the main database
+    os.environ['DATABASE_URL'] = 'sqlite:///bot_test.db'
     app = create_app('development')
     app.run(host='127.0.0.1', port=5001, debug=False)
 

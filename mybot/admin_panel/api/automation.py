@@ -274,8 +274,28 @@ def create_trigger():
         db.session.rollback()
         logger.error(f"❌ Error de integridad: {str(e.orig)}")
 
+        # Para manejar errores de unicidad de manera más robusta, obtenemos el código de error
         error_msg = str(e.orig)
-        if 'UNIQUE constraint' in error_msg or 'unique constraint' in error_msg.lower():
+
+        # Detectar diferentes tipos de errores de base de datos
+        # SQLite
+        if 'UNIQUE constraint failed' in error_msg or 'UNIQUE constraint' in error_msg or 'unique constraint' in error_msg.lower():
+            return jsonify({
+                'success': False,
+                'error': 'A trigger with this name already exists',
+                'code': 'DUPLICATE_NAME',
+                'details': error_msg
+            }), 409
+        # PostgreSQL: Detecta "duplicate key value violates unique constraint"
+        elif 'duplicate key value violates unique constraint' in error_msg.lower():
+            return jsonify({
+                'success': False,
+                'error': 'A trigger with this name already exists',
+                'code': 'DUPLICATE_NAME',
+                'details': error_msg
+            }), 409
+        # MySQL: Detecta "Duplicate entry"
+        elif 'Duplicate entry' in error_msg or 'for key' in error_msg:
             return jsonify({
                 'success': False,
                 'error': 'A trigger with this name already exists',
@@ -437,17 +457,34 @@ def list_triggers():
         # 8. Eager loading de acciones si se solicita
         include_list = [i.strip() for i in include.split(',') if i.strip()]
 
+        from sqlalchemy.orm import selectinload
+
         if 'actions' in include_list:
-            from sqlalchemy.orm import selectinload
+            # Si se incluyen acciones, cargarlas con selectinload
             query = query.options(selectinload(AutomationTrigger.actions))
 
-        # 9. Ejecutar query
+        # 9. Ejecutar query principal para obtener triggers
         result = db.session.execute(query)
         triggers = result.scalars().all()
 
         logger.info(f"✓ Encontrados {len(triggers)} triggers (total: {total})")
 
-        # 10. Serializar resultados
+        # 10. Pre-cargar conteo de acciones para evitar N+1 si no se incluyen acciones
+        trigger_ids = [trigger.id for trigger in triggers]
+        action_counts = {}
+
+        if not 'actions' in include_list and trigger_ids:
+            # Contar acciones para cada trigger en una sola consulta
+            from sqlalchemy import func
+            action_counts_query = (
+                select(TriggerAction.trigger_id, func.count(TriggerAction.id).label('count'))
+                .where(TriggerAction.trigger_id.in_(trigger_ids))
+                .group_by(TriggerAction.trigger_id)
+            )
+            action_results = db.session.execute(action_counts_query).all()
+            action_counts = {row[0]: row[1] for row in action_results}
+
+        # 11. Serializar resultados
         data = []
         for trigger in triggers:
             trigger_dict = {
@@ -469,7 +506,8 @@ def list_triggers():
 
             # Contar o incluir acciones
             if 'actions' in include_list:
-                trigger_dict['actions_count'] = len(trigger.actions)
+                # Ordenar acciones y preparar la lista
+                sorted_actions = sorted(trigger.actions, key=lambda a: a.execution_order)
                 trigger_dict['actions'] = [
                     {
                         'id': action.id,
@@ -485,16 +523,12 @@ def list_triggers():
                         'execution_order': action.execution_order,
                         'action_metadata': action.action_metadata
                     }
-                    for action in sorted(trigger.actions, key=lambda a: a.execution_order)
+                    for action in sorted_actions
                 ]
+                trigger_dict['actions_count'] = len(sorted_actions)
             else:
-                # Query separado para contar
-                actions_count = db.session.execute(
-                    select(db.func.count()).where(
-                        TriggerAction.trigger_id == trigger.id
-                    )
-                ).scalar()
-                trigger_dict['actions_count'] = actions_count
+                # Usar el conteo pre-cargado para evitar N+1 queries
+                trigger_dict['actions_count'] = action_counts.get(trigger.id, 0)
 
             data.append(trigger_dict)
 
@@ -582,10 +616,10 @@ def get_trigger(trigger_id):
         from sqlalchemy.orm import selectinload
         query = query.options(selectinload(AutomationTrigger.actions))
 
-        if 'logs' in include_list:
-            query = query.options(selectinload(AutomationTrigger.execution_logs))
+        # For logs, we'll handle them separately to avoid loading all logs into memory
+        include_logs = 'logs' in include_list
 
-        # 3. Ejecutar query
+        # 3. Ejecutar query para el trigger
         result = db.session.execute(query)
         trigger = result.scalar_one_or_none()
 
@@ -639,7 +673,16 @@ def get_trigger(trigger_id):
         ]
 
         # 6. Incluir logs si se solicitó
-        if 'logs' in include_list:
+        if include_logs:
+            # Consultar solo los últimos 10 logs de forma eficiente (evita cargar todos en memoria)
+            from sqlalchemy import desc
+            last_logs = db.session.execute(
+                select(TriggerExecutionLog)
+                .where(TriggerExecutionLog.trigger_id == trigger.id)
+                .order_by(desc(TriggerExecutionLog.executed_at))
+                .limit(10)
+            ).scalars().all()
+            # Mantener el orden cronológico descendente (más recientes primero)
             trigger_dict['execution_logs'] = [
                 {
                     'id': log.id,
@@ -650,7 +693,7 @@ def get_trigger(trigger_id):
                     'execution_time_ms': log.execution_time_ms,
                     'executed_at': log.executed_at.isoformat()
                 }
-                for log in trigger.execution_logs[-10:]  # Últimos 10 logs
+                for log in last_logs
             ]
 
         # 7. Retornar respuesta

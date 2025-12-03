@@ -284,10 +284,17 @@ def create_fragment():
         # Rollback en caso de error de integridad (ej: duplicate key)
         db.session.rollback()
         logger.error(f"❌ Error de integridad: {str(e.orig)}")
-        
-        # Parsear mensaje de error de SQLite/PostgreSQL
+
+        # Para manejar errores de unicidad de manera más robusta, detectamos diferentes tipos de base de datos
         error_msg = str(e.orig)
-        if 'UNIQUE constraint' in error_msg or 'unique constraint' in error_msg.lower():
+
+        # SQLite, PostgreSQL, MySQL
+        if ('UNIQUE constraint failed' in error_msg or
+            'UNIQUE constraint' in error_msg or
+            'unique constraint' in error_msg.lower() or
+            'duplicate key value violates unique constraint' in error_msg.lower() or
+            'Duplicate entry' in error_msg or
+            'for key' in error_msg):
             return jsonify({
                 'success': False,
                 'error': 'A fragment with this key already exists or a product with this name already exists',
@@ -925,15 +932,25 @@ def list_fragments():
 
         logger.info(f"✓ Encontrados {len(fragments)} fragmentos (total: {total})")
 
+        # Pre-cargar conteo de choices para evitar N+1 si no se incluyen choices
+        choices_counts = {}
+        include_list = [i.strip() for i in include.split(',') if i.strip()]
 
-        
-
+        if not 'choices' in include_list and fragments:
+            # Contar choices para cada fragmento en una sola consulta
+            from sqlalchemy import func
+            fragment_ids = [fragment.id for fragment in fragments]
+            if fragment_ids:  # Only execute query if there are fragments
+                choices_counts_query = (
+                    select(NarrativeChoice.source_fragment_id, func.count(NarrativeChoice.id).label('count'))
+                    .where(NarrativeChoice.source_fragment_id.in_(fragment_ids))
+                    .group_by(NarrativeChoice.source_fragment_id)
+                )
+                choices_results = db.session.execute(choices_counts_query).all()
+                choices_counts = {row[0]: row[1] for row in choices_results}
 
         # 10. Serializar resultados
-
-
         data = []
-
 
         for fragment in fragments:
 
@@ -984,54 +1001,21 @@ def list_fragments():
 
 
             if 'choices' in include_list:
-
-
                 fragment_dict['choices_count'] = len(fragment.choices)
-
-
                 fragment_dict['choices'] = [
-
-
                     {
-
-
                         'id': choice.id,
-
-
                         'text': choice.text,
-
-
                         'destination_fragment_key': choice.destination_fragment_key,
-
-
                         'required_besitos': choice.required_besitos,
-
-
                         'required_role': choice.required_role
-
-
                     }
-
-
                     for choice in fragment.choices
-
-
                 ]
-
-
             else:
-
-
-                choices_count = db.session.execute(
-
-
-                    select(func.count()).where(NarrativeChoice.source_fragment_id == fragment.id)
-
-
-                ).scalar()
-
-
-                fragment_dict['choices_count'] = choices_count
+                # Usar el conteo pre-cargado para evitar N+1 queries
+                # El conteo se hace eficientemente fuera del bucle de serialización
+                fragment_dict['choices_count'] = choices_counts.get(fragment.id, 0)
 
 
             

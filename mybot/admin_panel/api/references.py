@@ -174,20 +174,24 @@ def get_fragments_reference():
             }), 400
         
         # 2. Construir query
+        from sqlalchemy.orm import joinedload
         query = select(StoryFragment).order_by(StoryFragment.key.asc())
-        
+
+        # Usar joinedload para evitar N+1 al acceder a unlock_product
+        query = query.options(joinedload(StoryFragment.unlock_product))
+
         # Aplicar filtros
         if search:
             search_term = f"%{search}%"
             query = query.where(StoryFragment.key.ilike(search_term))
-        
+
         # Aplicar límite
         query = query.limit(limit)
-        
+
         # 3. Ejecutar query
         result = db.session.execute(query)
         fragments = result.scalars().all()
-        
+
         # 4. Serializar (solo campos necesarios)
         data = [
             {
