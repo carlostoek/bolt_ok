@@ -617,88 +617,56 @@ def get_statistics():
 
 @references_bp.route('/validate/fragment-key', methods=['POST'])
 def validate_fragment_key():
-    """
-    Valida que una key de fragmento sea única (para validación en tiempo real)
-    
-    Request Body:
-    {
-        "key": "CAP10_INTRO",
-        "exclude_id": 156  // Opcional, para edición
-    }
-    
-    Response Success (200):
-    {
-        "success": true,
-        "available": true,
-        "suggestion": null
-    }
-    
-    Response cuando ya existe (200):
-    {
-        "success": true,
-        "available": false,
-        "existing_fragment": {
-            "id": 100,
-            "key": "CAP10_INTRO"
-        },
-        "suggestion": "CAP10_INTRO_V2"
-    }
-    """
-    
+    """Valida disponibilidad de fragment key"""
     try:
         data = request.get_json()
-        
-        if not data or 'key' not in data:
+        key = data.get('key', '').strip().upper()
+
+        if not key:
             return jsonify({
                 'success': False,
-                'error': 'Field "key" is required',
-                'code': 'REQUIRED_FIELD'
+                'error': 'Key is required'
             }), 400
-        
-        key = data['key']
-        exclude_id = data.get('exclude_id')
-        
-        # Buscar fragmento existente
-        query = select(StoryFragment).where(StoryFragment.key == key)
-        
-        if exclude_id:
-            query = query.where(StoryFragment.id != exclude_id)
-        
-        existing = db.session.execute(query).scalar_one_or_none()
-        
+
+        # Validar formato
+        import re
+        if not re.match(r'^[A-Z0-9_-]+$', key):
+            return jsonify({
+                'success': False,
+                'available': False,
+                'error': 'Invalid format'
+            }), 200
+
+        # Verificar si existe
+        existing = db.session.execute(select(StoryFragment).where(StoryFragment.key == key)).scalar_one_or_none()
+
         if existing:
-            # Key ya existe, sugerir alternativa
-            suggestion = f"{key}_V2"
-            
+            # Generar sugerencia
+            base_key = re.sub(r'_\d+$', '', key)
+            counter = 1
+            suggestion = f"{base_key}_{counter}"
+
+            # Verificar que la sugerencia no exista ya
+            suggestion_exists = db.session.execute(select(StoryFragment).where(StoryFragment.key == suggestion)).scalar_one_or_none()
+            while suggestion_exists:
+                counter += 1
+                suggestion = f"{base_key}_{counter}"
+                suggestion_exists = db.session.execute(select(StoryFragment).where(StoryFragment.key == suggestion)).scalar_one_or_none()
+
             return jsonify({
                 'success': True,
                 'available': False,
-                'existing_fragment': {
-                    'id': existing.id,
-                    'key': existing.key
-                },
                 'suggestion': suggestion
             }), 200
-        else:
-            # Key disponible
-            return jsonify({
-                'success': True,
-                'available': True,
-                'suggestion': None
-            }), 200
-    
-    except SQLAlchemyError as e:
-        logger.error(f"❌ Error de base de datos: {str(e)}")
+
         return jsonify({
-            'success': False,
-            'error': 'Database error occurred',
-            'code': 'DATABASE_ERROR'
-        }), 500
-    
+            'success': True,
+            'available': True
+        }), 200
+
     except Exception as e:
-        logger.error(f"❌ Error inesperado: {str(e)}", exc_info=True)
+        logger.error(f"Error validating fragment key: {e}")
         return jsonify({
             'success': False,
-            'error': 'Internal server error',
-            'code': 'INTERNAL_ERROR'
+            'error': 'Server error'
         }), 500

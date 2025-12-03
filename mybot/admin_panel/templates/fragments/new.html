@@ -1,5 +1,833 @@
-<!-- Crear cada archivo con este contenido placeholder -->
 {% extends "base.html" %}
+
+{% block title %}Crear Fragmento{% endblock %}
+{% block page_title %}Crear Fragmento Narrativo{% endblock %}
+
 {% block content %}
-<p>TODO: Implementar esta vista</p>
+<div x-data="fragmentForm()" x-init="init()">
+    
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{{ url_for('index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary-600">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <a href="{{ url_for('fragments_list') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-primary-600 md:ml-2">Fragmentos</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Nuevo</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    
+    <!-- Formulario Principal -->
+    <form @submit.prevent="submitForm" class="space-y-6">
+        
+        <!-- Card: Información Básica -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
+                    Información Básica
+                </h3>
+                
+                <div class="grid grid-cols-1 gap-6">
+                    
+                    <!-- Fragment Key -->
+                    <div>
+                        <label for="key" class="block text-sm font-medium text-gray-700">
+                            Fragment Key *
+                            <span class="text-xs text-gray-500 font-normal">(Solo mayúsculas, números, guiones y guiones bajos)</span>
+                        </label>
+                        <div class="mt-1 relative">
+                            <input 
+                                type="text" 
+                                id="key" 
+                                x-model="formData.key"
+                                @input="validateKey" @blur="checkKeyAvailability"
+                                :class="{'border-red-300 focus:border-red-500 focus:ring-red-500': errors.key, 'border-green-300 focus:border-green-500 focus:ring-green-500': keyValidation.available === true}"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                placeholder="Ej: CAP10_INTRO"
+                                required>
+                            
+                            <!-- Indicador de validación -->
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                <!-- Cargando -->
+                                <svg x-show="keyValidation.checking" class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <!-- Disponible -->
+                                <svg x-show="keyValidation.available === true" class="h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <!-- No disponible -->
+                                <svg x-show="keyValidation.available === false" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Error o sugerencia -->
+                        <p x-show="errors.key" x-text="errors.key" class="mt-2 text-sm text-red-600"></p>
+                        <p x-show="keyValidation.suggestion" class="mt-2 text-sm text-blue-600">
+                            Sugerencia: <button type="button" @click="formData.key = keyValidation.suggestion; validateKey()" class="underline font-medium" x-text="keyValidation.suggestion"></button>
+                        </p>
+                    </div>
+                    
+                    <!-- Texto del Fragmento -->
+                    <div>
+                        <label for="text" class="block text-sm font-medium text-gray-700">
+                            Texto del Fragmento *
+                        </label>
+                        <div class="mt-1">
+                            <textarea 
+                                id="text" 
+                                x-model="formData.text"
+                                rows="6"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                placeholder="Escribe el contenido narrativo aquí..."
+                                required></textarea>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">
+                            Caracteres: <span x-text="formData.text.length"></span>
+                        </p>
+                    </div>
+                    
+                    <!-- URL de Imagen (Opcional) -->
+                    <div>
+                        <label for="image_url" class="block text-sm font-medium text-gray-700">
+                            URL de Imagen (Opcional)
+                        </label>
+                        <div class="mt-1">
+                            <input 
+                                type="url" 
+                                id="image_url" 
+                                x-model="formData.image_url"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                placeholder="https://ejemplo.com/imagen.jpg">
+                        </div>
+                    </div>
+                    
+                    <!-- Grid: Besitos y Rol -->
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                        
+                        <!-- Besitos Mínimos -->
+                        <div>
+                            <label for="min_besitos" class="block text-sm font-medium text-gray-700">
+                                Besitos Mínimos
+                            </label>
+                            <div class="mt-1">
+                                <input 
+                                    type="number" 
+                                    id="min_besitos" 
+                                    x-model.number="formData.min_besitos"
+                                    min="0"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Puntos requeridos para acceder</p>
+                        </div>
+                        
+                        <!-- Recompensa de Besitos -->
+                        <div>
+                            <label for="reward_besitos" class="block text-sm font-medium text-gray-700">
+                                Recompensa de Besitos
+                            </label>
+                            <div class="mt-1">
+                                <input 
+                                    type="number" 
+                                    id="reward_besitos" 
+                                    x-model.number="formData.reward_besitos"
+                                    min="0"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">Puntos que recibe el usuario</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Rol Requerido -->
+                    <div>
+                        <label for="required_role" class="block text-sm font-medium text-gray-700">
+                            Rol Requerido (Opcional)
+                        </label>
+                        <div class="mt-1">
+                            <select 
+                                id="required_role" 
+                                x-model="formData.required_role"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="">Sin restricción</option>
+                                <option value="free">Free</option>
+                                <option value="vip">VIP</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card: Producto de Desbloqueo (NESTED CREATION) -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">
+                    Producto de Desbloqueo
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Selector de Modo -->
+                    <div>
+                        <label class="text-base font-medium text-gray-900">¿Este fragmento está bloqueado?</label>
+                        <p class="text-sm leading-5 text-gray-500">Selecciona si requiere un producto para desbloquearse</p>
+                        <fieldset class="mt-4">
+                            <legend class="sr-only">Modo de desbloqueo</legend>
+                            <div class="space-y-4">
+                                
+                                <!-- Opción: Sin bloqueo -->
+                                <div class="flex items-center">
+                                    <input 
+                                        id="unlock_none" 
+                                        type="radio" 
+                                        x-model="unlockMode"
+                                        value="none"
+                                        class="h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    <label for="unlock_none" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Sin bloqueo (acceso gratuito)
+                                    </label>
+                                </div>
+                                
+                                <!-- Opción: Producto existente -->
+                                <div class="flex items-center">
+                                    <input 
+                                        id="unlock_existing" 
+                                        type="radio" 
+                                        x-model="unlockMode"
+                                        value="existing"
+                                        class="h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    <label for="unlock_existing" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Producto existente
+                                    </label>
+                                </div>
+                                
+                                <!-- Opción: Crear nuevo producto -->
+                                <div class="flex items-center">
+                                    <input 
+                                        id="unlock_new" 
+                                        type="radio" 
+                                        x-model="unlockMode"
+                                        value="create_new"
+                                        class="h-4 w-4 border-gray-300 text-primary-600 focus:ring-primary-500">
+                                    <label for="unlock_new" class="ml-3 block text-sm font-medium text-gray-700">
+                                        Crear nuevo producto
+                                    </label>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    
+                    <!-- Selector de Producto Existente -->
+                    <div x-show="unlockMode === 'existing'" x-transition class="mt-4">
+                        <label for="unlock_product_id" class="block text-sm font-medium text-gray-700">
+                            Seleccionar Producto
+                        </label>
+                        <div class="mt-1">
+                            <select 
+                                id="unlock_product_id" 
+                                x-model="formData.unlock_product_id"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="">-- Selecciona un producto --</option>
+                                <template x-for="product in products" :key="product.id">
+                                    <option :value="product.id" x-text="`${product.name} (${product.price} besitos)`"></option>
+                                </template>
+                            </select>
+                        </div>
+                        <p class="mt-2 text-sm text-gray-500">
+                            <button type="button" @click="loadProducts" class="text-primary-600 hover:text-primary-500">
+                                Recargar lista de productos
+                            </button>
+                        </p>
+                    </div>
+                    
+                    <!-- Formulario de Nuevo Producto (Nested) -->
+                    <div x-show="unlockMode === 'create_new'" x-transition class="mt-4 bg-blue-50 rounded-lg p-4 border-2 border-blue-200">
+                        <h4 class="text-sm font-medium text-blue-900 mb-3">Crear Nuevo Producto</h4>
+                        
+                        <div class="space-y-4">
+                            <!-- Nombre del Producto -->
+                            <div>
+                                <label for="product_name" class="block text-sm font-medium text-gray-700">
+                                    Nombre del Producto *
+                                </label>
+                                <div class="mt-1">
+                                    <input 
+                                        type="text" 
+                                        id="product_name" 
+                                        x-model="formData.unlock_product.name"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                        placeholder="Ej: Acceso Capítulo 10">
+                                </div>
+                            </div>
+                            
+                            <!-- Descripción -->
+                            <div>
+                                <label for="product_description" class="block text-sm font-medium text-gray-700">
+                                    Descripción (Opcional)
+                                </label>
+                                <div class="mt-1">
+                                    <textarea 
+                                        id="product_description" 
+                                        x-model="formData.unlock_product.description"
+                                        rows="2"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                        placeholder="Descripción del producto"></textarea>
+                                </div>
+                            </div>
+                            
+                            <!-- Precio y VIP Only -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="product_price" class="block text-sm font-medium text-gray-700">
+                                        Precio (Besitos) *
+                                    </label>
+                                    <div class="mt-1">
+                                        <input 
+                                            type="number" 
+                                            id="product_price" 
+                                            x-model.number="formData.unlock_product.price"
+                                            min="0"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label for="product_vip_only" class="block text-sm font-medium text-gray-700">
+                                        Solo VIP
+                                    </label>
+                                    <div class="mt-1">
+                                        <input 
+                                            type="checkbox" 
+                                            id="product_vip_only" 
+                                            x-model="formData.unlock_product.is_vip_only"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                                        <span class="ml-2 text-sm text-gray-500">Requiere rol VIP para comprar</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Card: Decisiones Narrativas -->
+        <div class="bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-lg font-medium leading-6 text-gray-900">
+                            Decisiones Narrativas
+                        </h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Define las opciones que el usuario puede elegir después de leer este fragmento
+                        </p>
+                    </div>
+                    <button
+                        type="button"
+                        @click="addChoice"
+                        class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Añadir Decisión
+                    </button>
+                </div>
+
+                <!-- Lista de Decisiones -->
+                <div x-show="formData.choices.length === 0" class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="mt-2 text-sm text-gray-500">No hay decisiones todavía</p>
+                    <p class="text-xs text-gray-400">Haz clic en "Añadir Decisión" para crear opciones</p>
+                </div>
+
+                <div class="space-y-4">
+                    <template x-for="(choice, index) in formData.choices" :key="index">
+                        <div class="bg-gray-50 rounded-lg p-4 border-2 border-gray-200">
+                            <!-- Header de la Decisión -->
+                            <div class="flex items-center justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-900">
+                                    Decisión #<span x-text="index + 1"></span>
+                                </h4>
+                                <button
+                                    type="button"
+                                    @click="removeChoice(index)"
+                                    class="text-red-600 hover:text-red-800">
+                                    <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-4">
+                                <!-- Texto de la Decisión -->
+                                <div>
+                                    <label :for="'choice_text_' + index" class="block text-sm font-medium text-gray-700">
+                                        Texto de la Decisión *
+                                    </label>
+                                    <div class="mt-1">
+                                        <input
+                                            type="text"
+                                            :id="'choice_text_' + index"
+                                            x-model="choice.text"
+                                            :class="{'border-red-300 focus:border-red-500 focus:ring-red-500': errors['choice_' + index + '_text']}"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                            placeholder='Ej: "Entrar sigilosamente"'>
+                                    </div>
+                                    <p x-show="errors['choice_' + index + '_text']" :x-text="errors['choice_' + index + '_text']" class="mt-1 text-sm text-red-600"></p>
+                                </div>
+
+                                <!-- Fragmento de Destino -->
+                                <div>
+                                    <label :for="'choice_dest_' + index" class="block text-sm font-medium text-gray-700">
+                                        Fragmento de Destino *
+                                    </label>
+                                    <div class="mt-1">
+                                        <select
+                                            :id="'choice_dest_' + index"
+                                            x-model="choice.destination_fragment_key"
+                                            :class="{'border-red-300 focus:border-red-500 focus:ring-red-500': errors['choice_' + index + '_dest']}"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                            <option value="">-- Selecciona un fragmento --</option>
+                                            <template x-for="fragment in fragments" :key="fragment.key">
+                                                <option :value="fragment.key" x-text="fragment.key + ' - ' + fragment.text.substring(0, 50) + '...'"></option>
+                                            </template>
+                                        </select>
+                                    </div>
+                                    <p x-show="errors['choice_' + index + '_dest']" :x-text="errors['choice_' + index + '_dest']" class="mt-1 text-sm text-red-600"></p>
+                                </div>
+
+                                <!-- Grid: Besitos y Rol Requeridos -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <!-- Besitos Requeridos -->
+                                    <div>
+                                        <label :for="'choice_besitos_' + index" class="block text-sm font-medium text-gray-700">
+                                            Besitos Requeridos
+                                        </label>
+                                        <div class="mt-1">
+                                            <input
+                                                type="number"
+                                                :id="'choice_besitos_' + index"
+                                                x-model.number="choice.required_besitos"
+                                                min="0"
+                                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                        </div>
+                                        <p class="mt-1 text-xs text-gray-500">Para elegir esta opción</p>
+                                    </div>
+
+                                    <!-- Rol Requerido -->
+                                    <div>
+                                        <label :for="'choice_role_' + index" class="block text-sm font-medium text-gray-700">
+                                            Rol Requerido
+                                        </label>
+                                        <div class="mt-1">
+                                            <select
+                                                :id="'choice_role_' + index"
+                                                x-model="choice.required_role"
+                                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                                <option value="">Sin restricción</option>
+                                                <option value="free">Free</option>
+                                                <option value="vip">VIP</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mensajes de Estado -->
+        <div class="space-y-4">
+            <!-- Mensajes de Error -->
+            <div x-show="errorMessage" class="rounded-md bg-red-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-red-800">Error de validación</h3>
+                        <div class="mt-2 text-sm text-red-700" x-text="errorMessage"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mensajes de Advertencia -->
+            <div x-show="warnings.length > 0" class="rounded-md bg-yellow-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm font-medium text-yellow-800">Advertencias</h3>
+                        <div class="mt-2">
+                            <ul class="list-disc pl-5 space-y-1">
+                                <template x-for="(warning, index) in warnings" :key="index">
+                                    <li class="text-sm text-yellow-700" x-text="warning"></li>
+                                </template>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mensajes de Éxito -->
+            <div x-show="successMessage" class="rounded-md bg-green-50 p-4">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-green-700" x-text="successMessage"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botones de Acción -->
+        <div class="flex items-center justify-end space-x-4">
+            <a 
+                href="{{ url_for('fragments_list') }}" 
+                class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                Cancelar
+            </a>
+            <button 
+                type="submit"
+                :disabled="loading"
+                :class="{'opacity-50 cursor-not-allowed': loading}"
+                class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <svg x-show="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span x-text="loading ? 'Creando...' : 'Crear Fragmento'"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+    function fragmentForm() {
+        return {
+            // Estado del formulario
+            loading: false,
+            errorMessage: '',
+            successMessage: '',
+            errors: {},
+            warnings: [],
+            
+            // Modo de desbloqueo
+            unlockMode: 'none',
+            
+            // Validación de key
+            keyValidation: {
+                checking: false,
+                available: null,
+                suggestion: null
+            },
+            
+            // Datos para dropdowns
+            products: [],
+            fragments: [],
+            
+            // Datos del formulario
+            formData: {
+                key: '',
+                text: '',
+                image_url: '',
+                min_besitos: 0,
+                reward_besitos: 0,
+                required_role: '',
+                unlock_product_id: null,
+                unlock_product: {
+                    name: '',
+                    description: '',
+                    price: 0,
+                    is_vip_only: false
+                },
+                choices: []
+            },
+            
+            // Inicialización
+            async init() {
+                await this.loadProducts();
+                await this.loadFragments();
+            },
+            
+            // Cargar productos para dropdown
+            async loadProducts() {
+                try {
+                    const response = await fetch('/api/v1/references/products?is_active=true');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.products = data.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                }
+            },
+            
+            // Cargar fragmentos para dropdown
+            async loadFragments() {
+                try {
+                    const response = await fetch('/api/v1/references/fragments?limit=200');
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.fragments = data.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading fragments:', error);
+                }
+            },
+            
+            // Validar formato de key
+            validateKey() {
+                const key = this.formData.key.toUpperCase();
+                this.formData.key = key;
+                
+                // Validar formato
+                const regex = /^[A-Z0-9_-]+$/;
+                if (key.length > 0 && !regex.test(key)) {
+                    this.errors.key = 'Solo se permiten mayúsculas, números, guiones y guiones bajos';
+                    this.keyValidation.available = null;
+                } else {
+                    delete this.errors.key;
+                }
+            },
+            
+            // Verificar disponibilidad de key
+            async checkKeyAvailability() {
+                if (!this.formData.key || this.errors.key) return;
+                
+                this.keyValidation.checking = true;
+                this.keyValidation.available = null;
+                this.keyValidation.suggestion = null;
+                
+                try {
+                    const response = await fetch('/api/v1/references/validate/fragment-key', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            key: this.formData.key
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.keyValidation.available = data.available;
+                        if (!data.available) {
+                            this.keyValidation.suggestion = data.suggestion;
+                            this.errors.key = `La key "${this.formData.key}" ya está en uso`;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking key availability:', error);
+                } finally {
+                    this.keyValidation.checking = false;
+                }
+            },
+            
+            // Añadir decisión
+            addChoice() {
+                this.formData.choices.push({
+                    text: '',
+                    destination_fragment_key: '',
+                    required_besitos: 0,
+                    required_role: ''
+                });
+            },
+            
+            // Eliminar decisión
+            removeChoice(index) {
+                this.formData.choices.splice(index, 1);
+            },
+            
+            // Cargar fragmentos para una decisión específica
+            async loadFragmentsForChoice(index) {
+                // Placeholder para funcionalidad futura si se necesita
+            },
+            
+            // Validar formulario antes de enviar
+            validateForm() {
+                this.errors = {};
+                this.warnings = [];
+                
+                // Validar key
+                if (!this.formData.key) {
+                    this.errors.key = 'El Fragment Key es requerido';
+                }
+                
+                if (this.keyValidation.available === false) {
+                    this.errors.key = 'Esta key ya está en uso';
+                }
+                
+                // Validar texto
+                if (!this.formData.text || this.formData.text.trim().length < 10) {
+                    this.errors.text = 'El texto debe tener al menos 10 caracteres';
+                }
+                
+                // Validar producto nested si está en modo create_new
+                if (this.unlockMode === 'create_new') {
+                    if (!this.formData.unlock_product.name) {
+                        this.errors.product_name = 'El nombre del producto es requerido';
+                    }
+                    if (this.formData.unlock_product.price < 0) {
+                        this.errors.product_price = 'El precio debe ser mayor o igual a 0';
+                    }
+                }
+                
+                // Validar producto existente si está en modo existing
+                if (this.unlockMode === 'existing' && !this.formData.unlock_product_id) {
+                    this.errors.unlock_product_id = 'Debes seleccionar un producto';
+                }
+                
+                // Validar choices
+                this.formData.choices.forEach((choice, index) => {
+                    if (!choice.text) {
+                        this.errors[`choice_${index}_text`] = 'El texto de la decisión es requerido';
+                    }
+                    if (!choice.destination_fragment_key) {
+                        this.errors[`choice_${index}_dest`] = 'Debes seleccionar un fragmento de destino';
+                    }
+                });
+                
+                // Advertencias
+                if (this.formData.text.length < 50) {
+                    this.warnings.push('El texto del fragmento es muy corto (menos de 50 caracteres)');
+                }
+                
+                if (this.formData.choices.length > 5) {
+                    this.warnings.push('Tienes muchas decisiones. Considera dividir en múltiples fragmentos.');
+                }
+                
+                if (this.formData.min_besitos > 1000) {
+                    this.warnings.push(`El fragmento requiere ${this.formData.min_besitos} besitos. Verifica que sea intencional.`);
+                }
+                
+                return Object.keys(this.errors).length === 0;
+            },
+            
+            // Preparar datos para envío
+            preparePayload() {
+                const payload = {
+                    key: this.formData.key,
+                    text: this.formData.text,
+                    image_url: this.formData.image_url || null,
+                    min_besitos: this.formData.min_besitos,
+                    reward_besitos: this.formData.reward_besitos,
+                    required_role: this.formData.required_role || null,
+                    choices: this.formData.choices.length > 0 ? this.formData.choices : []
+                };
+                
+                // Añadir producto según modo
+                if (this.unlockMode === 'existing') {
+                    payload.unlock_product_id = parseInt(this.formData.unlock_product_id);
+                } else if (this.unlockMode === 'create_new') {
+                    payload.unlock_product = {
+                        name: this.formData.unlock_product.name,
+                        description: this.formData.unlock_product.description || null,
+                        price: this.formData.unlock_product.price,
+                        is_vip_only: this.formData.unlock_product.is_vip_only
+                    };
+                }
+                
+                return payload;
+            },
+            
+            // Enviar formulario
+            async submitForm() {
+                // Limpiar mensajes previos
+                this.errorMessage = '';
+                this.successMessage = '';
+                
+                // Validar
+                if (!this.validateForm()) {
+                    this.errorMessage = 'Por favor corrige los errores en el formulario';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    return;
+                }
+                
+                this.loading = true;
+                
+                try {
+                    const payload = this.preparePayload();
+                    
+                    const response = await fetch('/api/v1/narrative/fragments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok && data.success) {
+                        this.successMessage = data.message || 'Fragmento creado exitosamente';
+                        
+                        // Mostrar advertencias si las hay
+                        if (data.warnings && data.warnings.length > 0) {
+                            this.warnings = data.warnings;
+                        }
+                        
+                        // Redireccionar después de 2 segundos
+                        setTimeout(() => {
+                            window.location.href = '{{ url_for("fragments_list") }}';
+                        }, 2000);
+                    } else {
+                        // Manejar errores de validación del backend
+                        if (data.field) {
+                            this.errors[data.field] = data.error;
+                        }
+                        this.errorMessage = data.error || 'Error al crear el fragmento';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                } catch (error) {
+                    console.error('Error submitting form:', error);
+                    this.errorMessage = 'Error de conexión. Por favor intenta nuevamente.';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }
+</script>
 {% endblock %}
