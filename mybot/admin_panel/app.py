@@ -22,6 +22,7 @@ from admin_panel.api.shop import shop_bp
 from admin_panel.api.automation import automation_bp
 from admin_panel.api.references import references_bp
 from admin_panel.api.analytics import analytics_bp
+from admin_panel.api.users import users_bp
 
 # Configurar logging
 logging.basicConfig(
@@ -74,6 +75,7 @@ def create_app(config_name='default'):
     app.register_blueprint(automation_bp)
     app.register_blueprint(references_bp)
     app.register_blueprint(analytics_bp, url_prefix='/api/v1/analytics')
+    app.register_blueprint(users_bp, url_prefix='/api/v1')
     logger.info("✓ Blueprints de API registrados")
     
     # Registrar rutas de vistas (templates)
@@ -127,7 +129,22 @@ def register_template_routes(app):
     def shop_products_edit(product_id):
         """Formulario de edición de producto"""
         return render_template('shop/edit.html', product_id=product_id)
-    
+
+    @app.route('/users')
+    def users_list():
+        """Lista de usuarios"""
+        return render_template('users/list.html')
+
+    @app.route('/users/<int:user_id>')
+    def users_detail(user_id):
+        """Detalle de usuario"""
+        return render_template('users/detail.html', user_id=user_id)
+
+    @app.route('/users/<int:user_id>/edit')
+    def users_edit(user_id):
+        """Editar usuario"""
+        return render_template('users/edit.html', user_id=user_id)
+
     @app.route('/automation/triggers')
     def triggers_list():
         """Lista de triggers configurables"""

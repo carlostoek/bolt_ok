@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+
+{% block title %}Detalle de Usuario{% endblock %}
+{% block page_title %}Detalle de Usuario{% endblock %}
+
+{% block content %}
+<div x-data="userDetail()" x-init="loadUser()">
+    
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{{ url_for('index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary-600">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <a href="{{ url_for('users_list') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-primary-600 md:ml-2">Usuarios</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Detalle</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500">Cargando datos del usuario...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div x-show="error" x-transition class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700" x-text="error"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Summary Card -->
+    <div x-show="!loading && !error" class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">
+                        <span x-text="user.full_name"></span>
+                        <span class="ml-2 text-sm font-normal text-gray-500" x-text="'@' + user.telegram_username"></span>
+                    </h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500" x-text="'ID: ' + user.telegram_id"></p>
+                </div>
+                <div class="flex space-x-3">
+                    <a 
+                        :href="`{{ url_for('users_edit', user_id=0) }}`.replace('0', userId)"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                        Editar
+                    </a>
+                    <button 
+                        @click="toggleBlock()"
+                        :class="user.is_blocked ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'"
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <span x-text="user.is_blocked ? 'Desbloquear' : 'Bloquear'"></span>
+                    </button>
+                    <button 
+                        @click="deleteUser()"
+                        class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-200">
+            <dl class="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <dt class="text-sm font-medium text-gray-500">Rol</dt>
+                    <dd class="mt-1 text-lg font-semibold">
+                        <span 
+                            :class="user.role === 'vip' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'"
+                            class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full uppercase">
+                            <span x-text="user.role"></span>
+                        </span>
+                        <button 
+                            @click="changeRole(user.role === 'vip' ? 'free' : 'vip')"
+                            class="ml-2 inline-flex items-center text-xs font-medium text-gray-500 hover:text-gray-700">
+                            Cambiar
+                        </button>
+                    </dd>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <dt class="text-sm font-medium text-gray-500">Besitos</dt>
+                    <dd class="mt-1 text-lg font-semibold text-gray-900 flex items-center">
+                        <span x-text="formatNumber(user.besitos)"></span>
+                        <span class="ml-1">💋</span>
+                        <button 
+                            @click="showBesitosModal = true"
+                            class="ml-2 inline-flex items-center text-xs font-medium text-gray-500 hover:text-gray-700">
+                            Ajustar
+                        </button>
+                    </dd>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <dt class="text-sm font-medium text-gray-500">Compras Realizadas</dt>
+                    <dd class="mt-1 text-lg font-semibold text-gray-900" x-text="user.total_purchases"></dd>
+                </div>
+                
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <dt class="text-sm font-medium text-gray-500">Total Gastado</dt>
+                    <dd class="mt-1 text-lg font-semibold text-gray-900 flex items-center">
+                        <span x-text="formatNumber(user.total_spent)"></span>
+                        <span class="ml-1">💋</span>
+                    </dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+    
+    <!-- User Details Grid -->
+    <div x-show="!loading && !error" class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-6">
+        
+        <!-- Activity Info -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Información de Actividad</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Última Actividad</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="formatDateTime(user.last_activity)"></dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Fecha de Registro</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="formatDateTime(user.created_at)"></dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Estado</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span 
+                                :class="user.is_blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'"
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                <span x-text="user.is_blocked ? 'Bloqueado' : 'Activo'"></span>
+                            </span>
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Estado Narrativo</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span 
+                                :class="user.stats.is_active ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'"
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
+                                <span x-text="user.stats.is_active ? 'Activo' : 'Inactivo'"></span>
+                            </span>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+        
+        <!-- Narrative Info -->
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">Progreso Narrativo</h3>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Fragmento Actual</dt>
+                        <dd class="mt-1 text-sm text-gray-900">
+                            <span x-text="user.narrative?.current_fragment_key || 'No iniciado'"></span>
+                        </dd>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <dt class="text-sm font-medium text-gray-500">Texto Actual</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="user.narrative?.current_fragment_text || 'N/A'"></dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Fecha de Inicio</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="formatDateTime(user.narrative?.started_at) || 'N/A'"></dd>
+                    </div>
+                    <div class="sm:col-span-1">
+                        <dt class="text-sm font-medium text-gray-500">Última Interacción</dt>
+                        <dd class="mt-1 text-sm text-gray-900" x-text="formatDateTime(user.narrative?.last_interaction) || 'N/A'"></dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Purchases Section -->
+    <div x-show="!loading && !error" class="bg-white shadow overflow-hidden sm:rounded-lg mb-6">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h3 class="text-lg leading-6 font-medium text-gray-900">Historial de Compras</h3>
+        </div>
+        <div class="px-4 py-5 sm:p-6">
+            <div x-show="user.purchases.length === 0" class="text-center py-8">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <p class="mt-2 text-sm text-gray-500">No hay compras registradas</p>
+            </div>
+            
+            <div x-show="user.purchases.length > 0" class="overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Producto
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Precio
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Fecha
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <template x-for="purchase in user.purchases" :key="purchase.id">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" x-text="purchase.product_name"></td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div class="flex items-center">
+                                        <span x-text="purchase.price"></span>
+                                        <span class="ml-1">💋</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="formatDateTime(purchase.purchased_at)"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Besitos Modal -->
+    <div x-show="showBesitosModal" x-transition class="fixed z-10 inset-0 overflow-y-auto">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showBesitosModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
+            </div>
+            
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            
+            <div x-show="showBesitosModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900">Ajustar Besitos</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Usuario actual: <span x-text="user.full_name"></span> (<span x-text="formatNumber(user.besitos)"></span> besitos)
+                                </p>
+                                <div class="space-y-4">
+                                    <div>
+                                        <label for="besitos_amount" class="block text-sm font-medium text-gray-700 mb-1">Cantidad a ajustar</label>
+                                        <input 
+                                            type="number" 
+                                            id="besitos_amount" 
+                                            x-model.number="besitosAmount"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+                                            placeholder="Ej: 100 (positivo para añadir, negativo para restar)">
+                                        <p class="mt-1 text-xs text-gray-500">Usa números positivos para añadir, negativos para restar</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button 
+                        @click="adjustBesitos()"
+                        type="button" 
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        Ajustar
+                    </button>
+                    <button 
+                        @click="showBesitosModal = false"
+                        type="button" 
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+    function userDetail() {
+        return {
+            userId: {{ user_id }},
+            loading: true,
+            user: {},
+            error: null,
+            
+            showBesitosModal: false,
+            besitosAmount: 0,
+            
+            async loadUser() {
+                this.loading = true;
+                this.error = null;
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.user = data.data;
+                    } else {
+                        this.error = data.error || 'Error al cargar el usuario';
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    this.error = 'Error de conexión al cargar el usuario';
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async changeRole(newRole) {
+                if (!confirm(`¿Estás seguro de cambiar el rol de este usuario a ${newRole.toUpperCase()}?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}/change-role`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            role: newRole
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.user.role = newRole;
+                        alert(data.message);
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error changing role:', error);
+                    alert('Error al cambiar el rol');
+                }
+            },
+            
+            async adjustBesitos() {
+                if (!this.besitosAmount || isNaN(this.besitosAmount)) {
+                    alert('Por favor ingresa una cantidad válida');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}/add-besitos`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            amount: parseInt(this.besitosAmount)
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.user.besitos = data.data.new_amount;
+                        alert(data.message);
+                        this.showBesitosModal = false;
+                        this.besitosAmount = 0;
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error adjusting besitos:', error);
+                    alert('Error al ajustar los besitos');
+                }
+            },
+            
+            async toggleBlock() {
+                const action = this.user.is_blocked ? 'desbloquear' : 'bloquear';
+                if (!confirm(`¿Estás seguro de ${action} al usuario "${this.user.telegram_username}"?`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}/toggle-block`, {
+                        method: 'POST'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.user.is_blocked = data.data.is_blocked;
+                        alert(data.message);
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error toggling block:', error);
+                    alert('Error al cambiar el estado de bloqueo');
+                }
+            },
+            
+            async deleteUser() {
+                if (!confirm(`¿Estás seguro de eliminar al usuario "${this.user.telegram_username}"?\n\nEsta acción NO se puede deshacer y eliminará:\n- Todos sus datos\n- Su historial de compras\n- Su progreso narrativo`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        window.location.href = '{{ url_for("users_list") }}';
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Error al eliminar el usuario');
+                }
+            },
+            
+            formatDateTime(dateStr) {
+                if (!dateStr) return 'Nunca';
+                
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) return 'Ahora';
+                if (diffMins < 60) return `Hace ${diffMins}m`;
+                if (diffHours < 24) return `Hace ${diffHours}h`;
+                if (diffDays < 7) return `Hace ${diffDays}d`;
+                
+                return date.toLocaleDateString('es-ES');
+            },
+            
+            formatNumber(num) {
+                return new Intl.NumberFormat('es-ES').format(num);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+{% block page_title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div x-data="usersList()" x-init="loadUsers()">
+    
+    <!-- Header con estadísticas rápidas -->
+    <div class="sm:flex sm:items-center sm:justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-semibold text-gray-900">Lista de Usuarios</h2>
+            <p class="mt-1 text-sm text-gray-500">Gestiona todos los usuarios del bot</p>
+        </div>
+        <div class="mt-4 sm:mt-0">
+            <button 
+                @click="showBulkActions = !showBulkActions"
+                x-show="selectedUsers.length > 0"
+                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 mr-2">
+                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Acciones Masivas (<span x-text="selectedUsers.length"></span>)
+            </button>
+        </div>
+    </div>
+    
+    <!-- Estadísticas Rápidas -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Total Usuarios</dt>
+                            <dd class="text-lg font-semibold text-gray-900" x-text="stats.total_users || 0"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Usuarios VIP</dt>
+                            <dd class="text-lg font-semibold text-gray-900" x-text="stats.vip_users || 0"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Activos (7d)</dt>
+                            <dd class="text-lg font-semibold text-gray-900" x-text="stats.active_users_week || 0"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-pink-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Promedio Besitos</dt>
+                            <dd class="text-lg font-semibold text-gray-900" x-text="stats.avg_besitos || 0"></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Panel de Acciones Masivas -->
+    <div x-show="showBulkActions" x-transition class="bg-purple-50 border border-purple-200 rounded-lg p-4 mb-6">
+        <h3 class="text-sm font-medium text-purple-900 mb-3">Acciones Masivas</h3>
+        <div class="flex flex-wrap gap-2">
+            <button 
+                @click="bulkAddBesitos()"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200">
+                💋 Añadir Besitos
+            </button>
+            <button 
+                @click="bulkChangeRole('vip')"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-yellow-700 bg-yellow-100 hover:bg-yellow-200">
+                ⭐ Hacer VIP
+            </button>
+            <button 
+                @click="bulkChangeRole('free')"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200">
+                👤 Hacer Free
+            </button>
+            <button 
+                @click="bulkBlock()"
+                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200">
+                🚫 Bloquear
+            </button>
+            <button 
+                @click="selectedUsers = []"
+                class="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                Cancelar
+            </button>
+        </div>
+    </div>
+    
+    <!-- Filtros y búsqueda -->
+    <div class="bg-white shadow rounded-lg p-4 mb-6">
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
+            <!-- Búsqueda -->
+            <div class="sm:col-span-2">
+                <label for="search" class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                <input 
+                    type="text" 
+                    id="search"
+                    x-model="filters.search"
+                    @input.debounce.500ms="loadUsers()"
+                    placeholder="Username, nombre, Telegram ID..."
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+            </div>
+            
+            <!-- Filtro: Rol -->
+            <div>
+                <label for="role" class="block text-sm font-medium text-gray-700 mb-1">Rol</label>
+                <select 
+                    id="role"
+                    x-model="filters.role"
+                    @change="loadUsers()"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    <option value="">Todos</option>
+                    <option value="free">Free</option>
+                    <option value="vip">VIP</option>
+                </select>
+            </div>
+            
+            <!-- Filtro: Estado -->
+            <div>
+                <label for="is_blocked" class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                <select 
+                    id="is_blocked"
+                    x-model="filters.is_blocked"
+                    @change="loadUsers()"
+                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                    <option value="">Todos</option>
+                    <option value="false">Activos</option>
+                    <option value="true">Bloqueados</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Filtros Avanzados -->
+        <div class="mt-4 pt-4 border-t border-gray-200">
+            <button 
+                @click="showAdvancedFilters = !showAdvancedFilters"
+                class="text-sm text-primary-600 hover:text-primary-500 flex items-center">
+                <svg class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+                Filtros Avanzados
+            </button>
+            
+            <div x-show="showAdvancedFilters" x-transition class="grid grid-cols-1 gap-4 sm:grid-cols-3 mt-4">
+                <!-- Besitos Mínimos -->
+                <div>
+                    <label for="min_besitos" class="block text-sm font-medium text-gray-700 mb-1">Besitos Mínimos</label>
+                    <input 
+                        type="number" 
+                        id="min_besitos"
+                        x-model.number="filters.min_besitos"
+                        @change="loadUsers()"
+                        min="0"
+                        placeholder="0"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                </div>
+                
+                <!-- Besitos Máximos -->
+                <div>
+                    <label for="max_besitos" class="block text-sm font-medium text-gray-700 mb-1">Besitos Máximos</label>
+                    <input 
+                        type="number" 
+                        id="max_besitos"
+                        x-model.number="filters.max_besitos"
+                        @change="loadUsers()"
+                        min="0"
+                        placeholder="Sin límite"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                </div>
+                
+                <!-- Días de Inactividad -->
+                <div>
+                    <label for="days_inactive" class="block text-sm font-medium text-gray-700 mb-1">Inactivos por (días)</label>
+                    <input 
+                        type="number" 
+                        id="days_inactive"
+                        x-model.number="filters.days_inactive"
+                        @change="loadUsers()"
+                        min="1"
+                        placeholder="Ej: 30"
+                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500">Cargando usuarios...</p>
+    </div>
+    
+    <!-- Tabla de Usuarios -->
+    <div x-show="!loading" class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left">
+                        <input 
+                            type="checkbox" 
+                            @change="toggleSelectAll($event.target.checked)"
+                            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Usuario
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Rol
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Besitos
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Compras
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Última Actividad
+                    </th>
+                    <th scope="col" class="relative px-6 py-3">
+                        <span class="sr-only">Acciones</span>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                <template x-if="users.length === 0">
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <p class="mt-2">No se encontraron usuarios</p>
+                        </td>
+                    </tr>
+                </template>
+                
+                <template x-for="user in users" :key="user.id">
+                    <tr :class="{'bg-red-50': user.is_blocked}">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <input 
+                                type="checkbox" 
+                                :value="user.id"
+                                x-model="selectedUsers"
+                                class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="flex items-center">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900" x-text="user.telegram_username"></div>
+                                    <div class="text-sm text-gray-500" x-text="user.full_name"></div>
+                                    <div class="text-xs text-gray-400">ID: <span x-text="user.telegram_id"></span></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span 
+                                :class="user.role === 'vip' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800'"
+                                class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full uppercase">
+                                <span x-text="user.role"></span>
+                            </span>
+                            <span 
+                                x-show="user.is_blocked"
+                                class="ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                Bloqueado
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div class="flex items-center">
+                                <span x-text="formatNumber(user.besitos)"></span>
+                                <span class="ml-1">💋</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <div x-text="user.total_purchases"></div>
+                            <div class="text-xs text-gray-400">
+                                <span x-text="formatNumber(user.total_spent)"></span> gastados
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span x-text="formatDateTime(user.last_activity)"></span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a 
+                                :href="`{{ url_for('users_detail', user_id=0) }}`.replace('0', user.id)" 
+                                class="text-primary-600 hover:text-primary-900 mr-3">
+                                Ver
+                            </a>
+                            <a 
+                                :href="`{{ url_for('users_edit', user_id=0) }}`.replace('0', user.id)" 
+                                class="text-indigo-600 hover:text-indigo-900 mr-3">
+                                Editar
+                            </a>
+                            <button 
+                                @click="deleteUser(user.id, user.telegram_username)"
+                                class="text-red-600 hover:text-red-900">
+                                Eliminar
+                            </button>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        
+        <!-- Paginación -->
+        <div x-show="totalPages > 1" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+            <div class="flex-1 flex justify-between sm:hidden">
+                <button 
+                    @click="previousPage()"
+                    :disabled="currentPage === 1"
+                    :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                    class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Anterior
+                </button>
+                <button 
+                    @click="nextPage()"
+                    :disabled="currentPage === totalPages"
+                    :class="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+                    class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                    Siguiente
+                </button>
+            </div>
+            <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div>
+                    <p class="text-sm text-gray-700">
+                        Mostrando
+                        <span class="font-medium" x-text="((currentPage - 1) * perPage) + 1"></span>
+                        a
+                        <span class="font-medium" x-text="Math.min(currentPage * perPage, totalItems)"></span>
+                        de
+                        <span class="font-medium" x-text="totalItems"></span>
+                        resultados
+                    </p>
+                </div>
+                <div>
+                    <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+                        <button 
+                            @click="previousPage()"
+                            :disabled="currentPage === 1"
+                            :class="{'opacity-50 cursor-not-allowed': currentPage === 1}"
+                            class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Anterior</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                        
+                        <template x-for="page in visiblePages" :key="page">
+                            <button 
+                                @click="goToPage(page)"
+                                :class="page === currentPage ? 'bg-primary-50 border-primary-500 text-primary-600' : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'"
+                                class="relative inline-flex items-center px-4 py-2 border text-sm font-medium"
+                                x-text="page">
+                            </button>
+                        </template>
+                        
+                        <button 
+                            @click="nextPage()"
+                            :disabled="currentPage === totalPages"
+                            :class="{'opacity-50 cursor-not-allowed': currentPage === totalPages}"
+                            class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                            <span class="sr-only">Siguiente</span>
+                            <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+    function usersList() {
+        return {
+            loading: false,
+            users: [],
+            stats: {},
+            currentPage: 1,
+            perPage: 20,
+            totalItems: 0,
+            totalPages: 0,
+            
+            showAdvancedFilters: false,
+            showBulkActions: false,
+            selectedUsers: [],
+            
+            filters: {
+                search: '',
+                role: '',
+                is_blocked: '',
+                min_besitos: null,
+                max_besitos: null,
+                days_inactive: null
+            },
+            
+            async init() {
+                await this.loadStats();
+            },
+            
+            async loadStats() {
+                try {
+                    const response = await fetch('/api/v1/users/stats');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.stats = data.data;
+                    }
+                } catch (error) {
+                    console.error('Error loading stats:', error);
+                }
+            },
+            
+            async loadUsers() {
+                this.loading = true;
+                
+                try {
+                    const params = new URLSearchParams({
+                        page: this.currentPage,
+                        per_page: this.perPage
+                    });
+                    
+                    if (this.filters.search) params.append('search', this.filters.search);
+                    if (this.filters.role) params.append('role', this.filters.role);
+                    if (this.filters.is_blocked) params.append('is_blocked', this.filters.is_blocked);
+                    if (this.filters.min_besitos !== null) params.append('min_besitos', this.filters.min_besitos);
+                    if (this.filters.max_besitos !== null) params.append('max_besitos', this.filters.max_besitos);
+                    if (this.filters.days_inactive !== null) params.append('days_inactive', this.filters.days_inactive);
+                    
+                    const response = await fetch(`/api/v1/users?${params}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.users = data.data;
+                        this.totalItems = data.pagination.total_items;
+                        this.totalPages = data.pagination.total_pages;
+                        this.currentPage = data.pagination.current_page;
+                    }
+                } catch (error) {
+                    console.error('Error loading users:', error);
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            toggleSelectAll(checked) {
+                if (checked) {
+                    this.selectedUsers = this.users.map(u => u.id);
+                } else {
+                    this.selectedUsers = [];
+                }
+            },
+            
+            async bulkAddBesitos() {
+                const amount = prompt('¿Cuántos besitos deseas añadir a los usuarios seleccionados?\n(Usa números negativos para restar)');
+                if (amount === null) return;
+                
+                const parsedAmount = parseInt(amount);
+                if (isNaN(parsedAmount)) {
+                    alert('Cantidad inválida');
+                    return;
+                }
+                
+                await this.executeBulkAction('add_besitos', parsedAmount);
+            },
+            
+            async bulkChangeRole(role) {
+                if (!confirm(`¿Estás seguro de cambiar ${this.selectedUsers.length} usuarios a rol ${role.toUpperCase()}?`)) {
+                    return;
+                }
+                await this.executeBulkAction('change_role', role);
+            },
+            
+            async bulkBlock() {
+                if (!confirm(`¿Estás seguro de BLOQUEAR ${this.selectedUsers.length} usuarios?`)) {
+                    return;
+                }
+                await this.executeBulkAction('block', null);
+            },
+            
+            async executeBulkAction(action, value) {
+                try {
+                    const response = await fetch('/api/v1/users/bulk-action', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            user_ids: this.selectedUsers,
+                            action: action,
+                            value: value
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert(data.message);
+                        this.selectedUsers = [];
+                        this.showBulkActions = false;
+                        await this.loadUsers();
+                        await this.loadStats();
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error executing bulk action:', error);
+                    alert('Error al ejecutar la acción masiva');
+                }
+            },
+            
+            async deleteUser(id, username) {
+                if (!confirm(`¿Estás seguro de eliminar al usuario "${username}"?\n\nEsta acción NO se puede deshacer y eliminará:\n- Todos sus datos\n- Su historial de compras\n- Su progreso narrativo`)) {
+                    return;
+                }
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await this.loadUsers();
+                        await this.loadStats();
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error deleting user:', error);
+                    alert('Error al eliminar el usuario');
+                }
+            },
+            
+            previousPage() {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.loadUsers();
+                }
+            },
+            
+            nextPage() {
+                if (this.currentPage < this.totalPages) {
+                    this.currentPage++;
+                    this.loadUsers();
+                }
+            },
+            
+            goToPage(page) {
+                this.currentPage = page;
+                this.loadUsers();
+            },
+            
+            get visiblePages() {
+                const pages = [];
+                const maxVisible = 5;
+                let start = Math.max(1, this.currentPage - Math.floor(maxVisible / 2));
+                let end = Math.min(this.totalPages, start + maxVisible - 1);
+                
+                if (end - start < maxVisible - 1) {
+                    start = Math.max(1, end - maxVisible + 1);
+                }
+                
+                for (let i = start; i <= end; i++) {
+                    pages.push(i);
+                }
+                
+                return pages;
+            },
+            
+            formatNumber(num) {
+                return new Intl.NumberFormat('es-ES').format(num);
+            },
+            
+            formatDateTime(dateStr) {
+                if (!dateStr) return 'Nunca';
+                
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) return 'Ahora';
+                if (diffMins < 60) return `Hace ${diffMins}m`;
+                if (diffHours < 24) return `Hace ${diffHours}h`;
+                if (diffDays < 7) return `Hace ${diffDays}d`;
+                
+                return date.toLocaleDateString('es-ES');
+            }
+        }
+    }
+</script>
+{% endblock %}
