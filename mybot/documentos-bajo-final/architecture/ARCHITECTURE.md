@@ -58,6 +58,17 @@ DianaBot is a sophisticated Telegram bot built with Python and Aiogram 3, design
 - **Participant Management**: Tracking and engagement
 - **Winner Processing**: Automated prize distribution
 
+### 6. User Management System (Fase 4.5)
+- **Complete API**: 9+ endpoints for comprehensive user management
+- **Admin Panel Integration**: Advanced user listing, filtering, and bulk operations
+- **User Role Management**: Free/VIP role assignment and management
+- **Besitos Adjustment**: Tools to modify user besitos balance
+- **User Blocking/Deletion**: Comprehensive user control features
+- **Narrative Progress Tracking**: Monitor and reset user narrative progress
+- **Purchase History**: Track user purchases and spending
+- **Advanced Filtering**: Search, role, besitos range, and activity-based filtering
+- **Bulk Operations**: Mass actions for efficient user management
+
 ## Technical Components
 
 ### Main Entry Point (bot.py)
@@ -74,7 +85,7 @@ DianaBot is a sophisticated Telegram bot built with Python and Aiogram 3, design
 - **Subscription Service**: VIP membership management
 
 ### Data Models
-- **User Management**: Roles, permissions, and profile data
+- **User Management**: Roles, permissions, profile data, blocking status
 - **Narrative Models**: Story fragments, choices, user states
 - **Gamification Models**: Points, missions, achievements, levels
 - **VIP Models**: Subscriptions, grants, exclusive features

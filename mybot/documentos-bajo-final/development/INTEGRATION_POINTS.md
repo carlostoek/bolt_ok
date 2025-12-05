@@ -86,6 +86,16 @@ DianaBot integrates with multiple external systems and services to provide a com
 ### Internal API Endpoints
 - **Narrative API**: `/api/v1/narrative` - Story fragment management
 - **Shop API**: `/api/v1/shop` - Product and purchase management
+- **User Management API**: `/api/v1/users` - Complete user management system (Fase 4.5)
+  - `GET /api/v1/users` - List users with advanced filtering
+  - `GET /api/v1/users/{id}` - Get user details with purchase history and narrative progress
+  - `PUT /api/v1/users/{id}` - Update user information (role, besitos, blocking status)
+  - `POST /api/v1/users/{id}/add-besitos` - Modify user besitos balance
+  - `POST /api/v1/users/{id}/change-role` - Change user role (free/VIP)
+  - `POST /api/v1/users/{id}/toggle-block` - Block/unblock user
+  - `DELETE /api/v1/users/{id}` - Delete user and related data
+  - `GET /api/v1/users/stats` - Get user statistics
+  - `POST /api/v1/users/bulk-action` - Perform bulk operations on users
 - **Automation API**: `/api/v1/automation` - Trigger management
 - **User API**: Various endpoints for user data management
 

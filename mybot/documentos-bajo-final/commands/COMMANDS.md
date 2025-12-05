@@ -188,6 +188,51 @@ The system handles various requirements for narrative access:
 - Badge collection
 - Progress tracking
 
+## User Management System API (Fase 4.5)
+
+### User Management Endpoints
+- **`GET /api/v1/users`**: List users with advanced filtering
+  - Parameters: page, per_page, search, role, min_besitos, max_besitos, is_blocked, days_inactive, sort_by, sort_order
+  - Features: Pagination, search, advanced filtering, sorting
+  - Response: Complete user list with purchase statistics
+
+- **`GET /api/v1/users/{id}`**: Get user details
+  - Returns: Complete user information, purchase history, narrative progress, statistics
+  - Includes: Purchases, narrative state, activity stats
+
+- **`PUT /api/v1/users/{id}`**: Update user
+  - Fields: besitos, role, is_blocked
+  - Updates user information based on provided data
+
+- **`POST /api/v1/users/{id}/add-besitos`**: Modify besitos
+  - Parameter: amount (positive to add, negative to subtract)
+  - Updates user's besitos balance with validation
+
+- **`POST /api/v1/users/{id}/change-role`**: Change user role
+  - Parameter: role (free or vip)
+  - Updates user's role status
+
+- **`POST /api/v1/users/{id}/toggle-block`**: Block/unblock user
+  - Toggles user's blocked status
+  - Prevents/allows user access to bot features
+
+- **`DELETE /api/v1/users/{id}`**: Delete user
+  - Removes user and all related data
+  - Includes: purchases, narrative state, achievements
+
+- **`GET /api/v1/users/stats`**: Get user statistics
+  - Returns: Total users, VIP users, free users, blocked users, active users (7d), average besitos
+
+- **`POST /api/v1/users/bulk-action`**: Perform bulk actions
+  - Parameters: user_ids, action, value
+  - Actions: add_besitos, change_role, block, unblock
+  - Applies action to multiple users at once
+
+### Admin Panel User Management
+- **`/users`**: Advanced user listing with filters and bulk actions
+- **`/users/{id}`**: Complete user details view with narrative progress
+- **`/users/{id}/edit`**: User editing functionality with role and besitos management
+
 ## Channel Access System
 
 ### Request Processing

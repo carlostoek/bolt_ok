@@ -193,6 +193,13 @@
   - Shop return handling
   - Decision processing
 
+- **`services/user_service.py`**: User management (Fase 4.5)
+  - Complete user management functionality
+  - User data retrieval and updates
+  - User role management (free/VIP)
+  - Besitos adjustment tools
+  - User blocking and status management
+
 - **`services/archetype_analyzer.py`**: Personality analysis
   - User archetype detection
   - Response pattern analysis
@@ -275,7 +282,13 @@
   - Narrative management
   - Shop item management
   - Automation triggers
-  - User management
+  - User management (Fase 4.5)
+    - Advanced user listing with filtering and bulk operations
+    - User detail views with purchase history and narrative progress
+    - User editing functionality with role and besitos management
+    - User blocking/deletion with confirmations
+    - Purchase history tracking
+    - Statistics and analytics
   - API endpoints for admin functions
 
 Each module is designed to be cohesive and focused on specific functionality while maintaining clear interfaces with other modules. This modular design allows for independent development, testing, and maintenance of different features.
