@@ -106,6 +106,19 @@ The admin panel implements IP-based security:
 - **Current Status**: API blueprint exists but implementation is pending
 - **Planned Features**: Product management, inventory, pricing, availability
 
+### User Management API (`/api/v1/users`) (Fase 4.5)
+- **Complete API**: 9+ endpoints for comprehensive user management
+- **List Users**: `GET /api/v1/users` with advanced filtering (search, role, besitos range, activity, blocking status)
+- **Get User**: `GET /api/v1/users/{id}` with complete user details, purchase history, and narrative progress
+- **Update User**: `PUT /api/v1/users/{id}` to modify besitos, role, and blocking status
+- **Modify Besitos**: `POST /api/v1/users/{id}/add-besitos` to add/remove besitos balance
+- **Change Role**: `POST /api/v1/users/{id}/change-role` to switch between free/VIP roles
+- **Toggle Block**: `POST /api/v1/users/{id}/toggle-block` to block/unblock users
+- **Delete User**: `DELETE /api/v1/users/{id}` to remove user and related data
+- **User Statistics**: `GET /api/v1/users/stats` for quick user statistics
+- **Bulk Actions**: `POST /api/v1/users/bulk-action` for mass operations on users
+- **Features**: Advanced filtering, pagination, sorting, bulk operations, user blocking, role management
+
 ### Automation Management API (`/api/v1/automation`)
 - **Current Status**: API blueprint exists but implementation is pending
 - **Planned Features**: Trigger management, automation rules, scheduling
@@ -132,6 +145,12 @@ The admin panel implements IP-based security:
 ### Shop Management
 - **List View** (`/shop/items`): Browse shop products
 - **Create View** (`/shop/items/new`): Create new products
+
+### User Management (Fase 4.5)
+- **List View** (`/users`): Advanced user listing with filters, bulk actions, and statistics
+- **Detail View** (`/users/{id}`): Complete user details with purchase history, narrative progress, and activity stats
+- **Edit View** (`/users/{id}/edit`): User editing functionality with role and besitos management
+- **Features**: Advanced filtering (search, role, besitos, activity), bulk operations (add besitos, change roles, block/unblock), user blocking/deletion, purchase history tracking, narrative progress monitoring
 
 ### Automation Management
 - **List View** (`/automation/triggers`): Browse automation triggers

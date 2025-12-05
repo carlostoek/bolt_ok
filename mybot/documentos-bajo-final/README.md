@@ -60,6 +60,17 @@ This documentation is organized into comprehensive guides covering all aspects o
 - Notification system
 - Winner processing
 
+### 6. User Management System (Fase 4.5)
+- Complete API: 9+ endpoints for comprehensive user management
+- Admin Panel Integration: Advanced user listing, filtering, and bulk operations
+- User Role Management: Free/VIP role assignment and management
+- Besitos Adjustment: Tools to modify user besitos balance
+- User Blocking/Deletion: Comprehensive user control features
+- Narrative Progress Tracking: Monitor and reset user narrative progress
+- Purchase History: Track user purchases and spending
+- Advanced Filtering: Search, role, besitos range, and activity-based filtering
+- Bulk Operations: Mass actions for efficient user management
+
 ## Technical Stack
 
 - **Framework**: Aiogram 3 (Telegram Bot Framework)
@@ -80,7 +91,7 @@ This documentation is organized into comprehensive guides covering all aspects o
 
 ### For Administrators
 - Comprehensive admin panel for content management
-- User management and analytics
+- Complete user management and analytics
 - Narrative and shop item management
 - VIP subscription management
 - Channel access control

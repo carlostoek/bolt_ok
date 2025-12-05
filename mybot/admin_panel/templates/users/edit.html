@@ -1,0 +1,291 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Usuario{% endblock %}
+{% block page_title %}Editar Usuario{% endblock %}
+
+{% block content %}
+<div x-data="userEdit()" x-init="loadUser()">
+    
+    <!-- Breadcrumb -->
+    <nav class="flex mb-6" aria-label="Breadcrumb">
+        <ol class="inline-flex items-center space-x-1 md:space-x-3">
+            <li class="inline-flex items-center">
+                <a href="{{ url_for('index') }}" class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-primary-600">
+                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path>
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <a href="{{ url_for('users_list') }}" class="ml-1 text-sm font-medium text-gray-700 hover:text-primary-600 md:ml-2">Usuarios</a>
+                </div>
+            </li>
+            <li aria-current="page">
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Editar</span>
+                </div>
+            </li>
+        </ol>
+    </nav>
+    
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500">Cargando datos del usuario...</p>
+    </div>
+    
+    <!-- Error State -->
+    <div x-show="error" x-transition class="mb-6 bg-red-50 border border-red-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700" x-text="error"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Success Message -->
+    <div x-show="successMessage" x-transition class="mb-6 bg-green-50 border border-green-200 rounded-md p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700" x-text="successMessage"></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- User Edit Form -->
+    <form @submit.prevent="updateUser" x-show="!loading && !error" class="space-y-6">
+        <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+            <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+                <h3 class="text-lg leading-6 font-medium text-gray-900">
+                    Editar Usuario: <span x-text="user.full_name"></span>
+                </h3>
+                <p class="mt-1 max-w-2xl text-sm text-gray-500" x-text="'ID: ' + user.telegram_id"></p>
+            </div>
+            <div class="px-4 py-5 sm:p-6">
+                <!-- User Information -->
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="telegram_username" class="block text-sm font-medium text-gray-700">Username de Telegram</label>
+                        <div class="mt-1">
+                            <input 
+                                type="text" 
+                                id="telegram_username" 
+                                x-model="user.telegram_username"
+                                disabled
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-gray-100">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="first_name" class="block text-sm font-medium text-gray-700">Nombre</label>
+                        <div class="mt-1">
+                            <input 
+                                type="text" 
+                                id="first_name" 
+                                x-model="user.first_name"
+                                disabled
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-gray-100">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="last_name" class="block text-sm font-medium text-gray-700">Apellido</label>
+                        <div class="mt-1">
+                            <input 
+                                type="text" 
+                                id="last_name" 
+                                x-model="user.last_name"
+                                disabled
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-gray-100">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="telegram_id" class="block text-sm font-medium text-gray-700">ID de Telegram</label>
+                        <div class="mt-1">
+                            <input 
+                                type="text" 
+                                id="telegram_id" 
+                                x-model="user.telegram_id"
+                                disabled
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm bg-gray-100">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Role and Besitos -->
+                <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700">Rol</label>
+                        <div class="mt-1">
+                            <select 
+                                id="role" 
+                                x-model="formData.role"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                                <option value="free">Free</option>
+                                <option value="vip">VIP</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="besitos" class="block text-sm font-medium text-gray-700">Besitos</label>
+                        <div class="mt-1">
+                            <input 
+                                type="number" 
+                                id="besitos" 
+                                x-model.number="formData.besitos"
+                                min="0"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Status -->
+                <div class="mt-6">
+                    <div class="flex items-center">
+                        <input 
+                            id="is_blocked" 
+                            type="checkbox" 
+                            x-model="formData.is_blocked"
+                            class="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded">
+                        <label for="is_blocked" class="ml-2 block text-sm text-gray-900">
+                            Usuario Bloqueado
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-end space-x-4">
+            <a 
+                :href="`{{ url_for('users_detail', user_id=0) }}`.replace('0', userId)"
+                class="inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                Cancelar
+            </a>
+            <button 
+                type="submit"
+                :disabled="loading"
+                :class="{'opacity-50 cursor-not-allowed': loading}"
+                class="inline-flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                <svg x-show="loading" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span x-text="loading ? 'Guardando...' : 'Guardar Cambios'"></span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Alpine.js Component -->
+<script>
+    function userEdit() {
+        return {
+            userId: {{ user_id }},
+            loading: true,
+            user: {},
+            error: null,
+            successMessage: '',
+            
+            formData: {
+                role: 'free',
+                besitos: 0,
+                is_blocked: false
+            },
+            
+            async loadUser() {
+                this.loading = true;
+                this.error = null;
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.user = data.data;
+                        
+                        // Initialize form data with user's current values
+                        this.formData = {
+                            role: this.user.role,
+                            besitos: this.user.besitos,
+                            is_blocked: this.user.is_blocked
+                        };
+                    } else {
+                        this.error = data.error || 'Error al cargar el usuario';
+                    }
+                } catch (error) {
+                    console.error('Error loading user:', error);
+                    this.error = 'Error de conexión al cargar el usuario';
+                } finally {
+                    this.loading = false;
+                }
+            },
+            
+            async updateUser() {
+                this.loading = true;
+                this.successMessage = '';
+                
+                try {
+                    const response = await fetch(`/api/v1/users/${this.userId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            role: this.formData.role,
+                            besitos: parseInt(this.formData.besitos),
+                            is_blocked: this.formData.is_blocked
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        this.successMessage = data.message;
+                        
+                        // Update user object for immediate feedback
+                        this.user.role = this.formData.role;
+                        this.user.besitos = this.formData.besitos;
+                        this.user.is_blocked = this.formData.is_blocked;
+                        
+                        // Redirect after a delay
+                        setTimeout(() => {
+                            window.location.href = `{{ url_for("users_detail", user_id=0) }}`.replace('0', this.userId);
+                        }, 1500);
+                    } else {
+                        alert(`Error: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error('Error updating user:', error);
+                    alert('Error de conexión al actualizar el usuario');
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

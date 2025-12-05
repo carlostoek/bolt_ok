@@ -28,6 +28,7 @@ Table: users
 - last_reminder_sent_at: DateTime (nullable)
 - menu_state: String (default: "root") - Current menu state
 - is_admin: Boolean (default: False) - Admin status
+- is_blocked: Boolean (default: False) - User blocked status (Fase 4.5)
 ```
 
 **Relationships:**
@@ -490,6 +491,7 @@ Table: pending_channel_requests
 
 ### Special Indexes
 - `users.role` - For role-based queries
+- `users.is_blocked` - For blocked user queries (Fase 4.5)
 - `story_fragments.required_role` - For access control
 - `story_fragments.archetype_variant` - For variant selection
 - `shop_items.is_vip_only` - For VIP filtering
@@ -525,5 +527,6 @@ The database uses Alembic for schema migrations, allowing for:
 - VIP-only features restricted by role checks
 - Admin-only operations clearly marked
 - Data isolation between user types
+- User blocking functionality to restrict access (Fase 4.5)
 
 This comprehensive schema supports all functionality of the DianaBot while maintaining data integrity, performance, and security across all modules.

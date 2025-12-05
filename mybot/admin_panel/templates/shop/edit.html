@@ -1,10 +1,10 @@
 {% extends "base.html" %}
 
-{% block title %}Crear Producto{% endblock %}
-{% block page_title %}Crear Producto{% endblock %}
+{% block title %}Editar Producto{% endblock %}
+{% block page_title %}Editar Producto{% endblock %}
 
 {% block content %}
-<div x-data="productForm()" x-init="init()">
+<div x-data="productEdit()" x-init="loadProduct()">
     
     <!-- Breadcrumb -->
     <nav class="flex mb-6" aria-label="Breadcrumb">
@@ -30,7 +30,7 @@
                     <svg class="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
                     </svg>
-                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Nuevo</span>
+                    <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2">Editar</span>
                 </div>
             </li>
         </ol>
@@ -63,8 +63,17 @@
         </div>
     </div>
     
+    <!-- Loading State -->
+    <div x-show="loading" class="text-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500">Cargando producto...</p>
+    </div>
+    
     <!-- Formulario Principal -->
-    <form @submit.prevent="submitForm" class="space-y-6">
+    <form @submit.prevent="submitForm" x-show="!loading" class="space-y-6">
         
         <!-- Card: Información Básica -->
         <div class="bg-white shadow rounded-lg">
@@ -302,7 +311,7 @@
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span x-text="loading ? 'Creando...' : 'Crear Producto'"></span>
+                <span x-text="loading ? 'Actualizando...' : 'Actualizar Producto'"></span>
             </button>
         </div>
     </form>
@@ -310,9 +319,10 @@
 
 <!-- Alpine.js Component -->
 <script>
-    function productForm() {
+    function productEdit() {
         return {
-            loading: false,
+            loading: true,
+            productId: {{ product_id }},
             errorMessage: '',
             successMessage: '',
             errors: {},
@@ -328,8 +338,32 @@
                 files: []
             },
             
-            init() {
-                // Inicialización si es necesaria
+            async loadProduct() {
+                try {
+                    const response = await fetch(`/api/v1/shop/products/${this.productId}`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        const product = data.data;
+                        this.formData = {
+                            name: product.name,
+                            description: product.description || '',
+                            price: product.price,
+                            category: product.category,
+                            is_vip_only: product.is_vip_only,
+                            is_active: product.is_active,
+                            stock: product.stock || null,
+                            files: [...product.files]
+                        };
+                    } else {
+                        this.errorMessage = data.error || 'Error al cargar el producto';
+                    }
+                } catch (error) {
+                    console.error('Error loading product:', error);
+                    this.errorMessage = 'Error de conexión al cargar el producto';
+                } finally {
+                    this.loading = false;
+                }
             },
             
             addFile() {
@@ -396,8 +430,8 @@
                 try {
                     const payload = this.preparePayload();
                     
-                    const response = await fetch('/api/v1/shop/products', {
-                        method: 'POST',
+                    const response = await fetch(`/api/v1/shop/products/${this.productId}`, {
+                        method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json'
                         },
@@ -407,7 +441,7 @@
                     const data = await response.json();
                     
                     if (response.ok && data.success) {
-                        this.successMessage = data.message || 'Producto creado exitosamente';
+                        this.successMessage = data.message || 'Producto actualizado exitosamente';
                         
                         setTimeout(() => {
                             window.location.href = '{{ url_for("shop_products_list") }}';
@@ -416,7 +450,7 @@
                         if (data.field) {
                             this.errors[data.field] = data.error;
                         }
-                        this.errorMessage = data.error || 'Error al crear el producto';
+                        this.errorMessage = data.error || 'Error al actualizar el producto';
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                     }
                 } catch (error) {

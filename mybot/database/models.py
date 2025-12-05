@@ -582,6 +582,7 @@ class ShopItem(Base):
 
     lore_piece = relationship("LorePiece")
     product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
+    purchases = relationship("UserPurchase", back_populates="shop_item", cascade="all, delete-orphan")
 
     unlocked_fragment = relationship(
         "StoryFragment",

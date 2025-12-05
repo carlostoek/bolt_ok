@@ -21,6 +21,8 @@ from admin_panel.api.narrative import narrative_bp
 from admin_panel.api.shop import shop_bp
 from admin_panel.api.automation import automation_bp
 from admin_panel.api.references import references_bp
+from admin_panel.api.analytics import analytics_bp
+from admin_panel.api.users import users_bp
 
 # Configurar logging
 logging.basicConfig(
@@ -69,9 +71,11 @@ def create_app(config_name='default'):
     
     # Registrar blueprints de API
     app.register_blueprint(narrative_bp)
-    app.register_blueprint(shop_bp)
+    app.register_blueprint(shop_bp, url_prefix='/api/v1/shop')
     app.register_blueprint(automation_bp)
     app.register_blueprint(references_bp)
+    app.register_blueprint(analytics_bp, url_prefix='/api/v1/analytics')
+    app.register_blueprint(users_bp, url_prefix='/api/v1')
     logger.info("✓ Blueprints de API registrados")
     
     # Registrar rutas de vistas (templates)
@@ -111,16 +115,36 @@ def register_template_routes(app):
         """Formulario para editar fragmento"""
         return render_template('fragments/edit.html', fragment_key=fragment_key)
     
-    @app.route('/shop/items')
-    def shop_list():
-        """Lista de productos de tienda"""
+    @app.route('/shop/products')
+    def shop_products_list():
+        """Lista de productos"""
         return render_template('shop/list.html')
-    
-    @app.route('/shop/items/new')
-    def shop_new():
-        """Formulario para crear producto"""
+
+    @app.route('/shop/products/new')
+    def shop_products_new():
+        """Formulario de creación de producto"""
         return render_template('shop/new.html')
-    
+
+    @app.route('/shop/products/<int:product_id>/edit')
+    def shop_products_edit(product_id):
+        """Formulario de edición de producto"""
+        return render_template('shop/edit.html', product_id=product_id)
+
+    @app.route('/users')
+    def users_list():
+        """Lista de usuarios"""
+        return render_template('users/list.html')
+
+    @app.route('/users/<int:user_id>')
+    def users_detail(user_id):
+        """Detalle de usuario"""
+        return render_template('users/detail.html', user_id=user_id)
+
+    @app.route('/users/<int:user_id>/edit')
+    def users_edit(user_id):
+        """Editar usuario"""
+        return render_template('users/edit.html', user_id=user_id)
+
     @app.route('/automation/triggers')
     def triggers_list():
         """Lista de triggers configurables"""

@@ -3,6 +3,7 @@ Blueprint API para datos de referencia (dropdowns, selectores)
 Endpoints ligeros que retornan solo ID y nombre para poblar UI
 """
 import sys
+import re
 from pathlib import Path
 
 # Añadir ruta del bot al PYTHONPATH
@@ -617,88 +618,73 @@ def get_statistics():
 
 @references_bp.route('/validate/fragment-key', methods=['POST'])
 def validate_fragment_key():
-    """
-    Valida que una key de fragmento sea única (para validación en tiempo real)
-    
-    Request Body:
-    {
-        "key": "CAP10_INTRO",
-        "exclude_id": 156  // Opcional, para edición
-    }
-    
-    Response Success (200):
-    {
-        "success": true,
-        "available": true,
-        "suggestion": null
-    }
-    
-    Response cuando ya existe (200):
-    {
-        "success": true,
-        "available": false,
-        "existing_fragment": {
-            "id": 100,
-            "key": "CAP10_INTRO"
-        },
-        "suggestion": "CAP10_INTRO_V2"
-    }
-    """
-    
+    """Valida disponibilidad de fragment key"""
     try:
         data = request.get_json()
-        
-        if not data or 'key' not in data:
+        key = data.get('key', '').strip().upper()
+        exclude_id = data.get('exclude_id', None)  # Nuevo parámetro opcional
+
+        if not key:
             return jsonify({
                 'success': False,
-                'error': 'Field "key" is required',
-                'code': 'REQUIRED_FIELD'
+                'error': 'Key is required'
             }), 400
-        
-        key = data['key']
-        exclude_id = data.get('exclude_id')
-        
-        # Buscar fragmento existente
+
+        # Validar formato
+        if not re.match(r'^[A-Z0-9_-]+$', key):
+            return jsonify({
+                'success': False,
+                'available': False,
+                'error': 'Invalid format'
+            }), 400  # Cambiado a 400 Bad Request
+
+        # Verificar si existe, excluyendo el ID especificado si se proporciona
         query = select(StoryFragment).where(StoryFragment.key == key)
-        
-        if exclude_id:
+        if exclude_id is not None:
             query = query.where(StoryFragment.id != exclude_id)
-        
+
         existing = db.session.execute(query).scalar_one_or_none()
-        
+
         if existing:
-            # Key ya existe, sugerir alternativa
-            suggestion = f"{key}_V2"
-            
+            # Generar sugerencia
+            base_key = re.sub(r'_\d+$', '', key)
+
+            # Consultar de antemano todos los keys que existen para evitar múltiples consultas
+            # Crear patrón para buscar sugerencias potenciales existentes
+            pattern = f"{base_key}_%"
+            existing_suggestions_query = select(StoryFragment.key).where(StoryFragment.key.like(pattern))
+            if exclude_id is not None:
+                existing_suggestions_query = existing_suggestions_query.where(StoryFragment.id != exclude_id)
+
+            existing_keys = {row[0] for row in db.session.execute(existing_suggestions_query).fetchall()}
+
+            # Encontrar la primera sugerencia disponible
+            counter = 1
+            suggestion = f"{base_key}_{counter}"
+            while suggestion in existing_keys:
+                counter += 1
+                suggestion = f"{base_key}_{counter}"
+
             return jsonify({
                 'success': True,
                 'available': False,
-                'existing_fragment': {
-                    'id': existing.id,
-                    'key': existing.key
-                },
                 'suggestion': suggestion
             }), 200
-        else:
-            # Key disponible
-            return jsonify({
-                'success': True,
-                'available': True,
-                'suggestion': None
-            }), 200
-    
+
+        return jsonify({
+            'success': True,
+            'available': True
+        }), 200
+
     except SQLAlchemyError as e:
-        logger.error(f"❌ Error de base de datos: {str(e)}")
+        logger.error(f"Error de base de datos al validar fragment key: {e}")
         return jsonify({
             'success': False,
-            'error': 'Database error occurred',
-            'code': 'DATABASE_ERROR'
+            'error': 'Database error occurred'
         }), 500
-    
     except Exception as e:
-        logger.error(f"❌ Error inesperado: {str(e)}", exc_info=True)
+        logger.error(f"Error validating fragment key: {e}")
         return jsonify({
             'success': False,
-            'error': 'Internal server error',
-            'code': 'INTERNAL_ERROR'
+            'error': 'Server error'
         }), 500
