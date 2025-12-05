@@ -13,6 +13,45 @@ users_bp = Blueprint('users_api', __name__)
 logger = logging.getLogger(__name__)
 
 
+def apply_filters(query, search=None, role=None, min_besitos=None, max_besitos=None,
+                  is_blocked=None, days_inactive=None):
+    """Función auxiliar para aplicar filtros comunes a una consulta de usuarios"""
+    # Aplicar filtros
+    if search:
+        or_clauses = [
+            User.username.ilike(f'%{search}%'),
+            User.first_name.ilike(f'%{search}%'),
+            User.last_name.ilike(f'%{search}%'),
+        ]
+
+        # Si el término de búsqueda es numérico, buscar por ID exacto
+        if search.isdigit():
+            or_clauses.append(User.id == int(search))
+        else:
+            # Para búsquedas no numéricas, también incluir búsqueda LIKE en ID
+            or_clauses.append(User.id.like(f'%{search}%'))
+
+        query = query.filter(or_(*or_clauses))
+
+    if role:
+        query = query.filter(User.role == role)
+
+    if min_besitos is not None:
+        query = query.filter(User.points >= min_besitos)
+
+    if max_besitos is not None:
+        query = query.filter(User.points <= max_besitos)
+
+    if is_blocked:
+        query = query.filter(User.is_blocked == (is_blocked.lower() == 'true'))
+
+    if days_inactive:
+        cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
+        query = query.filter(User.last_activity_at < cutoff_date)
+
+    return query
+
+
 @users_bp.route('/users', methods=['GET'])
 def list_users():
     """Lista de usuarios con filtros avanzados"""
@@ -35,40 +74,10 @@ def list_users():
         
         # Query base
         query = User.query
-        
-        # Aplicar filtros
-        if search:
-            or_clauses = [
-                User.username.ilike(f'%{search}%'),
-                User.first_name.ilike(f'%{search}%'),
-                User.last_name.ilike(f'%{search}%'),
-            ]
 
-            # Si el término de búsqueda es numérico, buscar por ID exacto
-            if search.isdigit():
-                or_clauses.append(User.id == int(search))
-            else:
-                # Para búsquedas no numéricas, también incluir búsqueda LIKE en ID
-                or_clauses.append(User.id.like(f'%{search}%'))
+        # Aplicar filtros usando la función auxiliar
+        query = apply_filters(query, search, role, min_besitos, max_besitos, is_blocked, days_inactive)
 
-            query = query.filter(or_(*or_clauses))
-        
-        if role:
-            query = query.filter(User.role == role)
-        
-        if min_besitos is not None:
-            query = query.filter(User.points >= min_besitos)
-        
-        if max_besitos is not None:
-            query = query.filter(User.points <= max_besitos)
-        
-        if is_blocked:
-            query = query.filter(User.is_blocked == (is_blocked.lower() == 'true'))
-        
-        if days_inactive:
-            cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
-            query = query.filter(User.last_activity_at < cutoff_date)
-        
         # Ordenamiento
         if hasattr(User, sort_by):
             column = getattr(User, sort_by)
@@ -109,38 +118,8 @@ def list_users():
             purchases_alias, User.id == purchases_alias.c.user_id
         )
 
-        # Aplicar filtros a la nueva consulta si existen
-        # (copiamos los filtros aplicados anteriormente)
-        if search:
-            paginated_with_aggs = paginated_with_aggs.filter(
-                or_(
-                    User.username.ilike(f'%{search}%'),
-                    User.first_name.ilike(f'%{search}%'),
-                    User.last_name.ilike(f'%{search}%')
-                )
-            )
-
-            # Si el término de búsqueda es numérico, buscar por ID exacto
-            if search.isdigit():
-                paginated_with_aggs = paginated_with_aggs.filter(User.id == int(search))
-            else:
-                paginated_with_aggs = paginated_with_aggs.filter(User.id.like(f'%{search}%'))
-
-        if role:
-            paginated_with_aggs = paginated_with_aggs.filter(User.role == role)
-
-        if min_besitos is not None:
-            paginated_with_aggs = paginated_with_aggs.filter(User.points >= min_besitos)
-
-        if max_besitos is not None:
-            paginated_with_aggs = paginated_with_aggs.filter(User.points <= max_besitos)
-
-        if is_blocked:
-            paginated_with_aggs = paginated_with_aggs.filter(User.is_blocked == (is_blocked.lower() == 'true'))
-
-        if days_inactive:
-            cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
-            paginated_with_aggs = paginated_with_aggs.filter(User.last_activity_at < cutoff_date)
+        # Aplicar filtros a la nueva consulta usando la función auxiliar
+        paginated_with_aggs = apply_filters(paginated_with_aggs, search, role, min_besitos, max_besitos, is_blocked, days_inactive)
 
         # Ordenamiento
         if hasattr(User, sort_by):

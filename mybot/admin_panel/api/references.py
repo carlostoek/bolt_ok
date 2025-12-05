@@ -648,24 +648,22 @@ def validate_fragment_key():
         if existing:
             # Generar sugerencia
             base_key = re.sub(r'_\d+$', '', key)
+
+            # Consultar de antemano todos los keys que existen para evitar múltiples consultas
+            # Crear patrón para buscar sugerencias potenciales existentes
+            pattern = f"{base_key}_%"
+            existing_suggestions_query = select(StoryFragment.key).where(StoryFragment.key.like(pattern))
+            if exclude_id is not None:
+                existing_suggestions_query = existing_suggestions_query.where(StoryFragment.id != exclude_id)
+
+            existing_keys = {row[0] for row in db.session.execute(existing_suggestions_query).fetchall()}
+
+            # Encontrar la primera sugerencia disponible
             counter = 1
             suggestion = f"{base_key}_{counter}"
-
-            # Verificar que la sugerencia no exista ya, excluyendo el ID especificado
-            query_suggestion = select(StoryFragment).where(StoryFragment.key == suggestion)
-            if exclude_id is not None:
-                query_suggestion = query_suggestion.where(StoryFragment.id != exclude_id)
-
-            suggestion_exists = db.session.execute(query_suggestion).scalar_one_or_none()
-            while suggestion_exists:
+            while suggestion in existing_keys:
                 counter += 1
                 suggestion = f"{base_key}_{counter}"
-
-                query_suggestion = select(StoryFragment).where(StoryFragment.key == suggestion)
-                if exclude_id is not None:
-                    query_suggestion = query_suggestion.where(StoryFragment.id != exclude_id)
-
-                suggestion_exists = db.session.execute(query_suggestion).scalar_one_or_none()
 
             return jsonify({
                 'success': True,

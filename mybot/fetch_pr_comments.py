@@ -145,8 +145,9 @@ def main():
         sys.exit(1)
     
     pr_number = int(sys.argv[1])
-    owner = "bolt_ok"
-    repo = "mybot"
+    # Hacer que owner y repo sean configurables mediante variables de entorno
+    owner = os.environ.get('GITHUB_REPO_OWNER', 'bolt_ok')
+    repo = os.environ.get('GITHUB_REPO_NAME', 'mybot')
     
     try:
         result = analyze_pr_comments(owner, repo, pr_number)

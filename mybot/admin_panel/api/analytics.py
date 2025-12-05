@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from sqlalchemy import func, desc, and_
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from admin_panel.extensions import db
 from database.models import User, ShopItem, UserPurchase, ProductFile
