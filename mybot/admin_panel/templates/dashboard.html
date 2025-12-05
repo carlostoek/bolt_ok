@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div x-data="dashboardData()" x-init="fetchStatistics()">
+
+    <!-- Tarjetas de estadísticas -->
+    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+
+        <!-- Fragmentos Totales -->
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-md bg-primary-500">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Fragmentos</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900" x-text="stats.total_fragments || '0'"></div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ url_for('fragments_list') }}" class="font-medium text-primary-600 hover:text-primary-500">
+                        Ver todos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Productos Totales -->
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-md bg-green-500">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Productos</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900" x-text="stats.total_products || '0'"></div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ url_for('shop_list') }}" class="font-medium text-green-600 hover:text-green-500">
+                        Ver todos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Triggers Totales -->
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-md bg-yellow-500">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Triggers</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900" x-text="stats.total_triggers || '0'"></div>
+                                <div class="ml-2 flex items-baseline text-sm font-semibold text-green-600">
+                                    <span x-text="stats.active_triggers || '0'"></span>
+                                    <span class="ml-1 text-gray-500 font-normal">activos</span>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <a href="{{ url_for('triggers_list') }}" class="font-medium text-yellow-600 hover:text-yellow-500">
+                        Ver todos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuarios Totales -->
+        <div class="overflow-hidden rounded-lg bg-white shadow">
+            <div class="p-5">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-md bg-purple-500">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="ml-5 w-0 flex-1">
+                        <dl>
+                            <dt class="text-sm font-medium text-gray-500 truncate">Usuarios</dt>
+                            <dd class="flex items-baseline">
+                                <div class="text-2xl font-semibold text-gray-900" x-text="stats.total_users || '0'"></div>
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-gray-50 px-5 py-3">
+                <div class="text-sm">
+                    <span class="font-medium text-gray-500">
+                        Total registrados
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones rápidas -->
+    <div class="mb-8">
+        <h2 class="text-lg font-medium text-gray-900 mb-4">Acciones Rápidas</h2>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+            <a href="{{ url_for('fragments_new') }}"
+               class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition">
+                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="mt-2 block text-sm font-medium text-gray-900">Crear Fragmento</span>
+                <span class="mt-1 block text-xs text-gray-500">Añadir nuevo contenido narrativo</span>
+            </a>
+
+            <a href="{{ url_for('shop_new') }}"
+               class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition">
+                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="mt-2 block text-sm font-medium text-gray-900">Crear Producto</span>
+                <span class="mt-1 block text-xs text-gray-500">Añadir item a la tienda</span>
+            </a>
+
+            <a href="{{ url_for('triggers_new') }}"
+               class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 transition">
+                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                <span class="mt-2 block text-sm font-medium text-gray-900">Crear Trigger</span>
+                <span class="mt-1 block text-xs text-gray-500">Configurar automatización</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Estado de carga -->
+    <div x-show="loading" class="text-center py-12">
+        <svg class="animate-spin h-10 w-10 text-primary-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <p class="mt-2 text-sm text-gray-500">Cargando estadísticas...</p>
+    </div>
+
+    <!-- Error al cargar -->
+    <div x-show="error" class="rounded-md bg-red-50 p-4">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <h3 class="text-sm font-medium text-red-800">Error al cargar estadísticas</h3>
+                <div class="mt-2 text-sm text-red-700">
+                    <p x-text="errorMessage"></p>
+                </div>
+                <div class="mt-4">
+                    <button type="button"
+                            @click="fetchStatistics()"
+                            class="rounded-md bg-red-50 px-2 py-1.5 text-sm font-medium text-red-800 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2 focus:ring-offset-red-50">
+                        Reintentar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alpine.js data -->
+<script>
+    function dashboardData() {
+        return {
+            loading: true,
+            error: false,
+            errorMessage: '',
+            stats: {
+                total_fragments: 0,
+                total_products: 0,
+                total_triggers: 0,
+                active_triggers: 0,
+                total_users: 0
+            },
+
+            async fetchStatistics() {
+                this.loading = true;
+                this.error = false;
+
+                try {
+                    const response = await fetch('/api/v1/references/statistics');
+
+                    if (!response.ok) {
+                        throw new Error('Error al obtener estadísticas');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.stats = data.data;
+                    } else {
+                        throw new Error(data.error || 'Error desconocido');
+                    }
+                } catch (error) {
+                    console.error('Error fetching statistics:', error);
+                    this.error = true;
+                    this.errorMessage = error.message;
+                } finally {
+                    this.loading = false;
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

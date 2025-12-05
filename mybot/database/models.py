@@ -583,6 +583,13 @@ class ShopItem(Base):
     lore_piece = relationship("LorePiece")
     product_files = relationship("ProductFile", back_populates="shop_item", cascade="all, delete-orphan")
 
+    unlocked_fragment = relationship(
+        "StoryFragment",
+        primaryjoin="foreign(ShopItem.unlocks_fragment_key) == StoryFragment.key",
+        uselist=False,
+        back_populates="unlock_product"
+    )
+
 class UserPurchase(Base):
     __tablename__ = "user_purchases"
     
