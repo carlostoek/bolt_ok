@@ -25,8 +25,8 @@ Examples: `@agente-fixes PR10`, `@agente-fixes PR23`
 
 ## Required Environment Variables
 ```
-GITHUB_REPO_OWNER=user
-GITHUB_REPO_NAME=repo
+GITHUB_REPO_OWNER=carlostoek
+GITHUB_REPO_NAME=bolt_ok
 ```
 
 ## Workflow Execution

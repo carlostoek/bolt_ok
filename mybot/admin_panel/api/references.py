@@ -3,6 +3,7 @@ Blueprint API para datos de referencia (dropdowns, selectores)
 Endpoints ligeros que retornan solo ID y nombre para poblar UI
 """
 import sys
+import re
 from pathlib import Path
 
 # Añadir ruta del bot al PYTHONPATH
@@ -621,6 +622,7 @@ def validate_fragment_key():
     try:
         data = request.get_json()
         key = data.get('key', '').strip().upper()
+        exclude_id = data.get('exclude_id', None)  # Nuevo parámetro opcional
 
         if not key:
             return jsonify({
@@ -629,16 +631,19 @@ def validate_fragment_key():
             }), 400
 
         # Validar formato
-        import re
         if not re.match(r'^[A-Z0-9_-]+$', key):
             return jsonify({
                 'success': False,
                 'available': False,
                 'error': 'Invalid format'
-            }), 200
+            }), 400  # Cambiado a 400 Bad Request
 
-        # Verificar si existe
-        existing = db.session.execute(select(StoryFragment).where(StoryFragment.key == key)).scalar_one_or_none()
+        # Verificar si existe, excluyendo el ID especificado si se proporciona
+        query = select(StoryFragment).where(StoryFragment.key == key)
+        if exclude_id is not None:
+            query = query.where(StoryFragment.id != exclude_id)
+
+        existing = db.session.execute(query).scalar_one_or_none()
 
         if existing:
             # Generar sugerencia
@@ -646,12 +651,21 @@ def validate_fragment_key():
             counter = 1
             suggestion = f"{base_key}_{counter}"
 
-            # Verificar que la sugerencia no exista ya
-            suggestion_exists = db.session.execute(select(StoryFragment).where(StoryFragment.key == suggestion)).scalar_one_or_none()
+            # Verificar que la sugerencia no exista ya, excluyendo el ID especificado
+            query_suggestion = select(StoryFragment).where(StoryFragment.key == suggestion)
+            if exclude_id is not None:
+                query_suggestion = query_suggestion.where(StoryFragment.id != exclude_id)
+
+            suggestion_exists = db.session.execute(query_suggestion).scalar_one_or_none()
             while suggestion_exists:
                 counter += 1
                 suggestion = f"{base_key}_{counter}"
-                suggestion_exists = db.session.execute(select(StoryFragment).where(StoryFragment.key == suggestion)).scalar_one_or_none()
+
+                query_suggestion = select(StoryFragment).where(StoryFragment.key == suggestion)
+                if exclude_id is not None:
+                    query_suggestion = query_suggestion.where(StoryFragment.id != exclude_id)
+
+                suggestion_exists = db.session.execute(query_suggestion).scalar_one_or_none()
 
             return jsonify({
                 'success': True,
@@ -664,6 +678,12 @@ def validate_fragment_key():
             'available': True
         }), 200
 
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al validar fragment key: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Database error occurred'
+        }), 500
     except Exception as e:
         logger.error(f"Error validating fragment key: {e}")
         return jsonify({

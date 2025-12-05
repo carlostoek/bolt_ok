@@ -38,14 +38,20 @@ def list_users():
         
         # Aplicar filtros
         if search:
-            query = query.filter(
-                or_(
-                    User.username.ilike(f'%{search}%'),
-                    User.first_name.ilike(f'%{search}%'),
-                    User.last_name.ilike(f'%{search}%'),
-                    User.id.like(f'%{search}%')
-                )
-            )
+            or_clauses = [
+                User.username.ilike(f'%{search}%'),
+                User.first_name.ilike(f'%{search}%'),
+                User.last_name.ilike(f'%{search}%'),
+            ]
+
+            # Si el término de búsqueda es numérico, buscar por ID exacto
+            if search.isdigit():
+                or_clauses.append(User.id == int(search))
+            else:
+                # Para búsquedas no numéricas, también incluir búsqueda LIKE en ID
+                or_clauses.append(User.id.like(f'%{search}%'))
+
+            query = query.filter(or_(*or_clauses))
         
         if role:
             query = query.filter(User.role == role)
@@ -68,25 +74,97 @@ def list_users():
             column = getattr(User, sort_by)
             query = query.order_by(column.desc() if sort_order == 'desc' else column.asc())
         
-        # Paginación
-        paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-        
+        # Pre-calcular agregaciones usando subconsultas para evitar N+1
+        from sqlalchemy.orm import aliased
+        from sqlalchemy import func, case
+
+        # Crear subconsulta para contar compras por usuario
+        purchases_subquery = db.session.query(
+            UserPurchase.user_id,
+            func.count(UserPurchase.id).label('purchase_count'),
+            func.coalesce(func.sum(ShopItem.price), 0).label('total_spent')
+        ).join(
+            ShopItem, UserPurchase.shop_item_id == ShopItem.id
+        ).group_by(
+            UserPurchase.user_id
+        ).subquery()
+
+        # Alias para la subconsulta
+        purchases_alias = aliased(purchases_subquery)
+
+        # Añadir las agregaciones a la consulta principal
+        query = query.outerjoin(
+            purchases_alias, User.id == purchases_alias.c.user_id
+        ).add_columns(
+            func.coalesce(purchases_alias.c.purchase_count, 0).label('total_purchases'),
+            func.coalesce(purchases_alias.c.total_spent, 0).label('total_spent')
+        )
+
+        # Volver a ejecutar la consulta con paginación, pero ahora incluyendo las agregaciones
+        # Necesitamos reconstruir la paginación para incluir las columnas adicionales
+        paginated_with_aggs = db.session.query(User).add_columns(
+            func.coalesce(purchases_alias.c.purchase_count, 0).label('total_purchases'),
+            func.coalesce(purchases_alias.c.total_spent, 0).label('total_spent')
+        ).outerjoin(
+            purchases_alias, User.id == purchases_alias.c.user_id
+        )
+
+        # Aplicar filtros a la nueva consulta si existen
+        # (copiamos los filtros aplicados anteriormente)
+        if search:
+            paginated_with_aggs = paginated_with_aggs.filter(
+                or_(
+                    User.username.ilike(f'%{search}%'),
+                    User.first_name.ilike(f'%{search}%'),
+                    User.last_name.ilike(f'%{search}%')
+                )
+            )
+
+            # Si el término de búsqueda es numérico, buscar por ID exacto
+            if search.isdigit():
+                paginated_with_aggs = paginated_with_aggs.filter(User.id == int(search))
+            else:
+                paginated_with_aggs = paginated_with_aggs.filter(User.id.like(f'%{search}%'))
+
+        if role:
+            paginated_with_aggs = paginated_with_aggs.filter(User.role == role)
+
+        if min_besitos is not None:
+            paginated_with_aggs = paginated_with_aggs.filter(User.points >= min_besitos)
+
+        if max_besitos is not None:
+            paginated_with_aggs = paginated_with_aggs.filter(User.points <= max_besitos)
+
+        if is_blocked:
+            paginated_with_aggs = paginated_with_aggs.filter(User.is_blocked == (is_blocked.lower() == 'true'))
+
+        if days_inactive:
+            cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
+            paginated_with_aggs = paginated_with_aggs.filter(User.last_activity_at < cutoff_date)
+
+        # Ordenamiento
+        if hasattr(User, sort_by):
+            column = getattr(User, sort_by)
+            paginated_with_aggs = paginated_with_aggs.order_by(
+                column.desc() if sort_order == 'desc' else column.asc()
+            )
+
+        # Paginación para la nueva consulta
+        from sqlalchemy.sql import text
+        # Usamos paginate personalizado o simplemente limitamos la consulta
+        offset = (page - 1) * per_page
+        users_with_aggs = paginated_with_aggs.offset(offset).limit(per_page).all()
+
+        # Obtener el total para paginación
+        total_users = query.count()
+
         # Serializar
         users = []
-        for user in paginated.items:
-            # Calcular compras totales
-            total_purchases = UserPurchase.query.filter_by(user_id=user.id).count()
-            
-            # Calcular total gastado
-            total_spent = db.session.query(
-                func.sum(ShopItem.price)
-            ).join(
-                UserPurchase,
-                UserPurchase.shop_item_id == ShopItem.id
-            ).filter(
-                UserPurchase.user_id == user.id
-            ).scalar() or 0
-            
+        for result in users_with_aggs:
+            user = result[0] if isinstance(result, tuple) else result
+            total_purchases = result.total_purchases if hasattr(result, 'total_purchases') else 0
+            total_spent = result.total_spent if hasattr(result, 'total_spent') else 0
+
             users.append({
                 'id': user.id,
                 'telegram_id': user.id,
@@ -102,20 +180,23 @@ def list_users():
                 'total_purchases': total_purchases,
                 'total_spent': int(total_spent)
             })
-        
+
+        # Necesitamos recrear el objeto de paginación
+        total_pages = (total_users + per_page - 1) // per_page  # Redondeo hacia arriba
+
         return jsonify({
             'success': True,
             'data': users,
             'pagination': {
-                'current_page': paginated.page,
-                'per_page': paginated.per_page,
-                'total_items': paginated.total,
-                'total_pages': paginated.pages,
-                'has_next': paginated.has_next,
-                'has_prev': paginated.has_prev
+                'current_page': page,
+                'per_page': per_page,
+                'total_items': total_users,
+                'total_pages': total_pages,
+                'has_next': page < total_pages,
+                'has_prev': page > 1
             }
         }), 200
-        
+
     except Exception as e:
         logger.error(f"Error listing users: {e}")
         return jsonify({

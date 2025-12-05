@@ -15,35 +15,35 @@ def get_overview():
     try:
         # Total de usuarios
         total_users = User.query.count()
-        
+
         # Usuarios VIP
         vip_users = User.query.filter_by(role='vip').count()
-        
+
         # Besitos en circulación
         total_besitos = db.session.query(
             func.sum(User.points)
         ).scalar() or 0
-        
+
         # Total de ventas (en besitos)
         total_sales = db.session.query(
             func.sum(UserPurchase.price_paid)
         ).scalar() or 0
-        
+
         # Fragmentos publicados
         total_fragments = StoryFragment.query.count()
-        
+
         # Productos activos
         active_products = ShopItem.query.filter_by(is_active=True).count()
-        
+
         # Usuarios activos (últimos 7 días)
         week_ago = datetime.utcnow() - timedelta(days=7)
         active_users = User.query.filter(
             User.last_activity_at >= week_ago
         ).count()
-        
+
         # Total de compras
         total_purchases = UserPurchase.query.count()
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -57,13 +57,13 @@ def get_overview():
                 'total_purchases': total_purchases
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener resumen: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting overview: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get overview data'
-        }), 500
+        logger.error(f"Error inesperado al obtener resumen: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/users/activity', methods=['GET'])
@@ -72,7 +72,7 @@ def get_user_activity():
     try:
         days = request.args.get('days', 30, type=int)
         start_date = datetime.utcnow() - timedelta(days=days)
-        
+
         # Agrupar por día
         activity = db.session.query(
             func.date(User.last_activity_at).label('date'),
@@ -82,14 +82,14 @@ def get_user_activity():
         ).group_by(
             func.date(User.last_activity_at)
         ).order_by('date').all()
-        
+
         # Formatear datos
         labels = []
         data = []
         for record in activity:
             labels.append(record.date.strftime('%Y-%m-%d') if record.date else 'Unknown')
             data.append(record.count)
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -97,13 +97,13 @@ def get_user_activity():
                 'values': data
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener actividad de usuarios: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting user activity: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get user activity'
-        }), 500
+        logger.error(f"Error inesperado al obtener actividad de usuarios: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/users/distribution', methods=['GET'])
@@ -114,14 +114,14 @@ def get_user_distribution():
             User.role,
             func.count(User.id).label('count')
         ).group_by(User.role).all()
-        
+
         labels = []
         data = []
         for record in distribution:
             role_name = record.role or 'free'
             labels.append(role_name.upper())
             data.append(record.count)
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -129,13 +129,13 @@ def get_user_distribution():
                 'values': data
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener distribución de usuarios: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting user distribution: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get user distribution'
-        }), 500
+        logger.error(f"Error inesperado al obtener distribución de usuarios: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/products/top-selling', methods=['GET'])
@@ -143,7 +143,7 @@ def get_top_selling_products():
     """Productos más vendidos"""
     try:
         limit = request.args.get('limit', 10, type=int)
-        
+
         top_products = db.session.query(
             ShopItem.name,
             func.count(UserPurchase.id).label('sales_count'),
@@ -157,16 +157,16 @@ def get_top_selling_products():
         ).order_by(
             desc('sales_count')
         ).limit(limit).all()
-        
+
         labels = []
         sales = []
         revenue = []
-        
+
         for product in top_products:
             labels.append(product.name)
             sales.append(product.sales_count)
             revenue.append(int(product.revenue or 0))
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -175,13 +175,13 @@ def get_top_selling_products():
                 'revenue': revenue
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener productos más vendidos: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting top selling products: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get top selling products'
-        }), 500
+        logger.error(f"Error inesperado al obtener productos más vendidos: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/fragments/top-visited', methods=['GET'])
@@ -189,7 +189,7 @@ def get_top_visited_fragments():
     """Fragmentos más visitados"""
     try:
         limit = request.args.get('limit', 10, type=int)
-        
+
         top_fragments = db.session.query(
             StoryFragment.key,
             StoryFragment.text,
@@ -203,16 +203,16 @@ def get_top_visited_fragments():
         ).order_by(
             desc('visit_count')
         ).limit(limit).all()
-        
+
         labels = []
         visits = []
-        
+
         for fragment in top_fragments:
             # Usar key como label, limitar texto si es muy largo
             label = fragment.key
             labels.append(label)
             visits.append(fragment.visit_count)
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -220,13 +220,13 @@ def get_top_visited_fragments():
                 'values': visits
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener fragmentos más visitados: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting top visited fragments: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get top visited fragments'
-        }), 500
+        logger.error(f"Error inesperado al obtener fragmentos más visitados: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/sales/trend', methods=['GET'])
@@ -235,7 +235,7 @@ def get_sales_trend():
     try:
         days = request.args.get('days', 30, type=int)
         start_date = datetime.utcnow() - timedelta(days=days)
-        
+
         sales_trend = db.session.query(
             func.date(UserPurchase.purchased_at).label('date'),
             func.count(UserPurchase.id).label('count'),
@@ -248,16 +248,16 @@ def get_sales_trend():
         ).group_by(
             func.date(UserPurchase.purchased_at)
         ).order_by('date').all()
-        
+
         labels = []
         counts = []
         revenues = []
-        
+
         for record in sales_trend:
             labels.append(record.date.strftime('%Y-%m-%d') if record.date else 'Unknown')
             counts.append(record.count)
             revenues.append(int(record.revenue or 0))
-        
+
         return jsonify({
             'success': True,
             'data': {
@@ -266,13 +266,13 @@ def get_sales_trend():
                 'revenue': revenues
             }
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener tendencia de ventas: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting sales trend: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get sales trend'
-        }), 500
+        logger.error(f"Error inesperado al obtener tendencia de ventas: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/recent/purchases', methods=['GET'])
@@ -280,7 +280,7 @@ def get_recent_purchases():
     """Últimas compras realizadas"""
     try:
         limit = request.args.get('limit', 10, type=int)
-        
+
         recent = db.session.query(
             UserPurchase.id,
             UserPurchase.purchased_at,
@@ -296,7 +296,7 @@ def get_recent_purchases():
         ).order_by(
             desc(UserPurchase.purchased_at)
         ).limit(limit).all()
-        
+
         purchases = []
         for purchase in recent:
             purchases.append({
@@ -306,18 +306,18 @@ def get_recent_purchases():
                 'product': purchase.product_name,
                 'price': purchase.price
             })
-        
+
         return jsonify({
             'success': True,
             'data': purchases
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener compras recientes: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting recent purchases: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get recent purchases'
-        }), 500
+        logger.error(f"Error inesperado al obtener compras recientes: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/products/ranking', methods=['GET'])
@@ -325,7 +325,7 @@ def get_products_ranking():
     """Ranking de productos por ventas"""
     try:
         limit = request.args.get('limit', 5, type=int)
-        
+
         ranking = db.session.query(
             ShopItem.id,
             ShopItem.name,
@@ -342,7 +342,7 @@ def get_products_ranking():
         ).order_by(
             desc('sales_count')
         ).limit(limit).all()
-        
+
         products = []
         for product in ranking:
             products.append({
@@ -352,18 +352,18 @@ def get_products_ranking():
                 'sales_count': product.sales_count,
                 'total_revenue': int(product.total_revenue or 0)
             })
-        
+
         return jsonify({
             'success': True,
             'data': products
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener ranking de productos: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting products ranking: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get products ranking'
-        }), 500
+        logger.error(f"Error inesperado al obtener ranking de productos: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
 
 
 @analytics_bp.route('/fragments/ranking', methods=['GET'])
@@ -371,7 +371,7 @@ def get_fragments_ranking():
     """Ranking de fragmentos por visitas"""
     try:
         limit = request.args.get('limit', 5, type=int)
-        
+
         ranking = db.session.query(
             StoryFragment.key,
             StoryFragment.text,
@@ -385,7 +385,7 @@ def get_fragments_ranking():
         ).order_by(
             desc('visit_count')
         ).limit(limit).all()
-        
+
         fragments = []
         for fragment in ranking:
             fragments.append({
@@ -393,15 +393,15 @@ def get_fragments_ranking():
                 'text': fragment.text[:100] + '...' if len(fragment.text) > 100 else fragment.text,
                 'visit_count': fragment.visit_count
             })
-        
+
         return jsonify({
             'success': True,
             'data': fragments
         }), 200
-        
+
+    except SQLAlchemyError as e:
+        logger.error(f"Error de base de datos al obtener ranking de fragmentos: {e}")
+        return jsonify({'success': False, 'error': 'Error de base de datos'}), 500
     except Exception as e:
-        logger.error(f"Error getting fragments ranking: {e}")
-        return jsonify({
-            'success': False,
-            'error': 'Failed to get fragments ranking'
-        }), 500
+        logger.error(f"Error inesperado al obtener ranking de fragmentos: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': 'Error interno del servidor'}), 500
