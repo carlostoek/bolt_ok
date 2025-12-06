@@ -1,10 +1,9 @@
-from flask import Blueprint, request, jsonify
-from sqlalchemy import or_, func, desc, and_
 from datetime import datetime, timedelta
+from flask import Blueprint, request, jsonify
+from sqlalchemy import or_, func, desc, and_, select
 from admin_panel.extensions import db
 from database.models import (
-    User, UserPurchase, ShopItem, UserNarrativeState, 
-    ProductFile, ConfigEntry
+    User, UserPurchase, ShopItem, ProductFile, ConfigEntry
 )
 from database.narrative_models import StoryFragment, UserNarrativeState as NarrativeState
 import logging
@@ -59,7 +58,7 @@ def list_users():
         # Parámetros de paginación
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 20, type=int)
-        
+
         # Filtros
         search = request.args.get('search', '').strip()
         role = request.args.get('role', '').strip()
@@ -67,100 +66,121 @@ def list_users():
         max_besitos = request.args.get('max_besitos', type=int)
         is_blocked = request.args.get('is_blocked', '').strip()
         days_inactive = request.args.get('days_inactive', type=int)
-        
+
         # Ordenamiento
         sort_by = request.args.get('sort_by', 'created_at')
         sort_order = request.args.get('sort_order', 'desc')
-        
-        # Query base
-        query = User.query
 
-        # Aplicar filtros usando la función auxiliar
-        query = apply_filters(query, search, role, min_besitos, max_besitos, is_blocked, days_inactive)
+        # Query base usando SQLAlchemy 2.0 syntax
+        from sqlalchemy import select, func
+        query = select(User)
+
+        # Aplicar filtros
+        # Aplicar filtros como en la función auxiliar apply_filters
+        if search:
+            or_clauses = [
+                User.username.ilike(f'%{search}%'),
+                User.first_name.ilike(f'%{search}%'),
+                User.last_name.ilike(f'%{search}%'),
+            ]
+
+            # Si el término de búsqueda es numérico, añadir ID exacto a or_clauses
+            if search.isdigit():
+                or_clauses.append(User.id == int(search))
+            else:
+                # Para búsquedas no numéricas, también incluir búsqueda LIKE en ID
+                or_clauses.append(User.id.like(f'%{search}%'))
+
+            # Aplicar OR para las cláusulas
+            query = query.where(or_(*or_clauses))
+
+        if role:
+            query = query.where(User.role == role)
+
+        if min_besitos is not None:
+            query = query.where(User.points >= min_besitos)
+
+        if max_besitos is not None:
+            query = query.where(User.points <= max_besitos)
+
+        if is_blocked:
+            query = query.where(User.is_blocked == (is_blocked.lower() == 'true'))
+
+        if days_inactive:
+            cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
+            query = query.where(User.last_activity_at < cutoff_date)
 
         # Ordenamiento
         if hasattr(User, sort_by):
             column = getattr(User, sort_by)
-            query = query.order_by(column.desc() if sort_order == 'desc' else column.asc())
-        
+            if sort_order.lower() == 'desc':
+                query = query.order_by(column.desc())
+            else:
+                query = query.order_by(column.asc())
+
         # Pre-calcular agregaciones usando subconsultas para evitar N+1
         from sqlalchemy.orm import aliased
-        from sqlalchemy import func, case
 
         # Crear subconsulta para contar compras por usuario
-        purchases_subquery = db.session.query(
-            UserPurchase.user_id,
-            func.count(UserPurchase.id).label('purchase_count'),
-            func.coalesce(func.sum(ShopItem.price), 0).label('total_spent')
-        ).join(
-            ShopItem, UserPurchase.shop_item_id == ShopItem.id
-        ).group_by(
-            UserPurchase.user_id
-        ).subquery()
+        purchases_subquery = (
+            select(
+                UserPurchase.user_id,
+                func.count(UserPurchase.id).label('purchase_count'),
+                func.coalesce(func.sum(ShopItem.price), 0).label('total_spent')
+            )
+            .join(ShopItem, UserPurchase.shop_item_id == ShopItem.id)
+            .group_by(UserPurchase.user_id)
+            .subquery()
+        )
 
         # Alias para la subconsulta
         purchases_alias = aliased(purchases_subquery)
 
         # Añadir las agregaciones a la consulta principal
-        query = query.outerjoin(
-            purchases_alias, User.id == purchases_alias.c.user_id
-        ).add_columns(
-            func.coalesce(purchases_alias.c.purchase_count, 0).label('total_purchases'),
-            func.coalesce(purchases_alias.c.total_spent, 0).label('total_spent')
-        )
-
-        # Volver a ejecutar la consulta con paginación, pero ahora incluyendo las agregaciones
-        # Necesitamos reconstruir la paginación para incluir las columnas adicionales
-        paginated_with_aggs = db.session.query(User).add_columns(
+        query_with_aggs = query.add_columns(
             func.coalesce(purchases_alias.c.purchase_count, 0).label('total_purchases'),
             func.coalesce(purchases_alias.c.total_spent, 0).label('total_spent')
         ).outerjoin(
             purchases_alias, User.id == purchases_alias.c.user_id
         )
 
-        # Aplicar filtros a la nueva consulta usando la función auxiliar
-        paginated_with_aggs = apply_filters(paginated_with_aggs, search, role, min_besitos, max_besitos, is_blocked, days_inactive)
+        # Contar total (antes de paginación)
+        count_query = select(func.count()).select_from(query.subquery())
+        total_users = db.session.execute(count_query).scalar()
 
-        # Ordenamiento
-        if hasattr(User, sort_by):
-            column = getattr(User, sort_by)
-            paginated_with_aggs = paginated_with_aggs.order_by(
-                column.desc() if sort_order == 'desc' else column.asc()
-            )
-
-        # Paginación para la nueva consulta
-        from sqlalchemy.sql import text
-        # Usamos paginate personalizado o simplemente limitamos la consulta
+        # Aplicar paginación manualmente
         offset = (page - 1) * per_page
-        users_with_aggs = paginated_with_aggs.offset(offset).limit(per_page).all()
+        paginated_query = query_with_aggs.offset(offset).limit(per_page)
 
-        # Obtener el total para paginación
-        total_users = query.count()
+        # Ejecutar query
+        result = db.session.execute(paginated_query)
+        users_with_aggs = result.all()
 
         # Serializar
         users = []
-        for result in users_with_aggs:
-            user = result[0] if isinstance(result, tuple) else result
-            total_purchases = result.total_purchases if hasattr(result, 'total_purchases') else 0
-            total_spent = result.total_spent if hasattr(result, 'total_spent') else 0
+        for row in users_with_aggs:
+            # SQLAlchemy 2.0 returns Row objects with positional access
+            user_obj = row[0]  # User object
+            total_purchases = row[1] or 0  # purchase_count from join
+            total_spent = row[2] or 0  # total_spent from join
 
             users.append({
-                'id': user.id,
-                'telegram_id': user.id,
-                'telegram_username': user.username or 'Sin username',
-                'first_name': user.first_name or '',
-                'last_name': user.last_name or '',
-                'full_name': f"{user.first_name or ''} {user.last_name or ''}".strip() or 'Sin nombre',
-                'role': user.role or 'free',
-                'besitos': user.points,
-                'is_blocked': user.is_blocked,
-                'last_activity': user.last_activity_at.isoformat() if user.last_activity_at else None,
-                'created_at': user.created_at.isoformat() if user.created_at else None,
+                'id': user_obj.id,
+                'telegram_id': user_obj.id,
+                'telegram_username': user_obj.username or 'Sin username',
+                'first_name': user_obj.first_name or '',
+                'last_name': user_obj.last_name or '',
+                'full_name': f"{user_obj.first_name or ''} {user_obj.last_name or ''}".strip() or 'Sin nombre',
+                'role': user_obj.role or 'free',
+                'besitos': user_obj.points,
+                'is_blocked': getattr(user_obj, 'is_blocked', False),
+                'last_activity': getattr(user_obj, 'last_activity_at', None).isoformat() if hasattr(user_obj, 'last_activity_at') and user_obj.last_activity_at else None,
+                'created_at': user_obj.created_at.isoformat() if user_obj.created_at else None,
                 'total_purchases': total_purchases,
-                'total_spent': int(total_spent)
+                'total_spent': int(total_spent) if total_spent else 0
             })
 
-        # Necesitamos recrear el objeto de paginación
+        # Calcular paginación
         total_pages = (total_users + per_page - 1) // per_page  # Redondeo hacia arriba
 
         return jsonify({
@@ -177,7 +197,7 @@ def list_users():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error listing users: {e}")
+        logger.error(f"Error listing users: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to list users'
@@ -188,21 +208,31 @@ def list_users():
 def get_user(user_id):
     """Obtener detalles completos de un usuario"""
     try:
-        user = User.query.get(user_id)
-        
+        from sqlalchemy import select
+        # Use SQLAlchemy 2.0 syntax
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
                 'error': 'User not found'
             }), 404
-        
+
         # Información de compras
-        purchases = UserPurchase.query.filter_by(user_id=user.id).all()
+        purchases_stmt = select(UserPurchase).where(UserPurchase.user_id == user.id)
+        purchases_result = db.session.execute(purchases_stmt)
+        purchases = purchases_result.scalars().all()
+
         purchase_data = []
         total_spent = 0
-        
+
         for purchase in purchases:
-            product = ShopItem.query.get(purchase.shop_item_id)
+            product_stmt = select(ShopItem).where(ShopItem.id == purchase.shop_item_id)
+            product_result = db.session.execute(product_stmt)
+            product = product_result.scalar_one_or_none()
+
             if product:
                 purchase_data.append({
                     'id': purchase.id,
@@ -211,27 +241,39 @@ def get_user(user_id):
                     'purchased_at': purchase.purchased_at.isoformat() if purchase.purchased_at else None
                 })
                 total_spent += product.price
-        
+
         # Información narrativa
-        narrative_state = NarrativeState.query.filter_by(user_id=user.id).first()
         narrative_data = None
-        
-        if narrative_state:
-            current_fragment = StoryFragment.query.filter_by(
-                key=narrative_state.current_fragment_key
-            ).first()
-            
-            narrative_data = {
-                'current_fragment_key': narrative_state.current_fragment_key,
-                'current_fragment_text': current_fragment.text[:100] + '...' if current_fragment else None,
-                'started_at': narrative_state.narrative_started_at.isoformat() if narrative_state.narrative_started_at else None,
-                'last_interaction': narrative_state.last_activity_at.isoformat() if narrative_state.last_activity_at else None
-            }
-        
+        try:
+            narrative_stmt = select(NarrativeState).where(NarrativeState.user_id == user.id)
+            narrative_result = db.session.execute(narrative_stmt)
+            narrative_state = narrative_result.scalar_one_or_none()
+
+            if narrative_state:
+                fragment_stmt = select(StoryFragment).where(StoryFragment.key == narrative_state.current_fragment_key)
+                fragment_result = db.session.execute(fragment_stmt)
+                current_fragment = fragment_result.scalar_one_or_none()
+
+                narrative_data = {
+                    'current_fragment_key': narrative_state.current_fragment_key,
+                    'current_fragment_text': (current_fragment.text[:100] + '...') if current_fragment and current_fragment.text else None,
+                    'started_at': narrative_state.narrative_started_at.isoformat() if narrative_state.narrative_started_at else None,
+                    'last_interaction': narrative_state.last_activity_at.isoformat() if narrative_state.last_activity_at else None
+                }
+        except Exception as e:
+            # Si el estado narrativo no existe o hay un error, continuar sin fallar pero registrarlo
+            logger.warning(f"Could not retrieve narrative state for user {user.id}: {e}")
+            pass
+
         # Estadísticas
-        days_since_registration = (datetime.utcnow() - user.created_at).days if user.created_at else 0
-        days_since_activity = (datetime.utcnow() - user.last_activity_at).days if user.last_activity_at else 999
-        
+        days_since_registration = 0
+        days_since_activity = 999
+
+        if user.created_at:
+            days_since_registration = (datetime.utcnow() - user.created_at).days
+        if hasattr(user, 'last_activity_at') and user.last_activity_at:
+            days_since_activity = (datetime.utcnow() - user.last_activity_at).days
+
         return jsonify({
             'success': True,
             'data': {
@@ -243,8 +285,8 @@ def get_user(user_id):
                 'full_name': f"{user.first_name or ''} {user.last_name or ''}".strip() or 'Sin nombre',
                 'role': user.role or 'free',
                 'besitos': user.points,
-                'is_blocked': user.is_blocked,
-                'last_activity': user.last_activity_at.isoformat() if user.last_activity_at else None,
+                'is_blocked': getattr(user, 'is_blocked', False),
+                'last_activity': getattr(user, 'last_activity_at', None).isoformat() if hasattr(user, 'last_activity_at') and user.last_activity_at else None,
                 'created_at': user.created_at.isoformat() if user.created_at else None,
                 'purchases': purchase_data,
                 'total_purchases': len(purchase_data),
@@ -257,9 +299,9 @@ def get_user(user_id):
                 }
             }
         }), 200
-        
+
     except Exception as e:
-        logger.error(f"Error getting user {user_id}: {e}")
+        logger.error(f"Error getting user {user_id}: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to get user details'

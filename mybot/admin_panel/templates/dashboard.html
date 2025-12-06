@@ -62,7 +62,7 @@
             </div>
             <div class="bg-gray-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="{{ url_for('shop_list') }}" class="font-medium text-green-600 hover:text-green-500">
+                    <a href="{{ url_for('shop_products_list') }}" class="font-medium text-green-600 hover:text-green-500">
                         Ver todos
                     </a>
                 </div>
@@ -148,13 +148,22 @@
                 <span class="mt-1 block text-xs text-gray-500">Añadir nuevo contenido narrativo</span>
             </a>
 
-            <a href="{{ url_for('shop_new') }}"
+            <a href="{{ url_for('shop_products_new') }}"
                class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-green-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition">
                 <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                 </svg>
                 <span class="mt-2 block text-sm font-medium text-gray-900">Crear Producto</span>
                 <span class="mt-1 block text-xs text-gray-500">Añadir item a la tienda</span>
+            </a>
+
+            <a href="{{ url_for('users_list') }}"
+               class="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-6 text-center hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition">
+                <svg class="mx-auto h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span class="mt-2 block text-sm font-medium text-gray-900">Gestionar Usuarios</span>
+                <span class="mt-1 block text-xs text-gray-500">Ver y administrar usuarios</span>
             </a>
 
             <a href="{{ url_for('triggers_new') }}"
