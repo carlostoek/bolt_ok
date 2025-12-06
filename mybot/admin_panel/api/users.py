@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy import or_, func, desc, and_
+from sqlalchemy import or_, func, desc, and_, select
 from datetime import datetime, timedelta
 from admin_panel.extensions import db
 from database.models import (
@@ -160,34 +160,10 @@ def list_users():
         # Serializar
         users = []
         for row in users_with_aggs:
-            user = row[0] if hasattr(row, '__getitem__') else row  # Get User object from result
-            # For SQLAlchemy 2.0, we may need to handle this differently
-            user_obj = None
-            total_purchases = 0
-            total_spent = 0
-
-            # Handle different tuple structures
-            if hasattr(row, '_mapping'):  # Row with named columns
-                user_obj = row.User  # SQLAlchemy 2.0 structure
-                total_purchases = row.total_purchases if hasattr(row, 'total_purchases') else 0
-                total_spent = row.total_spent if hasattr(row, 'total_spent') else 0
-            elif isinstance(row, tuple) and len(row) >= 2:
-                user_obj = row[0]
-                total_purchases = row[1] if len(row) > 1 else 0
-                total_spent = row[2] if len(row) > 2 else 0
-            else:
-                user_obj = row
-                # Need to calculate separately if not joined
-                user_purchases = db.session.execute(
-                    select(func.count(UserPurchase.id))
-                    .where(UserPurchase.user_id == user_obj.id)
-                ).scalar()
-                total_purchases = user_purchases or 0
-                total_spent = db.session.execute(
-                    select(func.sum(ShopItem.price))
-                    .join(UserPurchase, ShopItem.id == UserPurchase.shop_item_id)
-                    .where(UserPurchase.user_id == user_obj.id)
-                ).scalar() or 0
+            # SQLAlchemy 2.0 returns Row objects with positional access
+            user_obj = row[0]  # User object
+            total_purchases = row[1] or 0  # purchase_count from join
+            total_spent = row[2] or 0  # total_spent from join
 
             users.append({
                 'id': user_obj.id,
@@ -198,11 +174,11 @@ def list_users():
                 'full_name': f"{user_obj.first_name or ''} {user_obj.last_name or ''}".strip() or 'Sin nombre',
                 'role': user_obj.role or 'free',
                 'besitos': user_obj.points,
-                'is_blocked': getattr(user_obj, 'is_blocked', False),  # Default to False if not present
+                'is_blocked': getattr(user_obj, 'is_blocked', False),
                 'last_activity': getattr(user_obj, 'last_activity_at', None).isoformat() if hasattr(user_obj, 'last_activity_at') and user_obj.last_activity_at else None,
                 'created_at': user_obj.created_at.isoformat() if user_obj.created_at else None,
                 'total_purchases': total_purchases,
-                'total_spent': int(total_spent)
+                'total_spent': int(total_spent) if total_spent else 0
             })
 
         # Calcular paginación
@@ -222,9 +198,7 @@ def list_users():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error listing users: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error listing users: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to list users'
@@ -327,9 +301,7 @@ def get_user(user_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error getting user {user_id}: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error getting user {user_id}: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to get user details'
