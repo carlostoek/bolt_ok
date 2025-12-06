@@ -241,7 +241,9 @@
     
     <!-- Tabla de Usuarios -->
     <div x-show="!loading" class="bg-white shadow overflow-hidden sm:rounded-lg">
-        <table class="min-w-full divide-y divide-gray-200">
+        <!-- Contenedor con scroll horizontal para móviles -->
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
                     <th scope="col" class="px-6 py-3 text-left">
@@ -348,7 +350,8 @@
                 </template>
             </tbody>
         </table>
-        
+        </div> <!-- Cierre del contenedor con scroll horizontal -->
+
         <!-- Paginación -->
         <div x-show="totalPages > 1" class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div class="flex-1 flex justify-between sm:hidden">

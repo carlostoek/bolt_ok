@@ -330,6 +330,217 @@ def create_fragment():
         }), 500
 
 
+# ==================== ENDPOINT: UPDATE FRAGMENT ====================
+
+
+@narrative_bp.route('/fragments/<fragment_key>', methods=['PUT'])
+def update_fragment(fragment_key):
+    """Actualizar fragmento existente"""
+    try:
+        fragment = StoryFragment.query.filter_by(key=fragment_key).first()
+
+        if not fragment:
+            return jsonify({
+                'success': False,
+                'error': 'Fragment not found'
+            }), 404
+
+        data = request.get_json()
+
+        # Validar texto si se proporciona
+        if 'text' in data and (not data['text'] or len(data['text'].strip()) < 10):
+            return jsonify({
+                'success': False,
+                'error': 'Text must be at least 10 characters',
+                'field': 'text'
+            }), 400
+
+        # Actualizar campos básicos
+        if 'text' in data:
+            fragment.text = data['text'].strip()
+        if 'image_url' in data:
+            fragment.image_url = data['image_url'].strip() if data['image_url'] else None
+        if 'min_besitos' in data:
+            fragment.min_besitos = max(0, int(data['min_besitos']))
+        if 'reward_besitos' in data:
+            fragment.reward_besitos = max(0, int(data['reward_besitos']))
+        if 'required_role' in data:
+            fragment.required_role = data['required_role'] if data['required_role'] else None
+
+        # Actualizar producto de desbloqueo
+        if 'unlock_product_id' in data:
+            if data['unlock_product_id'] is not None:
+                # Validar que el producto existe
+                product = ShopItem.query.get(data['unlock_product_id'])
+                if not product:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Unlock product not found',
+                        'field': 'unlock_product_id'
+                    }), 400
+                fragment.unlock_product_id = data['unlock_product_id']
+            else:
+                fragment.unlock_product_id = None
+
+        # Actualizar decisiones si se proporcionan
+        if 'choices' in data:
+            # Eliminar decisiones existentes
+            NarrativeChoice.query.filter_by(source_fragment_id=fragment.id).delete()
+
+            # Crear nuevas decisiones
+            for idx, choice_data in enumerate(data['choices']):
+                # Validar datos de decisión
+                if not choice_data.get('text'):
+                    db.session.rollback()
+                    return jsonify({
+                        'success': False,
+                        'error': f'Choice text is required for choice #{idx + 1}',
+                        'field': f'choice_{idx}_text'
+                    }), 400
+
+                if not choice_data.get('destination_fragment_key'):
+                    db.session.rollback()
+                    return jsonify({
+                        'success': False,
+                        'error': f'Destination fragment is required for choice #{idx + 1}',
+                        'field': f'choice_{idx}_dest'
+                    }), 400
+
+                # Validar que el fragmento de destino existe
+                dest_fragment = StoryFragment.query.filter_by(
+                    key=choice_data['destination_fragment_key']
+                ).first()
+
+                if not dest_fragment:
+                    db.session.rollback()
+                    return jsonify({
+                        'success': False,
+                        'error': f"Destination fragment '{choice_data['destination_fragment_key']}' not found",
+                        'field': f'choice_{idx}_dest'
+                    }), 400
+
+                choice = NarrativeChoice(
+                    source_fragment_id=fragment.id,
+                    text=choice_data['text'].strip(),
+                    destination_fragment_key=choice_data['destination_fragment_key'],
+                    required_besitos=choice_data.get('required_besitos', 0),
+                    required_role=choice_data.get('required_role')
+                )
+                db.session.add(choice)
+
+        db.session.commit()
+
+        logger.info(f"Fragment {fragment_key} updated successfully")
+
+        return jsonify({
+            'success': True,
+            'message': 'Fragmento actualizado exitosamente',
+            'data': {
+                'key': fragment.key,
+                'text': fragment.text[:100] + '...' if len(fragment.text) > 100 else fragment.text
+            }
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error updating fragment {fragment_key}: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to update fragment'
+        }), 500
+
+
+# ==================== ENDPOINT: DELETE FRAGMENT ====================
+
+
+@narrative_bp.route('/fragments/<fragment_key>', methods=['DELETE'])
+def delete_fragment(fragment_key):
+    """Eliminar fragmento con validaciones de integridad"""
+    try:
+        fragment = StoryFragment.query.filter_by(key=fragment_key).first()
+
+        if not fragment:
+            return jsonify({
+                'success': False,
+                'error': 'Fragment not found'
+            }), 404
+
+        # Proteger fragmento START
+        if fragment_key == 'START':
+            return jsonify({
+                'success': False,
+                'error': 'Cannot delete START fragment. It is required for the narrative system.',
+                'code': 'PROTECTED_FRAGMENT'
+            }), 403
+
+        # Verificar si hay decisiones que apuntan a este fragmento
+        from sqlalchemy import exists
+        incoming_exists = db.session.query(
+            exists().where(NarrativeChoice.destination_fragment_key == fragment_key)
+        ).scalar()
+
+        if incoming_exists:
+            # Obtener fragmentos que apuntan a este
+            incoming_choices = NarrativeChoice.query.filter_by(
+                destination_fragment_key=fragment_key
+            ).all()
+            source_fragments = list(set([choice.source_fragment_key for choice in incoming_choices]))
+            return jsonify({
+                'success': False,
+                'error': f'Cannot delete fragment. {len(incoming_choices)} choices from {len(source_fragments)} fragments point here.',
+                'code': 'HAS_INCOMING_REFERENCES',
+                'details': {
+                    'incoming_count': len(incoming_choices),
+                    'source_fragments': source_fragments[:5]  # Mostrar máximo 5
+                }
+            }), 409
+
+        # Verificar si hay usuarios actualmente en este fragmento
+        from database.narrative_models import UserNarrativeState
+        users_in_fragment = db.session.query(
+            db.func.count(UserNarrativeState.id)
+        ).filter_by(current_fragment_key=fragment_key).scalar()
+
+        if users_in_fragment > 0:
+            return jsonify({
+                'success': False,
+                'error': f'Cannot delete fragment. {users_in_fragment} user(s) are currently in this fragment.',
+                'code': 'HAS_ACTIVE_USERS',
+                'details': {
+                    'active_users': users_in_fragment
+                }
+            }), 409
+
+        # Todo OK, proceder con eliminación
+        # 1. Eliminar decisiones salientes
+        outgoing_choices = NarrativeChoice.query.filter_by(
+            source_fragment_id=fragment.id
+        ).delete()
+
+        # 2. Eliminar el fragmento
+        db.session.delete(fragment)
+
+        db.session.commit()
+
+        logger.warning(f"Fragment {fragment_key} deleted (had {outgoing_choices} outgoing choices)")
+
+        return jsonify({
+            'success': True,
+            'message': 'Fragmento eliminado exitosamente',
+            'details': {
+                'deleted_choices': outgoing_choices
+            }
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting fragment {fragment_key}: {e}")
+        return jsonify({
+            'success': False,
+            'error': 'Failed to delete fragment'
+        }), 500
+
+
 # ==================== ENDPOINT: LIST FRAGMENTS ====================
 
 
@@ -938,11 +1149,11 @@ def list_fragments():
 
         if not 'choices' in include_list and fragments:
             # Contar choices para cada fragmento en una sola consulta
-            from sqlalchemy import func
+            from sqlalchemy import func as sa_func
             fragment_ids = [fragment.id for fragment in fragments]
             if fragment_ids:  # Only execute query if there are fragments
                 choices_counts_query = (
-                    select(NarrativeChoice.source_fragment_id, func.count(NarrativeChoice.id).label('count'))
+                    select(NarrativeChoice.source_fragment_id, sa_func.count(NarrativeChoice.id).label('count'))
                     .where(NarrativeChoice.source_fragment_id.in_(fragment_ids))
                     .group_by(NarrativeChoice.source_fragment_id)
                 )
