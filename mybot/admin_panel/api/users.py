@@ -1,6 +1,6 @@
+from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from sqlalchemy import or_, func, desc, and_, select
-from datetime import datetime, timedelta
 from admin_panel.extensions import db
 from database.models import (
     User, UserPurchase, ShopItem, ProductFile, ConfigEntry
@@ -84,9 +84,9 @@ def list_users():
                 User.last_name.ilike(f'%{search}%'),
             ]
 
-            # Si el término de búsqueda es numérico, buscar por ID exacto
+            # Si el término de búsqueda es numérico, añadir ID exacto a or_clauses
             if search.isdigit():
-                query = query.where(User.id == int(search))
+                or_clauses.append(User.id == int(search))
             else:
                 # Para búsquedas no numéricas, también incluir búsqueda LIKE en ID
                 or_clauses.append(User.id.like(f'%{search}%'))
@@ -107,7 +107,6 @@ def list_users():
             query = query.where(User.is_blocked == (is_blocked.lower() == 'true'))
 
         if days_inactive:
-            from datetime import datetime, timedelta
             cutoff_date = datetime.utcnow() - timedelta(days=days_inactive)
             query = query.where(User.last_activity_at < cutoff_date)
 
@@ -261,8 +260,9 @@ def get_user(user_id):
                     'started_at': narrative_state.narrative_started_at.isoformat() if narrative_state.narrative_started_at else None,
                     'last_interaction': narrative_state.last_activity_at.isoformat() if narrative_state.last_activity_at else None
                 }
-        except:
-            # If narrative state doesn't exist, continue without error
+        except Exception as e:
+            # Si el estado narrativo no existe o hay un error, continuar sin fallar pero registrarlo
+            logger.warning(f"Could not retrieve narrative state for user {user.id}: {e}")
             pass
 
         # Estadísticas

@@ -107,9 +107,7 @@ def list_products():
         }), 200
 
     except Exception as e:
-        logger.error(f"Error listing products: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error listing products: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to list products'
@@ -160,9 +158,7 @@ def get_product(product_id):
         }), 200
 
     except Exception as e:
-        logger.error(f"Error getting product: {e}")
-        import traceback
-        traceback.print_exc()
+        logger.error(f"Error getting product: {e}", exc_info=True)
         return jsonify({
             'success': False,
             'error': 'Failed to get product'

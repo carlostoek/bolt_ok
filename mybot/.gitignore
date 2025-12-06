@@ -90,3 +90,8 @@ Thumbs.db
 
 # Docs
 mybot/docs/guia-fragmentos-condicionados-items-2025-09-15.md
+
+# Database files
+bot.db-shm
+bot.db-wal
+commit-rv.md

@@ -10,13 +10,16 @@ BOT_PATH = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(BOT_PATH))
 
 from flask import Blueprint, request, jsonify
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func, or_, exists
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import logging
 from datetime import datetime
 
 # Importar extensiones
 from admin_panel.extensions import db
+
+# Importar modelos
+from database.narrative_models import UserNarrativeState
 
 # Importar modelos
 from database.models import ShopItem
@@ -337,7 +340,10 @@ def create_fragment():
 def update_fragment(fragment_key):
     """Actualizar fragmento existente"""
     try:
-        fragment = StoryFragment.query.filter_by(key=fragment_key).first()
+        from sqlalchemy import select
+        stmt = select(StoryFragment).where(StoryFragment.key == fragment_key)
+        result = db.session.execute(stmt)
+        fragment = result.scalar_one_or_none()
 
         if not fragment:
             return jsonify({
@@ -391,7 +397,6 @@ def update_fragment(fragment_key):
             for idx, choice_data in enumerate(data['choices']):
                 # Validar datos de decisión
                 if not choice_data.get('text'):
-                    db.session.rollback()
                     return jsonify({
                         'success': False,
                         'error': f'Choice text is required for choice #{idx + 1}',
@@ -399,7 +404,6 @@ def update_fragment(fragment_key):
                     }), 400
 
                 if not choice_data.get('destination_fragment_key'):
-                    db.session.rollback()
                     return jsonify({
                         'success': False,
                         'error': f'Destination fragment is required for choice #{idx + 1}',
@@ -407,12 +411,12 @@ def update_fragment(fragment_key):
                     }), 400
 
                 # Validar que el fragmento de destino existe
-                dest_fragment = StoryFragment.query.filter_by(
-                    key=choice_data['destination_fragment_key']
-                ).first()
+                from sqlalchemy import select
+                dest_stmt = select(StoryFragment).where(StoryFragment.key == choice_data['destination_fragment_key'])
+                dest_result = db.session.execute(dest_stmt)
+                dest_fragment = dest_result.scalar_one_or_none()
 
                 if not dest_fragment:
-                    db.session.rollback()
                     return jsonify({
                         'success': False,
                         'error': f"Destination fragment '{choice_data['destination_fragment_key']}' not found",
@@ -457,7 +461,10 @@ def update_fragment(fragment_key):
 def delete_fragment(fragment_key):
     """Eliminar fragmento con validaciones de integridad"""
     try:
-        fragment = StoryFragment.query.filter_by(key=fragment_key).first()
+        from sqlalchemy import select
+        stmt = select(StoryFragment).where(StoryFragment.key == fragment_key)
+        result = db.session.execute(stmt)
+        fragment = result.scalar_one_or_none()
 
         if not fragment:
             return jsonify({
@@ -474,32 +481,43 @@ def delete_fragment(fragment_key):
             }), 403
 
         # Verificar si hay decisiones que apuntan a este fragmento
-        from sqlalchemy import exists
-        incoming_exists = db.session.query(
-            exists().where(NarrativeChoice.destination_fragment_key == fragment_key)
-        ).scalar()
+        from sqlalchemy import select
+        incoming_exists = db.session.execute(
+            select(NarrativeChoice).where(NarrativeChoice.destination_fragment_key == fragment_key).limit(1)
+        ).first() is not None
 
         if incoming_exists:
-            # Obtener fragmentos que apuntan a este
-            incoming_choices = NarrativeChoice.query.filter_by(
-                destination_fragment_key=fragment_key
-            ).all()
-            source_fragments = list(set([choice.source_fragment_key for choice in incoming_choices]))
+            # Obtener fragmentos que apuntan a este (optimizado con consulta directa)
+            source_fragments_query = select(NarrativeChoice.source_fragment_key).where(
+                NarrativeChoice.destination_fragment_key == fragment_key
+            ).distinct()
+            source_fragments = db.session.execute(source_fragments_query).scalars().all()
+            source_fragments = list(set(source_fragments))  # Eliminar duplicados si hay
+            incoming_count = len(source_fragments)  # Contar las referencias
+
+            # Para contar el número total de choices que apuntan aquí
+            total_incoming_choices = db.session.execute(
+                select(func.count(NarrativeChoice.id)).where(
+                    NarrativeChoice.destination_fragment_key == fragment_key
+                )
+            ).scalar()
+
             return jsonify({
                 'success': False,
-                'error': f'Cannot delete fragment. {len(incoming_choices)} choices from {len(source_fragments)} fragments point here.',
+                'error': f'Cannot delete fragment. {total_incoming_choices} choices from {len(source_fragments)} fragments point here.',
                 'code': 'HAS_INCOMING_REFERENCES',
                 'details': {
-                    'incoming_count': len(incoming_choices),
+                    'incoming_count': total_incoming_choices,
                     'source_fragments': source_fragments[:5]  # Mostrar máximo 5
                 }
             }), 409
 
         # Verificar si hay usuarios actualmente en este fragmento
-        from database.narrative_models import UserNarrativeState
-        users_in_fragment = db.session.query(
-            db.func.count(UserNarrativeState.id)
-        ).filter_by(current_fragment_key=fragment_key).scalar()
+        users_in_fragment = db.session.execute(
+            select(func.count(UserNarrativeState.id)).where(
+                UserNarrativeState.current_fragment_key == fragment_key
+            )
+        ).scalar()
 
         if users_in_fragment > 0:
             return jsonify({
