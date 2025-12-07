@@ -11,12 +11,23 @@ class Config:
     # Flask
     SECRET_KEY = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     DEBUG = os.getenv('FLASK_DEBUG', 'True').lower() == 'true'
-    
+
     # Base de Datos
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        'DATABASE_URL', 
-        'sqlite:///../bot.db'  # Asume que bot.db está en raíz
-    )
+    # El panel web necesita usar un driver SYNC, no ASYNC
+    # Aunque el .env tenga sqlite+aiosqlite para el bot, aquí usamos sqlite:// para Flask
+    _db_url = os.getenv('DATABASE_URL', 'sqlite:///../bot.db')
+    if _db_url.startswith('sqlite+aiosqlite://'):
+        # Convertir de async a sync para Flask
+        # sqlite+aiosqlite:///bot.db -> sqlite:///bot.db
+        # Usar path absoluto: sqlite:////absolute/path/to/bot.db
+        from pathlib import Path
+        # bot.db está en el mismo directorio que app.py padre (mybot/)
+        # config.py -> admin_panel -> config.py, así que parent.parent es /mybot/
+        project_root = Path(__file__).parent.parent  # admin_panel/config.py -> admin_panel -> mybot
+        db_path = project_root / 'bot.db'
+        SQLALCHEMY_DATABASE_URI = f'sqlite:///{db_path}'
+    else:
+        SQLALCHEMY_DATABASE_URI = _db_url
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = DEBUG  # Log SQL queries en debug
     
