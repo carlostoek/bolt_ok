@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
-from sqlalchemy import or_, func, desc, and_, select
+from sqlalchemy import or_, func, desc, and_, select, delete
 from admin_panel.extensions import db
 from database.models import (
     User, UserPurchase, ShopItem, ProductFile, ConfigEntry
@@ -312,8 +312,10 @@ def get_user(user_id):
 def update_user(user_id):
     """Actualizar información del usuario"""
     try:
-        user = User.query.get(user_id)
-        
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
@@ -361,8 +363,10 @@ def update_user(user_id):
 def add_besitos(user_id):
     """Añadir o quitar besitos manualmente"""
     try:
-        user = User.query.get(user_id)
-        
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
@@ -410,8 +414,10 @@ def add_besitos(user_id):
 def change_role(user_id):
     """Cambiar rol del usuario (Free ↔ VIP)"""
     try:
-        user = User.query.get(user_id)
-        
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
@@ -457,8 +463,10 @@ def change_role(user_id):
 def toggle_block(user_id):
     """Bloquear/desbloquear usuario"""
     try:
-        user = User.query.get(user_id)
-        
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
@@ -492,8 +500,10 @@ def toggle_block(user_id):
 def delete_user(user_id):
     """Eliminar usuario (con precaución)"""
     try:
-        user = User.query.get(user_id)
-        
+        stmt = select(User).where(User.id == user_id)
+        result = db.session.execute(stmt)
+        user = result.scalar_one_or_none()
+
         if not user:
             return jsonify({
                 'success': False,
@@ -501,8 +511,11 @@ def delete_user(user_id):
             }), 404
         
         # Eliminar relaciones primero
-        UserPurchase.query.filter_by(user_id=user.id).delete()
-        NarrativeState.query.filter_by(user_id=user.id).delete()
+        delete_purchases_stmt = delete(UserPurchase).where(UserPurchase.user_id == user.id)
+        db.session.execute(delete_purchases_stmt)
+
+        delete_narrative_stmt = delete(NarrativeState).where(NarrativeState.user_id == user.id)
+        db.session.execute(delete_narrative_stmt)
         
         # Eliminar usuario
         db.session.delete(user)
@@ -528,16 +541,16 @@ def delete_user(user_id):
 def get_users_stats():
     """Estadísticas rápidas de usuarios"""
     try:
-        total_users = User.query.count()
-        vip_users = User.query.filter_by(role='vip').count()
-        blocked_users = User.query.filter_by(is_blocked=True).count()
-        
+        total_users = db.session.execute(select(func.count()).select_from(User)).scalar()
+        vip_users = db.session.execute(select(func.count()).select_from(User).where(User.role == 'vip')).scalar()
+        blocked_users = db.session.execute(select(func.count()).select_from(User).where(User.is_blocked == True)).scalar()
+
         # Usuarios activos (últimos 7 días)
         week_ago = datetime.utcnow() - timedelta(days=7)
-        active_users = User.query.filter(User.last_activity_at >= week_ago).count()
-        
+        active_users = db.session.execute(select(func.count()).select_from(User).where(User.last_activity_at >= week_ago)).scalar()
+
         # Promedio de besitos
-        avg_besitos = db.session.query(func.avg(User.points)).scalar() or 0
+        avg_besitos = db.session.execute(select(func.avg(User.points))).scalar() or 0
         
         return jsonify({
             'success': True,
@@ -574,9 +587,11 @@ def bulk_action():
                 'success': False,
                 'error': 'No users specified'
             }), 400
-        
-        users = User.query.filter(User.id.in_(user_ids)).all()
-        
+
+        stmt = select(User).where(User.id.in_(user_ids))
+        result = db.session.execute(stmt)
+        users = result.scalars().all()
+
         if not users:
             return jsonify({
                 'success': False,

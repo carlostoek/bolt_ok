@@ -10,7 +10,7 @@ BOT_PATH = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(BOT_PATH))
 
 from flask import Blueprint, request, jsonify
-from sqlalchemy import select, func, or_, exists
+from sqlalchemy import select, func, or_, exists, delete
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 import logging
 from datetime import datetime
@@ -377,7 +377,7 @@ def update_fragment(fragment_key):
         if 'unlock_product_id' in data:
             if data['unlock_product_id'] is not None:
                 # Validar que el producto existe
-                product = ShopItem.query.get(data['unlock_product_id'])
+                product = db.session.get(ShopItem, data['unlock_product_id'])
                 if not product:
                     return jsonify({
                         'success': False,
@@ -391,7 +391,9 @@ def update_fragment(fragment_key):
         # Actualizar decisiones si se proporcionan
         if 'choices' in data:
             # Eliminar decisiones existentes
-            NarrativeChoice.query.filter_by(source_fragment_id=fragment.id).delete()
+            db.session.execute(
+                delete(NarrativeChoice).where(NarrativeChoice.source_fragment_id == fragment.id)
+            )
 
             # Crear nuevas decisiones
             for idx, choice_data in enumerate(data['choices']):
@@ -531,9 +533,10 @@ def delete_fragment(fragment_key):
 
         # Todo OK, proceder con eliminación
         # 1. Eliminar decisiones salientes
-        outgoing_choices = NarrativeChoice.query.filter_by(
-            source_fragment_id=fragment.id
-        ).delete()
+        result = db.session.execute(
+            delete(NarrativeChoice).where(NarrativeChoice.source_fragment_id == fragment.id)
+        )
+        outgoing_choices = result.rowcount
 
         # 2. Eliminar el fragmento
         db.session.delete(fragment)

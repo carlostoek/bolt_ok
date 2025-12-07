@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func, desc, and_
+from sqlalchemy import func, desc, and_, select
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime, timedelta
 from admin_panel.extensions import db
@@ -15,35 +15,45 @@ def get_overview():
     """Métricas generales del dashboard"""
     try:
         # Total de usuarios
-        total_users = User.query.count()
+        total_users = db.session.execute(
+            select(func.count()).select_from(User)
+        ).scalar()
 
         # Usuarios VIP
-        vip_users = User.query.filter_by(role='vip').count()
+        vip_users = db.session.execute(
+            select(func.count()).select_from(User).where(User.role == 'vip')
+        ).scalar()
 
         # Besitos en circulación
-        total_besitos = db.session.query(
-            func.sum(User.points)
+        total_besitos = db.session.execute(
+            select(func.sum(User.points))
         ).scalar() or 0
 
         # Total de ventas (en besitos)
-        total_sales = db.session.query(
-            func.sum(UserPurchase.price_paid)
+        total_sales = db.session.execute(
+            select(func.sum(UserPurchase.price_paid))
         ).scalar() or 0
 
         # Fragmentos publicados
-        total_fragments = StoryFragment.query.count()
+        total_fragments = db.session.execute(
+            select(func.count()).select_from(StoryFragment)
+        ).scalar()
 
         # Productos activos
-        active_products = ShopItem.query.filter_by(is_active=True).count()
+        active_products = db.session.execute(
+            select(func.count()).select_from(ShopItem).where(ShopItem.is_active == True)
+        ).scalar()
 
         # Usuarios activos (últimos 7 días)
         week_ago = datetime.utcnow() - timedelta(days=7)
-        active_users = User.query.filter(
-            User.last_activity_at >= week_ago
-        ).count()
+        active_users = db.session.execute(
+            select(func.count()).select_from(User).where(User.last_activity_at >= week_ago)
+        ).scalar()
 
         # Total de compras
-        total_purchases = UserPurchase.query.count()
+        total_purchases = db.session.execute(
+            select(func.count()).select_from(UserPurchase)
+        ).scalar()
 
         return jsonify({
             'success': True,

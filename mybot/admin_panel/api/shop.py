@@ -236,7 +236,10 @@ def create_product():
 def update_product(product_id):
     """Actualizar producto existente"""
     try:
-        product = ShopItem.query.get(product_id)
+        from sqlalchemy import select
+        stmt = select(ShopItem).where(ShopItem.id == product_id)
+        result = db.session.execute(stmt)
+        product = result.scalar_one_or_none()
         
         if not product:
             return jsonify({
@@ -300,7 +303,10 @@ def update_product(product_id):
 def delete_product(product_id):
     """Eliminar producto"""
     try:
-        product = ShopItem.query.get(product_id)
+        from sqlalchemy import select
+        stmt = select(ShopItem).where(ShopItem.id == product_id)
+        result = db.session.execute(stmt)
+        product = result.scalar_one_or_none()
         
         if not product:
             return jsonify({
